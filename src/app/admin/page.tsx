@@ -22,6 +22,8 @@ import {
 } from "@hello-pangea/dnd";
 import { WeeklyScheduler } from "@/components/weekly-scheduler";
 import { QuickNote } from "@/components/quick-note";
+import { EisenhowerMatrix } from "@/components/eisenhower-matrix";
+import { FloatingQuickNote } from "@/components/floating-quicknote";
 
 /* ── Types ── */
 
@@ -897,7 +899,7 @@ export default function AdminDashboard() {
   const [vault, setVault] = useState<VaultData | null>(null);
   const [logFilter, setLogFilter] = useState("");
   const [loggingOut, setLoggingOut] = useState(false);
-  const [activeTab, setActiveTab] = useState<"dashboard" | "schedule" | "quicknote">("dashboard");
+  const [activeTab, setActiveTab] = useState<"dashboard" | "eisenhower" | "schedule" | "quicknote">("dashboard");
 
   const loadAgents = useCallback(async () => {
     const { data } = await supabase
@@ -965,6 +967,7 @@ export default function AdminDashboard() {
 
   const SIDEBAR_ITEMS = [
     { key: "dashboard" as const, label: "Dashboard", icon: "▦" },
+    { key: "eisenhower" as const, label: "Eisenhower", icon: "◈" },
     { key: "schedule" as const, label: "Schedule", icon: "▤" },
     { key: "quicknote" as const, label: "Quick Note", icon: "✎" },
   ];
@@ -1081,6 +1084,30 @@ export default function AdminDashboard() {
         </div>
       )}
 
+      {/* Tab: Eisenhower Matrix */}
+      {activeTab === "eisenhower" && (
+        <EisenhowerMatrix
+          tasks={tasks}
+          onMove={async (id, priority) => {
+            await fetch("/api/vault-sync/task", {
+              method: "PATCH",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ id, priority }),
+            });
+            loadTasks();
+          }}
+          onDelete={deleteTask}
+          onCreate={async (title, priority) => {
+            await fetch("/api/vault-sync/task", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ title, axis: "convergence", priority }),
+            });
+            loadTasks();
+          }}
+        />
+      )}
+
       {/* Tab: Schedule */}
       {activeTab === "schedule" && (
         <WeeklyScheduler />
@@ -1090,6 +1117,9 @@ export default function AdminDashboard() {
       {activeTab === "quicknote" && (
         <QuickNote />
       )}
+
+      {/* Floating Quick Note (always visible) */}
+      <FloatingQuickNote />
       </div>
     </div>
   );
