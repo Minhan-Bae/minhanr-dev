@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { TokenUsageIndicator } from "@/components/token-usage-indicator";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -70,11 +71,19 @@ export default function RootLayout({
               Dashboard
             </a>
             <a
+              href="/blog"
+              className="hover:text-neutral-100 transition-colors"
+            >
+              Blog
+            </a>
+            <a
               href="/admin"
               className="hover:text-neutral-100 transition-colors"
             >
               Admin
             </a>
+            <div className="w-px h-4 bg-neutral-700" />
+            <TokenUsageIndicator />
           </nav>
         </header>
         <main className="flex-1">{children}</main>

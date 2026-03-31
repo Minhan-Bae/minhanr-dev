@@ -39,7 +39,7 @@ export function getAllPosts(): BlogPostMeta[] {
 
   const fileNames = fs.readdirSync(postsDirectory).filter((f) => f.endsWith(".md"));
 
-  const posts: BlogPostMeta[] = fileNames
+  const posts = fileNames
     .map((fileName) => {
       const filePath = path.join(postsDirectory, fileName);
       const fileContents = fs.readFileSync(filePath, "utf8");

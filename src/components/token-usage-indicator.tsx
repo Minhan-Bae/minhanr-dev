@@ -1,0 +1,90 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { Zap } from "lucide-react";
+
+interface UsageBucket {
+  input: number;
+  output: number;
+  cache_create: number;
+  cache_read: number;
+  total: number;
+}
+
+interface UsageData {
+  today: UsageBucket;
+  week: UsageBucket;
+}
+
+function formatTokens(n: number): string {
+  if (n >= 1_000_000_000) return `${(n / 1_000_000_000).toFixed(1)}B`;
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
+  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
+  return String(n);
+}
+
+function Row({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="flex justify-between gap-4">
+      <span className="text-neutral-500">{label}</span>
+      <span className="tabular-nums">{formatTokens(value)}</span>
+    </div>
+  );
+}
+
+export function TokenUsageIndicator() {
+  const [data, setData] = useState<UsageData | null>(null);
+
+  useEffect(() => {
+    fetch("/api/claude-usage")
+      .then((r) => r.json())
+      .then((d) => setData(d))
+      .catch(() => {});
+  }, []);
+
+  if (!data) return null;
+
+  return (
+    <div className="relative group">
+      <button className="flex items-center gap-1.5 text-neutral-500 hover:text-amber-400 transition-colors">
+        <Zap size={14} />
+        <span className="text-xs tabular-nums">{formatTokens(data.today.total)}</span>
+      </button>
+
+      <div className="absolute right-0 top-full mt-2 w-56 rounded-lg border border-neutral-800 bg-neutral-900 p-3 text-[11px] shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity z-50">
+        <div className="mb-2 font-semibold text-neutral-300 flex items-center gap-1.5">
+          <Zap size={12} className="text-amber-400" />
+          Claude Token Usage
+        </div>
+
+        <div className="mb-2">
+          <div className="text-[10px] uppercase tracking-wider text-neutral-600 mb-1">
+            Today
+          </div>
+          <Row label="Input" value={data.today.input} />
+          <Row label="Output" value={data.today.output} />
+          <Row label="Cache Write" value={data.today.cache_create} />
+          <Row label="Cache Read" value={data.today.cache_read} />
+          <div className="border-t border-neutral-800 mt-1 pt-1 flex justify-between font-medium text-neutral-200">
+            <span>Total</span>
+            <span className="tabular-nums">{formatTokens(data.today.total)}</span>
+          </div>
+        </div>
+
+        <div>
+          <div className="text-[10px] uppercase tracking-wider text-neutral-600 mb-1">
+            Last 7 Days
+          </div>
+          <Row label="Input" value={data.week.input} />
+          <Row label="Output" value={data.week.output} />
+          <Row label="Cache Write" value={data.week.cache_create} />
+          <Row label="Cache Read" value={data.week.cache_read} />
+          <div className="border-t border-neutral-800 mt-1 pt-1 flex justify-between font-medium text-neutral-200">
+            <span>Total</span>
+            <span className="tabular-nums">{formatTokens(data.week.total)}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

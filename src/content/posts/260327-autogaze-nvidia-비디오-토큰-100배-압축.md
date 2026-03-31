@@ -1,0 +1,181 @@
+---
+author: MinHanr
+categories:
+- Research
+date: '2026-03-27'
+draft: false
+slug: 260327-autogaze-nvidia-비디오-토큰-100배-압축
+tags:
+- AI_Daily_Trend
+title: 한줄 요약
+---
+
+## 한줄 요약
+
+NVIDIA가 공개한 AutoGaze는 비디오의 중복 패치를 자동 제거하여 시각 토큰을 4x~100x 압축하고, MLLM을 최대 19배 가속하여 1K프레임 4K 비디오 처리를 가능하게 한다. VideoMME 67.0%, HLVid에서 +10.1% 향상을 달성하면서 GPT-4o에 근접하는 성능.
+
+## 연구 배경 및 동기
+
+비디오 이해(Video Understanding)는 AI의 핵심 프론티어이지만, 연산 비용이 치명적 병목이다. 1분짜리 30fps 4K 비디오를 ViT(Vision Transformer)로 처리하면 수백만 개의 시각 토큰이 생성된다. 현재 최고 성능의 MLLM(Multimodal Large Language Model)도 256프레임, 448px 해상도가 한계인데, 이는 실제 비디오 분석 요구사항에 한참 미달한다.
+
+문제의 근본 원인은 **비디오의 정보 중복**이다. 30fps 비디오에서 인접 프레임은 대부분 동일하다. 정적 배경은 수초간 변하지 않으며, 움직이는 영역은 전체 화면의 극히 일부에 불과하다. 그러나 기존 ViT/MLLM은 모든 프레임의 모든 패치를 균등하게 처리한다. 이는 연산 자원의 막대한 낭비이다.
+
+AutoGaze는 이 문제를 "**어떤 패치를 볼 것인가를 먼저 결정**"하는 접근으로 해결한다. ViT/MLLM이 attention 연산을 수행하기 전에(Attend Before Attention), 정보가 집중된 최소한의 패치 집합만 선별하여 전달하는 것이다.
+
+![Figure: AutoGaze 효율성 개요 — 토큰 압축률과 1K프레임 4K 해상도 비디오 스케일링 비교](https://autogaze.github.io/assets/figures/autogaze/teaser_v21.png)
+
+## 핵심 성능 수치
+
+| 지표 | 수치 |
+|------|------|
+| 토큰 압축률 | **4x ~ 100x** |
+| ViT/MLLM 가속 | **최대 19x** |
+| 모델 크기 | **3M 파라미터** (매우 경량) |
+| VideoMME 정확도 | **67.0%** (w/o sub) |
+| HLVid 향상 | 기준 MLLM 대비 **+10.1%** |
+| 처리 가능 스케일 | **1K프레임, 4K 해상도** |
+| 30fps 4K 비디오 패치 비율 | **~1%** (99% 제거) |
+
+## 방법론: 오토레그레시브 패치 선택
+
+### 아키텍처 상세
+
+AutoGaze는 **컨볼루션 인코더 + 4-레이어 오토레그레시브 트랜스포머 디코더**로 구성된 3M 파라미터의 초경량 모듈이다. 히든 차원은 192이다.
+
+![Figure: AutoGaze 모델 아키텍처 — 컨볼루션 인코더와 오토레그레시브 트랜스포머 디코더의 구성](https://autogaze.github.io/assets/figures/autogaze/architecture_v15.png)
+
+**인코더**: 각 비디오 프레임을 컨볼루션 네트워크로 인코딩하여 공간적 특징 맵을 생성한다. 이 특징 맵은 각 위치별로 "이 패치가 얼마나 정보가 풍부한가"에 대한 표현을 포함한다.
+
+**디코더**: 트랜스포머 디코더가 패치 선택 시퀀스를 자기회귀적으로 생성한다. 디코더의 **어휘(vocabulary)**는 4가지 스케일의 265개 패치 인덱스로 구성된다:
+
+| 스케일 | 패치 크기 | 용도 |
+|--------|----------|------|
+| Scale 1 | 32x32 px | 세밀한 디테일 (움직이는 물체, 텍스트 등) |
+| Scale 2 | 64x64 px | 중간 수준 디테일 |
+| Scale 3 | 112x112 px | 저디테일 영역 |
+| Scale 4 | 224x224 px | 거의 정적인 대영역 |
+
+디코더는 각 프레임에 대해 "어떤 위치를, 어떤 스케일로 볼 것인가"를 순차적으로 결정한다. 움직임이 많은 영역에는 작은(고해상도) 패치를, 정적 영역에는 큰(저해상도) 패치를 선택하여 **영역별 최적 해상도를 자동 결정**한다.
+
+### 학습 파이프라인: 2단계
+
+**Stage 1 — NTP(Next-Token Prediction) 사전 훈련**:
+- 250K 비디오 데이터셋에서 150 에포크 학습
+- 그리디 서치로 생성된 정답(greedy-search) gazing 시퀀스에 대해 다음 토큰 예측
+- 이 단계에서 기본적인 패치 선택 능력(어디에 정보가 있는가)을 학습
+
+**Stage 2 — RL(Reinforcement Learning) 후속 훈련**:
+- 간소화된 GRPO(Group Relative Policy Optimization) 알고리즘 사용
+- 복원 보상(Reconstruction Reward) 기반: 선택된 패치만으로 원본 비디오를 얼마나 잘 복원할 수 있는가
+- 3 에포크로 짧게 학습하되, NTP에서 학습하지 못한 새로운 gazing 전략을 탐색
+
+**복원 목적 함수(Reconstruction Objective)**:
+- 픽셀 손실: 가중치 1.0
+- DINOv2 특징 손실: 가중치 0.3 (의미적 유사성)
+- SigLIP2 특징 손실: 가중치 0.3 (시각-언어 정합성)
+
+이 다중 손실 함수 설계는 단순 픽셀 복원을 넘어 **의미적으로 중요한 정보**가 보존되도록 한다.
+
+### 스케일링 전략: 시공간 타일링
+
+AutoGaze는 16프레임, 224x224 해상도로 학습되지만, **시공간 타일링(spatiotemporal tiling)**을 통해 임의의 해상도와 길이에 배포된다. 예를 들어 4K(3840x2160) 비디오는 224x224 타일로 분할되어 각 타일에 독립적으로 AutoGaze가 적용된다. 복원 손실 임계값 0.7을 설정하면 성능 저하 0.5% 미만으로 동작한다.
+
+### 핵심 능력 3가지
+
+![Figure: AutoGaze의 정성적 결과 — 원본 비디오, 선택된 멀티스케일 패치, 복원 결과 비교](https://autogaze.github.io/assets/figures/autogaze/main_results.png)
+
+1. **움직이는 객체 추적**: 광학 흐름(optical flow)이 높은 영역에 자동으로 패치를 집중 배치. 정적 배경은 최소한의 패치로 커버.
+
+2. **장면 전환 적응**: 장면이 급격히 바뀌면 새로운 정보가 대량 유입되므로, 자동으로 더 많은 패치를 선택. 이는 학습된 것이 아니라 복원 목적 함수로부터 자연스럽게 발현(emergent)되는 능력이다.
+
+3. **멀티스케일 적응**: 세밀한 텍스처가 있는 영역(예: 사람의 얼굴, 텍스트)에는 32x32 작은 패치를, 균일한 영역(예: 하늘, 벽)에는 224x224 큰 패치를 사용. 이를 통해 패치 수를 최소화하면서도 정보 보존을 극대화한다.
+
+## 정량적 결과: SOTA MLLM과의 비교
+
+### 비디오 벤치마크 성능
+
+| 모델 | 최대 프레임 | 최대 해상도 | VideoMME (w/o sub)↑ | HLVid (test)↑ |
+|------|-----------|-----------|-------------------|-------------|
+| NVILA-8B (baseline) | 256 | 448 | 64.2% | 42.5% |
+| Qwen2.5-VL-7B | 48 | 896 | 65.1% | 48.1% |
+| GPT-4o | - | - | 71.9% | 49.3% |
+| **NVILA + AutoGaze** | **1024** | **3584** | **67.0%** | **52.6%** |
+
+놀라운 결과가 두 가지이다. 첫째, 동일한 NVILA-8B 모델에 AutoGaze를 장착하는 것만으로 VideoMME가 64.2% → 67.0%(+2.8%)로, HLVid가 42.5% → 52.6%(+10.1%)로 향상되었다. 이는 **더 많은 프레임을 더 높은 해상도로 처리**할 수 있게 되면서 비디오 이해 능력 자체가 향상된 것이다.
+
+둘째, HLVid에서 52.6%로 GPT-4o(49.3%)를 **3.3% 초과**했다. 8B 파라미터 오픈소스 모델이 GPT-4o를 능가한 것은, AutoGaze의 효율적 토큰 활용이 단순 연산 절감을 넘어 모델 능력의 실질적 향상으로 이어진다는 것을 보여준다.
+
+![Figure: 비디오 벤치마크 성능 비교 테이블](https://autogaze.github.io/assets/figures/autogaze/mllm_benchmarks.png)
+
+### 레이턴시 성능
+
+![Figure: ViT 및 MLLM 레이턴시 성능 — AutoGaze 적용 전후 비교](https://autogaze.github.io/assets/figures/autogaze/latency_vision.png)
+
+- ViT: 최대 **19x 가속** (100x 압축 시)
+- MLLM: 최대 **10x 가속** (LLM 부분은 토큰 수에 비례하지 않으므로 가속률이 낮음)
+- 30fps 4K 비디오에서 **~1%의 패치만으로 동작** — 99%의 연산을 절감
+
+### OOD(Out-of-Distribution) 일반화
+
+![Figure: OOD 일반화 — CCTV 영상, 로봇 비디오 등 학습 데이터에 없는 도메인에서의 동작](https://autogaze.github.io/assets/figures/autogaze/autogaze_ood_semantics_1.png)
+
+AutoGaze는 일반 비디오로 학습되었지만, CCTV 영상, 로봇 비디오, 의료 영상 등 학습 데이터에 포함되지 않은 도메인에서도 효과적으로 동작한다. 이는 "정보가 집중된 패치를 선택한다"는 기본 원리가 도메인에 독립적임을 보여준다.
+
+## 한계점 및 향후 연구 방향
+
+### 현재 한계
+
+1. **극단적 카메라 움직임**: 매우 빠른 팬/틸트나 극단적으로 빈번한 장면 전환에서는 gazing 시퀀스가 최적화되지 못할 수 있다. 이런 경우 더 많은 패치가 필요해져 압축률이 저하된다.
+2. **학습-추론 해상도 갭**: 224x224로 학습하고 4K에서 타일링으로 추론하므로, 타일 경계에서의 정보 손실이 있을 수 있다.
+3. **단방향 의존성**: 현재 프레임의 패치 선택이 과거 프레임에만 의존하고 미래 프레임을 참조하지 않으므로, 갑자기 중요해질 영역에 대한 선제적 선택이 불가능하다.
+
+### 논문이 제시하는 미래 방향
+
+- **비디오 생성 모델 가속**: Sora, Kling, LTX Helios 등 비디오 생성 모델의 디코딩 단계에서 AutoGaze를 적용하면 불필요한 토큰의 디코딩을 건너뛰어 생성 속도 향상 가능
+- **3D 비전 최적화**: Gaussian Splatting, NeRF 렌더링에서 뷰포인트별 중요 패치만 렌더링하는 전략에 활용
+- **실시간 스트리밍 에이전트**: 실시간 비디오 스트리밍에서 온라인(on-the-fly) gazing을 적용하여 실시간 비디오 이해 에이전트의 실현 가능성 확대
+
+## 시사점 & 액션 아이템
+
+### 왜 중요한가
+
+비디오 이해/생성의 최대 병목은 **연산 비용**이다. 1분짜리 30fps 4K 비디오는 수백만 개의 시각 토큰을 생성하며, 이를 모두 처리하는 것은 현재 하드웨어로 비현실적이다. AutoGaze의 100배 압축은 이 병목을 근본적으로 해결하며, 비디오 AI의 실용화를 앞당긴다.
+
+특히 3M 파라미터라는 초경량 설계는 기존 모델에 **플러그인처럼 붙일 수 있다**는 의미로, 별도의 대규모 재훈련 없이 기존 비디오 모델의 효율을 즉시 개선할 수 있다.
+
+### personal knowledge system 프로젝트 연관성
+
+**our video generation project 프로젝트 (비디오 효율화)**:
+- our video generation project의 비디오 이해 파이프라인에서 소스 비디오 분석 시 AutoGaze를 전처리로 적용하면 연산 비용을 10-100배 절감 가능. 특히 긴 밈 소스 비디오(수분~수십분)에서 핵심 장면의 시각 토큰만 추출하는 용도로 이상적이다.
+
+**our rendering research project 프로젝트 (실시간 처리)**:
+- 실시간 비디오 스트리밍 환경에서 AutoGaze의 온라인 패치 선택은 our rendering research project의 실시간 시각 처리 요구를 직접 충족. 3M 파라미터의 경량성은 엣지 디바이스에서도 실행 가능하다.
+- 네비게이션/시뮬레이션 중 렌더링된 비디오에서 중요 영역만 실시간으로 분석하는 용도
+
+**TaylorDub 프로젝트**: 비디오 이해 파이프라인에서 AutoGaze를 전처리로 사용하면 더빙용 영상 분석 비용 대폭 절감
+
+**VFX 파이프라인**: 렌더링된 시퀀스의 품질 검사(QC)에서 전체 프레임 대신 핵심 패치만 분석
+
+### 구체적 할 일
+
+- [ ] [NVIDIA AutoGaze GitHub](https://github.com/NVlabs/AutoGaze) 리포지토리 클론 및 로컬 실행 테스트
+- [ ] 기존 비디오 분석 파이프라인에 AutoGaze 전처리 통합 가능성 검토
+- [ ] LTX Helios 등 비디오 생성 모델과의 조합 시너지 분석
+- [ ] NVILA-8B + AutoGaze 조합으로 our video generation project 소스 비디오 분석 벤치마크
+- [ ] our rendering research project 실시간 파이프라인에 AutoGaze 삽입 시 레이턴시 프로파일링
+
+## 출처
+
+| 플랫폼 | 링크 |
+|--------|------|
+| ArXiv | [Attend Before Attention (2603.12254)](https://arxiv.org/abs/2603.12254) |
+| ArXiv HTML | [전문 보기](https://arxiv.org/html/2603.12254) |
+| HuggingFace | [AutoGaze Paper Page](https://huggingface.co/papers/2603.12254) |
+| GitHub | [NVlabs/AutoGaze](https://github.com/NVlabs/AutoGaze) |
+| 프로젝트 | [AutoGaze 공식 페이지](https://autogaze.github.io/) |
+
+## Related Notes
+
+- 260325_SpecEyes_에이전틱_멀티모달LLM_투기적가속 — 멀티모달 LLM 가속의 다른 접근법 (투기적 실행)
+- 260325_Google_TurboQuant_KV_Cache_3bit_압축 — KV Cache 압축과 시각 토큰 압축의 상보적 관계
+- 260324_LTX_2.3_Helios_비디오_생성_모델 — 비디오 생성 모델의 효율화 요구
