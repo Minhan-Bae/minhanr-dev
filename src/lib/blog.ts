@@ -51,15 +51,16 @@ export function getAllPosts(): BlogPostMeta[] {
 
       const slug = data.slug || fileName.replace(/\.md$/, "");
 
-      return {
+      const meta: BlogPostMeta = {
         title: data.title || slug,
         date: data.date ? new Date(data.date).toISOString().split("T")[0] : "",
         slug,
         tags: Array.isArray(data.tags) ? data.tags : [],
         categories: Array.isArray(data.categories) ? data.categories : [],
         summary: data.summary || "",
-        author: data.author || undefined,
       };
+      if (data.author) meta.author = data.author;
+      return meta;
     })
     .filter((p): p is BlogPostMeta => p !== null);
 
