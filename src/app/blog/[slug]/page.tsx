@@ -16,9 +16,25 @@ export async function generateMetadata({
   const { slug } = await params;
   const post = await getPostBySlug(slug);
   if (!post) return { title: "Post Not Found" };
+  const title = `${post.title} | OIKBAS Blog`;
+  const description = post.summary || post.title;
   return {
-    title: `${post.title} | OIKBAS Blog`,
-    description: post.summary || post.title,
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: "article",
+      publishedTime: post.date,
+      authors: [post.author || "MinHanr"],
+      images: [{ url: "/api/og", width: 1200, height: 630 }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: ["/api/og"],
+    },
   };
 }
 

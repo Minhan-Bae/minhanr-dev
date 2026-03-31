@@ -12,6 +12,18 @@ import { Badge } from "@/components/ui/badge";
 export const metadata = {
   title: "Blog | OIKBAS",
   description: "AI, VFX, Creative Technology 기술 리서치와 프로젝트 기록",
+  openGraph: {
+    title: "Blog | OIKBAS",
+    description: "AI, VFX, Creative Technology 기술 리서치와 프로젝트 기록",
+    type: "website" as const,
+    images: [{ url: "/api/og", width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: "summary_large_image" as const,
+    title: "Blog | OIKBAS",
+    description: "AI, VFX, Creative Technology 기술 리서치와 프로젝트 기록",
+    images: ["/api/og"],
+  },
 };
 
 export default function BlogPage() {
