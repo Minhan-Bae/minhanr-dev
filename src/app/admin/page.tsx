@@ -20,6 +20,7 @@ import {
   Draggable,
   type DropResult,
 } from "@hello-pangea/dnd";
+import { WeeklyScheduler } from "@/components/weekly-scheduler";
 
 /* ── Types ── */
 
@@ -1046,6 +1047,16 @@ export default function AdminDashboard() {
             agents={agents}
           />
         </div>
+      </section>
+
+      <Separator className="bg-neutral-800" />
+
+      {/* Weekly Scheduler */}
+      <section className="space-y-3">
+        <h2 className="text-xs font-medium text-neutral-500 uppercase tracking-wider">
+          Weekly Scheduler
+        </h2>
+        <WeeklyScheduler />
       </section>
     </div>
   );
