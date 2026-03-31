@@ -1,14 +1,21 @@
 import { NextResponse } from "next/server";
 
-const VAULT_INDEX_URL =
-  "https://raw.githubusercontent.com/Minhan-Bae/oikbas-vault/main/090_System/vault_index.json";
-
 export async function GET() {
   try {
-    const res = await fetch(VAULT_INDEX_URL, { next: { revalidate: 300 } });
+    const token = process.env.GITHUB_TOKEN;
+    const url =
+      "https://api.github.com/repos/Minhan-Bae/oikbas-vault/contents/090_System/vault_index.json";
+
+    const headers: Record<string, string> = {
+      Accept: "application/vnd.github.v3.raw",
+      "User-Agent": "minhanr-dev",
+    };
+    if (token) headers.Authorization = `Bearer ${token}`;
+
+    const res = await fetch(url, { headers, next: { revalidate: 300 } });
     if (!res.ok) {
       return NextResponse.json(
-        { error: "Failed to fetch vault index" },
+        { error: "Failed to fetch vault index", status: res.status },
         { status: 502 }
       );
     }
