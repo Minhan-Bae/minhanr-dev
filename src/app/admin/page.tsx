@@ -21,6 +21,7 @@ import {
   type DropResult,
 } from "@hello-pangea/dnd";
 import { WeeklyScheduler } from "@/components/weekly-scheduler";
+import { QuickNote } from "@/components/quick-note";
 
 /* ── Types ── */
 
@@ -895,6 +896,7 @@ export default function AdminDashboard() {
   const [vault, setVault] = useState<VaultData | null>(null);
   const [logFilter, setLogFilter] = useState("");
   const [loggingOut, setLoggingOut] = useState(false);
+  const [activeTab, setActiveTab] = useState<"dashboard" | "schedule" | "quicknote">("dashboard");
 
   const loadAgents = useCallback(async () => {
     const { data } = await supabase
@@ -983,81 +985,102 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* Heartbeat Monitor */}
-      <section className="space-y-3">
-        <h2 className="text-xs font-medium text-neutral-500 uppercase tracking-wider">
-          Heartbeat Monitor
-        </h2>
-        <HeartbeatMonitor agents={agents} commits={commits} />
-      </section>
+      {/* Tab Navigation */}
+      <div className="flex gap-1 border-b border-neutral-800">
+        {(["dashboard", "schedule", "quicknote"] as const).map((tab) => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={`px-4 py-2 text-xs font-medium transition-colors border-b-2 -mb-px ${
+              activeTab === tab
+                ? "border-blue-500 text-blue-400"
+                : "border-transparent text-neutral-500 hover:text-neutral-300"
+            }`}
+          >
+            {tab === "dashboard" ? "Dashboard" : tab === "schedule" ? "Schedule" : "Quick Note"}
+          </button>
+        ))}
+      </div>
 
-      <Separator className="bg-neutral-800" />
+      {/* Tab: Dashboard */}
+      {activeTab === "dashboard" && (
+        <div className="space-y-8">
+          {/* Heartbeat Monitor */}
+          <section className="space-y-3">
+            <h2 className="text-xs font-medium text-neutral-500 uppercase tracking-wider">
+              Heartbeat Monitor
+            </h2>
+            <HeartbeatMonitor agents={agents} commits={commits} />
+          </section>
 
-      {/* Cost Tracker + Vault Explorer side by side */}
-      <section className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div className="space-y-3">
-          <h2 className="text-xs font-medium text-neutral-500 uppercase tracking-wider">
-            Cost Tracker
-          </h2>
-          <CostTracker commits={commits} />
+          <Separator className="bg-neutral-800" />
+
+          {/* Cost Tracker + Vault Explorer side by side */}
+          <section className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className="space-y-3">
+              <h2 className="text-xs font-medium text-neutral-500 uppercase tracking-wider">
+                Cost Tracker
+              </h2>
+              <CostTracker commits={commits} />
+            </div>
+            <div className="space-y-3">
+              <h2 className="text-xs font-medium text-neutral-500 uppercase tracking-wider">
+                Vault Explorer
+              </h2>
+              <VaultExplorer vault={vault} />
+            </div>
+          </section>
+
+          <Separator className="bg-neutral-800" />
+
+          {/* Task Kanban */}
+          <section className="space-y-3">
+            <h2 className="text-xs font-medium text-neutral-500 uppercase tracking-wider">
+              Task Kanban
+            </h2>
+            <CreateTaskForm onCreated={loadTasks} />
+            <TaskKanban tasks={tasks} onMove={moveTask} onDelete={deleteTask} />
+          </section>
+
+          <Separator className="bg-neutral-800" />
+
+          {/* Publish Queue + System Log side by side */}
+          <section className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <div className="lg:col-span-1 space-y-3">
+              <h2 className="text-xs font-medium text-neutral-500 uppercase tracking-wider">
+                Publish Queue
+              </h2>
+              <PublishQueue
+                vault={vault}
+                onPublish={(slug) => {
+                  console.log("Publish requested:", slug);
+                }}
+              />
+            </div>
+            <div className="lg:col-span-2 space-y-3">
+              <h2 className="text-xs font-medium text-neutral-500 uppercase tracking-wider">
+                System Log
+              </h2>
+              <SystemLog
+                commits={commits}
+                filter={logFilter}
+                onFilterChange={setLogFilter}
+                agents={agents}
+              />
+            </div>
+          </section>
         </div>
-        <div className="space-y-3">
-          <h2 className="text-xs font-medium text-neutral-500 uppercase tracking-wider">
-            Vault Explorer
-          </h2>
-          <VaultExplorer vault={vault} />
-        </div>
-      </section>
+      )}
 
-      <Separator className="bg-neutral-800" />
-
-      {/* Task Kanban */}
-      <section className="space-y-3">
-        <h2 className="text-xs font-medium text-neutral-500 uppercase tracking-wider">
-          Task Kanban
-        </h2>
-        <CreateTaskForm onCreated={loadTasks} />
-        <TaskKanban tasks={tasks} onMove={moveTask} onDelete={deleteTask} />
-      </section>
-
-      <Separator className="bg-neutral-800" />
-
-      {/* Publish Queue + System Log side by side */}
-      <section className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div className="lg:col-span-1 space-y-3">
-          <h2 className="text-xs font-medium text-neutral-500 uppercase tracking-wider">
-            Publish Queue
-          </h2>
-          <PublishQueue
-            vault={vault}
-            onPublish={(slug) => {
-              console.log("Publish requested:", slug);
-              // Future: PATCH vault note status → published
-            }}
-          />
-        </div>
-        <div className="lg:col-span-2 space-y-3">
-          <h2 className="text-xs font-medium text-neutral-500 uppercase tracking-wider">
-            System Log
-          </h2>
-          <SystemLog
-            commits={commits}
-            filter={logFilter}
-            onFilterChange={setLogFilter}
-            agents={agents}
-          />
-        </div>
-      </section>
-
-      <Separator className="bg-neutral-800" />
-
-      {/* Weekly Scheduler */}
-      <section className="space-y-3">
-        <h2 className="text-xs font-medium text-neutral-500 uppercase tracking-wider">
-          Weekly Scheduler
-        </h2>
+      {/* Tab: Schedule */}
+      {activeTab === "schedule" && (
         <WeeklyScheduler />
-      </section>
+      )}
+
+      {/* Tab: Quick Note */}
+      {activeTab === "quicknote" && (
+        <QuickNote />
+      )}
     </div>
   );
 }

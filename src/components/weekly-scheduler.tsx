@@ -58,6 +58,11 @@ export function WeeklyScheduler() {
     is_routine: false,
   });
 
+  // Drag state
+  const [dragStart, setDragStart] = useState<{ day: number; hour: number } | null>(null);
+  const [dragEnd, setDragEnd] = useState<{ day: number; hour: number } | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+
   const load = useCallback(async () => {
     const res = await fetch("/api/schedules");
     const d = await res.json();
@@ -66,9 +71,45 @@ export function WeeklyScheduler() {
 
   useEffect(() => { load(); }, [load]);
 
-  function openCreate(day: number, hour: number) {
+  function handleMouseDown(day: number, hour: number) {
+    setDragStart({ day, hour });
+    setDragEnd({ day, hour });
+    setIsDragging(true);
+  }
+
+  function handleMouseEnter(day: number, hour: number) {
+    if (isDragging && dragStart && day === dragStart.day) {
+      setDragEnd({ day, hour });
+    }
+  }
+
+  function handleMouseUp() {
+    if (isDragging && dragStart && dragEnd && dragStart.day === dragEnd.day) {
+      const startH = Math.min(dragStart.hour, dragEnd.hour);
+      const endH = Math.max(dragStart.hour, dragEnd.hour) + 1;
+      openCreate(dragStart.day, startH, endH);
+    }
+    setIsDragging(false);
+    setDragStart(null);
+    setDragEnd(null);
+  }
+
+  useEffect(() => {
+    function up() { handleMouseUp(); }
+    window.addEventListener("mouseup", up);
+    return () => window.removeEventListener("mouseup", up);
+  });
+
+  function isDragSelected(day: number, hour: number) {
+    if (!isDragging || !dragStart || !dragEnd || day !== dragStart.day) return false;
+    const minH = Math.min(dragStart.hour, dragEnd.hour);
+    const maxH = Math.max(dragStart.hour, dragEnd.hour);
+    return hour >= minH && hour <= maxH;
+  }
+
+  function openCreate(day: number, hour: number, endHour?: number) {
     setEditTarget(null);
-    setForm({ title: "", day_of_week: day, start_hour: hour, end_hour: Math.min(hour + 1, 24), category: "event", is_routine: false });
+    setForm({ title: "", day_of_week: day, start_hour: hour, end_hour: Math.min(endHour ?? hour + 1, 24), category: "event", is_routine: false });
     setShowForm(true);
   }
 
@@ -202,11 +243,12 @@ export function WeeklyScheduler() {
                   return (
                     <div
                       key={dayIdx}
-                      className={`relative border-b border-r border-neutral-800/30 cursor-pointer hover:brightness-125 transition-colors ${bgClass}`}
+                      className={`relative border-b border-r border-neutral-800/30 cursor-crosshair select-none transition-colors ${bgClass} ${
+                        isDragSelected(dayIdx, hour) ? "!bg-blue-500/30" : "hover:brightness-125"
+                      }`}
                       style={{ height: CELL_H }}
-                      onClick={() => {
-                        if (cellSchedules.length === 0) openCreate(dayIdx, hour);
-                      }}
+                      onMouseDown={(e) => { e.preventDefault(); if (cellSchedules.length === 0) handleMouseDown(dayIdx, hour); }}
+                      onMouseEnter={() => handleMouseEnter(dayIdx, hour)}
                     >
                       {startsHere.map((s) => {
                         const spanHours = s.end_hour - s.start_hour;

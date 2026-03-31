@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { TokenUsageIndicator } from "@/components/token-usage-indicator";
+import { ThemeSwitcher } from "@/components/theme-switcher";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -45,6 +46,7 @@ export default function RootLayout({
   return (
     <html
       lang="ko"
+      suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} dark h-full antialiased`}
     >
       <head>
@@ -82,6 +84,8 @@ export default function RootLayout({
             >
               Admin
             </a>
+            <div className="w-px h-4 bg-neutral-700" />
+            <ThemeSwitcher />
             <div className="w-px h-4 bg-neutral-700" />
             <TokenUsageIndicator />
           </nav>

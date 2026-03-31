@@ -119,6 +119,27 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+.gray {
+  --background: oklch(0.27 0 0);
+  --foreground: oklch(0.92 0 0);
+  --card: oklch(0.30 0 0);
+  --card-foreground: oklch(0.92 0 0);
+  --popover: oklch(0.30 0 0);
+  --popover-foreground: oklch(0.92 0 0);
+  --primary: oklch(0.87 0 0);
+  --primary-foreground: oklch(0.27 0 0);
+  --secondary: oklch(0.35 0 0);
+  --secondary-foreground: oklch(0.92 0 0);
+  --muted: oklch(0.35 0 0);
+  --muted-foreground: oklch(0.65 0 0);
+  --accent: oklch(0.35 0 0);
+  --accent-foreground: oklch(0.92 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 12%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.55 0 0);
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -129,4 +150,25 @@
   html {
     @apply font-sans;
   }
+  /* Theme body colors */
+  html.dark body { background: #0a0a0a; color: #f5f5f5; }
+  html.light body { background: #fafafa; color: #171717; }
+  html.gray body { background: #3a3a3a; color: #e5e5e5; }
+
+  /* Gray theme neutral overrides for Tailwind classes */
+  html.gray .bg-neutral-950 { background: #3a3a3a; }
+  html.gray .bg-neutral-900 { background: #404040; }
+  html.gray .border-neutral-800 { border-color: #525252; }
+  html.gray .text-neutral-100 { color: #e5e5e5; }
+
+  /* Light theme overrides */
+  html.light .bg-neutral-950 { background: #fafafa; }
+  html.light .bg-neutral-900 { background: #f5f5f5; }
+  html.light .border-neutral-800 { border-color: #e5e5e5; }
+  html.light .text-neutral-100 { color: #171717; }
+  html.light .text-neutral-200 { color: #262626; }
+  html.light .text-neutral-300 { color: #404040; }
+  html.light .text-neutral-400 { color: #525252; }
+  html.light .text-neutral-500 { color: #737373; }
+  html.light .text-neutral-600 { color: #a3a3a3; }
 }
