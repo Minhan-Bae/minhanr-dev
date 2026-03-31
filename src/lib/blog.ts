@@ -1,8 +1,11 @@
 import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
-import { remark } from "remark";
-import html from "remark-html";
+import { unified } from "unified";
+import remarkParse from "remark-parse";
+import remarkRehype from "remark-rehype";
+import rehypeHighlight from "rehype-highlight";
+import rehypeStringify from "rehype-stringify";
 
 const postsDirectory = path.join(process.cwd(), "src/content/posts");
 
@@ -84,7 +87,12 @@ export async function getPostBySlug(slug: string): Promise<BlogPost | null> {
     const postSlug = data.slug || fileName.replace(/\.md$/, "");
 
     if (postSlug === slug) {
-      const processedContent = await remark().use(html, { sanitize: false }).process(content);
+      const processedContent = await unified()
+        .use(remarkParse)
+        .use(remarkRehype, { allowDangerousHtml: true })
+        .use(rehypeHighlight, { detect: true })
+        .use(rehypeStringify, { allowDangerousHtml: true })
+        .process(content);
       const contentHtml = processedContent.toString();
 
       return {

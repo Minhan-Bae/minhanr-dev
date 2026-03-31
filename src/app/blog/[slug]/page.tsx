@@ -97,6 +97,17 @@ export default async function BlogPostPage({
           )}
         </header>
 
+        {post.cover?.image && (
+          <div className="mb-8 rounded-lg overflow-hidden border border-neutral-800">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={post.cover.image}
+              alt={post.cover.alt || post.title}
+              className="w-full h-auto"
+            />
+          </div>
+        )}
+
         <div
           className="prose prose-invert prose-sm max-w-none
             prose-headings:font-semibold prose-headings:tracking-tight
