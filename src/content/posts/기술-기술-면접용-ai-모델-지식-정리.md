@@ -8,6 +8,7 @@ cover:
     on [Unsplash](https://unsplash.com)
   image: https://images.unsplash.com/photo-1587440871875-191322ee64b0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MDgzMTR8MHwxfHNlYXJjaHwzfHxSZXNlYXJjaHxlbnwwfDB8fHwxNzc0NjgyNDE1fDA&ixlib=rb-4.1.0&q=80&w=1080
 date: '2025-12-15'
+summary: "AI 기술 면접 대비를 위한 핵심 모델 지식 정리. Transformer의 Self-Attention 메커니즘부터 VAE의 잠재공간 학습, 손실 함수 설계까지 주요 AI 아키텍처의 구조와 원리를 체계적으로 설명한다."
 draft: false
 slug: 기술-기술-면접용-ai-모델-지식-정리
 tags:

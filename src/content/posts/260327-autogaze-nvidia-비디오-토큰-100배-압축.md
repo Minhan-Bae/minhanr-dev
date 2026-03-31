@@ -4,6 +4,7 @@ categories:
 - Research
 date: '2026-03-27'
 draft: false
+summary: "NVIDIA AutoGaze는 비디오의 중복 패치를 자동 제거하여 시각 토큰을 최대 100배 압축하고, 3M 파라미터 경량 모듈로 1K프레임 4K 비디오 처리와 MLLM 19배 가속을 달성한다."
 slug: 260327-autogaze-nvidia-비디오-토큰-100배-압축
 tags:
 - AI_Daily_Trend

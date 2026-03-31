@@ -4,6 +4,7 @@ categories:
 - Research
 date: '2026-03-28'
 draft: false
+summary: "Spectrum은 Chebyshev 다항식 기반 feature forecasting으로 DiT 모델의 추론을 최대 4.79배 가속하는 training-free 가속기로, FLUX.1과 Wan2.1-14B에서 SOTA 성능을 달성한 CVPR 2026 논문 분석."
 slug: 260328-spectrum-trainingfree-dit-accelerator-spec
 tags:
 - AI_R&D_Paper

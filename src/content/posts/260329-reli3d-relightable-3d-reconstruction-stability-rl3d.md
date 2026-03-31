@@ -3,6 +3,7 @@ author: MinHanr
 categories:
 - Research
 date: '2026-03-29'
+summary: "Stability AI의 ReLi3D는 소수의 멀티뷰 이미지로부터 1초 미만에 geometry, PBR material, HDR 조명을 동시에 추론하는 relightable 3D 재구성 모델이다. ICLR 2026 채택, MIT 라이선스로 VFX 및 게임 파이프라인에 즉시 통합 가능하다."
 draft: false
 slug: 260329-reli3d-relightable-3d-reconstruction-stability-rl3d
 tags:

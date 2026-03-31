@@ -8,6 +8,7 @@ cover:
   image: /images/posts/260327-hiar-autoregressive-long-video-generation/260327_HiAR_Hierarchical_Denoising_fig.png
 date: '2026-03-27'
 draft: false
+summary: "HiAR는 계층적 노이즈 매칭으로 오토리그레시브 비디오 생성의 temporal drift를 구조적으로 해결하여, 20초 영상에서 VBench 최고 점수(0.821)와 1.8배 추론 속도 향상을 달성한 논문 분석."
 slug: 260327-hiar-autoregressive-long-video-generation
 tags:
 - AI_R&D_Paper
