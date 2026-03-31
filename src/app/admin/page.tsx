@@ -962,45 +962,53 @@ export default function AdminDashboard() {
     router.push("/login");
   }
 
+  const SIDEBAR_ITEMS = [
+    { key: "dashboard" as const, label: "Dashboard", icon: "▦" },
+    { key: "schedule" as const, label: "Schedule", icon: "▤" },
+    { key: "quicknote" as const, label: "Quick Note", icon: "✎" },
+  ];
+
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-8">
-      {/* Header with Logout */}
-      <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold tracking-tight">
-          Admin Dashboard
-        </h1>
-        <div className="flex items-center gap-3">
-          <Badge variant="outline" className="text-[10px] text-green-400 border-green-400/30">
+    <div className="flex min-h-[calc(100vh-100px)]">
+      {/* Sidebar */}
+      <aside className="w-14 sm:w-48 shrink-0 border-r border-neutral-800 bg-neutral-950 flex flex-col">
+        <div className="p-3 border-b border-neutral-800 hidden sm:block">
+          <h1 className="text-sm font-bold tracking-tight">Admin</h1>
+        </div>
+        <nav className="flex-1 py-2 space-y-0.5">
+          {SIDEBAR_ITEMS.map((item) => (
+            <button
+              key={item.key}
+              onClick={() => setActiveTab(item.key)}
+              className={`w-full flex items-center gap-2.5 px-3 py-2 text-xs transition-colors ${
+                activeTab === item.key
+                  ? "bg-blue-500/10 text-blue-400 border-r-2 border-blue-500"
+                  : "text-neutral-500 hover:text-neutral-300 hover:bg-neutral-800/50"
+              }`}
+            >
+              <span className="text-sm shrink-0">{item.icon}</span>
+              <span className="hidden sm:inline">{item.label}</span>
+            </button>
+          ))}
+        </nav>
+        <div className="p-3 border-t border-neutral-800 space-y-2">
+          <Badge variant="outline" className="text-[9px] text-green-400 border-green-400/30 hidden sm:inline-flex">
             Authenticated
           </Badge>
           <Button
             variant="outline"
             size="sm"
-            className="text-[10px] h-7 border-neutral-700 text-neutral-400 hover:text-red-400 hover:border-red-400/30"
+            className="w-full text-[10px] h-7 border-neutral-700 text-neutral-400 hover:text-red-400 hover:border-red-400/30"
             onClick={handleLogout}
             disabled={loggingOut}
           >
             {loggingOut ? "..." : "Logout"}
           </Button>
         </div>
-      </div>
+      </aside>
 
-      {/* Tab Navigation */}
-      <div className="flex gap-1 border-b border-neutral-800">
-        {(["dashboard", "schedule", "quicknote"] as const).map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`px-4 py-2 text-xs font-medium transition-colors border-b-2 -mb-px ${
-              activeTab === tab
-                ? "border-blue-500 text-blue-400"
-                : "border-transparent text-neutral-500 hover:text-neutral-300"
-            }`}
-          >
-            {tab === "dashboard" ? "Dashboard" : tab === "schedule" ? "Schedule" : "Quick Note"}
-          </button>
-        ))}
-      </div>
+      {/* Main content */}
+      <div className="flex-1 px-4 sm:px-6 py-6 space-y-8 overflow-auto">
 
       {/* Tab: Dashboard */}
       {activeTab === "dashboard" && (
@@ -1081,6 +1089,7 @@ export default function AdminDashboard() {
       {activeTab === "quicknote" && (
         <QuickNote />
       )}
+      </div>
     </div>
   );
 }

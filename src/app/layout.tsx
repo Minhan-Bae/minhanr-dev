@@ -54,44 +54,44 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="theme-color" content="#0a0a0a" />
       </head>
-      <body className="min-h-full flex flex-col bg-neutral-950 text-neutral-100">
-        <header className="border-b border-neutral-800 px-6 py-3 flex items-center justify-between">
+      <body className="min-h-full flex flex-col bg-background text-foreground">
+        <header className="border-b border-border px-6 py-3 flex items-center justify-between bg-background">
           <div className="flex items-center gap-3">
             <span className="text-lg font-bold tracking-tight">OIKBAS</span>
             <span className="text-xs text-neutral-500 hidden sm:inline">
               Command Center
             </span>
           </div>
-          <nav className="flex items-center gap-4 text-sm text-neutral-400">
-            <a href="/" className="hover:text-neutral-100 transition-colors">
+          <nav className="flex items-center gap-4 text-sm text-muted-foreground">
+            <a href="/" className="hover:text-foreground transition-colors">
               Home
             </a>
             <a
               href="/dashboard"
-              className="hover:text-neutral-100 transition-colors"
+              className="hover:text-foreground transition-colors"
             >
               Dashboard
             </a>
             <a
               href="/blog"
-              className="hover:text-neutral-100 transition-colors"
+              className="hover:text-foreground transition-colors"
             >
               Blog
             </a>
             <a
               href="/admin"
-              className="hover:text-neutral-100 transition-colors"
+              className="hover:text-foreground transition-colors"
             >
               Admin
             </a>
-            <div className="w-px h-4 bg-neutral-700" />
+            <div className="w-px h-4 bg-border" />
             <ThemeSwitcher />
-            <div className="w-px h-4 bg-neutral-700" />
+            <div className="w-px h-4 bg-border" />
             <TokenUsageIndicator />
           </nav>
         </header>
         <main className="flex-1">{children}</main>
-        <footer className="border-t border-neutral-800 px-6 py-3 text-xs text-neutral-600 text-center">
+        <footer className="border-t border-border px-6 py-3 text-xs text-muted-foreground text-center">
           minhanr.dev &mdash; Powered by TrinityX
         </footer>
       </body>

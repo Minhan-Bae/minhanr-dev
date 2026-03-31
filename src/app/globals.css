@@ -140,6 +140,28 @@
   --ring: oklch(0.55 0 0);
 }
 
+/* ── Theme-aware neutral palette override ── */
+/* Uses CSS custom properties so ALL neutral-* Tailwind classes respond to theme */
+
+.dark {
+  --n-50: #fafafa; --n-100: #f5f5f5; --n-200: #e5e5e5; --n-300: #d4d4d4;
+  --n-400: #a3a3a3; --n-500: #737373; --n-600: #525252; --n-700: #404040;
+  --n-800: #262626; --n-900: #171717; --n-950: #0a0a0a;
+  --header-bg: #0a0a0a; --header-border: #262626;
+}
+:root, .light {
+  --n-50: #fafafa; --n-100: #f5f5f5; --n-200: #e5e5e5; --n-300: #d4d4d4;
+  --n-400: #a3a3a3; --n-500: #737373; --n-600: #525252; --n-700: #404040;
+  --n-800: #262626; --n-900: #171717; --n-950: #0a0a0a;
+  --header-bg: #ffffff; --header-border: #e5e5e5;
+}
+.gray {
+  --n-50: #e5e5e5; --n-100: #d4d4d4; --n-200: #b0b0b0; --n-300: #999;
+  --n-400: #777; --n-500: #666; --n-600: #555; --n-700: #4a4a4a;
+  --n-800: #444; --n-900: #3d3d3d; --n-950: #363636;
+  --header-bg: #363636; --header-border: #4a4a4a;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -150,25 +172,66 @@
   html {
     @apply font-sans;
   }
-  /* Theme body colors */
-  html.dark body { background: #0a0a0a; color: #f5f5f5; }
-  html.light body { background: #fafafa; color: #171717; }
-  html.gray body { background: #3a3a3a; color: #e5e5e5; }
+}
 
-  /* Gray theme neutral overrides for Tailwind classes */
-  html.gray .bg-neutral-950 { background: #3a3a3a; }
-  html.gray .bg-neutral-900 { background: #404040; }
-  html.gray .border-neutral-800 { border-color: #525252; }
-  html.gray .text-neutral-100 { color: #e5e5e5; }
+/* Full neutral palette remapping per theme */
+/* Light mode: invert the neutral scale so dark classes become light */
+html.light {
+  .bg-neutral-950 { background-color: #fafafa !important; }
+  .bg-neutral-900 { background-color: #f5f5f5 !important; }
+  .bg-neutral-900\/30 { background-color: rgb(245 245 245 / 0.3) !important; }
+  .bg-neutral-900\/50 { background-color: rgb(245 245 245 / 0.5) !important; }
+  .bg-neutral-900\/60 { background-color: rgb(245 245 245 / 0.6) !important; }
+  .bg-neutral-800 { background-color: #e5e5e5 !important; }
+  .bg-neutral-800\/50 { background-color: rgb(229 229 229 / 0.5) !important; }
+  .bg-neutral-700 { background-color: #d4d4d4 !important; }
+  .bg-neutral-600 { background-color: #a3a3a3 !important; }
+  .bg-neutral-950\/50 { background-color: rgb(250 250 250 / 0.5) !important; }
+  .border-neutral-800 { border-color: #e5e5e5 !important; }
+  .border-neutral-800\/50 { border-color: rgb(229 229 229 / 0.5) !important; }
+  .border-neutral-800\/30 { border-color: rgb(229 229 229 / 0.3) !important; }
+  .border-neutral-700 { border-color: #d4d4d4 !important; }
+  .text-neutral-100 { color: #171717 !important; }
+  .text-neutral-200 { color: #262626 !important; }
+  .text-neutral-300 { color: #404040 !important; }
+  .text-neutral-400 { color: #525252 !important; }
+  .text-neutral-500 { color: #737373 !important; }
+  .text-neutral-600 { color: #a3a3a3 !important; }
+  .text-neutral-700 { color: #d4d4d4 !important; }
+  .fill-neutral-200 { fill: #262626 !important; }
+  .fill-neutral-500 { fill: #737373 !important; }
+  .placeholder\:text-neutral-600::placeholder { color: #a3a3a3 !important; }
+  .hover\:text-neutral-100:hover { color: #171717 !important; }
+  .hover\:text-neutral-300:hover { color: #404040 !important; }
+  .group-hover\:text-neutral-100:is(:where(.group):hover *) { color: #171717 !important; }
+  .group-hover\:text-neutral-50:is(:where(.group):hover *) { color: #0a0a0a !important; }
+  .prose-invert { --tw-prose-body: #404040; --tw-prose-headings: #171717; }
+}
 
-  /* Light theme overrides */
-  html.light .bg-neutral-950 { background: #fafafa; }
-  html.light .bg-neutral-900 { background: #f5f5f5; }
-  html.light .border-neutral-800 { border-color: #e5e5e5; }
-  html.light .text-neutral-100 { color: #171717; }
-  html.light .text-neutral-200 { color: #262626; }
-  html.light .text-neutral-300 { color: #404040; }
-  html.light .text-neutral-400 { color: #525252; }
-  html.light .text-neutral-500 { color: #737373; }
-  html.light .text-neutral-600 { color: #a3a3a3; }
+/* Gray mode */
+html.gray {
+  .bg-neutral-950 { background-color: #363636 !important; }
+  .bg-neutral-900 { background-color: #3d3d3d !important; }
+  .bg-neutral-900\/30 { background-color: rgb(61 61 61 / 0.3) !important; }
+  .bg-neutral-900\/50 { background-color: rgb(61 61 61 / 0.5) !important; }
+  .bg-neutral-900\/60 { background-color: rgb(61 61 61 / 0.6) !important; }
+  .bg-neutral-800 { background-color: #444444 !important; }
+  .bg-neutral-800\/50 { background-color: rgb(68 68 68 / 0.5) !important; }
+  .bg-neutral-700 { background-color: #4a4a4a !important; }
+  .bg-neutral-600 { background-color: #555555 !important; }
+  .bg-neutral-950\/50 { background-color: rgb(54 54 54 / 0.5) !important; }
+  .border-neutral-800 { border-color: #4a4a4a !important; }
+  .border-neutral-800\/50 { border-color: rgb(74 74 74 / 0.5) !important; }
+  .border-neutral-800\/30 { border-color: rgb(74 74 74 / 0.3) !important; }
+  .border-neutral-700 { border-color: #555555 !important; }
+  .text-neutral-100 { color: #e5e5e5 !important; }
+  .text-neutral-200 { color: #d4d4d4 !important; }
+  .text-neutral-300 { color: #b0b0b0 !important; }
+  .text-neutral-400 { color: #999999 !important; }
+  .text-neutral-500 { color: #777777 !important; }
+  .text-neutral-600 { color: #666666 !important; }
+  .text-neutral-700 { color: #555555 !important; }
+  .fill-neutral-200 { fill: #d4d4d4 !important; }
+  .fill-neutral-500 { fill: #777777 !important; }
+  .placeholder\:text-neutral-600::placeholder { color: #666666 !important; }
 }
