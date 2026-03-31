@@ -110,7 +110,7 @@ export default function Home() {
           <span className="text-blue-400">Command Center</span>
         </h1>
         <p className="text-neutral-400 max-w-xl mx-auto text-sm sm:text-base">
-          1인 AI 연구자. 에이전트 6대가 24시간 자율 운용하는 개인 지식 시스템.
+          1인 AI 연구자. 에이전트 {AGENTS.length}대가 24시간 자율 운용하는 개인 지식 시스템.
           <br className="hidden sm:inline" />
           수집 → 수렴 → 확산, 3축 오케스트레이션.
         </p>
@@ -122,9 +122,7 @@ export default function Home() {
             Dashboard →
           </a>
           <a
-            href="https://blog.minhanr.dev"
-            target="_blank"
-            rel="noopener noreferrer"
+            href="/blog"
             className="inline-flex items-center rounded-lg border border-neutral-700 px-4 py-2 text-sm font-medium text-neutral-300 hover:border-neutral-500 transition-colors"
           >
             Blog
@@ -207,9 +205,7 @@ export default function Home() {
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold">Blog Highlights</h2>
           <a
-            href="https://blog.minhanr.dev"
-            target="_blank"
-            rel="noopener noreferrer"
+            href="/blog"
             className="text-xs text-neutral-500 hover:text-neutral-300 transition-colors"
           >
             View all →
