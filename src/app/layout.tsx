@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "OIKBAS Command Center | minhanr.dev",
   description:
-    "AI 에이전트 6대를 오케스트레이션하는 개인 지식 시스템 대시보드",
+    "AI 멀티에이전트 오케스트레이션 개인 지식 시스템 대시보드",
   metadataBase: new URL("https://minhanr.dev"),
   openGraph: {
     title: "OIKBAS Command Center",
@@ -31,7 +31,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "OIKBAS Command Center",
     description:
-      "AI 에이전트 6대를 오케스트레이션하는 개인 지식 시스템 대시보드",
+      "AI 멀티에이전트 오케스트레이션 개인 지식 시스템 대시보드",
   },
   icons: { icon: "/favicon.ico", apple: "/icon-192.png" },
   manifest: "/manifest.json",
