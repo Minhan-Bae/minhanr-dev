@@ -246,6 +246,7 @@ const AGENT_BADGE_COLORS: Record<string, string> = {
   "RT Slot 1": "bg-emerald-400/20 text-emerald-300",
   "RT Slot 2": "bg-cyan-400/20 text-cyan-300",
   "RT Slot 3": "bg-amber-400/20 text-amber-300",
+  Omega: "bg-red-400/20 text-red-300",
   Manual: "bg-neutral-400/20 text-neutral-300",
 };
 
@@ -294,17 +295,17 @@ export default function Dashboard() {
         <div className="flex justify-center gap-8 sm:gap-12">
           <AxisGauge
             axis="acquisition"
-            utilization={acq?.utilization ?? 85}
+            utilization={acq?.utilization ?? 0}
             notesCount={acq?.notes_count ?? 0}
           />
           <AxisGauge
             axis="convergence"
-            utilization={conv?.utilization ?? 70}
+            utilization={conv?.utilization ?? 0}
             notesCount={conv?.notes_count ?? 0}
           />
           <AxisGauge
             axis="amplification"
-            utilization={amp?.utilization ?? 45}
+            utilization={amp?.utilization ?? 0}
             notesCount={amp?.notes_count ?? 0}
           />
         </div>
@@ -328,18 +329,29 @@ export default function Dashboard() {
           Agent Organization
         </h2>
 
-        {/* Omega */}
+        {/* Omega (L1) */}
         <div className="flex justify-center">
-          <Card className="border-amber-500/30 bg-amber-500/5 w-40 sm:w-48 text-center">
-            <CardHeader className="py-2.5">
-              <CardTitle className="text-xs text-amber-400">
-                Omega
-              </CardTitle>
-              <CardDescription className="text-[10px]">
-                Orchestrator · L1
-              </CardDescription>
-            </CardHeader>
-          </Card>
+          {AGENTS.filter((a) => a.layer === 1).map((agent) => {
+            const hb = agents.find((h) => h.agent_name === agent.name);
+            return (
+              <Card
+                key={agent.name}
+                className={`${agent.bgColor} ${agent.borderColor} border w-40 sm:w-48 text-center`}
+              >
+                <CardHeader className="py-2.5">
+                  <div className="flex items-center justify-center gap-2">
+                    <CardTitle className={`text-xs ${agent.color}`}>
+                      {agent.label}
+                    </CardTitle>
+                    <StatusLed status={hb?.status || "idle"} />
+                  </div>
+                  <CardDescription className="text-[10px]">
+                    {agent.role} · L{agent.layer}
+                  </CardDescription>
+                </CardHeader>
+              </Card>
+            );
+          })}
         </div>
 
         {/* L2 */}

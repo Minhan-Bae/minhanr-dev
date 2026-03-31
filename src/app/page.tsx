@@ -70,6 +70,7 @@ const AGENT_BADGE_COLORS: Record<string, string> = {
   "RT Slot 1": "bg-emerald-400/20 text-emerald-300",
   "RT Slot 2": "bg-cyan-400/20 text-cyan-300",
   "RT Slot 3": "bg-amber-400/20 text-amber-300",
+  Omega: "bg-red-400/20 text-red-300",
   Manual: "bg-neutral-400/20 text-neutral-300",
 };
 
@@ -102,7 +103,7 @@ export default function Home() {
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75" />
             <span className="relative inline-flex h-2 w-2 rounded-full bg-green-400" />
           </span>
-          6 agents online
+          {agents.filter((a) => a.status === "active").length} agents online
         </div>
         <h1 className="text-3xl sm:text-5xl font-bold tracking-tight">
           MinHanr&apos;s{" "}

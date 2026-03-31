@@ -1,5 +1,16 @@
 export const AGENTS = [
   {
+    name: "omega",
+    label: "Omega",
+    role: "Orchestrator",
+    layer: 1,
+    axis: "convergence" as const,
+    description: "총괄 관리 · 디스패치 · 블로커 해결",
+    color: "text-red-400",
+    bgColor: "bg-red-400/10",
+    borderColor: "border-red-400/30",
+  },
+  {
     name: "alpha",
     label: "Alpha",
     role: "Refiner",

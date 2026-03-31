@@ -22,7 +22,7 @@ const AGENT_PREFIXES: Record<string, string> = {
   "auto: collect": "rt_slot1",
   "auto: converge": "rt_slot2",
   "auto: morning": "rt_slot3",
-  "omega:": "alpha",
+  "omega:": "omega",
 };
 
 function identifyAgent(commitMsg: string): string | null {
