@@ -1,5 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createHmac, timingSafeEqual } from "crypto";
 import { supabase } from "@/lib/supabase";
+
+function verifySignature(payload: string, signature: string | null): boolean {
+  const secret = process.env.GITHUB_WEBHOOK_SECRET;
+  if (!secret) return false;
+  if (!signature) return false;
+  const expected = "sha256=" + createHmac("sha256", secret).update(payload).digest("hex");
+  try {
+    return timingSafeEqual(Buffer.from(signature), Buffer.from(expected));
+  } catch {
+    return false;
+  }
+}
 
 const AGENT_PREFIXES: Record<string, string> = {
   "alpha:": "alpha",
@@ -21,7 +34,12 @@ function identifyAgent(commitMsg: string): string | null {
 
 export async function POST(request: NextRequest) {
   try {
-    const payload = await request.json();
+    const body = await request.text();
+    const signature = request.headers.get("x-hub-signature-256");
+    if (!verifySignature(body, signature)) {
+      return NextResponse.json({ error: "invalid signature" }, { status: 401 });
+    }
+    const payload = JSON.parse(body);
 
     if (!payload.commits || payload.commits.length === 0) {
       return NextResponse.json({ status: "no commits" });
