@@ -22,6 +22,7 @@ const AGENT_PREFIXES: Record<string, string> = {
   "auto: collect": "rt_slot1",
   "auto: converge": "rt_slot2",
   "auto: morning": "rt_slot3",
+  "omega:": "alpha",
 };
 
 function identifyAgent(commitMsg: string): string | null {
@@ -37,8 +38,7 @@ export async function POST(request: NextRequest) {
     const body = await request.text();
     const signature = request.headers.get("x-hub-signature-256");
     if (!verifySignature(body, signature)) {
-      const secret = process.env.GITHUB_WEBHOOK_SECRET;
-      return NextResponse.json({ error: "invalid signature", debug: { secretLen: secret?.length, hasSig: !!signature, bodyLen: body.length } }, { status: 401 });
+      return NextResponse.json({ error: "invalid signature" }, { status: 401 });
     }
     const payload = JSON.parse(body);
 
