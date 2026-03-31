@@ -24,23 +24,12 @@ interface Commit {
   date: string;
 }
 
-const BLOG_POSTS = [
-  {
-    title: "DiffusionRenderer — G-buffer 기반 Neural Rendering",
-    url: "https://blog.minhanr.dev/posts/diffusionrenderer/",
-    date: "2026-03-28",
-  },
-  {
-    title: "MCP 프로덕션 디자인 패턴 — CABP, ATBA, SERF",
-    url: "https://blog.minhanr.dev/posts/mcp-design-patterns/",
-    date: "2026-03-28",
-  },
-  {
-    title: "AI Agent Protocol Stack — A2A, MCP, AG-UI",
-    url: "https://blog.minhanr.dev/posts/agent-protocol-stack/",
-    date: "2026-03-28",
-  },
-];
+interface BlogPost {
+  title: string;
+  slug: string;
+  date: string;
+  url: string;
+}
 
 function StatusLed({ status }: { status: string }) {
   const color =
@@ -87,6 +76,7 @@ const AGENT_BADGE_COLORS: Record<string, string> = {
 export default function Home() {
   const [agents, setAgents] = useState<AgentHeartbeat[]>([]);
   const [commits, setCommits] = useState<Commit[]>([]);
+  const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
 
   useEffect(() => {
     fetch("/api/heartbeat")
@@ -96,6 +86,10 @@ export default function Home() {
     fetch("/api/activity")
       .then((r) => r.json())
       .then((d) => setCommits(d.commits || []))
+      .catch(() => {});
+    fetch("/api/blog")
+      .then((r) => r.json())
+      .then((d) => setBlogPosts(d.posts || []))
       .catch(() => {});
   }, []);
 
@@ -221,7 +215,7 @@ export default function Home() {
           </a>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          {BLOG_POSTS.map((post) => (
+          {(blogPosts.length > 0 ? blogPosts.slice(0, 3) : []).map((post) => (
             <a
               key={post.url}
               href={post.url}
@@ -241,6 +235,13 @@ export default function Home() {
               </Card>
             </a>
           ))}
+          {blogPosts.length === 0 && (
+            <Card className="border-neutral-800 col-span-3">
+              <CardContent className="py-4 text-center text-neutral-500 text-xs">
+                Loading blog posts...
+              </CardContent>
+            </Card>
+          )}
         </div>
       </section>
     </div>
