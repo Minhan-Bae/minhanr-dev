@@ -31,7 +31,8 @@ export const metadata: Metadata = {
     description:
       "AI 에이전트 6대를 오케스트레이션하는 개인 지식 시스템 대시보드",
   },
-  icons: { icon: "/favicon.ico" },
+  icons: { icon: "/favicon.ico", apple: "/icon-192.png" },
+  manifest: "/manifest.json",
 };
 
 export default function RootLayout({
@@ -44,6 +45,11 @@ export default function RootLayout({
       lang="ko"
       className={`${geistSans.variable} ${geistMono.variable} dark h-full antialiased`}
     >
+      <head>
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="theme-color" content="#0a0a0a" />
+      </head>
       <body className="min-h-full flex flex-col bg-neutral-950 text-neutral-100">
         <header className="border-b border-neutral-800 px-6 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
