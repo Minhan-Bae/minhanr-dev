@@ -42,12 +42,15 @@ export async function GET() {
     const commits = data.slice(0, 10).map(
       (c: {
         sha: string;
+        html_url: string;
         commit: { message: string; author: { date: string } };
       }) => ({
         hash: c.sha.slice(0, 7),
+        fullHash: c.sha,
         message: c.commit.message.split("\n")[0].slice(0, 80),
         agent: identifyAgent(c.commit.message),
         date: c.commit.author.date,
+        url: c.html_url,
       })
     );
 

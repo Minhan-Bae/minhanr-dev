@@ -134,48 +134,119 @@ const MONTHLY_TOTAL = 220;
 
 /* ── Heartbeat Monitor ── */
 
-function HeartbeatMonitor({ agents }: { agents: AgentHeartbeat[] }) {
+function HeartbeatMonitor({
+  agents,
+  commits,
+}: {
+  agents: AgentHeartbeat[];
+  commits: Commit[];
+}) {
+  const [selected, setSelected] = useState<string | null>(null);
+
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-      {AGENTS.map((def) => {
-        const hb = agents.find((h) => h.agent_name === def.name);
-        return (
-          <Card
-            key={def.name}
-            className={`${def.bgColor} ${def.borderColor} border`}
-          >
-            <CardHeader className="p-3 pb-1">
-              <div className="flex items-center justify-between">
-                <CardTitle className={`text-xs font-semibold ${def.color}`}>
-                  {def.label}
-                </CardTitle>
-                <StatusLed status={hb?.status || "idle"} />
-              </div>
-              <CardDescription className="text-[10px]">
-                {def.role}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="p-3 pt-0 space-y-1">
-              <p className="text-[10px] text-neutral-400 truncate">
-                {hb?.last_commit_msg?.slice(0, 50) || "—"}
-              </p>
-              <p className="text-[10px] text-neutral-600">
-                {hb?.last_commit_hash && (
-                  <code className="text-neutral-500 mr-1">
-                    {hb.last_commit_hash}
-                  </code>
-                )}
-                {timeAgo(hb?.last_commit_at ?? null)}
-              </p>
-              {hb?.error_message && (
-                <p className="text-[10px] text-red-400 truncate">
-                  {hb.error_message}
+    <div className="space-y-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        {AGENTS.map((def) => {
+          const hb = agents.find((h) => h.agent_name === def.name);
+          const isSelected = selected === def.name;
+          return (
+            <Card
+              key={def.name}
+              className={`${def.bgColor} ${def.borderColor} border cursor-pointer transition-all ${
+                isSelected ? "ring-1 ring-neutral-500" : "hover:brightness-110"
+              }`}
+              onClick={() => setSelected(isSelected ? null : def.name)}
+            >
+              <CardHeader className="p-3 pb-1">
+                <div className="flex items-center justify-between">
+                  <CardTitle className={`text-xs font-semibold ${def.color}`}>
+                    {def.label}
+                  </CardTitle>
+                  <StatusLed status={hb?.status || "idle"} />
+                </div>
+                <CardDescription className="text-[10px]">
+                  {def.role}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="p-3 pt-0 space-y-1">
+                <p className="text-[10px] text-neutral-400 truncate">
+                  {hb?.last_commit_msg?.slice(0, 50) || "—"}
                 </p>
-              )}
-            </CardContent>
-          </Card>
+                <p className="text-[10px] text-neutral-600">
+                  {hb?.last_commit_hash && (
+                    <code className="text-neutral-500 mr-1">
+                      {hb.last_commit_hash}
+                    </code>
+                  )}
+                  {timeAgo(hb?.last_commit_at ?? null)}
+                </p>
+                {hb?.error_message && (
+                  <p className="text-[10px] text-red-400 truncate">
+                    {hb.error_message}
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
+      {/* Agent detail panel */}
+      {selected && (() => {
+        const def = AGENTS.find((a) => a.name === selected);
+        const hb = agents.find((h) => h.agent_name === selected);
+        const agentCommits = commits
+          .filter((c) => c.agent === def?.label)
+          .slice(0, 5);
+        return (
+          <div className="rounded-lg border border-neutral-800 bg-neutral-900/60 p-4 space-y-3">
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-medium text-neutral-300">
+                {def?.label} — Recent Activity
+              </p>
+              <button
+                onClick={() => setSelected(null)}
+                className="text-neutral-600 hover:text-neutral-400 text-xs"
+              >
+                &times;
+              </button>
+            </div>
+            <div className="grid grid-cols-3 gap-3 text-[10px]">
+              <div className="rounded border border-neutral-800 px-2 py-1.5">
+                <span className="text-neutral-500">Status</span>
+                <p className={hb?.status === "active" ? "text-green-400 font-medium" : hb?.status === "error" ? "text-red-400 font-medium" : "text-neutral-400"}>
+                  {hb?.status || "idle"}
+                </p>
+              </div>
+              <div className="rounded border border-neutral-800 px-2 py-1.5">
+                <span className="text-neutral-500">Last active</span>
+                <p className="text-neutral-300">{timeAgo(hb?.last_commit_at ?? null)}</p>
+              </div>
+              <div className="rounded border border-neutral-800 px-2 py-1.5">
+                <span className="text-neutral-500">Axis</span>
+                <p className="text-neutral-300">{AXIS_LABELS[hb?.axis as Axis] || hb?.axis || "—"}</p>
+              </div>
+            </div>
+            {hb?.error_message && (
+              <div className="rounded border border-red-500/30 bg-red-500/5 px-3 py-2">
+                <p className="text-[10px] text-red-400">{hb.error_message}</p>
+              </div>
+            )}
+            {agentCommits.length > 0 ? (
+              <div className="space-y-1">
+                {agentCommits.map((c) => (
+                  <div key={c.hash + c.date} className="flex items-center gap-2 text-[10px]">
+                    <code className="text-neutral-500 shrink-0">{c.hash}</code>
+                    <span className="text-neutral-400 truncate">{c.message}</span>
+                    <span className="text-neutral-600 shrink-0 ml-auto">{timeAgo(c.date)}</span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-[10px] text-neutral-600">No recent commits</p>
+            )}
+          </div>
         );
-      })}
+      })()}
     </div>
   );
 }
@@ -543,9 +614,13 @@ function SystemLog({
   onFilterChange: (f: string) => void;
   agents: AgentHeartbeat[];
 }) {
-  const filtered = filter
-    ? commits.filter((c) => c.agent === filter)
-    : commits;
+  const [search, setSearch] = useState("");
+
+  const filtered = commits
+    .filter((c) => (filter ? c.agent === filter : true))
+    .filter((c) =>
+      search ? c.message.toLowerCase().includes(search.toLowerCase()) : true
+    );
 
   // Build set of agent labels whose heartbeat status is "error"
   const errorAgentLabels = useMemo(() => {
@@ -571,18 +646,27 @@ function SystemLog({
 
   return (
     <div className="space-y-3">
-      {/* Webhook health indicator */}
-      <div className="flex items-center gap-2">
-        <span className="relative flex h-2 w-2">
-          <span
-            className={`relative inline-flex h-2 w-2 rounded-full ${
-              webhookHealthy ? "bg-green-400" : "bg-yellow-400"
-            }`}
-          />
-        </span>
-        <span className="text-[10px] text-neutral-500">
-          Webhook {webhookHealthy ? "healthy" : "no recent pushes"}
-        </span>
+      {/* Webhook health + search */}
+      <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
+          <span className="relative flex h-2 w-2">
+            <span
+              className={`relative inline-flex h-2 w-2 rounded-full ${
+                webhookHealthy ? "bg-green-400" : "bg-yellow-400"
+              }`}
+            />
+          </span>
+          <span className="text-[10px] text-neutral-500">
+            Webhook {webhookHealthy ? "healthy" : "no recent pushes"}
+          </span>
+        </div>
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search commits..."
+          className="flex-1 max-w-[240px] rounded border border-neutral-700 bg-neutral-900 px-2 py-1 text-[10px] text-neutral-300 placeholder:text-neutral-600 focus:border-blue-500 focus:outline-none"
+        />
       </div>
 
       <div className="flex flex-wrap gap-1.5">
@@ -655,8 +739,22 @@ function SystemLog({
 
 /* ── Publish Queue (Spec §8 L216) ── */
 
-function PublishQueue({ vault }: { vault: VaultData | null }) {
+function PublishQueue({
+  vault,
+  onPublish,
+}: {
+  vault: VaultData | null;
+  onPublish: (slug: string) => void;
+}) {
   const matureCount = vault?.stats.by_status?.mature ?? 0;
+  const [publishing, setPublishing] = useState<string | null>(null);
+
+  async function handlePublish(noteTitle: string) {
+    setPublishing(noteTitle);
+    onPublish(noteTitle);
+    // Simulated — actual publish would PATCH vault note status
+    setTimeout(() => setPublishing(null), 2000);
+  }
 
   return (
     <Card className="border-neutral-800">
@@ -680,15 +778,30 @@ function PublishQueue({ vault }: { vault: VaultData | null }) {
             수렴 파이프라인이 mature 노트를 생성하면 여기 표시됩니다
           </p>
         ) : (
-          <div className="space-y-1">
+          <div className="space-y-2">
             <p className="text-[11px] text-neutral-400">
-              {matureCount} notes with <code className="text-amber-400">status: mature</code> detected in vault index.
+              {matureCount} notes with{" "}
+              <code className="text-amber-400">status: mature</code> detected.
             </p>
-            <p className="text-[10px] text-neutral-600">
-              Use the Vault Explorer status filter to browse them, or run{" "}
-              <code className="text-neutral-500">/blog-publish</code> to start
-              publishing.
-            </p>
+            <div className="rounded border border-neutral-800 bg-neutral-900/30 p-2 space-y-1.5">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] text-neutral-500">
+                  {matureCount} notes awaiting review
+                </span>
+                <Button
+                  variant="outline"
+                  size="xs"
+                  className="text-[9px] h-5 border-amber-500/30 text-amber-400 hover:bg-amber-500/10"
+                  onClick={() => handlePublish("batch")}
+                  disabled={publishing !== null}
+                >
+                  {publishing ? "Processing..." : "Review & Publish"}
+                </Button>
+              </div>
+              <p className="text-[9px] text-neutral-600">
+                Gamma(편집장)가 콘텐츠 재구성 후 /blog에 발행합니다
+              </p>
+            </div>
           </div>
         )}
       </CardContent>
@@ -874,7 +987,7 @@ export default function AdminDashboard() {
         <h2 className="text-xs font-medium text-neutral-500 uppercase tracking-wider">
           Heartbeat Monitor
         </h2>
-        <HeartbeatMonitor agents={agents} />
+        <HeartbeatMonitor agents={agents} commits={commits} />
       </section>
 
       <Separator className="bg-neutral-800" />
@@ -914,7 +1027,13 @@ export default function AdminDashboard() {
           <h2 className="text-xs font-medium text-neutral-500 uppercase tracking-wider">
             Publish Queue
           </h2>
-          <PublishQueue vault={vault} />
+          <PublishQueue
+            vault={vault}
+            onPublish={(slug) => {
+              console.log("Publish requested:", slug);
+              // Future: PATCH vault note status → published
+            }}
+          />
         </div>
         <div className="lg:col-span-2 space-y-3">
           <h2 className="text-xs font-medium text-neutral-500 uppercase tracking-wider">

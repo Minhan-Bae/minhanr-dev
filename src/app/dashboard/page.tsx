@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { AGENTS, AXIS_LABELS, AXIS_COLORS, type Axis } from "@/lib/agents";
 import {
   Card,
@@ -40,9 +40,11 @@ interface AxisMetrics {
 
 interface Commit {
   hash: string;
+  fullHash?: string;
   message: string;
   agent: string;
   date: string;
+  url?: string;
 }
 
 /* ── Helpers ── */
@@ -79,16 +81,42 @@ function timeAgo(dateStr: string | null): string {
   return `${Math.floor(hr / 24)}d ago`;
 }
 
-/* ── AxisGauge (SVG 원형 게이지) ── */
+/* ── Skeleton ── */
+
+function Skeleton({ className = "" }: { className?: string }) {
+  return (
+    <div
+      className={`animate-pulse rounded bg-neutral-800 ${className}`}
+    />
+  );
+}
+
+function SkeletonCard() {
+  return (
+    <Card className="border-neutral-800">
+      <CardContent className="py-6 space-y-3">
+        <Skeleton className="h-3 w-2/3" />
+        <Skeleton className="h-3 w-1/2" />
+        <Skeleton className="h-3 w-3/4" />
+      </CardContent>
+    </Card>
+  );
+}
+
+/* ── AxisGauge (SVG 원형 게이지 + 드릴다운) ── */
 
 function AxisGauge({
   axis,
   utilization,
   notesCount,
+  isExpanded,
+  onClick,
 }: {
   axis: Axis;
   utilization: number;
   notesCount: number;
+  isExpanded: boolean;
+  onClick: () => void;
 }) {
   const pct = Math.min(100, Math.max(0, utilization));
   const r = 36;
@@ -96,7 +124,14 @@ function AxisGauge({
   const offset = circumference - (pct / 100) * circumference;
 
   return (
-    <div className="flex flex-col items-center gap-2">
+    <button
+      onClick={onClick}
+      className={`flex flex-col items-center gap-2 rounded-lg p-3 transition-colors cursor-pointer ${
+        isExpanded
+          ? "bg-neutral-800/50 ring-1 ring-neutral-700"
+          : "hover:bg-neutral-800/30"
+      }`}
+    >
       <svg width="96" height="96" viewBox="0 0 96 96">
         <circle
           cx="48"
@@ -144,11 +179,63 @@ function AxisGauge({
       <span className={`text-xs font-medium ${AXIS_COLORS[axis]}`}>
         {AXIS_LABELS[axis]}
       </span>
+    </button>
+  );
+}
+
+/* ── Axis Drilldown Panel ── */
+
+function AxisDrilldown({
+  axis,
+  vault,
+}: {
+  axis: Axis;
+  vault: VaultStats | null;
+}) {
+  const byStatus = vault?.stats?.by_status || {};
+
+  const content: Record<Axis, { label: string; items: { name: string; count: number }[] }> = {
+    acquisition: {
+      label: "최근 수집 현황",
+      items: [
+        { name: "seed (수집 대기)", count: byStatus.seed || 0 },
+        { name: "inbox (미정리)", count: byStatus.inbox || 0 },
+      ],
+    },
+    convergence: {
+      label: "수렴 현황",
+      items: [
+        { name: "growing (정제 중)", count: byStatus.growing || 0 },
+        { name: "mature (완숙)", count: byStatus.mature || 0 },
+      ],
+    },
+    amplification: {
+      label: "확산 현황",
+      items: [
+        { name: "published (발행)", count: byStatus.published || 0 },
+        { name: "mature (발행 대기)", count: byStatus.mature || 0 },
+      ],
+    },
+  };
+
+  const data = content[axis];
+
+  return (
+    <div className="rounded-lg border border-neutral-800 bg-neutral-900/50 p-4 space-y-2 animate-in fade-in slide-in-from-top-2 duration-200">
+      <p className="text-xs font-medium text-neutral-300">{data.label}</p>
+      <div className="grid grid-cols-2 gap-3">
+        {data.items.map((item) => (
+          <div key={item.name} className="rounded border border-neutral-800 px-3 py-2">
+            <p className="text-lg font-bold text-neutral-200">{item.count}</p>
+            <p className="text-[10px] text-neutral-500">{item.name}</p>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
 
-/* ── StatusBar (파이 차트 대체 — 수평 비율 바) ── */
+/* ── StatusBar (수평 비율 바 + 클릭 필터) ── */
 
 const STATUS_COLORS: Record<string, string> = {
   seed: "bg-yellow-500",
@@ -165,9 +252,13 @@ const STATUS_COLORS: Record<string, string> = {
 function StatusDistribution({
   byStatus,
   total,
+  selectedStatus,
+  onSelect,
 }: {
   byStatus: Record<string, number>;
   total: number;
+  selectedStatus: string | null;
+  onSelect: (status: string | null) => void;
 }) {
   const sorted = Object.entries(byStatus).sort(([, a], [, b]) => b - a);
 
@@ -176,18 +267,27 @@ function StatusDistribution({
       {/* Bar */}
       <div className="flex h-4 w-full overflow-hidden rounded-full">
         {sorted.map(([status, count]) => (
-          <div
+          <button
             key={status}
-            className={`${STATUS_COLORS[status] || "bg-neutral-700"} transition-all`}
+            className={`${STATUS_COLORS[status] || "bg-neutral-700"} transition-all cursor-pointer ${
+              selectedStatus && selectedStatus !== status ? "opacity-30" : ""
+            }`}
             style={{ width: `${(count / total) * 100}%` }}
             title={`${status}: ${count}`}
+            onClick={() => onSelect(selectedStatus === status ? null : status)}
           />
         ))}
       </div>
       {/* Legend */}
       <div className="flex flex-wrap gap-x-4 gap-y-1">
         {sorted.slice(0, 6).map(([status, count]) => (
-          <div key={status} className="flex items-center gap-1.5">
+          <button
+            key={status}
+            onClick={() => onSelect(selectedStatus === status ? null : status)}
+            className={`flex items-center gap-1.5 transition-opacity cursor-pointer ${
+              selectedStatus && selectedStatus !== status ? "opacity-40" : ""
+            }`}
+          >
             <span
               className={`h-2 w-2 rounded-full ${STATUS_COLORS[status] || "bg-neutral-700"}`}
             />
@@ -195,9 +295,21 @@ function StatusDistribution({
               {status}{" "}
               <span className="text-neutral-500">{count}</span>
             </span>
-          </div>
+          </button>
         ))}
       </div>
+      {/* Selected status detail */}
+      {selectedStatus && byStatus[selectedStatus] != null && (
+        <div className="rounded border border-neutral-800 bg-neutral-900/50 px-3 py-2 animate-in fade-in duration-150">
+          <p className="text-xs text-neutral-300">
+            <span className="font-medium">{selectedStatus}</span>:{" "}
+            <span className="text-neutral-200 font-bold">{byStatus[selectedStatus]}</span> notes
+            <span className="text-neutral-600 ml-2">
+              ({((byStatus[selectedStatus] / total) * 100).toFixed(1)}%)
+            </span>
+          </p>
+        </div>
+      )}
     </div>
   );
 }
@@ -229,7 +341,7 @@ function PipelineFlow() {
             </div>
           </div>
           {i < steps.length - 1 && (
-            <span className="text-neutral-600 text-xs">→</span>
+            <span className="text-neutral-600 text-xs">&rarr;</span>
           )}
         </div>
       ))}
@@ -257,25 +369,31 @@ export default function Dashboard() {
   const [vault, setVault] = useState<VaultStats | null>(null);
   const [metrics, setMetrics] = useState<AxisMetrics | null>(null);
   const [commits, setCommits] = useState<Commit[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [expandedAxis, setExpandedAxis] = useState<Axis | null>(null);
+  const [expandedAgent, setExpandedAgent] = useState<string | null>(null);
+  const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
+
+  const fetchAll = useCallback(async () => {
+    const results = await Promise.allSettled([
+      fetch("/api/heartbeat").then((r) => r.json()),
+      fetch("/api/vault").then((r) => r.json()),
+      fetch("/api/stats").then((r) => r.json()),
+      fetch("/api/activity").then((r) => r.json()),
+    ]);
+
+    if (results[0].status === "fulfilled") setAgents(results[0].value.agents || []);
+    if (results[1].status === "fulfilled") setVault(results[1].value);
+    if (results[2].status === "fulfilled") setMetrics(results[2].value);
+    if (results[3].status === "fulfilled") setCommits(results[3].value.commits || []);
+    setLoading(false);
+  }, []);
 
   useEffect(() => {
-    fetch("/api/heartbeat")
-      .then((r) => r.json())
-      .then((d) => setAgents(d.agents || []))
-      .catch(() => {});
-    fetch("/api/vault")
-      .then((r) => r.json())
-      .then((d) => setVault(d))
-      .catch(() => {});
-    fetch("/api/stats")
-      .then((r) => r.json())
-      .then((d) => setMetrics(d))
-      .catch(() => {});
-    fetch("/api/activity")
-      .then((r) => r.json())
-      .then((d) => setCommits(d.commits || []))
-      .catch(() => {});
-  }, []);
+    fetchAll();
+    const interval = setInterval(fetchAll, 60000);
+    return () => clearInterval(interval);
+  }, [fetchAll]);
 
   const acq = metrics?.latest?.acquisition;
   const conv = metrics?.latest?.convergence;
@@ -292,23 +410,48 @@ export default function Dashboard() {
         <h2 className="text-xs font-medium text-neutral-500 uppercase tracking-wider">
           3-Axis Utilization
         </h2>
-        <div className="flex justify-center gap-8 sm:gap-12">
-          <AxisGauge
-            axis="acquisition"
-            utilization={acq?.utilization ?? 0}
-            notesCount={acq?.notes_count ?? 0}
-          />
-          <AxisGauge
-            axis="convergence"
-            utilization={conv?.utilization ?? 0}
-            notesCount={conv?.notes_count ?? 0}
-          />
-          <AxisGauge
-            axis="amplification"
-            utilization={amp?.utilization ?? 0}
-            notesCount={amp?.notes_count ?? 0}
-          />
-        </div>
+        {loading ? (
+          <div className="flex justify-center gap-8">
+            <Skeleton className="h-[120px] w-[120px] rounded-lg" />
+            <Skeleton className="h-[120px] w-[120px] rounded-lg" />
+            <Skeleton className="h-[120px] w-[120px] rounded-lg" />
+          </div>
+        ) : (
+          <>
+            <div className="flex justify-center gap-4 sm:gap-8">
+              <AxisGauge
+                axis="acquisition"
+                utilization={acq?.utilization ?? 0}
+                notesCount={acq?.notes_count ?? 0}
+                isExpanded={expandedAxis === "acquisition"}
+                onClick={() =>
+                  setExpandedAxis(expandedAxis === "acquisition" ? null : "acquisition")
+                }
+              />
+              <AxisGauge
+                axis="convergence"
+                utilization={conv?.utilization ?? 0}
+                notesCount={conv?.notes_count ?? 0}
+                isExpanded={expandedAxis === "convergence"}
+                onClick={() =>
+                  setExpandedAxis(expandedAxis === "convergence" ? null : "convergence")
+                }
+              />
+              <AxisGauge
+                axis="amplification"
+                utilization={amp?.utilization ?? 0}
+                notesCount={amp?.notes_count ?? 0}
+                isExpanded={expandedAxis === "amplification"}
+                onClick={() =>
+                  setExpandedAxis(
+                    expandedAxis === "amplification" ? null : "amplification"
+                  )
+                }
+              />
+            </div>
+            {expandedAxis && <AxisDrilldown axis={expandedAxis} vault={vault} />}
+          </>
+        )}
       </section>
 
       <Separator className="bg-neutral-800" />
@@ -329,96 +472,103 @@ export default function Dashboard() {
           Agent Organization
         </h2>
 
-        {/* Omega (L1) */}
-        <div className="flex justify-center">
-          {AGENTS.filter((a) => a.layer === 1).map((agent) => {
-            const hb = agents.find((h) => h.agent_name === agent.name);
-            return (
-              <Card
-                key={agent.name}
-                className={`${agent.bgColor} ${agent.borderColor} border w-40 sm:w-48 text-center`}
-              >
-                <CardHeader className="py-2.5">
-                  <div className="flex items-center justify-center gap-2">
-                    <CardTitle className={`text-xs ${agent.color}`}>
-                      {agent.label}
-                    </CardTitle>
-                    <StatusLed status={hb?.status || "idle"} />
+        {loading ? (
+          <div className="grid grid-cols-3 gap-3">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <SkeletonCard key={i} />
+            ))}
+          </div>
+        ) : (
+          <>
+            {/* Omega (L1) */}
+            <div className="flex justify-center">
+              {AGENTS.filter((a) => a.layer === 1).map((agent) => {
+                const hb = agents.find((h) => h.agent_name === agent.name);
+                const isExpanded = expandedAgent === agent.name;
+                return (
+                  <div key={agent.name}>
+                    <Card
+                      className={`${agent.bgColor} ${agent.borderColor} border w-40 sm:w-48 text-center cursor-pointer transition-colors ${
+                        isExpanded ? "ring-1 ring-neutral-600" : "hover:brightness-110"
+                      }`}
+                      onClick={() =>
+                        setExpandedAgent(isExpanded ? null : agent.name)
+                      }
+                    >
+                      <CardHeader className="py-2.5">
+                        <div className="flex items-center justify-center gap-2">
+                          <CardTitle className={`text-xs ${agent.color}`}>
+                            {agent.label}
+                          </CardTitle>
+                          <StatusLed status={hb?.status || "idle"} />
+                        </div>
+                        <CardDescription className="text-[10px]">
+                          {agent.role} · L{agent.layer}
+                        </CardDescription>
+                      </CardHeader>
+                    </Card>
+                    {isExpanded && (
+                      <AgentDetail
+                        agent={agent}
+                        heartbeat={hb || null}
+                        commits={commits}
+                      />
+                    )}
                   </div>
-                  <CardDescription className="text-[10px]">
-                    {agent.role} · L{agent.layer}
-                  </CardDescription>
-                </CardHeader>
-              </Card>
-            );
-          })}
-        </div>
+                );
+              })}
+            </div>
 
-        {/* L2 */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          {AGENTS.filter((a) => a.layer === 2).map((agent) => {
-            const hb = agents.find((h) => h.agent_name === agent.name);
-            return (
-              <Card
-                key={agent.name}
-                className={`${agent.bgColor} ${agent.borderColor} border`}
-              >
-                <CardHeader className="py-2.5">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className={`text-xs ${agent.color}`}>
-                      {agent.label}
-                    </CardTitle>
-                    <StatusLed status={hb?.status || "idle"} />
-                  </div>
-                  <CardDescription className="text-[10px]">
-                    {agent.role} · L{agent.layer}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="pt-0 pb-3 text-[11px] text-neutral-500">
-                  {hb?.last_commit_msg
-                    ? hb.last_commit_msg.slice(0, 50)
-                    : "Awaiting..."}
-                  <div className="mt-1 text-neutral-600">
-                    {timeAgo(hb?.last_commit_at ?? null)}
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-
-        {/* L3 */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          {AGENTS.filter((a) => a.layer === 3).map((agent) => {
-            const hb = agents.find((h) => h.agent_name === agent.name);
-            return (
-              <Card
-                key={agent.name}
-                className={`${agent.bgColor} ${agent.borderColor} border`}
-              >
-                <CardHeader className="py-2.5">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className={`text-xs ${agent.color}`}>
-                      {agent.label}
-                    </CardTitle>
-                    <StatusLed status={hb?.status || "idle"} />
-                  </div>
-                  <CardDescription className="text-[10px]">
-                    {agent.role} · L{agent.layer}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="pt-0 pb-3 text-[11px] text-neutral-500">
-                  {hb?.last_commit_msg
-                    ? hb.last_commit_msg.slice(0, 50)
-                    : "Awaiting..."}
-                  <div className="mt-1 text-neutral-600">
-                    {timeAgo(hb?.last_commit_at ?? null)}
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
+            {/* L2 + L3 */}
+            {[2, 3].map((layer) => (
+              <div key={layer} className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {AGENTS.filter((a) => a.layer === layer).map((agent) => {
+                  const hb = agents.find((h) => h.agent_name === agent.name);
+                  const isExpanded = expandedAgent === agent.name;
+                  return (
+                    <div key={agent.name}>
+                      <Card
+                        className={`${agent.bgColor} ${agent.borderColor} border cursor-pointer transition-colors ${
+                          isExpanded ? "ring-1 ring-neutral-600" : "hover:brightness-110"
+                        }`}
+                        onClick={() =>
+                          setExpandedAgent(isExpanded ? null : agent.name)
+                        }
+                      >
+                        <CardHeader className="py-2.5">
+                          <div className="flex items-center justify-between">
+                            <CardTitle className={`text-xs ${agent.color}`}>
+                              {agent.label}
+                            </CardTitle>
+                            <StatusLed status={hb?.status || "idle"} />
+                          </div>
+                          <CardDescription className="text-[10px]">
+                            {agent.role} · L{agent.layer}
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent className="pt-0 pb-3 text-[11px] text-neutral-500">
+                          {hb?.last_commit_msg
+                            ? hb.last_commit_msg.slice(0, 50)
+                            : "Awaiting..."}
+                          <div className="mt-1 text-neutral-600">
+                            {timeAgo(hb?.last_commit_at ?? null)}
+                          </div>
+                        </CardContent>
+                      </Card>
+                      {isExpanded && (
+                        <AgentDetail
+                          agent={agent}
+                          heartbeat={hb || null}
+                          commits={commits}
+                        />
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            ))}
+          </>
+        )}
       </section>
 
       <Separator className="bg-neutral-800" />
@@ -428,11 +578,26 @@ export default function Dashboard() {
         <h2 className="text-xs font-medium text-neutral-500 uppercase tracking-wider">
           Activity Timeline
         </h2>
-        {commits.length > 0 ? (
+        {loading ? (
+          <div className="space-y-3">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <Skeleton key={i} className="h-10 w-full" />
+            ))}
+          </div>
+        ) : commits.length > 0 ? (
           <div className="relative border-l border-neutral-800 ml-3 space-y-4">
             {commits.slice(0, 8).map((c) => (
-              <div key={c.hash} className="relative pl-6">
-                <span className="absolute -left-[5px] top-1.5 h-2.5 w-2.5 rounded-full border-2 border-neutral-800 bg-neutral-600" />
+              <a
+                key={c.hash}
+                href={
+                  c.url ||
+                  `https://github.com/Minhan-Bae/oikbas-vault/commit/${c.fullHash || c.hash}`
+                }
+                target="_blank"
+                rel="noopener noreferrer"
+                className="relative pl-6 block group"
+              >
+                <span className="absolute -left-[5px] top-1.5 h-2.5 w-2.5 rounded-full border-2 border-neutral-800 bg-neutral-600 group-hover:bg-neutral-400 transition-colors" />
                 <div className="flex items-start gap-2">
                   <span
                     className={`mt-0.5 shrink-0 rounded px-1.5 py-0.5 text-[9px] font-medium ${AGENT_BADGE_COLORS[c.agent] || AGENT_BADGE_COLORS.Manual}`}
@@ -440,7 +605,7 @@ export default function Dashboard() {
                     {c.agent}
                   </span>
                   <div className="min-w-0 flex-1">
-                    <p className="text-[11px] text-neutral-300 truncate">
+                    <p className="text-[11px] text-neutral-300 truncate group-hover:text-neutral-100 transition-colors">
                       {c.message}
                     </p>
                     <p className="text-[10px] text-neutral-600">
@@ -449,13 +614,13 @@ export default function Dashboard() {
                     </p>
                   </div>
                 </div>
-              </div>
+              </a>
             ))}
           </div>
         ) : (
           <Card className="border-neutral-800">
             <CardContent className="py-4 text-center text-neutral-500 text-xs">
-              Loading timeline...
+              No activity data
             </CardContent>
           </Card>
         )}
@@ -468,7 +633,13 @@ export default function Dashboard() {
         <h2 className="text-xs font-medium text-neutral-500 uppercase tracking-wider">
           Vault Statistics
         </h2>
-        {vault && vault.total_notes > 0 ? (
+        {loading ? (
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <Skeleton key={i} className="h-16 w-full" />
+            ))}
+          </div>
+        ) : vault && vault.total_notes > 0 ? (
           <div className="space-y-4">
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               <Card className="border-neutral-800">
@@ -500,13 +671,15 @@ export default function Dashboard() {
               <StatusDistribution
                 byStatus={vault.stats.by_status}
                 total={vault.total_notes}
+                selectedStatus={selectedStatus}
+                onSelect={setSelectedStatus}
               />
             )}
           </div>
         ) : (
           <Card className="border-neutral-800">
             <CardContent className="py-4 text-center text-neutral-500 text-xs">
-              Loading vault data...
+              No vault data
             </CardContent>
           </Card>
         )}
@@ -519,6 +692,68 @@ export default function Dashboard() {
           </p>
         )}
       </section>
+    </div>
+  );
+}
+
+/* ── Agent Detail Panel ── */
+
+function AgentDetail({
+  agent,
+  heartbeat,
+  commits,
+}: {
+  agent: (typeof AGENTS)[number];
+  heartbeat: AgentHeartbeat | null;
+  commits: Commit[];
+}) {
+  const agentCommits = commits
+    .filter((c) => c.agent === agent.label)
+    .slice(0, 3);
+
+  return (
+    <div className="mt-2 rounded-lg border border-neutral-800 bg-neutral-900/60 p-3 space-y-2 animate-in fade-in duration-150">
+      <div className="flex items-center gap-3 text-[10px]">
+        <span className="text-neutral-500">Status:</span>
+        <span
+          className={
+            heartbeat?.status === "active"
+              ? "text-green-400"
+              : heartbeat?.status === "error"
+                ? "text-red-400"
+                : "text-neutral-500"
+          }
+        >
+          {heartbeat?.status || "idle"}
+        </span>
+        <span className="text-neutral-700">|</span>
+        <span className="text-neutral-500">Last:</span>
+        <span className="text-neutral-400">
+          {timeAgo(heartbeat?.last_commit_at ?? null)}
+        </span>
+      </div>
+      {agentCommits.length > 0 ? (
+        <div className="space-y-1">
+          <p className="text-[10px] text-neutral-600">Recent commits:</p>
+          {agentCommits.map((c) => (
+            <a
+              key={c.hash}
+              href={
+                c.url ||
+                `https://github.com/Minhan-Bae/oikbas-vault/commit/${c.fullHash || c.hash}`
+              }
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block text-[10px] text-neutral-400 truncate hover:text-neutral-200 transition-colors"
+            >
+              <code className="text-neutral-500 mr-1">{c.hash}</code>
+              {c.message}
+            </a>
+          ))}
+        </div>
+      ) : (
+        <p className="text-[10px] text-neutral-600">No recent commits</p>
+      )}
     </div>
   );
 }
