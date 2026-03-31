@@ -24,6 +24,7 @@ export const metadata: Metadata = {
     url: "https://minhanr.dev",
     siteName: "minhanr.dev",
     type: "website",
+    images: [{ url: "/api/og", width: 1200, height: 630 }],
   },
   twitter: {
     card: "summary_large_image",
