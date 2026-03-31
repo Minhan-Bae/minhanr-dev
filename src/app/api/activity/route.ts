@@ -22,8 +22,14 @@ function identifyAgent(msg: string): string {
 
 export async function GET() {
   try {
+    const headers: Record<string, string> = {
+      Accept: "application/vnd.github+json",
+    };
+    const token = process.env.GITHUB_TOKEN;
+    if (token) headers.Authorization = `Bearer ${token}`;
+
     const res = await fetch(`${GITHUB_API}?per_page=10`, {
-      headers: { Accept: "application/vnd.github+json" },
+      headers,
       next: { revalidate: 120 },
     });
 

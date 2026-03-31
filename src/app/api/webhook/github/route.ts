@@ -58,15 +58,18 @@ export async function POST(request: NextRequest) {
 
     const { error } = await supabase
       .from("agent_heartbeats")
-      .update({
-        status: "active",
-        last_commit_hash: commitHash,
-        last_commit_at: commitAt,
-        last_commit_msg: commitMsg.slice(0, 200),
-        error_message: null,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("agent_name", agentName);
+      .upsert(
+        {
+          agent_name: agentName,
+          status: "active",
+          last_commit_hash: commitHash,
+          last_commit_at: commitAt,
+          last_commit_msg: commitMsg.slice(0, 200),
+          error_message: null,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "agent_name" }
+      );
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
