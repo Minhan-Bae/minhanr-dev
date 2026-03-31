@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 const VAULT_INDEX_URL =
-  "https://raw.githubusercontent.com/MiiNhanr/oikbas/main/090_System/vault_index.json";
+  "https://raw.githubusercontent.com/Minhan-Bae/oikbas-vault/main/090_System/vault_index.json";
 
 export async function GET() {
   try {

@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { AGENTS, AXIS_LABELS, AXIS_COLORS, type Axis } from "@/lib/agents";
-import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardContent,
@@ -31,6 +30,22 @@ interface VaultStats {
     by_folder?: Record<string, number>;
   };
 }
+
+interface AxisMetrics {
+  latest: Record<
+    string,
+    { utilization: number; notes_count: number; delta: Record<string, number> }
+  >;
+}
+
+interface Commit {
+  hash: string;
+  message: string;
+  agent: string;
+  date: string;
+}
+
+/* ── Helpers ── */
 
 function StatusLed({ status }: { status: string }) {
   const color =
@@ -64,9 +79,20 @@ function timeAgo(dateStr: string | null): string {
   return `${Math.floor(hr / 24)}d ago`;
 }
 
-function AxisGauge({ axis, utilization }: { axis: Axis; utilization: number }) {
+/* ── AxisGauge (SVG 원형 게이지) ── */
+
+function AxisGauge({
+  axis,
+  utilization,
+  notesCount,
+}: {
+  axis: Axis;
+  utilization: number;
+  notesCount: number;
+}) {
   const pct = Math.min(100, Math.max(0, utilization));
-  const circumference = 2 * Math.PI * 36;
+  const r = 36;
+  const circumference = 2 * Math.PI * r;
   const offset = circumference - (pct / 100) * circumference;
 
   return (
@@ -75,7 +101,7 @@ function AxisGauge({ axis, utilization }: { axis: Axis; utilization: number }) {
         <circle
           cx="48"
           cy="48"
-          r="36"
+          r={r}
           fill="none"
           stroke="currentColor"
           className="text-neutral-800"
@@ -84,7 +110,7 @@ function AxisGauge({ axis, utilization }: { axis: Axis; utilization: number }) {
         <circle
           cx="48"
           cy="48"
-          r="36"
+          r={r}
           fill="none"
           stroke="currentColor"
           className={AXIS_COLORS[axis]}
@@ -96,13 +122,23 @@ function AxisGauge({ axis, utilization }: { axis: Axis; utilization: number }) {
         />
         <text
           x="48"
-          y="48"
+          y="44"
           textAnchor="middle"
           dominantBaseline="central"
-          className="fill-neutral-200 text-lg font-bold"
+          className="fill-neutral-200 font-bold"
           fontSize="18"
         >
           {pct}%
+        </text>
+        <text
+          x="48"
+          y="62"
+          textAnchor="middle"
+          dominantBaseline="central"
+          className="fill-neutral-500"
+          fontSize="9"
+        >
+          {notesCount} notes
         </text>
       </svg>
       <span className={`text-xs font-medium ${AXIS_COLORS[axis]}`}>
@@ -112,9 +148,114 @@ function AxisGauge({ axis, utilization }: { axis: Axis; utilization: number }) {
   );
 }
 
+/* ── StatusBar (파이 차트 대체 — 수평 비율 바) ── */
+
+const STATUS_COLORS: Record<string, string> = {
+  seed: "bg-yellow-500",
+  growing: "bg-blue-500",
+  published: "bg-green-500",
+  active: "bg-cyan-500",
+  mature: "bg-purple-500",
+  archived: "bg-neutral-600",
+  inbox: "bg-orange-500",
+  evergreen: "bg-emerald-500",
+  no_status: "bg-neutral-700",
+};
+
+function StatusDistribution({
+  byStatus,
+  total,
+}: {
+  byStatus: Record<string, number>;
+  total: number;
+}) {
+  const sorted = Object.entries(byStatus).sort(([, a], [, b]) => b - a);
+
+  return (
+    <div className="space-y-3">
+      {/* Bar */}
+      <div className="flex h-4 w-full overflow-hidden rounded-full">
+        {sorted.map(([status, count]) => (
+          <div
+            key={status}
+            className={`${STATUS_COLORS[status] || "bg-neutral-700"} transition-all`}
+            style={{ width: `${(count / total) * 100}%` }}
+            title={`${status}: ${count}`}
+          />
+        ))}
+      </div>
+      {/* Legend */}
+      <div className="flex flex-wrap gap-x-4 gap-y-1">
+        {sorted.slice(0, 6).map(([status, count]) => (
+          <div key={status} className="flex items-center gap-1.5">
+            <span
+              className={`h-2 w-2 rounded-full ${STATUS_COLORS[status] || "bg-neutral-700"}`}
+            />
+            <span className="text-[10px] text-neutral-400">
+              {status}{" "}
+              <span className="text-neutral-500">{count}</span>
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ── Pipeline flow diagram ── */
+
+function PipelineFlow() {
+  const steps = [
+    { label: "수집", sub: "Collect", color: "border-green-400 text-green-400" },
+    { label: "정제", sub: "Refine", color: "border-blue-400 text-blue-400" },
+    { label: "수렴", sub: "Converge", color: "border-cyan-400 text-cyan-400" },
+    {
+      label: "확산",
+      sub: "Amplify",
+      color: "border-purple-400 text-purple-400",
+    },
+  ];
+
+  return (
+    <div className="flex items-center justify-center gap-1 sm:gap-2">
+      {steps.map((step, i) => (
+        <div key={step.label} className="flex items-center gap-1 sm:gap-2">
+          <div
+            className={`rounded-lg border ${step.color} px-3 sm:px-4 py-2 text-center`}
+          >
+            <div className="text-xs sm:text-sm font-medium">{step.label}</div>
+            <div className="text-[9px] sm:text-[10px] opacity-60">
+              {step.sub}
+            </div>
+          </div>
+          {i < steps.length - 1 && (
+            <span className="text-neutral-600 text-xs">→</span>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/* ── Agent badge colors ── */
+
+const AGENT_BADGE_COLORS: Record<string, string> = {
+  Alpha: "bg-blue-400/20 text-blue-300",
+  Beta: "bg-green-400/20 text-green-300",
+  Gamma: "bg-purple-400/20 text-purple-300",
+  "RT Slot 1": "bg-emerald-400/20 text-emerald-300",
+  "RT Slot 2": "bg-cyan-400/20 text-cyan-300",
+  "RT Slot 3": "bg-amber-400/20 text-amber-300",
+  Manual: "bg-neutral-400/20 text-neutral-300",
+};
+
+/* ── Main page ── */
+
 export default function Dashboard() {
   const [agents, setAgents] = useState<AgentHeartbeat[]>([]);
   const [vault, setVault] = useState<VaultStats | null>(null);
+  const [metrics, setMetrics] = useState<AxisMetrics | null>(null);
+  const [commits, setCommits] = useState<Commit[]>([]);
 
   useEffect(() => {
     fetch("/api/heartbeat")
@@ -125,50 +266,84 @@ export default function Dashboard() {
       .then((r) => r.json())
       .then((d) => setVault(d))
       .catch(() => {});
+    fetch("/api/stats")
+      .then((r) => r.json())
+      .then((d) => setMetrics(d))
+      .catch(() => {});
+    fetch("/api/activity")
+      .then((r) => r.json())
+      .then((d) => setCommits(d.commits || []))
+      .catch(() => {});
   }, []);
 
+  const acq = metrics?.latest?.acquisition;
+  const conv = metrics?.latest?.convergence;
+  const amp = metrics?.latest?.amplification;
+
   return (
-    <div className="max-w-6xl mx-auto px-6 py-8 space-y-10">
-      <h1 className="text-2xl font-bold tracking-tight">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-8">
+      <h1 className="text-xl sm:text-2xl font-bold tracking-tight">
         Public Dashboard
       </h1>
 
       {/* 3-Axis Gauges */}
       <section className="space-y-4">
-        <h2 className="text-sm font-medium text-neutral-500 uppercase tracking-wider">
+        <h2 className="text-xs font-medium text-neutral-500 uppercase tracking-wider">
           3-Axis Utilization
         </h2>
-        <div className="flex justify-center gap-12">
-          <AxisGauge axis="acquisition" utilization={85} />
-          <AxisGauge axis="convergence" utilization={70} />
-          <AxisGauge axis="amplification" utilization={45} />
+        <div className="flex justify-center gap-8 sm:gap-12">
+          <AxisGauge
+            axis="acquisition"
+            utilization={acq?.utilization ?? 85}
+            notesCount={acq?.notes_count ?? 0}
+          />
+          <AxisGauge
+            axis="convergence"
+            utilization={conv?.utilization ?? 70}
+            notesCount={conv?.notes_count ?? 0}
+          />
+          <AxisGauge
+            axis="amplification"
+            utilization={amp?.utilization ?? 45}
+            notesCount={amp?.notes_count ?? 0}
+          />
         </div>
+      </section>
+
+      <Separator className="bg-neutral-800" />
+
+      {/* Pipeline */}
+      <section className="space-y-4">
+        <h2 className="text-xs font-medium text-neutral-500 uppercase tracking-wider">
+          Pipeline Flow
+        </h2>
+        <PipelineFlow />
       </section>
 
       <Separator className="bg-neutral-800" />
 
       {/* Agent Org Chart */}
       <section className="space-y-4">
-        <h2 className="text-sm font-medium text-neutral-500 uppercase tracking-wider">
+        <h2 className="text-xs font-medium text-neutral-500 uppercase tracking-wider">
           Agent Organization
         </h2>
 
-        {/* Layer 1: Omega */}
+        {/* Omega */}
         <div className="flex justify-center">
-          <Card className="border-amber-500/30 bg-amber-500/5 w-48 text-center">
-            <CardHeader className="py-3">
-              <CardTitle className="text-sm text-amber-400">
+          <Card className="border-amber-500/30 bg-amber-500/5 w-40 sm:w-48 text-center">
+            <CardHeader className="py-2.5">
+              <CardTitle className="text-xs text-amber-400">
                 Omega
               </CardTitle>
               <CardDescription className="text-[10px]">
-                Orchestrator &middot; L1
+                Orchestrator · L1
               </CardDescription>
             </CardHeader>
           </Card>
         </div>
 
-        {/* Layer 2: Interactive */}
-        <div className="grid grid-cols-3 gap-4">
+        {/* L2 */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {AGENTS.filter((a) => a.layer === 2).map((agent) => {
             const hb = agents.find((h) => h.agent_name === agent.name);
             return (
@@ -176,21 +351,21 @@ export default function Dashboard() {
                 key={agent.name}
                 className={`${agent.bgColor} ${agent.borderColor} border`}
               >
-                <CardHeader className="py-3">
+                <CardHeader className="py-2.5">
                   <div className="flex items-center justify-between">
-                    <CardTitle className={`text-sm ${agent.color}`}>
+                    <CardTitle className={`text-xs ${agent.color}`}>
                       {agent.label}
                     </CardTitle>
                     <StatusLed status={hb?.status || "idle"} />
                   </div>
                   <CardDescription className="text-[10px]">
-                    {agent.role} &middot; L{agent.layer}
+                    {agent.role} · L{agent.layer}
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="pt-0 text-[11px] text-neutral-500">
+                <CardContent className="pt-0 pb-3 text-[11px] text-neutral-500">
                   {hb?.last_commit_msg
-                    ? hb.last_commit_msg.slice(0, 60)
-                    : "Awaiting activity..."}
+                    ? hb.last_commit_msg.slice(0, 50)
+                    : "Awaiting..."}
                   <div className="mt-1 text-neutral-600">
                     {timeAgo(hb?.last_commit_at ?? null)}
                   </div>
@@ -200,8 +375,8 @@ export default function Dashboard() {
           })}
         </div>
 
-        {/* Layer 3: RT Slots */}
-        <div className="grid grid-cols-3 gap-4">
+        {/* L3 */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {AGENTS.filter((a) => a.layer === 3).map((agent) => {
             const hb = agents.find((h) => h.agent_name === agent.name);
             return (
@@ -209,21 +384,21 @@ export default function Dashboard() {
                 key={agent.name}
                 className={`${agent.bgColor} ${agent.borderColor} border`}
               >
-                <CardHeader className="py-3">
+                <CardHeader className="py-2.5">
                   <div className="flex items-center justify-between">
-                    <CardTitle className={`text-sm ${agent.color}`}>
+                    <CardTitle className={`text-xs ${agent.color}`}>
                       {agent.label}
                     </CardTitle>
                     <StatusLed status={hb?.status || "idle"} />
                   </div>
                   <CardDescription className="text-[10px]">
-                    {agent.role} &middot; L{agent.layer}
+                    {agent.role} · L{agent.layer}
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="pt-0 text-[11px] text-neutral-500">
+                <CardContent className="pt-0 pb-3 text-[11px] text-neutral-500">
                   {hb?.last_commit_msg
-                    ? hb.last_commit_msg.slice(0, 60)
-                    : "Awaiting activity..."}
+                    ? hb.last_commit_msg.slice(0, 50)
+                    : "Awaiting..."}
                   <div className="mt-1 text-neutral-600">
                     {timeAgo(hb?.last_commit_at ?? null)}
                   </div>
@@ -236,48 +411,96 @@ export default function Dashboard() {
 
       <Separator className="bg-neutral-800" />
 
-      {/* Vault Stats */}
+      {/* Activity Timeline */}
       <section className="space-y-4">
-        <h2 className="text-sm font-medium text-neutral-500 uppercase tracking-wider">
-          Vault Statistics
+        <h2 className="text-xs font-medium text-neutral-500 uppercase tracking-wider">
+          Activity Timeline
         </h2>
-        {vault ? (
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            <Card className="border-neutral-800">
-              <CardHeader className="py-3">
-                <CardDescription className="text-[10px]">
-                  Total Notes
-                </CardDescription>
-                <CardTitle className="text-2xl">
-                  {vault.total_notes}
-                </CardTitle>
-              </CardHeader>
-            </Card>
-            {vault.stats?.by_status &&
-              Object.entries(vault.stats.by_status)
-                .sort(([, a], [, b]) => b - a)
-                .slice(0, 3)
-                .map(([status, count]) => (
-                  <Card key={status} className="border-neutral-800">
-                    <CardHeader className="py-3">
-                      <CardDescription className="text-[10px]">
-                        {status}
-                      </CardDescription>
-                      <CardTitle className="text-2xl">{count}</CardTitle>
-                    </CardHeader>
-                  </Card>
-                ))}
+        {commits.length > 0 ? (
+          <div className="relative border-l border-neutral-800 ml-3 space-y-4">
+            {commits.slice(0, 8).map((c) => (
+              <div key={c.hash} className="relative pl-6">
+                <span className="absolute -left-[5px] top-1.5 h-2.5 w-2.5 rounded-full border-2 border-neutral-800 bg-neutral-600" />
+                <div className="flex items-start gap-2">
+                  <span
+                    className={`mt-0.5 shrink-0 rounded px-1.5 py-0.5 text-[9px] font-medium ${AGENT_BADGE_COLORS[c.agent] || AGENT_BADGE_COLORS.Manual}`}
+                  >
+                    {c.agent}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[11px] text-neutral-300 truncate">
+                      {c.message}
+                    </p>
+                    <p className="text-[10px] text-neutral-600">
+                      <code className="text-neutral-500">{c.hash}</code> ·{" "}
+                      {timeAgo(c.date)}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         ) : (
           <Card className="border-neutral-800">
-            <CardContent className="py-6 text-center text-neutral-500 text-sm">
+            <CardContent className="py-4 text-center text-neutral-500 text-xs">
+              Loading timeline...
+            </CardContent>
+          </Card>
+        )}
+      </section>
+
+      <Separator className="bg-neutral-800" />
+
+      {/* Vault Stats */}
+      <section className="space-y-4">
+        <h2 className="text-xs font-medium text-neutral-500 uppercase tracking-wider">
+          Vault Statistics
+        </h2>
+        {vault && vault.total_notes > 0 ? (
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <Card className="border-neutral-800">
+                <CardHeader className="py-3">
+                  <CardDescription className="text-[10px]">
+                    Total Notes
+                  </CardDescription>
+                  <CardTitle className="text-2xl">
+                    {vault.total_notes}
+                  </CardTitle>
+                </CardHeader>
+              </Card>
+              {vault.stats?.by_status &&
+                Object.entries(vault.stats.by_status)
+                  .sort(([, a], [, b]) => b - a)
+                  .slice(0, 3)
+                  .map(([status, count]) => (
+                    <Card key={status} className="border-neutral-800">
+                      <CardHeader className="py-3">
+                        <CardDescription className="text-[10px]">
+                          {status}
+                        </CardDescription>
+                        <CardTitle className="text-2xl">{count}</CardTitle>
+                      </CardHeader>
+                    </Card>
+                  ))}
+            </div>
+            {vault.stats?.by_status && (
+              <StatusDistribution
+                byStatus={vault.stats.by_status}
+                total={vault.total_notes}
+              />
+            )}
+          </div>
+        ) : (
+          <Card className="border-neutral-800">
+            <CardContent className="py-4 text-center text-neutral-500 text-xs">
               Loading vault data...
             </CardContent>
           </Card>
         )}
         {vault?.last_commit_hash && (
-          <p className="text-xs text-neutral-600 text-right">
-            Last index: {vault.last_commit_hash} &middot;{" "}
+          <p className="text-[10px] text-neutral-600 text-right">
+            Index: {vault.last_commit_hash} ·{" "}
             {vault.last_full_scan
               ? new Date(vault.last_full_scan).toLocaleDateString()
               : ""}

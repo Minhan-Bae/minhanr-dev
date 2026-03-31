@@ -16,6 +16,22 @@ export const metadata: Metadata = {
   title: "OIKBAS Command Center | minhanr.dev",
   description:
     "AI 에이전트 6대를 오케스트레이션하는 개인 지식 시스템 대시보드",
+  metadataBase: new URL("https://minhanr.dev"),
+  openGraph: {
+    title: "OIKBAS Command Center",
+    description:
+      "1인 AI 연구자의 에이전트 오케스트레이션 대시보드 — 수집·수렴·확산 3축 자율 운용",
+    url: "https://minhanr.dev",
+    siteName: "minhanr.dev",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "OIKBAS Command Center",
+    description:
+      "AI 에이전트 6대를 오케스트레이션하는 개인 지식 시스템 대시보드",
+  },
+  icons: { icon: "/favicon.ico" },
 };
 
 export default function RootLayout({
