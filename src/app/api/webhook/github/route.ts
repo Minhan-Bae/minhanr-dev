@@ -36,12 +36,8 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.text();
     const signature = request.headers.get("x-hub-signature-256");
-    const secret = process.env.GITHUB_WEBHOOK_SECRET;
-    const hasSecret = !!secret;
-    const secretLen = secret?.length ?? 0;
     if (!verifySignature(body, signature)) {
-      console.error("Webhook verify failed", { hasSecret, secretLen, hasSig: !!signature, sigPrefix: signature?.slice(0, 12) });
-      return NextResponse.json({ error: "invalid signature", debug: { hasSecret, secretLen, hasSig: !!signature } }, { status: 401 });
+      return NextResponse.json({ error: "invalid signature" }, { status: 401 });
     }
     const payload = JSON.parse(body);
 
