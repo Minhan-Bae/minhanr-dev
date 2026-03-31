@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import { AGENTS, AXIS_LABELS, type Axis } from "@/lib/agents";
 import { supabase } from "@/lib/supabase";
 import { Badge } from "@/components/ui/badge";
@@ -49,6 +50,16 @@ interface Commit {
   message: string;
   agent: string;
   date: string;
+}
+
+interface VaultData {
+  total_notes: number;
+  last_full_scan: string | null;
+  last_commit_hash: string | null;
+  stats: {
+    by_folder?: Record<string, number>;
+    by_status?: Record<string, number>;
+  };
 }
 
 /* ── Helpers ── */
@@ -110,6 +121,17 @@ const AGENT_BADGE: Record<string, string> = {
   Manual: "bg-neutral-400/20 text-neutral-300",
 };
 
+const STATUS_OPTIONS = [
+  "seed",
+  "growing",
+  "mature",
+  "published",
+  "active",
+  "archived",
+] as const;
+
+const MONTHLY_TOTAL = 220;
+
 /* ── Heartbeat Monitor ── */
 
 function HeartbeatMonitor({ agents }: { agents: AgentHeartbeat[] }) {
@@ -158,7 +180,260 @@ function HeartbeatMonitor({ agents }: { agents: AgentHeartbeat[] }) {
   );
 }
 
-/* ── Task Kanban ── */
+/* ── Cost Tracker (Spec §4 L122) ── */
+
+function CostTracker({ commits }: { commits: Commit[] }) {
+  const agentCosts = useMemo(() => {
+    const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
+    const recentCommits = commits.filter(
+      (c) => new Date(c.date).getTime() >= thirtyDaysAgo
+    );
+
+    const counts: Record<string, number> = {};
+    let total = 0;
+    for (const c of recentCommits) {
+      counts[c.agent] = (counts[c.agent] || 0) + 1;
+      total++;
+    }
+
+    return Object.entries(counts)
+      .map(([agent, count]) => ({
+        agent,
+        count,
+        share: total > 0 ? count / total : 0,
+        estimated: total > 0 ? Math.round((count / total) * MONTHLY_TOTAL) : 0,
+      }))
+      .sort((a, b) => b.count - a.count);
+  }, [commits]);
+
+  const barColors: Record<string, string> = {
+    Alpha: "bg-blue-400",
+    Beta: "bg-green-400",
+    Gamma: "bg-purple-400",
+    "RT Slot 1": "bg-emerald-400",
+    "RT Slot 2": "bg-cyan-400",
+    "RT Slot 3": "bg-amber-400",
+    Manual: "bg-neutral-400",
+  };
+
+  return (
+    <Card className="border-neutral-800">
+      <CardHeader className="p-4 pb-2">
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-sm font-semibold">Cost Tracker</CardTitle>
+          <span className="text-xs text-neutral-400">
+            Monthly: <span className="text-neutral-200 font-medium">${MONTHLY_TOTAL}</span>{" "}
+            <span className="text-neutral-600">(Claude Max fixed)</span>
+          </span>
+        </div>
+        <CardDescription className="text-[10px]">
+          Per-agent estimated cost based on commit frequency (last 30 days)
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="p-4 pt-0 space-y-3">
+        {/* Horizontal stacked bar */}
+        <div className="flex h-4 w-full rounded overflow-hidden bg-neutral-800">
+          {agentCosts.map((ac) => (
+            <div
+              key={ac.agent}
+              className={`${barColors[ac.agent] || "bg-neutral-500"} transition-all`}
+              style={{ width: `${ac.share * 100}%` }}
+              title={`${ac.agent}: ${(ac.share * 100).toFixed(1)}%`}
+            />
+          ))}
+        </div>
+        {/* Legend */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+          {agentCosts.map((ac) => (
+            <div key={ac.agent} className="flex items-center gap-2">
+              <span
+                className={`h-2 w-2 rounded-full ${barColors[ac.agent] || "bg-neutral-500"}`}
+              />
+              <span className="text-[10px] text-neutral-400">
+                {ac.agent}
+              </span>
+              <span className="text-[10px] text-neutral-500 ml-auto">
+                ~${ac.estimated}
+              </span>
+              <span className="text-[10px] text-neutral-600">
+                ({ac.count})
+              </span>
+            </div>
+          ))}
+        </div>
+        {agentCosts.length === 0 && (
+          <p className="text-[10px] text-neutral-600 text-center py-2">
+            No commits in the last 30 days
+          </p>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+/* ── Vault Explorer (Spec §4 L123) ── */
+
+function VaultExplorer({ vault }: { vault: VaultData | null }) {
+  const [statusFilter, setStatusFilter] = useState<string>("");
+  const [expandedFolders, setExpandedFolders] = useState<Set<string>>(
+    new Set()
+  );
+
+  if (!vault) {
+    return (
+      <Card className="border-neutral-800">
+        <CardHeader className="p-4 pb-2">
+          <CardTitle className="text-sm font-semibold">Vault Explorer</CardTitle>
+        </CardHeader>
+        <CardContent className="p-4 pt-0">
+          <p className="text-[10px] text-neutral-600 text-center py-4">
+            Loading vault index...
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const byFolder = vault.stats.by_folder || {};
+  const byStatus = vault.stats.by_status || {};
+
+  const toggleFolder = (folder: string) => {
+    setExpandedFolders((prev) => {
+      const next = new Set(prev);
+      if (next.has(folder)) next.delete(folder);
+      else next.add(folder);
+      return next;
+    });
+  };
+
+  // Group folders into parent/child for tree view
+  const folderEntries = Object.entries(byFolder).sort(([a], [b]) =>
+    a.localeCompare(b)
+  );
+
+  // Build tree: top-level = 3-digit prefix folders, children = subfolders
+  const topLevel: Record<string, { count: number; children: [string, number][] }> = {};
+  for (const [folder, count] of folderEntries) {
+    const parts = folder.split("/");
+    const root = parts[0];
+    if (parts.length === 1) {
+      if (!topLevel[root]) topLevel[root] = { count: 0, children: [] };
+      topLevel[root].count += count;
+    } else {
+      if (!topLevel[root]) topLevel[root] = { count: 0, children: [] };
+      topLevel[root].children.push([folder, count]);
+      topLevel[root].count += count;
+    }
+  }
+
+  return (
+    <Card className="border-neutral-800">
+      <CardHeader className="p-4 pb-2">
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-sm font-semibold">Vault Explorer</CardTitle>
+          <span className="text-[10px] text-neutral-500">
+            {vault.total_notes} notes
+          </span>
+        </div>
+        <CardDescription className="text-[10px]">
+          vault_index.json browser{" "}
+          {vault.last_commit_hash && (
+            <code className="text-neutral-600">@{vault.last_commit_hash?.slice(0, 7)}</code>
+          )}
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="p-4 pt-0 space-y-3">
+        {/* Status filter buttons */}
+        <div className="flex flex-wrap gap-1.5">
+          <button
+            onClick={() => setStatusFilter("")}
+            className={`rounded px-2 py-0.5 text-[10px] border transition-colors ${
+              !statusFilter
+                ? "border-blue-500 text-blue-300"
+                : "border-neutral-700 text-neutral-500 hover:text-neutral-300"
+            }`}
+          >
+            All
+          </button>
+          {STATUS_OPTIONS.map((s) => (
+            <button
+              key={s}
+              onClick={() => setStatusFilter(statusFilter === s ? "" : s)}
+              className={`rounded px-2 py-0.5 text-[10px] border transition-colors ${
+                statusFilter === s
+                  ? "border-blue-500 text-blue-300"
+                  : "border-neutral-700 text-neutral-500 hover:text-neutral-300"
+              }`}
+            >
+              {s}{" "}
+              {byStatus[s] != null && (
+                <span className="text-neutral-600">({byStatus[s]})</span>
+              )}
+            </button>
+          ))}
+        </div>
+
+        {/* Status bar (when a specific status is selected) */}
+        {statusFilter && byStatus[statusFilter] != null && (
+          <div className="rounded border border-neutral-800 bg-neutral-900/50 px-3 py-2">
+            <p className="text-[11px] text-neutral-300">
+              <span className="font-medium">{statusFilter}</span>: {byStatus[statusFilter]} notes
+            </p>
+          </div>
+        )}
+
+        {/* Folder tree */}
+        <div className="space-y-0.5 max-h-[300px] overflow-y-auto">
+          {Object.entries(topLevel).map(([root, data]) => (
+            <div key={root}>
+              <button
+                onClick={() => toggleFolder(root)}
+                className="flex items-center gap-1.5 w-full text-left rounded px-2 py-1 hover:bg-neutral-800/50 transition-colors"
+              >
+                <span className="text-[10px] text-neutral-600 w-3">
+                  {data.children.length > 0
+                    ? expandedFolders.has(root)
+                      ? "v"
+                      : ">"
+                    : " "}
+                </span>
+                <span className="text-[11px] text-neutral-300 font-mono">
+                  {root}
+                </span>
+                <span className="text-[10px] text-neutral-600 ml-auto">
+                  {data.count}
+                </span>
+              </button>
+              {expandedFolders.has(root) &&
+                data.children.map(([child, cnt]) => (
+                  <div
+                    key={child}
+                    className="flex items-center gap-1.5 pl-7 pr-2 py-0.5"
+                  >
+                    <span className="text-[10px] text-neutral-500 font-mono">
+                      {child.split("/").slice(1).join("/")}
+                    </span>
+                    <span className="text-[10px] text-neutral-600 ml-auto">
+                      {cnt}
+                    </span>
+                  </div>
+                ))}
+            </div>
+          ))}
+        </div>
+
+        {/* Last scan info */}
+        {vault.last_full_scan && (
+          <p className="text-[10px] text-neutral-600 text-right">
+            Last scan: {timeAgo(vault.last_full_scan)}
+          </p>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+/* ── Task Kanban (refactored to use /api/tasks REST) ── */
 
 function TaskKanban({
   tasks,
@@ -255,23 +530,61 @@ function TaskKanban({
   );
 }
 
-/* ── System Log ── */
+/* ── System Log (enhanced with error highlighting + webhook health) ── */
 
 function SystemLog({
   commits,
   filter,
   onFilterChange,
+  agents,
 }: {
   commits: Commit[];
   filter: string;
   onFilterChange: (f: string) => void;
+  agents: AgentHeartbeat[];
 }) {
   const filtered = filter
     ? commits.filter((c) => c.agent === filter)
     : commits;
 
+  // Build set of agent labels whose heartbeat status is "error"
+  const errorAgentLabels = useMemo(() => {
+    const set = new Set<string>();
+    for (const hb of agents) {
+      if (hb.status === "error") {
+        const def = AGENTS.find((a) => a.name === hb.agent_name);
+        if (def) set.add(def.label);
+      }
+    }
+    return set;
+  }, [agents]);
+
+  // Webhook health: check if any agents have recent heartbeats (within 15 min)
+  const webhookHealthy = useMemo(() => {
+    const fifteenMin = 15 * 60 * 1000;
+    return agents.some(
+      (a) =>
+        a.last_commit_at &&
+        Date.now() - new Date(a.last_commit_at).getTime() < fifteenMin
+    );
+  }, [agents]);
+
   return (
     <div className="space-y-3">
+      {/* Webhook health indicator */}
+      <div className="flex items-center gap-2">
+        <span className="relative flex h-2 w-2">
+          <span
+            className={`relative inline-flex h-2 w-2 rounded-full ${
+              webhookHealthy ? "bg-green-400" : "bg-yellow-400"
+            }`}
+          />
+        </span>
+        <span className="text-[10px] text-neutral-500">
+          Webhook {webhookHealthy ? "healthy" : "no recent pushes"}
+        </span>
+      </div>
+
       <div className="flex flex-wrap gap-1.5">
         <button
           onClick={() => onFilterChange("")}
@@ -298,33 +611,92 @@ function SystemLog({
         ))}
       </div>
       <div className="space-y-1 max-h-[400px] overflow-y-auto">
-        {filtered.slice(0, 20).map((c) => (
-          <div
-            key={c.hash + c.date}
-            className="flex items-start gap-2 rounded border border-neutral-800 bg-neutral-900/30 px-3 py-2"
-          >
-            <span
-              className={`mt-0.5 shrink-0 rounded px-1 py-0.5 text-[9px] font-medium ${AGENT_BADGE[c.agent] || AGENT_BADGE.Manual}`}
+        {filtered.slice(0, 20).map((c) => {
+          const isError = errorAgentLabels.has(c.agent);
+          return (
+            <div
+              key={c.hash + c.date}
+              className={`flex items-start gap-2 rounded border px-3 py-2 ${
+                isError
+                  ? "border-red-500/40 bg-red-500/5"
+                  : "border-neutral-800 bg-neutral-900/30"
+              }`}
             >
-              {c.agent}
-            </span>
-            <div className="min-w-0 flex-1">
-              <p className="text-[11px] text-neutral-300 truncate">
-                {c.message}
-              </p>
-              <p className="text-[10px] text-neutral-600">
-                <code className="text-neutral-500">{c.hash}</code> ·{" "}
-                {timeAgo(c.date)}
-              </p>
+              <span
+                className={`mt-0.5 shrink-0 rounded px-1 py-0.5 text-[9px] font-medium ${AGENT_BADGE[c.agent] || AGENT_BADGE.Manual}`}
+              >
+                {c.agent}
+              </span>
+              <div className="min-w-0 flex-1">
+                <p
+                  className={`text-[11px] truncate ${
+                    isError ? "text-red-300" : "text-neutral-300"
+                  }`}
+                >
+                  {c.message}
+                </p>
+                <p className="text-[10px] text-neutral-600">
+                  <code className="text-neutral-500">{c.hash}</code> ·{" "}
+                  {timeAgo(c.date)}
+                </p>
+              </div>
+              {isError && (
+                <span className="text-[9px] text-red-400 shrink-0 mt-0.5">
+                  ERROR
+                </span>
+              )}
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
 }
 
-/* ── Create Task Modal (inline) ── */
+/* ── Publish Queue (Spec §8 L216) ── */
+
+function PublishQueue({ vault }: { vault: VaultData | null }) {
+  const matureCount = vault?.stats.by_status?.mature ?? 0;
+
+  return (
+    <Card className="border-neutral-800">
+      <CardHeader className="p-4 pb-2">
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-sm font-semibold">Publish Queue</CardTitle>
+          <Badge
+            variant="outline"
+            className="text-[10px] border-neutral-700 text-neutral-400"
+          >
+            {matureCount} mature
+          </Badge>
+        </div>
+        <CardDescription className="text-[10px]">
+          Mature notes ready for publication
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="p-4 pt-0">
+        {matureCount === 0 ? (
+          <p className="text-[11px] text-neutral-600 text-center py-4">
+            수렴 파이프라인이 mature 노트를 생성하면 여기 표시됩니다
+          </p>
+        ) : (
+          <div className="space-y-1">
+            <p className="text-[11px] text-neutral-400">
+              {matureCount} notes with <code className="text-amber-400">status: mature</code> detected in vault index.
+            </p>
+            <p className="text-[10px] text-neutral-600">
+              Use the Vault Explorer status filter to browse them, or run{" "}
+              <code className="text-neutral-500">/blog-publish</code> to start
+              publishing.
+            </p>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+/* ── Create Task Form ── */
 
 function CreateTaskForm({ onCreated }: { onCreated: () => void }) {
   const [title, setTitle] = useState("");
@@ -336,12 +708,15 @@ function CreateTaskForm({ onCreated }: { onCreated: () => void }) {
     e.preventDefault();
     if (!title.trim()) return;
 
-    await supabase.from("tasks").insert({
-      title: title.trim(),
-      axis,
-      priority,
-      assigned_to: assignedTo || null,
-      status: "backlog",
+    await fetch("/api/tasks", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        title: title.trim(),
+        axis,
+        priority,
+        assigned_to: assignedTo || null,
+      }),
     });
 
     setTitle("");
@@ -399,10 +774,13 @@ function CreateTaskForm({ onCreated }: { onCreated: () => void }) {
 /* ── Admin Page ── */
 
 export default function AdminDashboard() {
+  const router = useRouter();
   const [agents, setAgents] = useState<AgentHeartbeat[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [commits, setCommits] = useState<Commit[]>([]);
+  const [vault, setVault] = useState<VaultData | null>(null);
   const [logFilter, setLogFilter] = useState("");
+  const [loggingOut, setLoggingOut] = useState(false);
 
   const loadAgents = useCallback(async () => {
     const { data } = await supabase
@@ -414,11 +792,9 @@ export default function AdminDashboard() {
   }, []);
 
   const loadTasks = useCallback(async () => {
-    const { data } = await supabase
-      .from("tasks")
-      .select("*")
-      .order("created_at", { ascending: false });
-    if (data) setTasks(data);
+    const res = await fetch("/api/tasks");
+    const d = await res.json();
+    if (d.tasks) setTasks(d.tasks);
   }, []);
 
   const loadCommits = useCallback(async () => {
@@ -427,44 +803,70 @@ export default function AdminDashboard() {
     setCommits(d.commits || []);
   }, []);
 
+  const loadVault = useCallback(async () => {
+    try {
+      const res = await fetch("/api/vault");
+      if (res.ok) {
+        const d = await res.json();
+        setVault(d);
+      }
+    } catch {
+      // vault fetch is optional
+    }
+  }, []);
+
   useEffect(() => {
     loadAgents();
     loadTasks();
     loadCommits();
+    loadVault();
 
     // Poll heartbeats every 10s
     const interval = setInterval(loadAgents, 10000);
     return () => clearInterval(interval);
-  }, [loadAgents, loadTasks, loadCommits]);
+  }, [loadAgents, loadTasks, loadCommits, loadVault]);
 
   async function moveTask(id: string, newStatus: string) {
-    await supabase
-      .from("tasks")
-      .update({
-        status: newStatus,
-        updated_at: new Date().toISOString(),
-        ...(newStatus === "done"
-          ? { completed_at: new Date().toISOString() }
-          : {}),
-      })
-      .eq("id", id);
+    await fetch("/api/tasks", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, status: newStatus }),
+    });
     loadTasks();
   }
 
   async function deleteTask(id: string) {
-    await supabase.from("tasks").delete().eq("id", id);
+    await fetch(`/api/tasks?id=${id}`, { method: "DELETE" });
     loadTasks();
+  }
+
+  async function handleLogout() {
+    setLoggingOut(true);
+    await supabase.auth.signOut();
+    router.push("/login");
   }
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-8">
+      {/* Header with Logout */}
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-bold tracking-tight">
           Admin Dashboard
         </h1>
-        <Badge variant="outline" className="text-[10px] text-green-400 border-green-400/30">
-          Authenticated
-        </Badge>
+        <div className="flex items-center gap-3">
+          <Badge variant="outline" className="text-[10px] text-green-400 border-green-400/30">
+            Authenticated
+          </Badge>
+          <Button
+            variant="outline"
+            size="sm"
+            className="text-[10px] h-7 border-neutral-700 text-neutral-400 hover:text-red-400 hover:border-red-400/30"
+            onClick={handleLogout}
+            disabled={loggingOut}
+          >
+            {loggingOut ? "..." : "Logout"}
+          </Button>
+        </div>
       </div>
 
       {/* Heartbeat Monitor */}
@@ -473,6 +875,24 @@ export default function AdminDashboard() {
           Heartbeat Monitor
         </h2>
         <HeartbeatMonitor agents={agents} />
+      </section>
+
+      <Separator className="bg-neutral-800" />
+
+      {/* Cost Tracker + Vault Explorer side by side */}
+      <section className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="space-y-3">
+          <h2 className="text-xs font-medium text-neutral-500 uppercase tracking-wider">
+            Cost Tracker
+          </h2>
+          <CostTracker commits={commits} />
+        </div>
+        <div className="space-y-3">
+          <h2 className="text-xs font-medium text-neutral-500 uppercase tracking-wider">
+            Vault Explorer
+          </h2>
+          <VaultExplorer vault={vault} />
+        </div>
       </section>
 
       <Separator className="bg-neutral-800" />
@@ -488,16 +908,25 @@ export default function AdminDashboard() {
 
       <Separator className="bg-neutral-800" />
 
-      {/* System Log */}
-      <section className="space-y-3">
-        <h2 className="text-xs font-medium text-neutral-500 uppercase tracking-wider">
-          System Log
-        </h2>
-        <SystemLog
-          commits={commits}
-          filter={logFilter}
-          onFilterChange={setLogFilter}
-        />
+      {/* Publish Queue + System Log side by side */}
+      <section className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="lg:col-span-1 space-y-3">
+          <h2 className="text-xs font-medium text-neutral-500 uppercase tracking-wider">
+            Publish Queue
+          </h2>
+          <PublishQueue vault={vault} />
+        </div>
+        <div className="lg:col-span-2 space-y-3">
+          <h2 className="text-xs font-medium text-neutral-500 uppercase tracking-wider">
+            System Log
+          </h2>
+          <SystemLog
+            commits={commits}
+            filter={logFilter}
+            onFilterChange={setLogFilter}
+            agents={agents}
+          />
+        </div>
       </section>
     </div>
   );
