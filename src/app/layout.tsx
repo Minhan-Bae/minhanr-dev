@@ -62,6 +62,12 @@ export default function RootLayout({
             >
               Dashboard
             </a>
+            <a
+              href="/admin"
+              className="hover:text-neutral-100 transition-colors"
+            >
+              Admin
+            </a>
           </nav>
         </header>
         <main className="flex-1">{children}</main>
