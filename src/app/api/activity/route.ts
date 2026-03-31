@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-
-const GITHUB_API = "https://api.github.com/repos/Minhan-Bae/oikbas-vault/commits";
+import { GITHUB_COMMITS_URL, COMMITS_PER_PAGE, CACHE_TTL_SHORT } from "@/lib/constants";
 
 const AGENT_PREFIXES: Record<string, string> = {
   "alpha:": "Alpha",
@@ -28,9 +27,9 @@ export async function GET() {
     const token = process.env.GITHUB_TOKEN;
     if (token) headers.Authorization = `Bearer ${token}`;
 
-    const res = await fetch(`${GITHUB_API}?per_page=10`, {
+    const res = await fetch(`${GITHUB_COMMITS_URL}?per_page=${COMMITS_PER_PAGE}`, {
       headers,
-      next: { revalidate: 120 },
+      next: { revalidate: CACHE_TTL_SHORT },
     });
 
     if (!res.ok) {
@@ -39,7 +38,7 @@ export async function GET() {
 
     const data = await res.json();
 
-    const commits = data.slice(0, 10).map(
+    const commits = data.slice(0, COMMITS_PER_PAGE).map(
       (c: {
         sha: string;
         html_url: string;

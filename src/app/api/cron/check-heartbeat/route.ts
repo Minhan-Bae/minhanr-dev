@@ -6,13 +6,7 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
-const ERROR_THRESHOLDS: Record<string, number> = {
-  rt_slot1: 6 * 60 * 60 * 1000,  // 6 hours
-  rt_slot2: 36 * 60 * 60 * 1000, // 36 hours
-  rt_slot3: 36 * 60 * 60 * 1000, // 36 hours
-};
-
-const GITHUB_API = "https://api.github.com/repos/Minhan-Bae/oikbas-vault/commits";
+import { GITHUB_COMMITS_URL, CRON_COMMITS_PER_PAGE, COMMIT_MSG_MAX_LEN, ERROR_THRESHOLDS } from "@/lib/constants";
 
 const AGENT_PREFIXES: Record<string, string> = {
   "alpha:": "alpha",
@@ -57,7 +51,7 @@ export async function GET() {
     };
     if (token) headers.Authorization = `Bearer ${token}`;
 
-    const res = await fetch(`${GITHUB_API}?per_page=5`, { headers });
+    const res = await fetch(`${GITHUB_COMMITS_URL}?per_page=${CRON_COMMITS_PER_PAGE}`, { headers });
     if (res.ok) {
       const commits = await res.json();
       for (const c of commits) {
@@ -82,7 +76,7 @@ export async function GET() {
               status: "active",
               last_commit_hash: commitHash,
               last_commit_at: commitAt,
-              last_commit_msg: msg.slice(0, 200),
+              last_commit_msg: msg.slice(0, COMMIT_MSG_MAX_LEN),
               error_message: null,
               updated_at: new Date().toISOString(),
             })

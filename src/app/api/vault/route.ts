@@ -1,10 +1,9 @@
 import { NextResponse } from "next/server";
+import { VAULT_INDEX_URL, CACHE_TTL_VAULT } from "@/lib/constants";
 
 export async function GET() {
   try {
     const token = process.env.GITHUB_TOKEN;
-    const url =
-      "https://api.github.com/repos/Minhan-Bae/oikbas-vault/contents/090_System/vault_index.json";
 
     const headers: Record<string, string> = {
       Accept: "application/vnd.github.v3.raw",
@@ -12,7 +11,7 @@ export async function GET() {
     };
     if (token) headers.Authorization = `Bearer ${token}`;
 
-    const res = await fetch(url, { headers, next: { revalidate: 300 } });
+    const res = await fetch(VAULT_INDEX_URL, { headers, next: { revalidate: CACHE_TTL_VAULT } });
     if (!res.ok) {
       return NextResponse.json(
         { error: "Failed to fetch vault index", status: res.status },

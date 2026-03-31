@@ -16,7 +16,7 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   const body = await request.json();
-  const { title, day_of_week, start_hour, end_hour, category, color, is_routine } = body;
+  const { title, day_of_week, start_hour, end_hour, category, color, is_routine, specific_date } = body;
 
   if (!title || day_of_week == null || start_hour == null || end_hour == null) {
     return NextResponse.json(
@@ -35,6 +35,7 @@ export async function POST(request: NextRequest) {
       category: category || "event",
       color: color || null,
       is_routine: is_routine || false,
+      specific_date: specific_date || null,
     })
     .select()
     .single();

@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { AGENTS, AXIS_LABELS, AXIS_COLORS, type Axis } from "@/lib/agents";
+import { DASHBOARD_POLL_MS, TIMELINE_DISPLAY } from "@/lib/constants";
 import {
   Card,
   CardContent,
@@ -391,7 +392,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     fetchAll();
-    const interval = setInterval(fetchAll, 60000);
+    const interval = setInterval(fetchAll, DASHBOARD_POLL_MS);
     return () => clearInterval(interval);
   }, [fetchAll]);
 
@@ -586,7 +587,7 @@ export default function Dashboard() {
           </div>
         ) : commits.length > 0 ? (
           <div className="relative border-l border-neutral-800 ml-3 space-y-4">
-            {commits.slice(0, 8).map((c) => (
+            {commits.slice(0, TIMELINE_DISPLAY).map((c) => (
               <a
                 key={c.hash}
                 href={

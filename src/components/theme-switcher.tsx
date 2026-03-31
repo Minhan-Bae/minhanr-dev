@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 
 type Theme = "dark" | "light" | "gray";
 
@@ -10,15 +11,21 @@ const THEME_CONFIG: Record<Theme, { label: string; icon: string }> = {
   gray: { label: "Gray", icon: "◐" },
 };
 
+function getThemeFromDOM(): Theme {
+  if (typeof document === "undefined") return "dark";
+  const cl = document.documentElement.classList;
+  if (cl.contains("light")) return "light";
+  if (cl.contains("gray")) return "gray";
+  return "dark";
+}
+
 export function ThemeSwitcher() {
+  const [mounted, setMounted] = useState(false);
   const [theme, setTheme] = useState<Theme>("dark");
 
   useEffect(() => {
-    const saved = localStorage.getItem("oikbas-theme") as Theme | null;
-    if (saved && THEME_CONFIG[saved]) {
-      setTheme(saved);
-      applyTheme(saved);
-    }
+    setTheme(getThemeFromDOM());
+    setMounted(true);
   }, []);
 
   function applyTheme(t: Theme) {
@@ -26,19 +33,24 @@ export function ThemeSwitcher() {
     html.classList.remove("dark", "light", "gray");
     html.classList.add(t);
     localStorage.setItem("oikbas-theme", t);
+    setTheme(t);
   }
 
   function cycle() {
     const order: Theme[] = ["dark", "gray", "light"];
     const next = order[(order.indexOf(theme) + 1) % order.length];
-    setTheme(next);
     applyTheme(next);
+  }
+
+  // Prevent hydration mismatch - render nothing until mounted
+  if (!mounted) {
+    return <span className="w-10 h-4" />;
   }
 
   return (
     <button
       onClick={cycle}
-      className="flex items-center gap-1 text-neutral-500 hover:text-neutral-300 transition-colors"
+      className="flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors"
       title={`Theme: ${THEME_CONFIG[theme].label}`}
     >
       <span className="text-xs">{THEME_CONFIG[theme].icon}</span>

@@ -1,4 +1,5 @@
 import { ImageResponse } from "@vercel/og";
+import { AGENTS } from "@/lib/agents";
 
 export const runtime = "edge";
 
@@ -179,7 +180,7 @@ export async function GET(request: Request) {
             color: "#737373",
           }}
         >
-          7 AI Agents · 3-Axis Orchestration · minhanr.dev
+          {AGENTS.length} AI Agents · 3-Axis Orchestration · minhanr.dev
         </span>
       </div>
     ),

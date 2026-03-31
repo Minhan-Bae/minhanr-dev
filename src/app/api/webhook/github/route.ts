@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createHmac, timingSafeEqual } from "crypto";
 import { supabase } from "@/lib/supabase";
+import { COMMIT_MSG_MAX_LEN } from "@/lib/constants";
 
 function verifySignature(payload: string, signature: string | null): boolean {
   const secret = process.env.GITHUB_WEBHOOK_SECRET;
@@ -64,7 +65,7 @@ export async function POST(request: NextRequest) {
           status: "active",
           last_commit_hash: commitHash,
           last_commit_at: commitAt,
-          last_commit_msg: commitMsg.slice(0, 200),
+          last_commit_msg: commitMsg.slice(0, COMMIT_MSG_MAX_LEN),
           error_message: null,
           updated_at: new Date().toISOString(),
         },

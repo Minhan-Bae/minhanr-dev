@@ -53,6 +53,11 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="theme-color" content="#0a0a0a" />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem("oikbas-theme");if(t&&["dark","light","gray"].includes(t)){document.documentElement.classList.remove("dark","light","gray");document.documentElement.classList.add(t)}}catch(e){}})()`,
+          }}
+        />
       </head>
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <header className="border-b border-border px-6 py-3 flex items-center justify-between bg-background">

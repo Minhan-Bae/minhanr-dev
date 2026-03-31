@@ -132,7 +132,8 @@ const STATUS_OPTIONS = [
   "archived",
 ] as const;
 
-const MONTHLY_TOTAL = 220;
+import { MONTHLY_COST_USD, ADMIN_POLL_MS } from "@/lib/constants";
+const MONTHLY_TOTAL = MONTHLY_COST_USD;
 
 /* ── Heartbeat Monitor ── */
 
@@ -938,7 +939,7 @@ export default function AdminDashboard() {
     loadVault();
 
     // Poll heartbeats every 10s
-    const interval = setInterval(loadAgents, 10000);
+    const interval = setInterval(loadAgents, ADMIN_POLL_MS);
     return () => clearInterval(interval);
   }, [loadAgents, loadTasks, loadCommits, loadVault]);
 
