@@ -11,6 +11,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { AxisTrendChart } from "@/components/axis-trend-chart";
 
 interface AgentHeartbeat {
   agent_name: string;
@@ -32,11 +33,21 @@ interface VaultStats {
   };
 }
 
+interface AxisMetricRow {
+  id: string;
+  date: string;
+  axis: string;
+  utilization: number;
+  notes_count: number;
+  delta: Record<string, number> | null;
+}
+
 interface AxisMetrics {
   latest: Record<
     string,
     { utilization: number; notes_count: number; delta: Record<string, number> }
   >;
+  history: AxisMetricRow[];
 }
 
 interface Commit {
@@ -452,6 +463,20 @@ export default function Dashboard() {
             </div>
             {expandedAxis && <AxisDrilldown axis={expandedAxis} vault={vault} />}
           </>
+        )}
+
+        {/* 21-day Trend */}
+        {metrics?.history && metrics.history.length > 0 && (
+          <Card className="bg-neutral-900/50 border-neutral-800">
+            <CardHeader className="py-3 px-4">
+              <CardTitle className="text-xs font-medium text-neutral-500 uppercase tracking-wider">
+                21-Day Trend
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="px-2 pb-3">
+              <AxisTrendChart history={metrics.history} />
+            </CardContent>
+          </Card>
         )}
       </section>
 
