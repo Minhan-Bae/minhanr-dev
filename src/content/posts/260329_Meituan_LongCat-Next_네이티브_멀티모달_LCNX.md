@@ -17,6 +17,7 @@ created: 2026-03-29
 relevance: 4
 related:
   - "Memesis"
+  - "CharacterShift"
 ---
 
 # Meituan LongCat-Next — 네이티브 디스크리트 Any-to-Any 멀티모달 모델
@@ -32,7 +33,7 @@ LongCat-Next는 **DiNA (Discrete Native Autoregression)** 패러다임을 제안
 핵심 구성 요소:
 - **DiNA 프레임워크**: 하나의 오토리그레시브 백본이 멀티모달 이해(understanding)와 생성(generation)을 동시에 수행. 이해와 생성을 하나의 대칭적 토큰 예측 문제로 통합 최적화.
 - **dNaViT (Discrete Native Any-Resolution Vision Transformer)**: 임의 해상도의 비주얼 토크나이저. **SAE (Semantic-and-Aligned Encoders)** + **8-layer RVQ (Residual Vector Quantization)** 압축으로 시맨틱 추상화와 세밀한 비주얼 디테일을 동시에 보존하며 28× 압축 비율을 달성.
-- **MoE A3B 백본**: LongCat-Flash-Lite MoE 기반, 총 68.5B 파라미터 중 3B만 활성화하여 효율적 추론.
+- **MoE A3B 백본**: LongCat-Flash-Lite MoE 기반, 총 68.5~74B 파라미터 중 3B만 활성화하여 효율적 추론. weights 총량 약 161GB.
 
 ### 성능 및 벤치마크
 
@@ -78,7 +79,11 @@ LongCat-Next는 Meituan의 더 넓은 LongCat 에코시스템의 일부:
 
 3. **MoE A3B 트렌드 재확인**: 68.5B 중 3B 활성화라는 극단적 스파스 MoE는 Qwen3.5-35B-A3B, DeepSeek-V4 등과 함께 2026년 효율적 추론의 메인 트렌드. 동일 활성 파라미터 대비 더 높은 용량이 멀티모달 태스크에서 유효함을 시사.
 
-4. **오픈소스 생태계 경쟁**: Meituan이 MIT 라이선스로 풀 에코시스템을 공개한 것은 Qwen, DeepSeek에 이은 중국 기업의 공격적 오픈소스 전략. 연구 활용도 측면에서 매우 유리.
+4. **오픈소스 생태계 경쟁**: Meituan이 MIT 라이선스로 풀 에코시스템을 공개한 것은 Qwen, DeepSeek에 이은 중국 기업의 공격적 오픈소스 전략. 연구 활용도 측면에서 매우 유리. MIT 라이선스로 파인튜닝/배포 제한 없음.
+
+5. **CharacterShift 관점**: 이산 비전 토크나이저(dNaViT)가 이미지 이해+생성을 통합한다면, 캐릭터 일관성 유지에도 활용 가능.
+
+**주의점**: 약 161GB의 모델 크기로 H100 80GB x2~3 이상 필요. 양자화(GGUF) 버전 미확인. 전용 arXiv 논문 미공개로 재현성 검증 어려울 수 있음. 로컬 실험에는 상당한 GPU 리소스 필요하며 클라우드 추론으로 테스트하는 것이 현실적.
 
 ## 출처
 
