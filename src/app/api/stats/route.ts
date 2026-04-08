@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
+import { aggregate, fetchVaultIndex } from "@/lib/vault-index";
+
+export const revalidate = 300;
 
 export async function GET() {
+  // Axis metrics from Supabase (existing behavior, kept backward compatible)
   const { data: metrics, error } = await supabase
     .from("axis_metrics")
     .select("*")
@@ -14,7 +18,6 @@ export async function GET() {
 
   const axes = ["acquisition", "convergence", "amplification"];
   const latest: Record<string, { utilization: number; notes_count: number; delta: unknown }> = {};
-
   for (const axis of axes) {
     const row = metrics?.find((m) => m.axis === axis);
     latest[axis] = {
@@ -24,5 +27,20 @@ export async function GET() {
     };
   }
 
-  return NextResponse.json({ latest, history: metrics ?? [] });
+  // Vault aggregates (new)
+  let vault: Awaited<ReturnType<typeof aggregate>> | null = null;
+  let vault_error: string | null = null;
+  try {
+    const index = await fetchVaultIndex();
+    vault = aggregate(index);
+  } catch (e) {
+    vault_error = e instanceof Error ? e.message : "vault aggregate failed";
+  }
+
+  return NextResponse.json({
+    latest,
+    history: metrics ?? [],
+    vault,
+    vault_error,
+  });
 }

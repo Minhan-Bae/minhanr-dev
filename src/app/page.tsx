@@ -116,10 +116,10 @@ export default function Home() {
         </p>
         <div className="flex justify-center gap-3 pt-2">
           <a
-            href="/dashboard"
+            href="/command"
             className="inline-flex items-center rounded-lg bg-blue-500 px-4 py-2 text-sm font-medium text-white hover:bg-blue-600 transition-colors"
           >
-            Dashboard →
+            Command Center →
           </a>
           <a
             href="/blog"
