@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { TagTopBarChart } from "@/components/charts/tag-top-bar-chart";
-import { aggregate, fetchVaultIndex } from "@/lib/vault-index";
+import { aggregate, getCachedVaultIndex } from "@/lib/vault-index";
 
 export const metadata = {
   title: "Tags | OIKBAS",
@@ -13,7 +13,7 @@ export const revalidate = 300;
 async function TagsContent() {
   let agg;
   try {
-    agg = aggregate(await fetchVaultIndex());
+    agg = aggregate(await getCachedVaultIndex());
   } catch (e) {
     return (
       <Card className="border-destructive/40">

@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { NoteBrowserControls } from "@/components/note-browser-controls";
 import { NoteList } from "@/components/note-list";
-import { aggregate, fetchVaultIndex, listNotes, type ListNotesOptions } from "@/lib/vault-index";
+import { aggregate, getCachedVaultIndex, listNotes, type ListNotesOptions } from "@/lib/vault-index";
 
 export const metadata = {
   title: "Notes | OIKBAS",
@@ -21,7 +21,7 @@ async function NotesContent({ folder, title, subtitle, sp }: {
   subtitle: string;
   sp: Record<string, string | undefined>;
 }) {
-  const index = await fetchVaultIndex();
+  const index = await getCachedVaultIndex();
   const agg = aggregate(index);
   const page = Math.max(1, parseInt(sp.page || "1", 10) || 1);
   const opts: ListNotesOptions = {

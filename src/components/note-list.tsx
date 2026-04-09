@@ -53,7 +53,12 @@ export function NoteList({ notes, total, page, pageSize, baseHref, searchParams 
                     >
                       {n.title}
                     </Link>
-                    <p className="text-[10px] text-muted-foreground truncate">{n.path}</p>
+                    {typeof n.excerpt === "string" && n.excerpt && (
+                      <p className="text-[11px] text-muted-foreground/80 line-clamp-2 leading-relaxed">
+                        {n.excerpt}
+                      </p>
+                    )}
+                    <p className="text-[10px] text-muted-foreground/60 truncate">{n.path}</p>
                     <div className="flex flex-wrap items-center gap-1.5 text-[10px]">
                       {n.status && (
                         <Badge variant="outline" className="font-normal">

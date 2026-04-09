@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
-import { aggregate, fetchVaultIndex } from "@/lib/vault-index";
+import { aggregate, getCachedVaultIndex } from "@/lib/vault-index";
 
 export const revalidate = 300;
 
@@ -31,7 +31,7 @@ export async function GET() {
   let vault: Awaited<ReturnType<typeof aggregate>> | null = null;
   let vault_error: string | null = null;
   try {
-    const index = await fetchVaultIndex();
+    const index = await getCachedVaultIndex();
     vault = aggregate(index);
   } catch (e) {
     vault_error = e instanceof Error ? e.message : "vault aggregate failed";

@@ -8,7 +8,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { aggregate, fetchVaultIndex, listNotes } from "@/lib/vault-index";
+import { aggregate, getCachedVaultIndex, listNotes } from "@/lib/vault-index";
 import { vaultPathToHref } from "@/lib/vault-note";
 
 export const metadata = {
@@ -42,7 +42,7 @@ function buildMonthGrid(year: number, month0: number) {
 async function DashboardContent() {
   let index;
   try {
-    index = await fetchVaultIndex();
+    index = await getCachedVaultIndex();
   } catch (e) {
     return (
       <Card className="border-destructive/40">

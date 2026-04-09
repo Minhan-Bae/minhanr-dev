@@ -11,7 +11,7 @@ import { CategoryBarChart } from "@/components/charts/category-bar-chart";
 import { TagTopBarChart } from "@/components/charts/tag-top-bar-chart";
 import { ActivityLineChart } from "@/components/charts/activity-line-chart";
 import { StatusDonutChart } from "@/components/charts/status-donut-chart";
-import { aggregate, fetchVaultIndex } from "@/lib/vault-index";
+import { aggregate, getCachedVaultIndex } from "@/lib/vault-index";
 
 export const metadata = {
   title: "Statistics | OIKBAS",
@@ -22,7 +22,7 @@ export const revalidate = 300;
 async function StatisticsContent() {
   let agg;
   try {
-    agg = aggregate(await fetchVaultIndex());
+    agg = aggregate(await getCachedVaultIndex());
   } catch (e) {
     return (
       <Card className="border-destructive/40">

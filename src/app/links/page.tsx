@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { fetchVaultIndex } from "@/lib/vault-index";
+import { getCachedVaultIndex } from "@/lib/vault-index";
 
 export const metadata = {
   title: "Links | OIKBAS",
@@ -35,7 +35,7 @@ function domainOf(url: string): string {
 async function LinksContent() {
   let index;
   try {
-    index = await fetchVaultIndex();
+    index = await getCachedVaultIndex();
   } catch (e) {
     return (
       <Card className="border-destructive/40">
