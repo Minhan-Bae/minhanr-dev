@@ -2,8 +2,7 @@ import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import type { VaultNote } from "@/lib/vault-index";
-
-const VAULT_REPO = "Minhan-Bae/oikbas-vault";
+import { vaultPathToHref } from "@/lib/vault-note";
 
 export interface NoteListProps {
   notes: VaultNote[];
@@ -43,19 +42,17 @@ export function NoteList({ notes, total, page, pageSize, baseHref, searchParams 
       ) : (
         <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {notes.map((n) => {
-            const href = `https://github.com/${VAULT_REPO}/blob/main/${encodeURI(n.path)}`;
+            const href = vaultPathToHref(n.path);
             return (
               <li key={n.path}>
                 <Card className="h-full transition-colors hover:border-primary/40">
                   <CardContent className="py-3 space-y-2">
-                    <a
+                    <Link
                       href={href}
-                      target="_blank"
-                      rel="noreferrer"
                       className="block font-medium text-sm leading-tight line-clamp-2 hover:underline"
                     >
                       {n.title}
-                    </a>
+                    </Link>
                     <p className="text-[10px] text-muted-foreground truncate">{n.path}</p>
                     <div className="flex flex-wrap items-center gap-1.5 text-[10px]">
                       {n.status && (

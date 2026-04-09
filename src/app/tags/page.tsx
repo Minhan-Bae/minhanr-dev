@@ -4,7 +4,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { TagTopBarChart } from "@/components/charts/tag-top-bar-chart";
 import { aggregate, fetchVaultIndex } from "@/lib/vault-index";
 
-export const metadata = { title: "Tags | OIKBAS" };
+export const metadata = {
+  title: "Tags | OIKBAS",
+  robots: { index: false, follow: false },
+};
 export const revalidate = 300;
 
 async function TagsContent() {

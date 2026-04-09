@@ -1,12 +1,15 @@
+import Link from "next/link";
 import { Suspense } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { fetchVaultIndex } from "@/lib/vault-index";
+import { vaultPathToHref } from "@/lib/vault-note";
 
-export const metadata = { title: "Deadlines | OIKBAS" };
+export const metadata = {
+  title: "Deadlines | OIKBAS",
+  robots: { index: false, follow: false },
+};
 export const revalidate = 300;
-
-const VAULT_REPO = "Minhan-Bae/oikbas-vault";
 
 interface DeadlineItem {
   path: string;
@@ -118,14 +121,12 @@ async function DeadlinesContent() {
                   {list.map((it) => (
                     <li key={it.path} className="flex items-start justify-between gap-3 text-sm">
                       <div className="min-w-0 flex-1">
-                        <a
-                          href={`https://github.com/${VAULT_REPO}/blob/main/${encodeURI(it.path)}`}
-                          target="_blank"
-                          rel="noreferrer"
+                        <Link
+                          href={vaultPathToHref(it.path)}
                           className="font-medium hover:underline"
                         >
                           {it.title}
-                        </a>
+                        </Link>
                         <p className="text-[10px] text-muted-foreground truncate">{it.path}</p>
                       </div>
                       <div className="flex shrink-0 items-center gap-1.5 text-[10px]">

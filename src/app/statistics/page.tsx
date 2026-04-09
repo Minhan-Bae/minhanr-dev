@@ -13,7 +13,10 @@ import { ActivityLineChart } from "@/components/charts/activity-line-chart";
 import { StatusDonutChart } from "@/components/charts/status-donut-chart";
 import { aggregate, fetchVaultIndex } from "@/lib/vault-index";
 
-export const metadata = { title: "Statistics | OIKBAS" };
+export const metadata = {
+  title: "Statistics | OIKBAS",
+  robots: { index: false, follow: false },
+};
 export const revalidate = 300;
 
 async function StatisticsContent() {

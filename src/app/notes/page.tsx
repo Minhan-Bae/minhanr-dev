@@ -3,7 +3,10 @@ import { NoteBrowserControls } from "@/components/note-browser-controls";
 import { NoteList } from "@/components/note-list";
 import { aggregate, fetchVaultIndex, listNotes, type ListNotesOptions } from "@/lib/vault-index";
 
-export const metadata = { title: "Notes | OIKBAS" };
+export const metadata = {
+  title: "Notes | OIKBAS",
+  robots: { index: false, follow: false },
+};
 export const revalidate = 300;
 
 const PAGE_SIZE = 24;
@@ -25,6 +28,8 @@ async function NotesContent({ folder, title, subtitle, sp }: {
     folder,
     q: sp.q || undefined,
     status: sp.status || undefined,
+    // Knowledge Hub: published 노트는 /blog 전용이므로 자동 제외 (사용자가 명시적으로 status=published 필터를 걸면 보여줌)
+    excludeStatus: sp.status === "published" ? undefined : "published",
     tag: sp.tag || undefined,
     sort: (sp.sort as ListNotesOptions["sort"]) || "created_desc",
     limit: PAGE_SIZE,

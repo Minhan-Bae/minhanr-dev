@@ -9,11 +9,13 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { aggregate, fetchVaultIndex, listNotes } from "@/lib/vault-index";
+import { vaultPathToHref } from "@/lib/vault-note";
 
-export const metadata = { title: "Dashboard | OIKBAS" };
+export const metadata = {
+  title: "Dashboard | OIKBAS",
+  robots: { index: false, follow: false },
+};
 export const revalidate = 300;
-
-const VAULT_REPO = "Minhan-Bae/oikbas-vault";
 
 function ymd(d: Date): string {
   const y = d.getFullYear();
@@ -78,9 +80,10 @@ async function DashboardContent() {
     if (path.startsWith("000_Inbox/") && created >= weekAgoIso) inboxThisWeek += 1;
   }
 
-  // 진행 중 프로젝트 top 3
+  // 진행 중 프로젝트 top 3 (published 제외 — 작업 중인 것만)
   const { notes: activeProjects } = listNotes(index, {
     folder: "020_Projects/",
+    excludeStatus: "published",
     sort: "created_desc",
     limit: 3,
   });
@@ -88,8 +91,9 @@ async function DashboardContent() {
   // 추천 (growing top 3)
   const recommended = agg.recent_growing.slice(0, 3);
 
-  // 최근 노트 5
+  // 최근 노트 5 (published는 /blog 전용이므로 제외 — 작업 중인 것만)
   const { notes: recentNotes } = listNotes(index, {
+    excludeStatus: "published",
     sort: "created_desc",
     limit: 5,
   });
@@ -234,14 +238,12 @@ async function DashboardContent() {
             <ul className="space-y-2">
               {activeProjects.map((p) => (
                 <li key={p.path} className="space-y-0.5">
-                  <a
-                    href={`https://github.com/${VAULT_REPO}/blob/main/${encodeURI(p.path)}`}
-                    target="_blank"
-                    rel="noreferrer"
+                  <Link
+                    href={vaultPathToHref(p.path)}
                     className="text-sm font-medium hover:underline truncate block"
                   >
                     {p.title}
-                  </a>
+                  </Link>
                   <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
                     {p.priority && <Badge variant="outline" className="font-normal">{p.priority}</Badge>}
                     {p.status && <span>{p.status}</span>}
@@ -266,14 +268,12 @@ async function DashboardContent() {
             <ul className="space-y-2">
               {recommended.map((n) => (
                 <li key={n.path} className="space-y-0.5">
-                  <a
-                    href={`https://github.com/${VAULT_REPO}/blob/main/${encodeURI(n.path)}`}
-                    target="_blank"
-                    rel="noreferrer"
+                  <Link
+                    href={vaultPathToHref(n.path)}
                     className="text-sm font-medium hover:underline truncate block"
                   >
                     {n.title}
-                  </a>
+                  </Link>
                   <p className="text-[10px] text-muted-foreground truncate">{n.path}</p>
                 </li>
               ))}
@@ -296,14 +296,12 @@ async function DashboardContent() {
           <ul className="space-y-1.5 text-sm">
             {recentNotes.map((n) => (
               <li key={n.path} className="flex items-center justify-between gap-2">
-                <a
-                  href={`https://github.com/${VAULT_REPO}/blob/main/${encodeURI(n.path)}`}
-                  target="_blank"
-                  rel="noreferrer"
+                <Link
+                  href={vaultPathToHref(n.path)}
                   className="truncate hover:underline"
                 >
                   {n.title}
-                </a>
+                </Link>
                 <span className="text-[10px] text-muted-foreground tabular-nums shrink-0">
                   {n.created || ""}
                 </span>

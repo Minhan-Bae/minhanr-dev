@@ -3,7 +3,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { fetchVaultIndex } from "@/lib/vault-index";
 
-export const metadata = { title: "Links | OIKBAS" };
+export const metadata = {
+  title: "Links | OIKBAS",
+  robots: { index: false, follow: false },
+};
 export const revalidate = 300;
 
 interface LinkItem {

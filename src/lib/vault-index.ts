@@ -225,6 +225,7 @@ export interface ListNotesOptions {
   folder?: string;       // path prefix, e.g. "020_Projects/"
   tag?: string;
   status?: string;
+  excludeStatus?: string | string[]; // Knowledge Hub: published 자동 제외 등
   q?: string;            // case-insensitive substring on title/path
   sort?: "created_desc" | "created_asc" | "title_asc";
   limit?: number;
@@ -237,12 +238,16 @@ export interface ListNotesResult {
 }
 
 export function listNotes(index: VaultIndexFile, opts: ListNotesOptions = {}): ListNotesResult {
-  const { folder, tag, status, q, sort = "created_desc", limit = 50, offset = 0 } = opts;
+  const { folder, tag, status, excludeStatus, q, sort = "created_desc", limit = 50, offset = 0 } = opts;
   const ql = q?.toLowerCase();
+  const excludeSet = excludeStatus
+    ? new Set(Array.isArray(excludeStatus) ? excludeStatus : [excludeStatus])
+    : null;
   const out: VaultNote[] = [];
   for (const [path, rec] of Object.entries(index.notes || {})) {
     if (folder && !path.startsWith(folder)) continue;
     if (status && (rec.status || "no_status") !== status) continue;
+    if (excludeSet && excludeSet.has(rec.status || "no_status")) continue;
     if (tag && !(Array.isArray(rec.tags) && rec.tags.includes(tag))) continue;
     const title = deriveTitle(path);
     if (ql && !path.toLowerCase().includes(ql) && !title.toLowerCase().includes(ql)) continue;
