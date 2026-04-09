@@ -223,6 +223,7 @@ export function aggregate(index: VaultIndexFile): VaultAggregates {
 
 export interface ListNotesOptions {
   folder?: string;       // path prefix, e.g. "020_Projects/"
+  folders?: readonly string[]; // OR 매칭용 prefix 배열 (folder와 함께 쓰면 합집합)
   tag?: string;
   status?: string;
   excludeStatus?: string | string[]; // Knowledge Hub: published 자동 제외 등
@@ -238,14 +239,19 @@ export interface ListNotesResult {
 }
 
 export function listNotes(index: VaultIndexFile, opts: ListNotesOptions = {}): ListNotesResult {
-  const { folder, tag, status, excludeStatus, q, sort = "created_desc", limit = 50, offset = 0 } = opts;
+  const { folder, folders, tag, status, excludeStatus, q, sort = "created_desc", limit = 50, offset = 0 } = opts;
   const ql = q?.toLowerCase();
   const excludeSet = excludeStatus
     ? new Set(Array.isArray(excludeStatus) ? excludeStatus : [excludeStatus])
     : null;
+  // folder와 folders는 OR 합집합. 둘 다 비어 있으면 폴더 필터 없음.
+  const folderPrefixes: string[] = [];
+  if (folder) folderPrefixes.push(folder);
+  if (folders) folderPrefixes.push(...folders);
+  const folderFilterActive = folderPrefixes.length > 0;
   const out: VaultNote[] = [];
   for (const [path, rec] of Object.entries(index.notes || {})) {
-    if (folder && !path.startsWith(folder)) continue;
+    if (folderFilterActive && !folderPrefixes.some((p) => path.startsWith(p))) continue;
     if (status && (rec.status || "no_status") !== status) continue;
     if (excludeSet && excludeSet.has(rec.status || "no_status")) continue;
     if (tag && !(Array.isArray(rec.tags) && rec.tags.includes(tag))) continue;

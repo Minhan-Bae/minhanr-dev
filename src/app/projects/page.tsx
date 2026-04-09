@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { NoteBrowserControls } from "@/components/note-browser-controls";
 import { NoteList } from "@/components/note-list";
 import { aggregate, fetchVaultIndex, listNotes, type ListNotesOptions } from "@/lib/vault-index";
+import { PROJECTS_FOLDERS } from "@/lib/vault-tiers";
 
 export const metadata = {
   title: "Projects | OIKBAS",
@@ -10,7 +11,6 @@ export const metadata = {
 export const revalidate = 300;
 
 const PAGE_SIZE = 24;
-const FOLDER = "020_Projects/";
 
 interface PageProps {
   searchParams: Promise<Record<string, string | undefined>>;
@@ -21,7 +21,9 @@ async function ProjectsContent({ sp }: { sp: Record<string, string | undefined> 
   const agg = aggregate(index);
   const page = Math.max(1, parseInt(sp.page || "1", 10) || 1);
   const opts: ListNotesOptions = {
-    folder: FOLDER,
+    // Tier 2 화이트리스트: 021_R&D + 023_Trinity_x만 공개
+    // (022_지원사업, 024_AIX챌린지는 Tier 3 — auth 필수)
+    folders: PROJECTS_FOLDERS,
     q: sp.q || undefined,
     status: sp.status || undefined,
     // Knowledge Hub: published 노트는 /blog 전용이므로 자동 제외
@@ -40,7 +42,7 @@ async function ProjectsContent({ sp }: { sp: Record<string, string | undefined> 
       <div className="space-y-1">
         <h1 className="text-2xl font-bold tracking-tight">Projects</h1>
         <p className="text-sm text-muted-foreground">
-          020_Projects — R&D · 지원사업 · TrinityX · AIX · 기타 ({total}건)
+          021_R&D · 023_Trinity_x ({total}건) — 지원사업·AIX는 인증 필요
         </p>
       </div>
       <NoteBrowserControls statusOptions={statusOptions} tagOptions={tagOptions} />

@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { NoteBrowserControls } from "@/components/note-browser-controls";
 import { NoteList } from "@/components/note-list";
 import { aggregate, fetchVaultIndex, listNotes, type ListNotesOptions } from "@/lib/vault-index";
+import { PAPERS_FOLDERS } from "@/lib/vault-tiers";
 
 export const metadata = {
   title: "Papers | OIKBAS",
@@ -10,7 +11,6 @@ export const metadata = {
 export const revalidate = 300;
 
 const PAGE_SIZE = 24;
-const FOLDER = "040_Resources/041_Tech/Research/";
 
 interface PageProps {
   searchParams: Promise<Record<string, string | undefined>>;
@@ -21,7 +21,8 @@ async function PapersContent({ sp }: { sp: Record<string, string | undefined> })
   const agg = aggregate(index);
   const page = Math.max(1, parseInt(sp.page || "1", 10) || 1);
   const opts: ListNotesOptions = {
-    folder: FOLDER,
+    // Lab notebook: 040_Resources/041_Tech/Research + 030_Areas/031_Research 결합
+    folders: PAPERS_FOLDERS,
     q: sp.q || undefined,
     status: sp.status || undefined,
     // Knowledge Hub: published 노트는 /blog 전용이므로 자동 제외
@@ -43,7 +44,7 @@ async function PapersContent({ sp }: { sp: Record<string, string | undefined> })
       <div className="space-y-1">
         <h1 className="text-2xl font-bold tracking-tight">Papers</h1>
         <p className="text-sm text-muted-foreground">
-          040_Resources/041_Tech/Research — 논문·기술 노트 ({agg.by_folder["040_Resources"] || 0} Resources 중 {total}건)
+          041_Tech/Research + 031_Research — 논문·기술·주간 리서치 ({total}건)
         </p>
       </div>
       <div className="flex flex-wrap gap-2 text-[10px]">

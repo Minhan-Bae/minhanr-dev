@@ -8,6 +8,8 @@ import {
   deriveNoteTitle,
   deriveNoteSurface,
 } from "@/lib/vault-note";
+import { isTier2Path } from "@/lib/vault-tiers";
+import { createSupabaseServer } from "@/lib/supabase-server";
 
 // ISR: Generate on first visit, cache for vault TTL.
 export const revalidate = 300;
@@ -66,6 +68,19 @@ export default async function NoteDetailPage({ params }: PageProps) {
   // 안전성 체크: .md 파일만 허용
   if (!path.endsWith(".md")) {
     notFound();
+  }
+
+  // 이중 방어: Tier 3 경로(010_Daily, 030_Areas/032_*, 034_Finance 등)는
+  // 미들웨어가 먼저 /login으로 redirect하지만, 만에 하나 우회되더라도
+  // 라우트 자체에서 비인증 사용자에게는 존재 자체를 노출하지 않는다 (404).
+  if (!isTier2Path(path)) {
+    const supabase = await createSupabaseServer();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+      notFound();
+    }
   }
 
   const note = await getVaultNote(path);
