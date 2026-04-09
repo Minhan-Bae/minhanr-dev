@@ -8,7 +8,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { aggregate, getCachedVaultIndex, listNotes } from "@/lib/vault-index";
+import { aggregate, getCachedVaultIndex, KB_HUB_HIDDEN_STATUSES, listNotes } from "@/lib/vault-index";
 import { vaultPathToHref } from "@/lib/vault-note";
 
 export const metadata = {
@@ -80,10 +80,10 @@ async function DashboardContent() {
     if (path.startsWith("000_Inbox/") && created >= weekAgoIso) inboxThisWeek += 1;
   }
 
-  // 진행 중 프로젝트 top 3 (published 제외 — 작업 중인 것만)
+  // 진행 중 프로젝트 top 3 (published/archived 제외 — 작업 중인 것만)
   const { notes: activeProjects } = listNotes(index, {
     folder: "020_Projects/",
-    excludeStatus: "published",
+    excludeStatus: [...KB_HUB_HIDDEN_STATUSES],
     sort: "created_desc",
     limit: 3,
   });
@@ -91,9 +91,9 @@ async function DashboardContent() {
   // 추천 (growing top 3)
   const recommended = agg.recent_growing.slice(0, 3);
 
-  // 최근 노트 5 (published는 /blog 전용이므로 제외 — 작업 중인 것만)
+  // 최근 노트 5 (published/archived 제외 — 작업 중인 것만)
   const { notes: recentNotes } = listNotes(index, {
-    excludeStatus: "published",
+    excludeStatus: [...KB_HUB_HIDDEN_STATUSES],
     sort: "created_desc",
     limit: 5,
   });

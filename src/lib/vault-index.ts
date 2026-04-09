@@ -341,6 +341,27 @@ export interface ListNotesResult {
   total: number;
 }
 
+/**
+ * Knowledge Hub 표면이 기본으로 숨기는 status 목록.
+ *
+ * - `published` → /blog 전용
+ * - `archived`  → 050_Archive로 이동된 것 (만료/정제완료/좀비). v4 lifecycle 정책.
+ *
+ * 사용자가 명시적으로 status 필터를 그 값으로 지정하면 자동 제외에서 빠진다
+ * (kbHubExcludeStatus 헬퍼 사용).
+ */
+export const KB_HUB_HIDDEN_STATUSES = ["published", "archived"] as const;
+
+/**
+ * 페이지 호출처에서 sp.status를 받아 excludeStatus를 계산하는 헬퍼.
+ * 명시적 status 필터가 KB_HUB_HIDDEN_STATUSES에 속하면 그 status는 제외 목록에서 빠진다
+ * (사용자가 의도적으로 archived/published를 보려는 경우).
+ */
+export function kbHubExcludeStatus(explicitStatus?: string): string[] {
+  if (!explicitStatus) return [...KB_HUB_HIDDEN_STATUSES];
+  return KB_HUB_HIDDEN_STATUSES.filter((s) => s !== explicitStatus);
+}
+
 export function listNotes(index: VaultIndexFile, opts: ListNotesOptions = {}): ListNotesResult {
   const { folder, folders, tag, status, excludeStatus, q, sort = "created_desc", limit = 50, offset = 0 } = opts;
   const ql = q?.toLowerCase();

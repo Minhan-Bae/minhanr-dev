@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { NoteBrowserControls } from "@/components/note-browser-controls";
 import { NoteList } from "@/components/note-list";
-import { aggregate, getCachedVaultIndex, listNotes, type ListNotesOptions } from "@/lib/vault-index";
+import { aggregate, getCachedVaultIndex, kbHubExcludeStatus, listNotes, type ListNotesOptions } from "@/lib/vault-index";
 import { PROJECTS_FOLDERS } from "@/lib/vault-tiers";
 
 export const metadata = {
@@ -26,8 +26,8 @@ async function ProjectsContent({ sp }: { sp: Record<string, string | undefined> 
     folders: PROJECTS_FOLDERS,
     q: sp.q || undefined,
     status: sp.status || undefined,
-    // Knowledge Hub: published 노트는 /blog 전용이므로 자동 제외
-    excludeStatus: sp.status === "published" ? undefined : "published",
+    // Knowledge Hub: published(/blog 전용)와 archived(050_Archive 이동) 자동 제외.
+    excludeStatus: kbHubExcludeStatus(sp.status),
     tag: sp.tag || undefined,
     sort: (sp.sort as ListNotesOptions["sort"]) || "created_desc",
     limit: PAGE_SIZE,
