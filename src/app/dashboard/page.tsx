@@ -15,7 +15,7 @@ export const metadata = {
   title: "Dashboard | OIKBAS",
   robots: { index: false, follow: false },
 };
-export const revalidate = 300;
+export const dynamic = "force-dynamic";
 
 function ymd(d: Date): string {
   const y = d.getFullYear();

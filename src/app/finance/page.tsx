@@ -14,7 +14,7 @@ export const metadata = {
   title: "Finance | OIKBAS",
   robots: { index: false, follow: false },
 };
-export const revalidate = 300;
+export const dynamic = "force-dynamic";
 
 interface FinanceNote {
   path: string;

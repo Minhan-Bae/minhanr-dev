@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 import { aggregate, getCachedVaultIndex } from "@/lib/vault-index";
 
-export const revalidate = 300;
+export const dynamic = "force-dynamic";
 
 export async function GET() {
   // Axis metrics from Supabase (existing behavior, kept backward compatible)

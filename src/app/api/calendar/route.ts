@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getFileContent, commitToGitHub } from "@/lib/github";
 
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
 
 interface TimeBlock {
   date: string;
