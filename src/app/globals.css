@@ -86,9 +86,9 @@
 }
 
 .dark {
-  --background: oklch(0.13 0.005 280);
+  --background: oklch(0.16 0.015 280);
   --foreground: oklch(0.985 0 0);
-  --card: oklch(0.18 0.008 280);
+  --card: oklch(0.20 0.02 280);
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.18 0.008 280);
   --popover-foreground: oklch(0.985 0 0);
@@ -145,9 +145,9 @@
 
 .dark {
   --n-50: #f0eef5; --n-100: #e2dff0; --n-200: #c8c4de; --n-300: #a9a3c8;
-  --n-400: #8880a8; --n-500: #6b6490; --n-600: #4a4570; --n-700: #383355;
-  --n-800: #252140; --n-900: #1a1730; --n-950: #100e20;
-  --header-bg: #100e20; --header-border: #252140;
+  --n-400: #8880a8; --n-500: #6b6490; --n-600: #524a7a; --n-700: #3d3660;
+  --n-800: #2a2548; --n-900: #1e1a38; --n-950: #16132a;
+  --header-bg: #16132a; --header-border: #2a2548;
 }
 :root, .light {
   --n-50: #fafafa; --n-100: #f5f5f5; --n-200: #e5e5e5; --n-300: #d4d4d4;
@@ -178,23 +178,23 @@
 
 /* Dark mode: neutral → violet-tinted darks */
 html.dark {
-  .bg-neutral-950 { background-color: #100e20 !important; }
-  .bg-neutral-900 { background-color: #1a1730 !important; }
-  .bg-neutral-900\/30 { background-color: rgb(26 23 48 / 0.3) !important; }
-  .bg-neutral-900\/50 { background-color: rgb(26 23 48 / 0.5) !important; }
-  .bg-neutral-900\/60 { background-color: rgb(26 23 48 / 0.6) !important; }
-  .bg-neutral-800 { background-color: #252140 !important; }
-  .bg-neutral-800\/50 { background-color: rgb(37 33 64 / 0.5) !important; }
-  .bg-neutral-800\/30 { background-color: rgb(37 33 64 / 0.3) !important; }
-  .bg-neutral-700 { background-color: #383355 !important; }
-  .bg-neutral-600 { background-color: #4a4570 !important; }
-  .bg-neutral-950\/50 { background-color: rgb(16 14 32 / 0.5) !important; }
-  .border-neutral-800 { border-color: #2d2850 !important; }
-  .border-neutral-800\/50 { border-color: rgb(45 40 80 / 0.5) !important; }
-  .border-neutral-800\/30 { border-color: rgb(45 40 80 / 0.3) !important; }
-  .border-neutral-700 { border-color: #383355 !important; }
-  .hover\:border-neutral-600:hover { border-color: #4a4570 !important; }
-  .hover\:border-neutral-700:hover { border-color: #383355 !important; }
+  .bg-neutral-950 { background-color: #16132a !important; }
+  .bg-neutral-900 { background-color: #1e1a38 !important; }
+  .bg-neutral-900\/30 { background-color: rgb(30 26 56 / 0.3) !important; }
+  .bg-neutral-900\/50 { background-color: rgb(30 26 56 / 0.5) !important; }
+  .bg-neutral-900\/60 { background-color: rgb(30 26 56 / 0.6) !important; }
+  .bg-neutral-800 { background-color: #2a2548 !important; }
+  .bg-neutral-800\/50 { background-color: rgb(42 37 72 / 0.5) !important; }
+  .bg-neutral-800\/30 { background-color: rgb(42 37 72 / 0.3) !important; }
+  .bg-neutral-700 { background-color: #3d3660 !important; }
+  .bg-neutral-600 { background-color: #524a7a !important; }
+  .bg-neutral-950\/50 { background-color: rgb(22 19 42 / 0.5) !important; }
+  .border-neutral-800 { border-color: #332d58 !important; }
+  .border-neutral-800\/50 { border-color: rgb(51 45 88 / 0.5) !important; }
+  .border-neutral-800\/30 { border-color: rgb(51 45 88 / 0.3) !important; }
+  .border-neutral-700 { border-color: #3d3660 !important; }
+  .hover\:border-neutral-600:hover { border-color: #524a7a !important; }
+  .hover\:border-neutral-700:hover { border-color: #3d3660 !important; }
 }
 
 /* Light mode: invert the neutral scale so dark classes become light */
