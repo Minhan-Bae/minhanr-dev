@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { getCachedVaultIndex } from "@/lib/vault-index";
+import { BoostButton, SuppressButton } from "@/components/trends-actions";
 
 export const metadata = {
   title: "Trends | OIKBAS",
@@ -122,6 +123,8 @@ async function TrendsContent() {
                   <div className="flex items-center gap-2">
                     <div className="h-2 rounded-full bg-primary" style={{ width: `${Math.min(count * 8, 120)}px` }} />
                     <span className="text-xs text-muted-foreground w-6 text-right">{count}</span>
+                    <BoostButton target={domain} label="강화" />
+                    <SuppressButton target={domain} />
                   </div>
                 </div>
               ))}

@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { getCachedVaultIndex } from "@/lib/vault-index";
+import { WatchlistAdd } from "@/components/finance-actions";
 
 export const metadata = {
   title: "Finance | OIKBAS",
@@ -97,7 +98,10 @@ async function FinanceContent() {
       <Card>
         <CardHeader>
           <CardTitle>Insider Scan</CardTitle>
-          <CardDescription>내부자 매수 신호 (OpenInsider)</CardDescription>
+          <CardDescription className="flex items-center justify-between">
+            <span>내부자 매수 신호 (OpenInsider)</span>
+            <WatchlistAdd />
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
