@@ -251,7 +251,7 @@ function AxisDrilldown({
 
 const STATUS_COLORS: Record<string, string> = {
   seed: "bg-yellow-500",
-  growing: "bg-blue-500",
+  growing: "bg-primary",
   published: "bg-green-500",
   active: "bg-cyan-500",
   mature: "bg-purple-500",
@@ -331,7 +331,7 @@ function StatusDistribution({
 function PipelineFlow() {
   const steps = [
     { label: "수집", sub: "Collect", color: "border-green-400 text-green-400" },
-    { label: "정제", sub: "Refine", color: "border-blue-400 text-blue-400" },
+    { label: "정제", sub: "Refine", color: "border-primary text-primary" },
     { label: "수렴", sub: "Converge", color: "border-cyan-400 text-cyan-400" },
     {
       label: "확산",
@@ -364,7 +364,7 @@ function PipelineFlow() {
 /* ── Agent badge colors ── */
 
 const AGENT_BADGE_COLORS: Record<string, string> = {
-  Alpha: "bg-blue-400/20 text-blue-300",
+  Alpha: "bg-primary/20 text-primary",
   Beta: "bg-green-400/20 text-green-300",
   Gamma: "bg-purple-400/20 text-purple-300",
   "RT Slot 1": "bg-emerald-400/20 text-emerald-300",

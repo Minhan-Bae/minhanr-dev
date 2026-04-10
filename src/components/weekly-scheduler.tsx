@@ -49,7 +49,7 @@ const ROUTINE_COLORS = [
 ];
 
 const CAT_COLORS: Record<string, string> = {
-  event: "bg-blue-500 border-blue-400",
+  event: "bg-primary border-primary",
   meeting: "bg-orange-500 border-orange-400",
   workout: "bg-green-500 border-green-400",
   study: "bg-cyan-500 border-cyan-400",
@@ -230,7 +230,7 @@ export function WeeklyScheduler() {
           </span>
           <button type="button" onClick={closeForm} className="text-neutral-600 hover:text-neutral-400 text-sm leading-none">&times;</button>
         </div>
-        <input type="text" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="What's happening?" required autoFocus className="w-full rounded border border-neutral-700 bg-neutral-950 px-2 py-1.5 text-xs text-neutral-100 placeholder:text-neutral-600 focus:border-blue-500 focus:outline-none" />
+        <input type="text" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="What's happening?" required autoFocus className="w-full rounded border border-neutral-700 bg-neutral-950 px-2 py-1.5 text-xs text-neutral-100 placeholder:text-neutral-600 focus:border-primary focus:outline-none" />
         <div className="grid grid-cols-2 gap-2">
           <select value={form.start_hour} onChange={(e) => setForm({ ...form, start_hour: Number(e.target.value) })} className="rounded border border-neutral-700 bg-neutral-950 px-1 py-1 text-[10px] text-neutral-300">
             {HOURS.map((h) => <option key={h} value={h}>{String(h).padStart(2, "0")}:00</option>)}
@@ -304,9 +304,9 @@ export function WeeklyScheduler() {
             {weekDates.map((date, i) => {
               const isToday = toISODate(date) === toISODate(new Date());
               return (
-                <div key={i} className={`sticky top-0 bg-neutral-950 border-b border-neutral-800 h-8 flex flex-col items-center justify-center z-10 ${isToday ? "!bg-blue-500/10" : ""}`}>
-                  <span className={`text-[9px] font-medium ${isToday ? "text-blue-400" : "text-neutral-400"}`}>{DAY_LABELS[i]}</span>
-                  <span className={`text-[8px] ${isToday ? "text-blue-400 font-bold" : "text-neutral-600"}`}>{formatDate(date)}</span>
+                <div key={i} className={`sticky top-0 bg-neutral-950 border-b border-neutral-800 h-8 flex flex-col items-center justify-center z-10 ${isToday ? "!bg-primary/10" : ""}`}>
+                  <span className={`text-[9px] font-medium ${isToday ? "text-primary" : "text-neutral-400"}`}>{DAY_LABELS[i]}</span>
+                  <span className={`text-[8px] ${isToday ? "text-primary font-bold" : "text-neutral-600"}`}>{formatDate(date)}</span>
                 </div>
               );
             })}
@@ -327,8 +327,8 @@ export function WeeklyScheduler() {
                     <div
                       key={dayIdx}
                       className={`relative border-b border-r border-neutral-800/30 select-none transition-colors ${bgClass} ${
-                        isDragSelected(dayIdx, hour) ? "!bg-blue-500/30" : "hover:brightness-125"
-                      } ${isToday ? "bg-blue-500/5" : ""} ${occupied ? "cursor-default" : "cursor-crosshair"}`}
+                        isDragSelected(dayIdx, hour) ? "!bg-primary/30" : "hover:brightness-125"
+                      } ${isToday ? "bg-primary/5" : ""} ${occupied ? "cursor-default" : "cursor-crosshair"}`}
                       style={{ height: CELL_H }}
                       onMouseDown={(e) => { if (!occupied) handleMouseDown(dayIdx, hour, e); }}
                       onMouseEnter={() => handleMouseEnter(dayIdx, hour)}
@@ -385,7 +385,7 @@ function RoutineSettings({ routines, onSave }: { routines: RoutineBlock[]; onSav
       <div className="space-y-1.5">
         {blocks.map((b, i) => (
           <div key={i} className="grid grid-cols-[1fr_60px_60px_1fr_24px] gap-1.5 items-center">
-            <input value={b.label} onChange={(e) => update(i, "label", e.target.value)} className="rounded border border-neutral-700 bg-neutral-950 px-1.5 py-0.5 text-[10px] text-neutral-300 focus:outline-none focus:border-blue-500" />
+            <input value={b.label} onChange={(e) => update(i, "label", e.target.value)} className="rounded border border-neutral-700 bg-neutral-950 px-1.5 py-0.5 text-[10px] text-neutral-300 focus:outline-none focus:border-primary" />
             <select value={b.start} onChange={(e) => update(i, "start", Number(e.target.value))} className="rounded border border-neutral-700 bg-neutral-950 px-0.5 py-0.5 text-[9px] text-neutral-300">
               {HOURS.map((h) => <option key={h} value={h}>{String(h).padStart(2, "0")}:00</option>)}
             </select>

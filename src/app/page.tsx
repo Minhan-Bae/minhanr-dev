@@ -58,7 +58,7 @@ function timeAgo(dateStr: string | null): string {
 }
 
 const AGENT_COLORS: Record<string, string> = {
-  Alpha: "text-blue-400",
+  Alpha: "text-primary",
   Beta: "text-emerald-400",
   Gamma: "text-purple-400",
   "RT Slot 1": "text-cyan-400",

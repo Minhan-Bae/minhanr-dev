@@ -17,9 +17,9 @@ export const AGENTS = [
     layer: 2,
     axis: "convergence" as const,
     description: "볼트 정제 · 프론트매터 정규화 · 링킹 고도화",
-    color: "text-blue-400",
-    bgColor: "bg-blue-400/10",
-    borderColor: "border-blue-400/30",
+    color: "text-primary",
+    bgColor: "bg-primary/10",
+    borderColor: "border-primary/30",
   },
   {
     name: "beta",
@@ -89,6 +89,6 @@ export const AXIS_LABELS: Record<Axis, string> = {
 
 export const AXIS_COLORS: Record<Axis, string> = {
   acquisition: "text-green-400",
-  convergence: "text-blue-400",
+  convergence: "text-primary",
   amplification: "text-purple-400",
 };

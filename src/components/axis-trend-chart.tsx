@@ -71,14 +71,14 @@ export function AxisTrendChart({ history }: { history: AxisMetricRow[] }) {
         <XAxis
           dataKey="date"
           tickFormatter={formatDate}
-          tick={{ fill: "#737373", fontSize: 11 }}
-          axisLine={{ stroke: "#404040" }}
+          tick={{ fill: "#6b6490", fontSize: 11 }}
+          axisLine={{ stroke: "#3d3660" }}
           tickLine={false}
         />
         <YAxis
           domain={[0, 100]}
-          tick={{ fill: "#737373", fontSize: 11 }}
-          axisLine={{ stroke: "#404040" }}
+          tick={{ fill: "#6b6490", fontSize: 11 }}
+          axisLine={{ stroke: "#3d3660" }}
           tickLine={false}
           tickFormatter={(v) => `${v}%`}
         />

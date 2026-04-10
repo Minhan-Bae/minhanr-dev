@@ -97,7 +97,7 @@ export function BlogList({ posts }: { posts: PostMeta[] }) {
             onClick={() => setSelectedCategory(selectedCategory === cat ? null : cat)}
             className={`rounded-full px-3 py-1 text-xs border transition-colors ${
               selectedCategory === cat
-                ? "border-blue-500 bg-blue-500/10 text-blue-400"
+                ? "border-primary bg-primary/10 text-primary"
                 : "border-neutral-800 text-neutral-500 hover:border-neutral-600 hover:text-neutral-300"
             }`}
           >

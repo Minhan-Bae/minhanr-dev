@@ -48,7 +48,7 @@ export function FloatingQuickNote() {
       {!open && (
         <button
           onClick={() => setOpen(true)}
-          className="fixed bottom-6 right-6 z-40 w-12 h-12 rounded-full bg-blue-600 hover:bg-blue-500 text-white shadow-lg flex items-center justify-center text-lg transition-colors"
+          className="fixed bottom-6 right-6 z-40 w-12 h-12 rounded-full bg-primary hover:bg-primary/80 text-white shadow-lg flex items-center justify-center text-lg transition-colors"
           title="Quick Note → Vault"
         >
           ✎
@@ -76,14 +76,14 @@ export function FloatingQuickNote() {
                 handleSave();
               }
             }}
-            className="w-full rounded border border-neutral-700 bg-neutral-950 px-2 py-1.5 text-xs text-neutral-100 placeholder:text-neutral-600 focus:border-blue-500 focus:outline-none resize-none"
+            className="w-full rounded border border-neutral-700 bg-neutral-950 px-2 py-1.5 text-xs text-neutral-100 placeholder:text-neutral-600 focus:border-primary focus:outline-none resize-none"
           />
           <div className="flex items-center justify-between">
             <span className="text-[8px] text-neutral-600">Enter to save · Shift+Enter for newline</span>
             <button
               onClick={handleSave}
               disabled={!text.trim() || saving}
-              className="rounded bg-blue-600 hover:bg-blue-500 disabled:bg-neutral-700 px-2.5 py-1 text-[10px] text-white font-medium transition-colors"
+              className="rounded bg-primary hover:bg-primary/80 disabled:bg-neutral-700 px-2.5 py-1 text-[10px] text-white font-medium transition-colors"
             >
               {saving ? "..." : "Save"}
             </button>

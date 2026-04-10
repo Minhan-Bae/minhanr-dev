@@ -84,7 +84,7 @@ export function QuickNote() {
               onChange={(e) => setDraft(e.target.value)}
               placeholder="Quick thought, idea, or note..."
               rows={3}
-              className="w-full rounded border border-neutral-700 bg-neutral-900 px-3 py-2 text-xs text-neutral-100 placeholder:text-neutral-600 focus:border-blue-500 focus:outline-none resize-none"
+              className="w-full rounded border border-neutral-700 bg-neutral-900 px-3 py-2 text-xs text-neutral-100 placeholder:text-neutral-600 focus:border-primary focus:outline-none resize-none"
               onKeyDown={(e) => {
                 if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
                   e.preventDefault();
@@ -128,7 +128,7 @@ export function QuickNote() {
                       setEditId(editId === note.id ? null : note.id);
                       setEditContent(note.content);
                     }}
-                    className="text-[10px] text-neutral-600 hover:text-blue-400 transition-colors px-1"
+                    className="text-[10px] text-neutral-600 hover:text-primary transition-colors px-1"
                   >
                     ✎
                   </button>
@@ -148,7 +148,7 @@ export function QuickNote() {
                     value={editContent}
                     onChange={(e) => setEditContent(e.target.value)}
                     rows={3}
-                    className="w-full rounded border border-neutral-700 bg-neutral-900 px-2 py-1 text-[11px] text-neutral-200 focus:border-blue-500 focus:outline-none resize-none"
+                    className="w-full rounded border border-neutral-700 bg-neutral-900 px-2 py-1 text-[11px] text-neutral-200 focus:border-primary focus:outline-none resize-none"
                   />
                   <div className="flex gap-1 justify-end">
                     <Button size="xs" variant="outline" className="text-[8px] h-4" onClick={() => setEditId(null)}>Cancel</Button>

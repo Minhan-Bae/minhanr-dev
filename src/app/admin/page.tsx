@@ -103,7 +103,7 @@ function timeAgo(dateStr: string | null): string {
 const PRIORITY_COLORS: Record<string, string> = {
   P0: "bg-red-500/20 text-red-300 border-red-500/30",
   P1: "bg-orange-500/20 text-orange-300 border-orange-500/30",
-  P2: "bg-blue-500/20 text-blue-300 border-blue-500/30",
+  P2: "bg-primary/20 text-primary border-primary/30",
   P3: "bg-neutral-500/20 text-neutral-300 border-neutral-500/30",
 };
 
@@ -116,7 +116,7 @@ const COLUMN_LABELS: Record<string, string> = {
 };
 
 const AGENT_BADGE: Record<string, string> = {
-  Alpha: "bg-blue-400/20 text-blue-300",
+  Alpha: "bg-primary/20 text-primary",
   Beta: "bg-green-400/20 text-green-300",
   Gamma: "bg-purple-400/20 text-purple-300",
   "RT Slot 1": "bg-emerald-400/20 text-emerald-300",
@@ -283,7 +283,7 @@ function CostTracker({ commits }: { commits: Commit[] }) {
   }, [commits]);
 
   const barColors: Record<string, string> = {
-    Alpha: "bg-blue-400",
+    Alpha: "bg-primary",
     Beta: "bg-green-400",
     Gamma: "bg-purple-400",
     "RT Slot 1": "bg-emerald-400",
@@ -425,7 +425,7 @@ function VaultExplorer({ vault }: { vault: VaultData | null }) {
             onClick={() => setStatusFilter("")}
             className={`rounded px-2 py-0.5 text-[10px] border transition-colors ${
               !statusFilter
-                ? "border-blue-500 text-blue-300"
+                ? "border-primary text-primary"
                 : "border-neutral-700 text-neutral-500 hover:text-neutral-300"
             }`}
           >
@@ -437,7 +437,7 @@ function VaultExplorer({ vault }: { vault: VaultData | null }) {
               onClick={() => setStatusFilter(statusFilter === s ? "" : s)}
               className={`rounded px-2 py-0.5 text-[10px] border transition-colors ${
                 statusFilter === s
-                  ? "border-blue-500 text-blue-300"
+                  ? "border-primary text-primary"
                   : "border-neutral-700 text-neutral-500 hover:text-neutral-300"
               }`}
             >
@@ -538,7 +538,7 @@ function TaskKanban({
                 {...provided.droppableProps}
                 className={`rounded-lg border p-2 min-h-[200px] ${
                   snapshot.isDraggingOver
-                    ? "border-blue-500/50 bg-blue-500/5"
+                    ? "border-primary/50 bg-primary/5"
                     : "border-neutral-800 bg-neutral-900/30"
                 }`}
               >
@@ -670,7 +670,7 @@ function SystemLog({
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search commits..."
-          className="flex-1 max-w-[240px] rounded border border-neutral-700 bg-neutral-900 px-2 py-1 text-[10px] text-neutral-300 placeholder:text-neutral-600 focus:border-blue-500 focus:outline-none"
+          className="flex-1 max-w-[240px] rounded border border-neutral-700 bg-neutral-900 px-2 py-1 text-[10px] text-neutral-300 placeholder:text-neutral-600 focus:border-primary focus:outline-none"
         />
       </div>
 
@@ -679,7 +679,7 @@ function SystemLog({
           onClick={() => onFilterChange("")}
           className={`rounded px-2 py-0.5 text-[10px] border transition-colors ${
             !filter
-              ? "border-blue-500 text-blue-300"
+              ? "border-primary text-primary"
               : "border-neutral-700 text-neutral-500 hover:text-neutral-300"
           }`}
         >
@@ -691,7 +691,7 @@ function SystemLog({
             onClick={() => onFilterChange(name)}
             className={`rounded px-2 py-0.5 text-[10px] border transition-colors ${
               filter === name
-                ? "border-blue-500 text-blue-300"
+                ? "border-primary text-primary"
                 : "border-neutral-700 text-neutral-500 hover:text-neutral-300"
             }`}
           >
@@ -849,7 +849,7 @@ function CreateTaskForm({ onCreated }: { onCreated: () => void }) {
         onChange={(e) => setTitle(e.target.value)}
         placeholder="New task title..."
         required
-        className="flex-1 min-w-[200px] rounded border border-neutral-700 bg-neutral-900 px-2 py-1.5 text-xs text-neutral-100 placeholder:text-neutral-600 focus:border-blue-500 focus:outline-none"
+        className="flex-1 min-w-[200px] rounded border border-neutral-700 bg-neutral-900 px-2 py-1.5 text-xs text-neutral-100 placeholder:text-neutral-600 focus:border-primary focus:outline-none"
       />
       <select
         value={axis}
@@ -986,7 +986,7 @@ export default function AdminDashboard() {
               onClick={() => setActiveTab(item.key)}
               className={`w-full flex items-center gap-2.5 px-3 py-2 text-xs transition-colors ${
                 activeTab === item.key
-                  ? "bg-blue-500/10 text-blue-400 border-r-2 border-blue-500"
+                  ? "bg-primary/10 text-primary border-r-2 border-primary"
                   : "text-neutral-500 hover:text-neutral-300 hover:bg-neutral-800/50"
               }`}
             >

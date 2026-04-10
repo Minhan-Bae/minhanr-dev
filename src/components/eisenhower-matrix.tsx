@@ -26,14 +26,14 @@ interface Quadrant {
 
 const QUADRANTS: Quadrant[] = [
   { priority: "P0", label: "DO NOW", sublabel: "긴급 + 중요", color: "text-red-400", borderColor: "border-red-500/40", bgColor: "bg-red-500/5" },
-  { priority: "P1", label: "SCHEDULE", sublabel: "비긴급 + 중요", color: "text-blue-400", borderColor: "border-blue-500/40", bgColor: "bg-blue-500/5" },
+  { priority: "P1", label: "SCHEDULE", sublabel: "비긴급 + 중요", color: "text-primary", borderColor: "border-primary/40", bgColor: "bg-primary/5" },
   { priority: "P2", label: "DELEGATE", sublabel: "긴급 + 비중요", color: "text-amber-400", borderColor: "border-amber-500/40", bgColor: "bg-amber-500/5" },
   { priority: "P3", label: "ELIMINATE", sublabel: "비긴급 + 비중요", color: "text-neutral-400", borderColor: "border-neutral-500/40", bgColor: "bg-neutral-500/5" },
 ];
 
 const AXIS_BADGE: Record<string, string> = {
   acquisition: "bg-green-400/20 text-green-300",
-  convergence: "bg-blue-400/20 text-blue-300",
+  convergence: "bg-primary/20 text-primary",
   amplification: "bg-purple-400/20 text-purple-300",
 };
 
@@ -124,7 +124,7 @@ export function EisenhowerMatrix({
     return (
       <div
         className={`rounded-lg border p-2 min-h-[140px] transition-colors ${q.borderColor} ${q.bgColor} ${
-          isOver ? "ring-1 ring-blue-500/50 brightness-110" : ""
+          isOver ? "ring-1 ring-primary/50 brightness-110" : ""
         }`}
         onDragOver={(e) => handleDragOver(e, q.priority)}
         onDragLeave={() => setDragOverQuadrant(null)}
@@ -153,7 +153,7 @@ export function EisenhowerMatrix({
               onKeyDown={(e) => { if (e.key === "Enter") handleInlineCreate(q.priority); if (e.key === "Escape") setInlineCreate(null); }}
               placeholder="Task title..."
               autoFocus
-              className="w-full rounded border border-neutral-700 bg-neutral-950 px-1.5 py-1 text-[10px] text-neutral-200 placeholder:text-neutral-600 focus:border-blue-500 focus:outline-none"
+              className="w-full rounded border border-neutral-700 bg-neutral-950 px-1.5 py-1 text-[10px] text-neutral-200 placeholder:text-neutral-600 focus:border-primary focus:outline-none"
             />
           </div>
         )}

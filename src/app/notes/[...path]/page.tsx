@@ -156,7 +156,7 @@ export default async function NoteDetailPage({ params }: PageProps) {
             prose-h2:text-lg prose-h2:mt-8 prose-h2:mb-3
             prose-h3:text-base prose-h3:mt-6 prose-h3:mb-2
             prose-p:text-neutral-300 prose-p:leading-relaxed
-            prose-a:text-blue-400 prose-a:no-underline hover:prose-a:underline
+            prose-a:text-primary prose-a:no-underline hover:prose-a:underline
             prose-strong:text-neutral-200
             prose-code:text-sm prose-code:bg-neutral-800 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-neutral-300
             prose-pre:bg-neutral-900 prose-pre:border prose-pre:border-neutral-800 prose-pre:rounded-lg

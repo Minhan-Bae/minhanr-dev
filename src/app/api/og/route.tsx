@@ -18,7 +18,7 @@ export async function GET(request: Request) {
             display: "flex",
             flexDirection: "column",
             justifyContent: "space-between",
-            backgroundColor: "#0a0a0a",
+            backgroundColor: "#16132a",
             fontFamily: "sans-serif",
             padding: "60px",
           }}
@@ -60,11 +60,11 @@ export async function GET(request: Request) {
             </span>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-            <span style={{ fontSize: "16px", color: "#737373" }}>
+            <span style={{ fontSize: "16px", color: "#6b6490" }}>
               minhanr.dev/blog
             </span>
-            <span style={{ fontSize: "16px", color: "#525252" }}>·</span>
-            <span style={{ fontSize: "16px", color: "#737373" }}>
+            <span style={{ fontSize: "16px", color: "#524a7a" }}>·</span>
+            <span style={{ fontSize: "16px", color: "#6b6490" }}>
               AI · VFX · Creative Technology
             </span>
           </div>
@@ -85,7 +85,7 @@ export async function GET(request: Request) {
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          backgroundColor: "#0a0a0a",
+          backgroundColor: "#16132a",
           fontFamily: "sans-serif",
         }}
       >
@@ -177,7 +177,7 @@ export async function GET(request: Request) {
         <span
           style={{
             fontSize: "16px",
-            color: "#737373",
+            color: "#6b6490",
           }}
         >
           {AGENTS.length} AI Agents · 3-Axis Orchestration · minhanr.dev
