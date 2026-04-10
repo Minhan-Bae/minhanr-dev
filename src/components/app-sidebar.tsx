@@ -16,6 +16,9 @@ import {
   Newspaper,
   Shield,
   Home,
+  CheckCircle2,
+  TrendingUp,
+  Wallet,
 } from "lucide-react";
 
 import {
@@ -68,12 +71,17 @@ const NAV_GROUPS: NavGroup[] = [
     label: "Insights",
     items: [
       { title: "Statistics", href: "/statistics", icon: BarChart3 },
+      { title: "Trends", href: "/trends", icon: TrendingUp },
+      { title: "Finance", href: "/finance", icon: Wallet },
       { title: "Deadlines", href: "/deadlines", icon: CalendarClock },
     ],
   },
   {
     label: "Publish",
-    items: [{ title: "Blog", href: "/blog", icon: Newspaper }],
+    items: [
+      { title: "Review", href: "/review", icon: CheckCircle2 },
+      { title: "Blog", href: "/blog", icon: Newspaper },
+    ],
   },
   {
     label: "System",
