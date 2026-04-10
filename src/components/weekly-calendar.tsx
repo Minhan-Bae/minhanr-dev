@@ -59,7 +59,7 @@ export function WeeklyCalendar() {
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/calendar?date=${baseDate}`);
+      const res = await fetch(`/api/calendar?date=${baseDate}&_t=${Date.now()}`, { cache: "no-store" });
       const json = await res.json();
       setData(json);
     } catch {
