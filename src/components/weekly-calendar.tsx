@@ -89,24 +89,26 @@ export function WeeklyCalendar() {
     } catch { /* */ }
   }, []);
 
-  const fetchData = useCallback(async () => {
-    setLoading(true);
+  const fetchData = useCallback(async (showLoading = false) => {
+    if (showLoading) setLoading(true);
     try {
       const res = await fetch(`/api/calendar?date=${baseDate}&_t=${Date.now()}`, { cache: "no-store" });
       setData(await res.json());
-    } catch { setData(null); }
-    setLoading(false);
+    } catch { if (showLoading) setData(null); }
+    if (showLoading) setLoading(false);
   }, [baseDate]);
 
-  useEffect(() => { fetchData(); }, [fetchData]);
+  useEffect(() => { fetchData(true); }, [fetchData]);
   useEffect(() => {
     const id = setInterval(() => { const n = getNowKST(); setNowMinute(n.getUTCHours() * 60 + n.getUTCMinutes()); }, 60000);
     return () => clearInterval(id);
   }, []);
+  const hasScrolled = useRef(false);
   useEffect(() => {
-    if (!loading && scrollRef.current) {
+    if (!loading && scrollRef.current && !hasScrolled.current) {
       const currentHour = Math.floor(nowMinute / 60);
       scrollRef.current.scrollTop = Math.max(0, (currentHour - 8) * CELL_H);
+      hasScrolled.current = true;
     }
   }, [loading, nowMinute]);
 
@@ -140,48 +142,88 @@ export function WeeklyCalendar() {
   }
   useEffect(() => { function onUp() { if (isDragging) { setIsDragging(false); setDragStart(null); setDragEnd(null); } } window.addEventListener("mouseup", onUp); return () => window.removeEventListener("mouseup", onUp); });
 
-  // ── API Actions ──
+  // ── Optimistic helpers ──
+  function updateLocalData(mutator: (d: CalendarData) => CalendarData) {
+    setData((prev) => prev ? mutator(structuredClone(prev)) : prev);
+  }
+
+  // ── API Actions (optimistic) ──
   async function addBlock() {
     if (!popup) return;
-    setSubmitting(true);
+    const newBlock: TimeBlock = { date: popup.date, startHour: popup.startHour, endHour: popup.endHour, category: popupForm.category, memo: popupForm.memo };
+
+    // Optimistic: add to local state immediately
+    updateLocalData((d) => {
+      const day = d.days.find((dd) => dd.date === popup.date);
+      if (day) day.blocks.push(newBlock);
+      return d;
+    });
+    setPopup(null);
+
+    // Background API
     try {
       const res = await fetch("/api/calendar", { method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ date: popup.date, startHour: popup.startHour, endHour: popup.endHour, category: popupForm.category, memo: popupForm.memo }) });
-      if ((await res.json()).ok) { setPopup(null); fetchData(); }
-    } catch { /* */ }
-    setSubmitting(false);
+        body: JSON.stringify(newBlock) });
+      const result = await res.json();
+      if (!result.ok) fetchData(); // rollback on failure
+    } catch { fetchData(); }
   }
 
   async function deleteBlock(block: TimeBlock) {
-    setSubmitting(true);
+    // Optimistic: remove from local state immediately
+    updateLocalData((d) => {
+      const day = d.days.find((dd) => dd.date === block.date);
+      if (day) day.blocks = day.blocks.filter((b) => !(b.startHour === block.startHour && b.endHour === block.endHour));
+      return d;
+    });
+    setContextBlock(null);
+
     try {
       const res = await fetch("/api/calendar", { method: "DELETE", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ date: block.date, startHour: block.startHour, endHour: block.endHour }) });
-      if ((await res.json()).ok) { setContextBlock(null); fetchData(); }
-    } catch { /* */ }
-    setSubmitting(false);
+      if (!(await res.json()).ok) fetchData();
+    } catch { fetchData(); }
   }
 
   async function updateBlock() {
     if (!editing) return;
-    setSubmitting(true);
+    const updatedBlock: TimeBlock = { date: editing.date, startHour: parseInt(editForm.startHour), endHour: parseInt(editForm.endHour), category: editForm.category, memo: editForm.memo };
+
+    // Optimistic: replace in local state
+    updateLocalData((d) => {
+      const day = d.days.find((dd) => dd.date === editing.date);
+      if (day) {
+        day.blocks = day.blocks.map((b) =>
+          b.startHour === editing.startHour && b.endHour === editing.endHour ? updatedBlock : b
+        );
+      }
+      return d;
+    });
+    setEditing(null);
+
     try {
       const res = await fetch("/api/calendar", { method: "PATCH", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ date: editing.date, action: "update_block",
           oldStartHour: editing.startHour, oldEndHour: editing.endHour,
-          startHour: parseInt(editForm.startHour), endHour: parseInt(editForm.endHour),
-          category: editForm.category, memo: editForm.memo }) });
-      if ((await res.json()).ok) { setEditing(null); fetchData(); }
-    } catch { /* */ }
-    setSubmitting(false);
+          startHour: updatedBlock.startHour, endHour: updatedBlock.endHour,
+          category: updatedBlock.category, memo: updatedBlock.memo }) });
+      if (!(await res.json()).ok) fetchData();
+    } catch { fetchData(); }
   }
 
   async function saveTitle(date: string, title: string) {
+    // Optimistic
+    updateLocalData((d) => {
+      const day = d.days.find((dd) => dd.date === date);
+      if (day) day.title = title;
+      return d;
+    });
+    setEditingTitle(null);
+
     try {
       await fetch("/api/calendar", { method: "PATCH", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ date, action: "set_title", title }) });
-      setEditingTitle(null); fetchData();
-    } catch { /* */ }
+    } catch { fetchData(); }
   }
 
   // ── Close popups on outside click ──
