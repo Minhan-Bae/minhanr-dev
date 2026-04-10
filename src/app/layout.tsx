@@ -67,17 +67,22 @@ export default function RootLayout({
           <SidebarProvider>
             <AppSidebar />
             <SidebarInset className="flex min-h-svh flex-col">
-              <header className="flex h-12 shrink-0 items-center gap-2 border-b border-border px-4">
+              <header className="flex h-11 shrink-0 items-center gap-2 border-b border-border/50 px-4 bg-background/80 backdrop-blur-sm sticky top-0 z-30">
                 <SidebarTrigger className="-ml-1" />
                 <div className="flex flex-1 items-center justify-between">
-                  <span className="text-sm font-semibold tracking-tight">
-                    OIKBAS — Knowledge Hub
+                  <span className="text-sm font-semibold tracking-tight text-foreground/80">
+                    OIKBAS
                   </span>
+                  <div className="flex items-center gap-2">
+                    <kbd className="hidden sm:inline-flex items-center gap-1 rounded-md border border-border/50 bg-muted/30 px-2 py-0.5 text-[10px] text-muted-foreground">
+                      <span className="text-xs">⌘</span>K
+                    </kbd>
+                  </div>
                 </div>
               </header>
-              <main className="flex-1">{children}</main>
-              <footer className="border-t border-border px-6 py-3 text-xs text-muted-foreground text-center">
-                minhanr.dev &mdash; Powered by TrinityX
+              <main className="flex-1 animate-in fade-in duration-300">{children}</main>
+              <footer className="border-t border-border/30 px-6 py-2.5 text-[11px] text-muted-foreground/50 text-center">
+                minhanr.dev · TrinityX v7.0
               </footer>
             </SidebarInset>
           </SidebarProvider>
