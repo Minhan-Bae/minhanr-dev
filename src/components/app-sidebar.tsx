@@ -54,9 +54,8 @@ const NAV_GROUPS: NavGroup[] = [
     label: "Workspace",
     items: [
       { title: "Home", href: "/", icon: Home },
-      { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
       { title: "Calendar", href: "/calendar", icon: Calendar },
-      { title: "Command Center", href: "/command", icon: Activity },
+      { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
     ],
   },
   {
@@ -65,21 +64,17 @@ const NAV_GROUPS: NavGroup[] = [
       { title: "Notes", href: "/notes", icon: FileText },
       { title: "Papers", href: "/papers", icon: BookOpen },
       { title: "Projects", href: "/projects", icon: FolderKanban },
-      { title: "Tags", href: "/tags", icon: Tag },
-      { title: "Links", href: "/links", icon: Link2 },
     ],
   },
   {
     label: "Insights",
     items: [
-      { title: "Statistics", href: "/statistics", icon: BarChart3 },
       { title: "Trends", href: "/trends", icon: TrendingUp },
       { title: "Finance", href: "/finance", icon: Wallet },
-      { title: "Deadlines", href: "/deadlines", icon: CalendarClock },
     ],
   },
   {
-    label: "Publish",
+    label: "Actions",
     items: [
       { title: "Review", href: "/review", icon: CheckCircle2 },
       { title: "Blog", href: "/blog", icon: Newspaper },
@@ -87,7 +82,10 @@ const NAV_GROUPS: NavGroup[] = [
   },
   {
     label: "System",
-    items: [{ title: "Admin", href: "/admin", icon: Shield }],
+    items: [
+      { title: "Command", href: "/command", icon: Activity },
+      { title: "Admin", href: "/admin", icon: Shield },
+    ],
   },
 ];
 
