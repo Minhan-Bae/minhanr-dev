@@ -41,27 +41,34 @@ function catStyle(cat: string) {
 }
 
 const HOURS = Array.from({ length: 17 }, (_, i) => i + 7);
+const CELL_H = 48; // px per hour row
+
+function getNowKST() {
+  return new Date(Date.now() + 9 * 60 * 60 * 1000);
+}
 
 export function WeeklyCalendar() {
   const [data, setData] = useState<CalendarData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [baseDate, setBaseDate] = useState(() => {
-    const now = new Date(Date.now() + 9 * 60 * 60 * 1000);
-    return now.toISOString().split("T")[0];
-  });
-  const [view, setView] = useState<"week" | "3day">("week");
+  const [baseDate, setBaseDate] = useState(() => getNowKST().toISOString().split("T")[0]);
+  const [view, setView] = useState<"week" | "3day">("3day"); // 3일 기본
 
-  // Drag selection state
+  // Drag
   const [dragStart, setDragStart] = useState<{ date: string; hour: number } | null>(null);
   const [dragEnd, setDragEnd] = useState<{ date: string; hour: number } | null>(null);
   const [isDragging, setIsDragging] = useState(false);
 
-  // Add block form state
+  // Add form
   const [adding, setAdding] = useState<{ date: string; startHour: number; endHour: number } | null>(null);
   const [form, setForm] = useState({ category: "업무", memo: "" });
   const [submitting, setSubmitting] = useState(false);
 
-  const gridRef = useRef<HTMLDivElement>(null);
+  // Now line
+  const [nowMinute, setNowMinute] = useState(() => {
+    const n = getNowKST();
+    return n.getUTCHours() * 60 + n.getUTCMinutes();
+  });
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -74,7 +81,25 @@ export function WeeklyCalendar() {
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
-  const todayStr = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().split("T")[0];
+  // Update now line every minute
+  useEffect(() => {
+    const id = setInterval(() => {
+      const n = getNowKST();
+      setNowMinute(n.getUTCHours() * 60 + n.getUTCMinutes());
+    }, 60000);
+    return () => clearInterval(id);
+  }, []);
+
+  // Auto-scroll to current hour on load
+  useEffect(() => {
+    if (!loading && scrollRef.current) {
+      const currentHour = Math.floor(nowMinute / 60);
+      const scrollTo = Math.max(0, (currentHour - 8) * CELL_H); // show 1h before current
+      scrollRef.current.scrollTop = scrollTo;
+    }
+  }, [loading, nowMinute]);
+
+  const todayStr = getNowKST().toISOString().split("T")[0];
 
   function shiftWeek(dir: number) {
     const d = new Date(baseDate + "T00:00:00");
@@ -117,7 +142,6 @@ export function WeeklyCalendar() {
     return hour >= minH && hour <= maxH;
   }
 
-  // Global mouseup to handle drag ending outside grid
   useEffect(() => {
     function onUp() { if (isDragging) handleMouseUp(); }
     window.addEventListener("mouseup", onUp);
@@ -131,46 +155,35 @@ export function WeeklyCalendar() {
       const res = await fetch("/api/calendar", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          date: adding.date,
-          startHour: adding.startHour,
-          endHour: adding.endHour,
-          category: form.category,
-          memo: form.memo,
-        }),
+        body: JSON.stringify({ date: adding.date, startHour: adding.startHour, endHour: adding.endHour, category: form.category, memo: form.memo }),
       });
-      if ((await res.json()).ok) {
-        setAdding(null);
-        setForm({ category: "업무", memo: "" });
-        fetchData();
-      }
+      if ((await res.json()).ok) { setAdding(null); fetchData(); }
     } catch { /* */ }
     setSubmitting(false);
   }
 
-  if (loading) {
-    return (
-      <div className="space-y-2">
-        <div className="h-10 bg-muted/20 rounded-lg animate-pulse" />
-        <div className="h-[600px] bg-muted/10 rounded-xl animate-pulse" />
-      </div>
-    );
-  }
-
+  if (loading) return <div className="h-[600px] bg-muted/10 rounded-xl animate-pulse" />;
   if (!data) return <div className="text-muted-foreground text-sm">캘린더 로드 실패</div>;
 
-  const visibleDays = view === "3day"
-    ? data.days.filter((_, idx) => {
-        const todayIdx = data.days.findIndex((dd) => dd.date === todayStr);
-        const start = todayIdx >= 0 ? todayIdx : 0;
-        return idx >= start && idx < start + 3;
-      }).slice(0, 3)
-    : data.days;
+  // View days — 3day centers on today
+  let days: DayData[];
+  if (view === "3day") {
+    const todayIdx = data.days.findIndex((d) => d.date === todayStr);
+    const start = todayIdx >= 0 ? Math.max(0, todayIdx - 1) : 0; // yesterday, today, tomorrow
+    days = data.days.slice(start, start + 3);
+    if (days.length < 3) days = data.days.slice(0, 3);
+  } else {
+    days = data.days;
+  }
 
-  const days = visibleDays.length > 0 ? visibleDays : data.days.slice(0, view === "3day" ? 3 : 7);
+  const colCount = days.length;
   const totalBlocks = data.days.reduce((s, d) => s + d.blocks.length, 0);
   const totalHours = data.days.reduce((s, d) => s + d.blocks.reduce((h, b) => h + (b.endHour - b.startHour), 0), 0);
-  const colCount = days.length;
+
+  // Now line position
+  const nowHour = Math.floor(nowMinute / 60);
+  const nowFrac = (nowMinute % 60) / 60;
+  const nowTop = (nowHour - 7) * CELL_H + nowFrac * CELL_H;
 
   return (
     <div className="space-y-3 select-none">
@@ -178,88 +191,72 @@ export function WeeklyCalendar() {
       <div className="flex items-center justify-between gap-2 flex-wrap">
         <div className="flex items-center gap-1.5">
           <Button variant="outline" size="sm" className="h-8 text-xs" onClick={() => shiftWeek(-1)}>←</Button>
-          <Button variant="outline" size="sm" className="h-8 text-xs" onClick={goToday}>오늘</Button>
+          <Button variant="outline" size="sm" className="h-8 text-xs font-medium" onClick={goToday}>오늘</Button>
           <Button variant="outline" size="sm" className="h-8 text-xs" onClick={() => shiftWeek(1)}>→</Button>
         </div>
-        <span className="text-sm font-semibold tracking-tight">
-          {data.week[0]?.slice(5)} — {data.week[6]?.slice(5)}
-        </span>
+        <div className="text-center">
+          <div className="text-sm font-semibold tracking-tight">{data.week[0]?.slice(5)} — {data.week[6]?.slice(5)}</div>
+          <div className="text-[10px] text-muted-foreground">{totalBlocks}개 블록 · {totalHours}시간</div>
+        </div>
         <div className="flex items-center gap-1 bg-muted/30 rounded-lg p-0.5">
-          <button className={`px-3 py-1 rounded-md text-xs transition-colors ${view === "3day" ? "bg-background shadow-sm font-medium" : "text-muted-foreground hover:text-foreground"}`} onClick={() => setView("3day")}>3일</button>
-          <button className={`px-3 py-1 rounded-md text-xs transition-colors ${view === "week" ? "bg-background shadow-sm font-medium" : "text-muted-foreground hover:text-foreground"}`} onClick={() => setView("week")}>주간</button>
+          <button className={`px-3 py-1 rounded-md text-xs transition-all ${view === "3day" ? "bg-background shadow-sm font-medium" : "text-muted-foreground hover:text-foreground"}`} onClick={() => setView("3day")}>3일</button>
+          <button className={`px-3 py-1 rounded-md text-xs transition-all ${view === "week" ? "bg-background shadow-sm font-medium" : "text-muted-foreground hover:text-foreground"}`} onClick={() => setView("week")}>주간</button>
         </div>
       </div>
 
-      {/* Mini stats + legend */}
-      <div className="flex gap-4 text-xs text-muted-foreground">
-        <span>{totalBlocks}개 블록</span>
-        <span>{totalHours}시간</span>
-        <span className="ml-auto flex gap-1.5 flex-wrap">
-          {Object.entries(CATEGORIES).map(([cat, s]) => (
-            <span key={cat} className="flex items-center gap-1">
-              <span className={`w-2 h-2 rounded-full ${s.dot}`} />
-              <span>{cat}</span>
-            </span>
-          ))}
-        </span>
-      </div>
-
-      {/* Inline add form (appears after drag) */}
+      {/* Add form */}
       {adding && (
-        <div className="rounded-xl border border-primary/30 bg-primary/5 p-3 space-y-2 animate-in fade-in duration-200">
-          <div className="text-xs font-medium text-primary">
-            {adding.date} · {adding.startHour}:00 — {adding.endHour}:00 ({adding.endHour - adding.startHour}h)
+        <div className="rounded-xl border border-primary/30 bg-primary/5 p-3 space-y-2 animate-in fade-in slide-in-from-top-2 duration-200">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-medium text-primary">
+              {adding.date.slice(5)} · {adding.startHour}:00 — {adding.endHour}:00 ({adding.endHour - adding.startHour}h)
+            </span>
+            <button className="text-xs text-muted-foreground hover:text-foreground" onClick={() => setAdding(null)}>✕</button>
           </div>
-          <div className="flex gap-2 items-end flex-wrap">
-            <div className="space-y-0.5">
-              <label className="text-[10px] text-muted-foreground uppercase">카테고리</label>
-              <div className="flex gap-1 flex-wrap">
-                {Object.entries(CATEGORIES).map(([cat, s]) => (
-                  <button
-                    key={cat}
-                    className={`px-2 py-1 rounded-md text-[11px] border transition-all ${
-                      form.category === cat
-                        ? `${s.bg} ${s.border} ${s.text} font-medium`
-                        : "border-border/50 text-muted-foreground hover:border-border"
-                    }`}
-                    onClick={() => setForm({ ...form, category: cat })}
-                  >
-                    {cat}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div className="space-y-0.5 flex-1 min-w-[140px]">
-              <label className="text-[10px] text-muted-foreground uppercase">메모</label>
-              <Input className="h-8 text-sm" placeholder="내용" value={form.memo}
-                onChange={(e) => setForm({ ...form, memo: e.target.value })}
-                onKeyDown={(e) => e.key === "Enter" && handleAddBlock()} autoFocus />
-            </div>
-            <Button size="sm" className="h-8" disabled={submitting} onClick={handleAddBlock}>
-              {submitting ? "저장 중..." : "추가"}
+          <div className="flex gap-1 flex-wrap">
+            {Object.entries(CATEGORIES).map(([cat, s]) => (
+              <button key={cat}
+                className={`px-2.5 py-1 rounded-lg text-[11px] border transition-all ${
+                  form.category === cat
+                    ? `${s.bg} ${s.border} ${s.text} font-semibold shadow-sm`
+                    : "border-transparent text-muted-foreground hover:text-foreground hover:bg-muted/20"
+                }`}
+                onClick={() => setForm({ ...form, category: cat })}>
+                <span className={`inline-block w-1.5 h-1.5 rounded-full mr-1 ${s.dot}`} />{cat}
+              </button>
+            ))}
+          </div>
+          <div className="flex gap-2">
+            <Input className="h-8 text-sm flex-1" placeholder="메모 (선택)" value={form.memo}
+              onChange={(e) => setForm({ ...form, memo: e.target.value })}
+              onKeyDown={(e) => e.key === "Enter" && handleAddBlock()} autoFocus />
+            <Button size="sm" className="h-8 px-4" disabled={submitting} onClick={handleAddBlock}>
+              {submitting ? "..." : "추가"}
             </Button>
-            <Button size="sm" variant="ghost" className="h-8" onClick={() => setAdding(null)}>취소</Button>
           </div>
         </div>
       )}
 
-      {/* Calendar grid */}
-      <div ref={gridRef} className="rounded-xl border border-border overflow-hidden bg-background">
+      {/* Calendar */}
+      <div className="rounded-xl border border-border overflow-hidden bg-background">
         {/* Day headers */}
-        <div className="grid gap-0" style={{ gridTemplateColumns: `40px repeat(${colCount}, 1fr)` }}>
-          <div className="bg-muted/20 border-b border-border" />
+        <div className="grid gap-0" style={{ gridTemplateColumns: `44px repeat(${colCount}, 1fr)` }}>
+          <div className="border-b border-border bg-muted/10" />
           {days.map((day) => {
             const isToday = day.date === todayStr;
+            const dateNum = parseInt(day.date.split("-")[2]);
             return (
-              <div key={day.date} className={`border-l border-b border-border px-2 py-2.5 ${isToday ? "bg-primary/8" : "bg-muted/20"}`}>
-                <div className="flex items-center gap-1.5">
-                  <span className={`text-[11px] font-medium ${isToday ? "text-primary" : "text-muted-foreground"}`}>{day.day}</span>
-                  <span className={`text-lg font-bold tabular-nums leading-none ${isToday ? "bg-primary text-primary-foreground w-7 h-7 rounded-full flex items-center justify-center text-sm" : ""}`}>
-                    {parseInt(day.date.split("-")[2])}
-                  </span>
+              <div key={day.date} className={`border-l border-b border-border px-3 py-3 transition-colors ${isToday ? "bg-primary/10" : "bg-muted/10"}`}>
+                <div className="flex items-center gap-2">
+                  <span className={`text-xs ${isToday ? "text-primary font-semibold" : "text-muted-foreground"}`}>{day.day}</span>
+                  {isToday ? (
+                    <span className="bg-primary text-primary-foreground w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold">{dateNum}</span>
+                  ) : (
+                    <span className="text-xl font-bold tabular-nums">{dateNum}</span>
+                  )}
                 </div>
                 {day.focus && day.focus !== "---" && (
-                  <div className="text-[10px] text-muted-foreground/70 truncate mt-1 leading-tight" title={day.focus}>{day.focus}</div>
+                  <div className="text-[11px] text-muted-foreground/80 mt-1.5 line-clamp-2 leading-snug" title={day.focus}>{day.focus}</div>
                 )}
               </div>
             );
@@ -267,11 +264,12 @@ export function WeeklyCalendar() {
         </div>
 
         {/* Time grid */}
-        <div className="max-h-[600px] overflow-y-auto">
-          <div className="grid gap-0" style={{ gridTemplateColumns: `40px repeat(${colCount}, 1fr)` }}>
+        <div ref={scrollRef} className="max-h-[calc(100vh-320px)] overflow-y-auto relative">
+          <div className="grid gap-0 relative" style={{ gridTemplateColumns: `44px repeat(${colCount}, 1fr)` }}>
             {HOURS.map((hour) => (
               <Fragment key={`row-${hour}`}>
-                <div className={`text-[10px] text-muted-foreground/50 text-right pr-1.5 pt-1 border-t border-border/30 h-10 ${hour === 12 ? "border-t-border" : ""}`}>
+                <div className={`text-[11px] text-muted-foreground/40 text-right pr-2 pt-1 border-t border-border/20 ${hour === 12 ? "border-t-border/60 text-muted-foreground/60 font-medium" : ""}`}
+                  style={{ height: `${CELL_H}px` }}>
                   {hour}
                 </div>
                 {days.map((day) => {
@@ -284,24 +282,25 @@ export function WeeklyCalendar() {
 
                   return (
                     <div key={`${day.date}-${hour}`}
-                      className={`relative border-l border-t border-border/30 h-10 transition-colors ${
-                        isToday ? "bg-primary/[0.03]" : ""
-                      } ${selected ? "bg-primary/15" : ""} ${
-                        !block ? "cursor-crosshair hover:bg-muted/15" : ""
-                      } ${hour === 12 ? "border-t-border" : ""}`}
+                      className={`relative border-l border-t border-border/20 transition-colors ${
+                        isToday ? "bg-primary/[0.04]" : ""
+                      } ${selected ? "bg-primary/20 border-primary/30" : ""} ${
+                        !block ? "cursor-crosshair hover:bg-muted/10" : ""
+                      } ${hour === 12 ? "border-t-border/60" : ""}`}
+                      style={{ height: `${CELL_H}px` }}
                       onMouseDown={(e) => { if (!block) { e.preventDefault(); handleMouseDown(day.date, hour); }}}
-                      onMouseEnter={() => { if (!block) handleMouseEnter(day.date, hour); }}
-                    >
+                      onMouseEnter={() => { if (!block) handleMouseEnter(day.date, hour); }}>
+
                       {isStart && s && (
-                        <div className={`absolute inset-x-0.5 top-0.5 rounded-md border ${s.bg} ${s.border} ${s.text} px-1.5 py-0.5 overflow-hidden z-10 shadow-sm`}
-                          style={{ height: `${span * 40 - 4}px` }}>
-                          <div className="flex items-center gap-1">
-                            <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${s.dot}`} />
-                            <span className="text-[11px] font-semibold truncate">{block.category}</span>
-                            <span className="text-[10px] opacity-50 ml-auto shrink-0">{block.startHour}–{block.endHour}</span>
+                        <div className={`absolute inset-x-1 top-1 rounded-lg border ${s.bg} ${s.border} ${s.text} px-2 py-1 overflow-hidden z-10 shadow-sm hover:shadow-md transition-shadow`}
+                          style={{ height: `${span * CELL_H - 6}px` }}>
+                          <div className="flex items-center gap-1.5">
+                            <span className={`w-2 h-2 rounded-full shrink-0 ${s.dot}`} />
+                            <span className="text-xs font-semibold truncate">{block.category}</span>
+                            <span className="text-[10px] opacity-40 ml-auto shrink-0">{block.startHour}–{block.endHour}</span>
                           </div>
                           {block.memo && span > 1 && (
-                            <div className="text-[10px] opacity-60 truncate mt-0.5 leading-tight">{block.memo}</div>
+                            <div className="text-[11px] opacity-60 mt-0.5 line-clamp-2 leading-snug">{block.memo}</div>
                           )}
                         </div>
                       )}
@@ -310,8 +309,30 @@ export function WeeklyCalendar() {
                 })}
               </Fragment>
             ))}
+
+            {/* Now line */}
+            {nowHour >= 7 && nowHour <= 23 && (
+              <div className="absolute left-0 right-0 z-20 pointer-events-none flex items-center" style={{ top: `${nowTop}px` }}>
+                <div className="w-[44px] flex justify-end pr-1">
+                  <div className="w-2.5 h-2.5 rounded-full bg-red-500 shadow-sm shadow-red-500/50" />
+                </div>
+                <div className="flex-1 h-[2px] bg-red-500/70 shadow-sm shadow-red-500/30" />
+              </div>
+            )}
           </div>
         </div>
+      </div>
+
+      {/* Legend */}
+      <div className="flex gap-2 flex-wrap text-[11px] text-muted-foreground/60">
+        {Object.entries(CATEGORIES).map(([cat, s]) => (
+          <span key={cat} className="flex items-center gap-1">
+            <span className={`w-2 h-2 rounded-full ${s.dot}`} />{cat}
+          </span>
+        ))}
+        <span className="ml-auto flex items-center gap-1">
+          <span className="w-2 h-2 rounded-full bg-red-500" />now
+        </span>
       </div>
     </div>
   );
