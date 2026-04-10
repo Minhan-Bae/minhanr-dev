@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState, useEffect, useCallback, Fragment } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -25,23 +24,23 @@ interface CalendarData {
   days: DayData[];
 }
 
-const CATEGORY_COLORS: Record<string, string> = {
-  "업무": "bg-blue-500/30 border-blue-500/50 text-blue-200",
-  "개발": "bg-emerald-500/30 border-emerald-500/50 text-emerald-200",
-  "R&D": "bg-purple-500/30 border-purple-500/50 text-purple-200",
-  "회의": "bg-orange-500/30 border-orange-500/50 text-orange-200",
-  "학습": "bg-cyan-500/30 border-cyan-500/50 text-cyan-200",
-  "운동": "bg-green-500/30 border-green-500/50 text-green-200",
-  "식사": "bg-yellow-500/30 border-yellow-500/50 text-yellow-200",
-  "휴식": "bg-neutral-500/30 border-neutral-500/50 text-neutral-300",
-  "사이드": "bg-pink-500/30 border-pink-500/50 text-pink-200",
+const CATEGORIES: Record<string, { bg: string; border: string; text: string; dot: string }> = {
+  "업무":   { bg: "bg-blue-500/20",    border: "border-blue-500/40",    text: "text-blue-300",    dot: "bg-blue-400" },
+  "개발":   { bg: "bg-emerald-500/20", border: "border-emerald-500/40", text: "text-emerald-300", dot: "bg-emerald-400" },
+  "R&D":    { bg: "bg-violet-500/20",  border: "border-violet-500/40",  text: "text-violet-300",  dot: "bg-violet-400" },
+  "회의":   { bg: "bg-orange-500/20",  border: "border-orange-500/40",  text: "text-orange-300",  dot: "bg-orange-400" },
+  "학습":   { bg: "bg-cyan-500/20",    border: "border-cyan-500/40",    text: "text-cyan-300",    dot: "bg-cyan-400" },
+  "운동":   { bg: "bg-green-500/20",   border: "border-green-500/40",   text: "text-green-300",   dot: "bg-green-400" },
+  "식사":   { bg: "bg-amber-500/20",   border: "border-amber-500/40",   text: "text-amber-300",   dot: "bg-amber-400" },
+  "휴식":   { bg: "bg-neutral-500/20", border: "border-neutral-500/40", text: "text-neutral-400", dot: "bg-neutral-400" },
+  "사이드": { bg: "bg-pink-500/20",    border: "border-pink-500/40",    text: "text-pink-300",    dot: "bg-pink-400" },
 };
 
-const HOURS = Array.from({ length: 18 }, (_, i) => i + 6); // 6am - 11pm
-
-function getColor(category: string) {
-  return CATEGORY_COLORS[category] || "bg-primary/20 border-primary/40 text-primary";
+function catStyle(cat: string) {
+  return CATEGORIES[cat] || { bg: "bg-primary/15", border: "border-primary/30", text: "text-primary", dot: "bg-primary" };
 }
+
+const HOURS = Array.from({ length: 17 }, (_, i) => i + 7); // 7am-11pm
 
 export function WeeklyCalendar() {
   const [data, setData] = useState<CalendarData | null>(null);
@@ -50,8 +49,7 @@ export function WeeklyCalendar() {
     const now = new Date(Date.now() + 9 * 60 * 60 * 1000);
     return now.toISOString().split("T")[0];
   });
-
-  // Add block modal state
+  const [view, setView] = useState<"week" | "3day">("week");
   const [adding, setAdding] = useState<{ date: string; hour: number } | null>(null);
   const [form, setForm] = useState({ endHour: "", category: "업무", memo: "" });
   const [submitting, setSubmitting] = useState(false);
@@ -60,20 +58,23 @@ export function WeeklyCalendar() {
     setLoading(true);
     try {
       const res = await fetch(`/api/calendar?date=${baseDate}&_t=${Date.now()}`, { cache: "no-store" });
-      const json = await res.json();
-      setData(json);
-    } catch {
-      setData(null);
-    }
+      setData(await res.json());
+    } catch { setData(null); }
     setLoading(false);
   }, [baseDate]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
+  const todayStr = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().split("T")[0];
+
   function shiftWeek(dir: number) {
     const d = new Date(baseDate + "T00:00:00");
-    d.setDate(d.getDate() + dir * 7);
+    d.setDate(d.getDate() + dir * (view === "3day" ? 3 : 7));
     setBaseDate(d.toISOString().split("T")[0]);
+  }
+
+  function goToday() {
+    setBaseDate(todayStr);
   }
 
   async function handleAddBlock() {
@@ -91,155 +92,206 @@ export function WeeklyCalendar() {
           memo: form.memo,
         }),
       });
-      const result = await res.json();
-      if (result.ok) {
+      if ((await res.json()).ok) {
         setAdding(null);
         setForm({ endHour: "", category: "업무", memo: "" });
-        fetchData(); // refresh
+        fetchData();
       }
-    } catch { /* ignore */ }
+    } catch { /* */ }
     setSubmitting(false);
   }
 
-  const todayStr = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().split("T")[0];
-
   if (loading) {
-    return <div className="h-96 bg-muted/30 rounded-lg animate-pulse" />;
+    return (
+      <div className="space-y-2">
+        <div className="h-10 bg-muted/20 rounded-lg animate-pulse" />
+        <div className="h-[600px] bg-muted/10 rounded-xl animate-pulse" />
+      </div>
+    );
   }
 
-  if (!data) {
-    return <div className="text-muted-foreground text-sm">캘린더 로드 실패</div>;
-  }
+  if (!data) return <div className="text-muted-foreground text-sm">캘린더 로드 실패</div>;
+
+  // View filter
+  const visibleDays = view === "3day"
+    ? data.days.filter((d) => {
+        const idx = data.days.indexOf(d);
+        const todayIdx = data.days.findIndex((dd) => dd.date === todayStr);
+        const start = todayIdx >= 0 ? todayIdx : 0;
+        return idx >= start && idx < start + 3;
+      }).slice(0, 3)
+    : data.days;
+
+  // If 3-day has fewer, fill from start
+  const days = visibleDays.length > 0 ? visibleDays : data.days.slice(0, view === "3day" ? 3 : 7);
+
+  // Stats
+  const totalBlocks = data.days.reduce((s, d) => s + d.blocks.length, 0);
+  const totalHours = data.days.reduce((s, d) => s + d.blocks.reduce((h, b) => h + (b.endHour - b.startHour), 0), 0);
+
+  const colCount = days.length;
 
   return (
     <div className="space-y-3">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <Button variant="ghost" size="sm" onClick={() => shiftWeek(-1)}>← 이전</Button>
-        <span className="text-sm font-medium">
-          {data.week[0]} ~ {data.week[6]}
+      {/* Toolbar */}
+      <div className="flex items-center justify-between gap-2 flex-wrap">
+        <div className="flex items-center gap-1.5">
+          <Button variant="outline" size="sm" className="h-8 text-xs" onClick={() => shiftWeek(-1)}>←</Button>
+          <Button variant="outline" size="sm" className="h-8 text-xs" onClick={goToday}>오늘</Button>
+          <Button variant="outline" size="sm" className="h-8 text-xs" onClick={() => shiftWeek(1)}>→</Button>
+        </div>
+
+        <span className="text-sm font-semibold tracking-tight">
+          {data.week[0]?.slice(5)} — {data.week[6]?.slice(5)}
         </span>
-        <Button variant="ghost" size="sm" onClick={() => shiftWeek(1)}>다음 →</Button>
+
+        <div className="flex items-center gap-1 bg-muted/30 rounded-lg p-0.5">
+          <button
+            className={`px-3 py-1 rounded-md text-xs transition-colors ${view === "3day" ? "bg-background shadow-sm font-medium" : "text-muted-foreground hover:text-foreground"}`}
+            onClick={() => setView("3day")}
+          >3일</button>
+          <button
+            className={`px-3 py-1 rounded-md text-xs transition-colors ${view === "week" ? "bg-background shadow-sm font-medium" : "text-muted-foreground hover:text-foreground"}`}
+            onClick={() => setView("week")}
+          >주간</button>
+        </div>
       </div>
 
-      {/* Add block modal */}
+      {/* Mini stats */}
+      <div className="flex gap-4 text-xs text-muted-foreground">
+        <span>{totalBlocks}개 블록</span>
+        <span>{totalHours}시간</span>
+        <span className="ml-auto flex gap-1.5 flex-wrap">
+          {Object.entries(CATEGORIES).map(([cat, s]) => (
+            <span key={cat} className="flex items-center gap-1">
+              <span className={`w-2 h-2 rounded-full ${s.dot}`} />
+              <span>{cat}</span>
+            </span>
+          ))}
+        </span>
+      </div>
+
+      {/* Add block inline */}
       {adding && (
-        <Card className="border-primary/40">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm">{adding.date} {adding.hour}:00 ~ 타임블록 추가</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex gap-2 items-end">
-              <div>
-                <label className="text-xs text-muted-foreground">종료</label>
-                <Input
-                  className="h-8 w-16 text-sm"
-                  placeholder={String(adding.hour + 1)}
-                  value={form.endHour}
-                  onChange={(e) => setForm({ ...form, endHour: e.target.value })}
-                />
-              </div>
-              <div>
-                <label className="text-xs text-muted-foreground">카테고리</label>
-                <select
-                  className="h-8 rounded-md border border-border bg-background px-2 text-sm"
-                  value={form.category}
-                  onChange={(e) => setForm({ ...form, category: e.target.value })}
-                >
-                  {Object.keys(CATEGORY_COLORS).map((c) => (
-                    <option key={c} value={c}>{c}</option>
-                  ))}
-                </select>
-              </div>
-              <div className="flex-1">
-                <label className="text-xs text-muted-foreground">메모</label>
-                <Input
-                  className="h-8 text-sm"
-                  placeholder="내용"
-                  value={form.memo}
-                  onChange={(e) => setForm({ ...form, memo: e.target.value })}
-                  onKeyDown={(e) => e.key === "Enter" && handleAddBlock()}
-                />
-              </div>
-              <Button size="sm" className="h-8" disabled={submitting} onClick={handleAddBlock}>
-                {submitting ? "..." : "추가"}
-              </Button>
-              <Button size="sm" variant="ghost" className="h-8" onClick={() => setAdding(null)}>취소</Button>
+        <div className="rounded-xl border border-primary/30 bg-primary/5 p-3 space-y-2">
+          <div className="text-xs font-medium text-primary">
+            {adding.date} · {adding.hour}:00 ~ 타임블록 추가
+          </div>
+          <div className="flex gap-2 items-end flex-wrap">
+            <div className="space-y-0.5">
+              <label className="text-[10px] text-muted-foreground uppercase">종료</label>
+              <Input className="h-8 w-16 text-sm" placeholder={String(adding.hour + 1)}
+                value={form.endHour} onChange={(e) => setForm({ ...form, endHour: e.target.value })} />
             </div>
-          </CardContent>
-        </Card>
+            <div className="space-y-0.5">
+              <label className="text-[10px] text-muted-foreground uppercase">카테고리</label>
+              <select className="h-8 rounded-md border border-border bg-background px-2 text-sm"
+                value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}>
+                {Object.keys(CATEGORIES).map((c) => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </div>
+            <div className="space-y-0.5 flex-1 min-w-[120px]">
+              <label className="text-[10px] text-muted-foreground uppercase">메모</label>
+              <Input className="h-8 text-sm" placeholder="내용" value={form.memo}
+                onChange={(e) => setForm({ ...form, memo: e.target.value })}
+                onKeyDown={(e) => e.key === "Enter" && handleAddBlock()} />
+            </div>
+            <Button size="sm" className="h-8" disabled={submitting} onClick={handleAddBlock}>
+              {submitting ? "저장 중..." : "추가"}
+            </Button>
+            <Button size="sm" variant="ghost" className="h-8" onClick={() => setAdding(null)}>취소</Button>
+          </div>
+        </div>
       )}
 
       {/* Calendar grid */}
-      <div className="grid grid-cols-[48px_repeat(7,1fr)] gap-0 border border-neutral-800 rounded-lg overflow-hidden">
-        {/* Header row */}
-        <div className="bg-muted/30 p-1" />
-        {data.days.map((day) => (
-          <div
-            key={day.date}
-            className={`p-2 text-center border-l border-neutral-800 ${
-              day.date === todayStr ? "bg-primary/10" : "bg-muted/30"
-            }`}
-          >
-            <div className="text-xs font-medium">{day.day}</div>
-            <div className={`text-lg tabular-nums ${day.date === todayStr ? "text-primary font-bold" : ""}`}>
-              {parseInt(day.date.split("-")[2])}
-            </div>
-            {day.focus && (
-              <div className="text-[10px] text-muted-foreground truncate mt-0.5" title={day.focus}>
-                🎯 {day.focus}
-              </div>
-            )}
-          </div>
-        ))}
-
-        {/* Hour rows */}
-        {HOURS.map((hour) => (
-          <>
-            <div key={`h-${hour}`} className="text-[10px] text-muted-foreground text-right pr-1 py-2 border-t border-neutral-800/50">
-              {hour}:00
-            </div>
-            {data.days.map((day) => {
-              const block = day.blocks.find(
-                (b) => b.startHour <= hour && b.endHour > hour
-              );
-              const isBlockStart = block && block.startHour === hour;
-              const blockHeight = block ? block.endHour - block.startHour : 1;
-
-              return (
-                <div
-                  key={`${day.date}-${hour}`}
-                  className={`relative border-l border-t border-neutral-800/50 min-h-[32px] cursor-pointer hover:bg-muted/20 transition-colors ${
-                    day.date === todayStr ? "bg-primary/5" : ""
-                  }`}
-                  onClick={() => {
-                    if (!block) {
-                      setAdding({ date: day.date, hour });
-                      setForm({ endHour: String(hour + 1), category: "업무", memo: "" });
-                    }
-                  }}
-                >
-                  {isBlockStart && (
-                    <div
-                      className={`absolute inset-x-0.5 top-0 rounded border text-[10px] px-1 py-0.5 overflow-hidden ${getColor(block.category)}`}
-                      style={{ height: `${blockHeight * 32}px`, zIndex: 10 }}
-                    >
-                      <div className="font-medium">{block.category}</div>
-                      {block.memo && <div className="opacity-70 truncate">{block.memo}</div>}
-                    </div>
-                  )}
+      <div className="rounded-xl border border-neutral-800 overflow-hidden bg-background">
+        {/* Day headers */}
+        <div className="grid gap-0" style={{ gridTemplateColumns: `40px repeat(${colCount}, 1fr)` }}>
+          <div className="bg-muted/20 border-b border-neutral-800" />
+          {days.map((day) => {
+            const isToday = day.date === todayStr;
+            return (
+              <div key={day.date}
+                className={`border-l border-b border-neutral-800 px-2 py-2.5 ${isToday ? "bg-primary/8" : "bg-muted/20"}`}>
+                <div className="flex items-center gap-1.5">
+                  <span className={`text-[11px] font-medium ${isToday ? "text-primary" : "text-muted-foreground"}`}>
+                    {day.day}
+                  </span>
+                  <span className={`text-lg font-bold tabular-nums leading-none ${
+                    isToday ? "bg-primary text-primary-foreground w-7 h-7 rounded-full flex items-center justify-center text-sm" : ""
+                  }`}>
+                    {parseInt(day.date.split("-")[2])}
+                  </span>
                 </div>
-              );
-            })}
-          </>
-        ))}
-      </div>
+                {day.focus && day.focus !== "---" && (
+                  <div className="text-[10px] text-muted-foreground/70 truncate mt-1 leading-tight" title={day.focus}>
+                    {day.focus}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
 
-      {/* Category legend */}
-      <div className="flex flex-wrap gap-2 text-xs">
-        {Object.entries(CATEGORY_COLORS).map(([cat, cls]) => (
-          <span key={cat} className={`px-2 py-0.5 rounded border ${cls}`}>{cat}</span>
-        ))}
+        {/* Time grid - scrollable */}
+        <div className="max-h-[600px] overflow-y-auto">
+          <div className="grid gap-0" style={{ gridTemplateColumns: `40px repeat(${colCount}, 1fr)` }}>
+            {HOURS.map((hour) => (
+              <Fragment key={`row-${hour}`}>
+                {/* Time label */}
+                <div className={`text-[10px] text-muted-foreground/50 text-right pr-1.5 pt-1 border-t border-neutral-800/30 h-10 ${
+                  hour === 12 ? "border-t-neutral-700" : ""
+                }`}>
+                  {hour}
+                </div>
+
+                {/* Day cells */}
+                {days.map((day) => {
+                  const isToday = day.date === todayStr;
+                  const block = day.blocks.find((b) => b.startHour <= hour && b.endHour > hour);
+                  const isStart = block?.startHour === hour;
+                  const span = block ? block.endHour - block.startHour : 1;
+                  const s = block ? catStyle(block.category) : null;
+
+                  return (
+                    <div key={`${day.date}-${hour}`}
+                      className={`relative border-l border-t border-neutral-800/30 h-10 transition-colors ${
+                        isToday ? "bg-primary/[0.03]" : ""
+                      } ${!block ? "cursor-pointer hover:bg-muted/15" : ""} ${
+                        hour === 12 ? "border-t-neutral-700" : ""
+                      }`}
+                      onClick={() => {
+                        if (!block) {
+                          setAdding({ date: day.date, hour });
+                          setForm({ endHour: String(hour + 1), category: "업무", memo: "" });
+                        }
+                      }}
+                    >
+                      {isStart && s && (
+                        <div
+                          className={`absolute inset-x-0.5 top-0.5 rounded-md border ${s.bg} ${s.border} ${s.text} px-1.5 py-0.5 overflow-hidden z-10 shadow-sm`}
+                          style={{ height: `${span * 40 - 4}px` }}
+                        >
+                          <div className="flex items-center gap-1">
+                            <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${s.dot}`} />
+                            <span className="text-[11px] font-semibold truncate">{block.category}</span>
+                            <span className="text-[10px] opacity-50 ml-auto shrink-0">
+                              {block.startHour}–{block.endHour}
+                            </span>
+                          </div>
+                          {block.memo && span > 1 && (
+                            <div className="text-[10px] opacity-60 truncate mt-0.5 leading-tight">{block.memo}</div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </Fragment>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );
