@@ -135,21 +135,29 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Time Blocks section not found" }, { status: 400 });
     }
 
-    // Find the table header row and insert after it
-    const tableHeaderPattern = /\|.*시간.*\|.*카테고리.*\|.*메모.*\|\n\|[-\s|]+\|/;
-    const headerMatch = file.content.match(tableHeaderPattern);
+    // Find the Telegram hint line (> Telegram `/t ...`) and insert row BEFORE it
+    const hintPattern = /^>\s*Telegram\s*`\/t/m;
+    const hintMatch = file.content.match(hintPattern);
 
     let updated: string;
-    if (headerMatch) {
-      const insertPos = file.content.indexOf(headerMatch[0]) + headerMatch[0].length;
-      updated = file.content.slice(0, insertPos) + "\n" + row + file.content.slice(insertPos);
+    if (hintMatch && hintMatch.index != null) {
+      // Insert new row on its own line before the hint
+      updated = file.content.slice(0, hintMatch.index) + row + "\n" + file.content.slice(hintMatch.index);
     } else {
-      // No table yet, add after Time Blocks heading
-      const idx = file.content.search(marker);
-      const headingEnd = file.content.indexOf("\n", idx);
-      updated = file.content.slice(0, headingEnd + 1) +
-        "\n| 시간 | 카테고리 | 메모 |\n|------|---------|------|\n" + row + "\n" +
-        file.content.slice(headingEnd + 1);
+      // Fallback: find table separator and insert after
+      const tableHeaderPattern = /\|.*시간.*\|.*카테고리.*\|.*메모.*\|\n\|[-\s|]+\|/;
+      const headerMatch = file.content.match(tableHeaderPattern);
+      if (headerMatch && headerMatch.index != null) {
+        const insertPos = headerMatch.index + headerMatch[0].length;
+        updated = file.content.slice(0, insertPos) + "\n" + row + file.content.slice(insertPos);
+      } else {
+        // No table, create one
+        const idx = file.content.search(marker);
+        const headingEnd = file.content.indexOf("\n", idx);
+        updated = file.content.slice(0, headingEnd + 1) +
+          "\n| 시간 | 카테고리 | 메모 |\n|------|---------|------|\n" + row + "\n" +
+          file.content.slice(headingEnd + 1);
+      }
     }
 
     const result = await commitToGitHub(
