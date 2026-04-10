@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { getCachedVaultIndex } from "@/lib/vault-index";
+import { ReviewActions } from "@/components/review-actions";
 
 export const metadata = {
   title: "Review | OIKBAS",
@@ -137,9 +138,12 @@ async function ReviewContent() {
                       )}
                     </div>
                     <p className="text-xs text-muted-foreground line-clamp-2">{c.summary}</p>
-                    <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
-                      <span>{c.created}</span>
-                      {c.slug && <span className="text-neutral-600">/{c.slug}</span>}
+                    <div className="flex items-center justify-between mt-1">
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <span>{c.created}</span>
+                        {c.slug && <span className="text-neutral-600">/{c.slug}</span>}
+                      </div>
+                      <ReviewActions path={c.path} isPublished={isPublished} />
                     </div>
                   </div>
                 </div>
