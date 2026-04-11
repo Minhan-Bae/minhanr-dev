@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
+import { createSupabaseAdmin } from "@/lib/supabase-admin";
 import { appendToDailyNote } from "@/lib/github";
 import { requireUser } from "@/lib/api-auth";
 
 export async function POST(request: NextRequest) {
   const { response: authResponse } = await requireUser();
   if (authResponse) return authResponse;
+  const supabase = createSupabaseAdmin();
   const body = await request.json();
   const { title, day_of_week, start_hour, end_hour, category, is_routine, specific_date } = body;
 

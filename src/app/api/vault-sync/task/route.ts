@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
+import { createSupabaseAdmin } from "@/lib/supabase-admin";
 import { appendToDailyNote, updateDailyCheckbox } from "@/lib/github";
 import { requireUser } from "@/lib/api-auth";
 
@@ -13,6 +13,7 @@ const PRIORITY_LABELS: Record<string, string> = {
 export async function POST(request: NextRequest) {
   const { response: authResponse } = await requireUser();
   if (authResponse) return authResponse;
+  const supabase = createSupabaseAdmin();
   const { title, axis, priority, assigned_to } = await request.json();
   if (!title?.trim()) {
     return NextResponse.json({ error: "title required" }, { status: 400 });
@@ -51,6 +52,7 @@ export async function POST(request: NextRequest) {
 export async function PATCH(request: NextRequest) {
   const { response: authResponse } = await requireUser();
   if (authResponse) return authResponse;
+  const supabase = createSupabaseAdmin();
   const { id, status, title, priority, assigned_to } = await request.json();
   if (!id) {
     return NextResponse.json({ error: "id required" }, { status: 400 });

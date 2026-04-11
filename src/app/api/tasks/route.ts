@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
+import { createSupabaseAdmin } from "@/lib/supabase-admin";
 import { requireUser } from "@/lib/api-auth";
 
 export async function GET(request: NextRequest) {
   const { response: authResponse } = await requireUser();
   if (authResponse) return authResponse;
+  const supabase = createSupabaseAdmin();
   const { searchParams } = new URL(request.url);
   const axis = searchParams.get("axis");
   const status = searchParams.get("status");
@@ -28,6 +29,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   const { response: authResponse } = await requireUser();
   if (authResponse) return authResponse;
+  const supabase = createSupabaseAdmin();
   const body = await request.json();
   const { title, axis, priority, assigned_to } = body;
 
@@ -56,6 +58,7 @@ export async function POST(request: NextRequest) {
 export async function PATCH(request: NextRequest) {
   const { response: authResponse } = await requireUser();
   if (authResponse) return authResponse;
+  const supabase = createSupabaseAdmin();
   const body = await request.json();
   const { id, status, title, priority, assigned_to } = body;
 
@@ -86,6 +89,7 @@ export async function PATCH(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   const { response: authResponse } = await requireUser();
   if (authResponse) return authResponse;
+  const supabase = createSupabaseAdmin();
   const { searchParams } = new URL(request.url);
   const id = searchParams.get("id");
 

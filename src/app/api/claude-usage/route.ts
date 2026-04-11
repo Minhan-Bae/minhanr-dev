@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
+import { createSupabaseAdmin } from "@/lib/supabase-admin";
 import { requireUser } from "@/lib/api-auth";
 
 interface UsageBucket {
@@ -17,6 +17,7 @@ function emptyBucket(): UsageBucket {
 export async function GET() {
   const { response: authResponse } = await requireUser();
   if (authResponse) return authResponse;
+  const supabase = createSupabaseAdmin();
   const sevenDaysAgo = new Date(Date.now() - 7 * 86_400_000)
     .toISOString()
     .slice(0, 10);

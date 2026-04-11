@@ -1,11 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { createSupabaseAdmin } from "@/lib/supabase-admin";
 import { requireCronSecret } from "@/lib/api-auth";
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
 
 import { GITHUB_COMMITS_URL, CRON_COMMITS_PER_PAGE, COMMIT_MSG_MAX_LEN, ERROR_THRESHOLDS } from "@/lib/constants";
 
@@ -43,6 +38,7 @@ async function sendTelegramAlert(message: string) {
 export async function GET(req: NextRequest) {
   const unauthorized = requireCronSecret(req);
   if (unauthorized) return unauthorized;
+  const supabase = createSupabaseAdmin();
   const results: string[] = [];
 
   // 1. Fallback polling: check recent GitHub commits and sync missing heartbeats

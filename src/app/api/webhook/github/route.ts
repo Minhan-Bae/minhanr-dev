@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createHmac, timingSafeEqual } from "crypto";
-import { supabase } from "@/lib/supabase";
+import { createSupabaseAdmin } from "@/lib/supabase-admin";
 import { COMMIT_MSG_MAX_LEN } from "@/lib/constants";
 
 function verifySignature(payload: string, signature: string | null): boolean {
@@ -57,6 +57,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ status: "unknown agent", commit: commitMsg });
     }
 
+    const supabase = createSupabaseAdmin();
     const { error } = await supabase
       .from("agent_heartbeats")
       .upsert(

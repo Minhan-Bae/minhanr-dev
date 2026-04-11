@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
+import { createSupabaseAdmin } from "@/lib/supabase-admin";
 import { aggregate, getCachedVaultIndex } from "@/lib/vault-index";
 import { requireUser } from "@/lib/api-auth";
 
@@ -8,6 +8,7 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   const { response: authResponse } = await requireUser();
   if (authResponse) return authResponse;
+  const supabase = createSupabaseAdmin();
   // Axis metrics from Supabase (existing behavior, kept backward compatible)
   const { data: metrics, error } = await supabase
     .from("axis_metrics")

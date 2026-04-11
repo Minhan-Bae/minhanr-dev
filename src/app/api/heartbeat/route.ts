@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
+import { createSupabaseAdmin } from "@/lib/supabase-admin";
 import { requireUser } from "@/lib/api-auth";
 
 export async function GET() {
   const { response: authResponse } = await requireUser();
   if (authResponse) return authResponse;
+  const supabase = createSupabaseAdmin();
   const { data, error } = await supabase
     .from("agent_heartbeats")
     .select("*")

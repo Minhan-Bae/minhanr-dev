@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
+import { createSupabaseAdmin } from "@/lib/supabase-admin";
 import { requireUser } from "@/lib/api-auth";
 
 export async function GET() {
   const { response: authResponse } = await requireUser();
   if (authResponse) return authResponse;
+  const supabase = createSupabaseAdmin();
   const { data, error } = await supabase
     .from("quicknotes")
     .select("*")
@@ -18,6 +19,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   const { response: authResponse } = await requireUser();
   if (authResponse) return authResponse;
+  const supabase = createSupabaseAdmin();
   const { content } = await request.json();
   if (!content?.trim()) return NextResponse.json({ error: "content required" }, { status: 400 });
 
@@ -34,6 +36,7 @@ export async function POST(request: NextRequest) {
 export async function PATCH(request: NextRequest) {
   const { response: authResponse } = await requireUser();
   if (authResponse) return authResponse;
+  const supabase = createSupabaseAdmin();
   const { id, ...updates } = await request.json();
   if (!id) return NextResponse.json({ error: "id required" }, { status: 400 });
 
@@ -46,6 +49,7 @@ export async function PATCH(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   const { response: authResponse } = await requireUser();
   if (authResponse) return authResponse;
+  const supabase = createSupabaseAdmin();
   const id = new URL(request.url).searchParams.get("id");
   if (!id) return NextResponse.json({ error: "id required" }, { status: 400 });
 

@@ -216,71 +216,83 @@ curl -i -H "Authorization: Bearer $CRON_SECRET" \
 
 ## 6. Supabase RLS (Row Level Security)
 
-**Status**: not yet audited. Phase F-Critical (commit `c9d76e1`) added
-the API auth layer (defense layer 1). Supabase RLS is the second
-defense layer — it ensures that even with the anon key, a request can
-only see/modify rows belonging to the authenticated user.
+**Status**: Phase F-2-RLS audit complete (2026-04-11). All API routes
+migrated to service-role admin client; RLS enabled as defense-in-depth.
 
-### Why RLS matters even with API auth in place
+### Architecture (post Phase F-2-RLS)
 
-The API auth check (`requireUser()`) protects every server route in
-`/api/*`, but the anon Supabase key (`NEXT_PUBLIC_SUPABASE_ANON_KEY`)
-is **shipped to the client** by design. Anyone reading the page source
-can see it. Without RLS, that key could be used outside the API
-routes — directly against Supabase REST/Realtime endpoints — to
-read or modify any row in any table.
+Three Supabase clients with distinct roles:
 
-**Both layers are required**: API auth catches the in-app path; RLS
-catches everything else.
+| Client | Key | Used by | Purpose |
+|---|---|---|---|
+| `src/lib/supabase.ts` (browser) | anon | `app/login/page.tsx`, `app/(private)/admin/page.tsx` | client-side **auth flows only** (`signInWithPassword`, `signOut`). Never reads tables. |
+| `src/lib/supabase-server.ts` (cookies) | anon + cookies | `requireUser()` in `api-auth.ts` | reads the user's session cookie to verify auth. Never reads app tables. |
+| `src/lib/supabase-admin.ts` (service-role) | `SUPABASE_SERVICE_KEY` | every `/api/*` route that touches tables | bypasses RLS, executes the actual reads/writes. **Server-only**. |
 
-### RLS audit checklist (manual, ~30 min)
+The three layers separate concerns:
+- **API auth** (`requireUser`) decides if the caller is allowed.
+- **Admin client** does the data work.
+- **RLS** is the wall preventing anyone from skipping the API entirely
+  (e.g. by curling `…/rest/v1/tasks` with the anon key from the page
+  source).
 
-This is a Supabase dashboard task; the codebase cannot do it for you.
-Run through it once after deploying any new user-scoped table.
+### Why this layout
 
-1. Open Supabase dashboard → **Database** → **Tables**.
-2. For each user-scoped table — current candidates from the codebase:
-   - `tasks`
-   - `schedules`
-   - `quicknotes`
-   - `claude_usage`
-   - `axis_metrics`
-   - `agent_heartbeats`
-   - any new table introduced by future phases
-3. Click the table → **RLS** tab → confirm **Enable Row Level Security**
-   is **ON**.
-4. For each policy (`SELECT`, `INSERT`, `UPDATE`, `DELETE`), verify
-   the expression restricts rows to the current user. Typical pattern:
-   ```sql
-   (auth.uid() = user_id)
-   ```
-   Or, for a join-scoped table:
-   ```sql
-   (auth.uid() = (SELECT user_id FROM parent WHERE id = parent_id))
-   ```
-5. Tables that intentionally have **no** user scoping (shared lookup
-   tables, public read-only data) are exceptions — document them in a
-   small `docs/rls-exceptions.md` if/when they exist, with the
-   reasoning per table.
+The earlier layout (Phase F-Critical) added `requireUser()` but kept
+the data calls on the browser anon client without cookies. That meant
+Supabase saw every backend write as **anon, no session**. As long as
+RLS was off the calls worked, but the moment RLS was enabled (with any
+realistic policy) the entire app broke. Phase F-2-RLS chose service-role
+because:
 
-### Verification — direct Supabase test
+1. Single-user app — there is no second user to scope to.
+2. `auth.uid() = user_id` is impossible (no `user_id` columns exist).
+3. Service-role bypass is the standard pattern for backend-driven apps.
+4. RLS-enabled-with-no-policy is the correct DB-side default — denies
+   anon PostgREST while admin client passes through.
 
-After enabling RLS, verify it actually rejects unauthenticated reads:
+### What's enabled now
+
+| Table | RLS | Policies | Notes |
+|---|---|---|---|
+| `tasks` | ON | none (deny anon) | admin client only |
+| `schedules` | ON | none (deny anon) | admin client only |
+| `quicknotes` | ON | none (deny anon) | admin client only |
+| `agent_heartbeats` | ON | none (deny anon) | admin client only |
+| `axis_metrics` | ON | none (deny anon) | admin client only |
+| `claude_usage` | ON | none (deny anon) | admin client only |
+| `papers` / `subscribers` / `captures` / `paper_collections` / `articles` / `collections` / `page_views` | ON | (existing) | Phase F-2-RLS did not modify these |
+
+### Verification — direct anon test
+
+After enabling RLS, verify the anon key can no longer read tables:
 
 ```bash
-# Should return 401 / empty result
+# Should return [] (RLS denies anon)
 curl -s "${NEXT_PUBLIC_SUPABASE_URL}/rest/v1/tasks?select=*" \
   -H "apikey: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}"
 ```
 
-If this returns rows without an `Authorization: Bearer <jwt>` header,
-RLS is not active on the `tasks` table.
+If this returns rows, RLS is not active on `tasks`.
 
-### Future automation
+### Required env var
 
-A `scripts/verify-rls.ts` script that lists all tables via the
-management API and asserts `rls_enabled = true` would catch silent
-drift. Tracked as a follow-up; not blocking.
+`SUPABASE_SERVICE_KEY` must be set in:
+1. **Local**: `.env.local`
+2. **Vercel**: Settings → Environment Variables → all environments
+
+Without it, every `createSupabaseAdmin()` call throws a clear error
+message at request time (see `supabase-admin.ts`). The build itself
+does not need the key.
+
+### Adding a new table
+
+When introducing a new user-scoped table:
+1. Create the table with `RLS enabled` from the start.
+2. Do **not** add policies — the deny-by-default behavior is correct.
+3. Use `createSupabaseAdmin()` in the API route that touches it.
+4. Run `mcp__claude_ai_Supabase__get_advisors` and confirm no new
+   `rls_disabled_in_public` ERRORs.
 
 ---
 
