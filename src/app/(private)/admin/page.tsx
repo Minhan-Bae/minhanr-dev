@@ -640,15 +640,23 @@ function SystemLog({
     return set;
   }, [agents]);
 
-  // Webhook health: check if any agents have recent heartbeats (within 15 min)
+  // Webhook health: check if any agents have recent heartbeats (within 15 min).
+  // Phase Lint-Cleanup: Date.now() inside useMemo was flagged as impure call
+  // during render. Hoist current time into a state that ticks every minute,
+  // making the memo a pure function of (agents, nowMs).
+  const [nowMs, setNowMs] = useState(() => Date.now());
+  useEffect(() => {
+    const id = setInterval(() => setNowMs(Date.now()), 60_000);
+    return () => clearInterval(id);
+  }, []);
   const webhookHealthy = useMemo(() => {
     const fifteenMin = 15 * 60 * 1000;
     return agents.some(
       (a) =>
         a.last_commit_at &&
-        Date.now() - new Date(a.last_commit_at).getTime() < fifteenMin
+        nowMs - new Date(a.last_commit_at).getTime() < fifteenMin
     );
-  }, [agents]);
+  }, [agents, nowMs]);
 
   return (
     <div className="space-y-3">

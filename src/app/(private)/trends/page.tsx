@@ -28,7 +28,6 @@ async function TrendsContent() {
   const stats = index._meta?.stats;
   const tagTop = stats?.by_tag_top || [];
   const researchCats = stats?.by_research_category || {};
-  const monthCreated = stats?.by_month_created || [];
 
   // 최근 7일 growing/seed 노트에서 도메인 태그 분포
   const now = new Date();
