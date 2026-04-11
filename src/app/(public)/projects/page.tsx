@@ -17,8 +17,6 @@ interface PageProps {
 }
 
 async function ProjectsContent({ sp }: { sp: Record<string, string | undefined> }) {
-  const index = await getCachedVaultIndex();
-  const agg = aggregate(index);
   const page = Math.max(1, parseInt(sp.page || "1", 10) || 1);
   const opts: ListNotesOptions = {
     // Tier 2 화이트리스트: 021_R&D + 023_Trinity_x만 공개
@@ -33,7 +31,28 @@ async function ProjectsContent({ sp }: { sp: Record<string, string | undefined> 
     limit: PAGE_SIZE,
     offset: (page - 1) * PAGE_SIZE,
   };
-  const { notes, total } = listNotes(index, opts);
+
+  // Phase G-defense: vault index 미접근 시 graceful degrade.
+  // 홈 (page.tsx loadHomeData) 와 동일한 패턴 — 일시적 GitHub outage,
+  // rate limit, 또는 로컬 dev 의 PAT 권한 부재 (§6 vault 404 함정) 시
+  // 500 대신 placeholder 노출.
+  let index, agg, listed;
+  try {
+    index = await getCachedVaultIndex();
+    agg = aggregate(index);
+    listed = listNotes(index, opts);
+  } catch {
+    return (
+      <div className="space-y-2">
+        <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">Projects</h1>
+        <p className="text-sm text-muted-foreground">
+          vault index unreachable — placeholder until token / data flow restored.
+        </p>
+      </div>
+    );
+  }
+
+  const { notes, total } = listed;
   const statusOptions = Object.keys(agg.by_status).sort();
   const tagOptions = agg.by_tag_top.map((t) => t.tag);
 
