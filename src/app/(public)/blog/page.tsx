@@ -24,7 +24,12 @@ export default function BlogPage() {
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10 sm:py-14 space-y-6">
       <section className="space-y-2">
-        <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">Blog</h1>
+        <h1
+          className="font-bold tracking-tight"
+          style={{ fontSize: "var(--font-size-h1)" }}
+        >
+          Blog
+        </h1>
         <p className="text-muted-foreground text-sm">
           AI, VFX, Creative Technology 분야의 기술 리서치와 프로젝트 기록.
         </p>

@@ -36,6 +36,10 @@ export interface BlogPostMeta {
   categories: string[];
   summary: string;
   author?: string;
+  cover?: {
+    image?: string;
+    alt?: string;
+  };
 }
 
 // ── Module-scope cache ──
@@ -74,6 +78,12 @@ function buildIndex(): { posts: BlogPostMeta[]; slugMap: Map<string, string> } {
         summary: data.summary || "",
       };
       if (data.author) meta.author = data.author;
+      if (data.cover && (data.cover.image || data.cover.alt)) {
+        meta.cover = {
+          image: data.cover.image,
+          alt: data.cover.alt,
+        };
+      }
       return meta;
     })
     .filter((p): p is BlogPostMeta => p !== null);

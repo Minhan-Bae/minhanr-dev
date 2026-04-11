@@ -1,41 +1,66 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import Link from "next/link";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import { BlogCard, isPublicCategory } from "@/components/blog-card";
+import type { BlogPostMeta } from "@/lib/blog";
 
-interface PostMeta {
-  title: string;
-  date: string;
-  slug: string;
-  tags: string[];
-  categories: string[];
-  summary: string;
-}
+type Group = { key: string; label: string; posts: BlogPostMeta[] };
 
-const CATEGORY_COLORS: Record<string, string> = {
-  AI: "border-l-primary",
-  VFX: "border-l-chart-3",
-  Research: "border-l-chart-1",
-  "Creative Technology": "border-l-chart-4",
-  TrinityX: "border-l-chart-2",
-};
+const FOURTEEN_DAYS_MS = 14 * 86400000;
+const ONE_YEAR_MS = 365 * 86400000;
+const MONTH_FORMATTER = new Intl.DateTimeFormat("en-US", {
+  month: "long",
+  year: "numeric",
+});
 
-function getCategoryBorder(categories: string[]): string {
-  for (const cat of categories) {
-    if (CATEGORY_COLORS[cat]) return CATEGORY_COLORS[cat];
+function groupPostsByTime(posts: BlogPostMeta[]): Group[] {
+  const now = Date.now();
+  const recent: BlogPostMeta[] = [];
+  const monthBuckets = new Map<string, Group>();
+  const older: BlogPostMeta[] = [];
+
+  for (const post of posts) {
+    if (!post.date) {
+      older.push(post);
+      continue;
+    }
+    const d = new Date(post.date);
+    const ageMs = now - d.getTime();
+    if (ageMs < FOURTEEN_DAYS_MS) {
+      recent.push(post);
+    } else if (ageMs < ONE_YEAR_MS) {
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+      const existing = monthBuckets.get(key);
+      if (existing) {
+        existing.posts.push(post);
+      } else {
+        monthBuckets.set(key, {
+          key,
+          label: MONTH_FORMATTER.format(d),
+          posts: [post],
+        });
+      }
+    } else {
+      older.push(post);
+    }
   }
-  return "border-l-border";
+
+  const groups: Group[] = [];
+  if (recent.length > 0) {
+    groups.push({ key: "recent", label: "Recent", posts: recent });
+  }
+  // Insertion order is newest-first because input is date-desc sorted.
+  for (const bucket of monthBuckets.values()) {
+    groups.push(bucket);
+  }
+  if (older.length > 0) {
+    groups.push({ key: "older", label: "Older", posts: older });
+  }
+  return groups;
 }
 
-export function BlogList({ posts }: { posts: PostMeta[] }) {
+export function BlogList({ posts }: { posts: BlogPostMeta[] }) {
   const [query, setQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
@@ -43,7 +68,11 @@ export function BlogList({ posts }: { posts: PostMeta[] }) {
   const categories = useMemo(() => {
     const set = new Set<string>();
     posts.forEach((p) => p.categories.forEach((c) => set.add(c)));
-    return Array.from(set).sort();
+    // Defense in depth: only show categories listed in the public palette
+    // (CATEGORY_PALETTE in blog-card.tsx). Anything else — including the
+    // Tier 3 TrinityX codename — is filtered out even if a stale post
+    // still carries that frontmatter.
+    return Array.from(set).filter(isPublicCategory).sort();
   }, [posts]);
 
   const topTags = useMemo(() => {
@@ -81,7 +110,13 @@ export function BlogList({ posts }: { posts: PostMeta[] }) {
     setSelectedTag(null);
   };
 
-  const hasFilters = query || selectedCategory || selectedTag;
+  const hasFilters = Boolean(query || selectedCategory || selectedTag);
+
+  const featured = !hasFilters && posts.length > 0 ? posts[0] : null;
+  const groups = useMemo(() => {
+    if (hasFilters || posts.length === 0) return [];
+    return groupPostsByTime(posts.slice(1));
+  }, [hasFilters, posts]);
 
   return (
     <>
@@ -89,7 +124,7 @@ export function BlogList({ posts }: { posts: PostMeta[] }) {
       <div className="relative">
         <input
           type="text"
-          placeholder="Search posts..."
+          placeholder={`Wander through ${posts.length} notes...`}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           className="w-full rounded-lg border border-border bg-card px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/50 focus:border-primary/50 focus:outline-none focus:ring-1 focus:ring-primary/20 transition-all"
@@ -149,81 +184,49 @@ export function BlogList({ posts }: { posts: PostMeta[] }) {
         </div>
       )}
 
-      {/* 포스트 목록 */}
-      <div className="space-y-4">
-        {filtered.map((post, index) => (
-          <Link
-            key={post.slug}
-            href={`/blog/${post.slug}`}
-            className="block group animate-fade-up"
-            style={{ animationDelay: `${index * 60}ms` }}
-          >
-            <Card
-              className={`border-border hover:border-primary/20 hover:bg-[var(--surface-1)] card-lift transition-all border-l-4 ${getCategoryBorder(post.categories)} ${
-                index === 0 && !hasFilters ? "ring-1 ring-primary/10" : ""
-              }`}
-            >
-              <CardHeader className="p-4 pb-2">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <CardDescription className="text-xs text-muted-foreground tabular-nums">
-                    {post.date}
-                  </CardDescription>
-                  {post.categories.map((cat) => (
-                    <Badge
-                      key={cat}
-                      variant="secondary"
-                      className="text-xs px-1.5 py-0"
-                    >
-                      {cat}
-                    </Badge>
-                  ))}
-                </div>
-                <CardTitle
-                  className={`font-medium text-foreground group-hover:text-primary transition-colors leading-relaxed mt-1 ${
-                    index === 0 && !hasFilters ? "text-base" : "text-sm"
-                  }`}
-                >
-                  {post.title}
-                </CardTitle>
-              </CardHeader>
-              {(post.summary || post.tags.length > 0) && (
-                <CardContent className="p-4 pt-0">
-                  {post.summary && (
-                    <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
-                      {post.summary}
-                    </p>
-                  )}
-                  {post.tags.length > 0 && (
-                    <div className="flex gap-1.5 flex-wrap">
-                      {post.tags.slice(0, 5).map((tag) => (
-                        <span
-                          key={tag}
-                          className="text-xs text-primary/80 bg-primary/10 rounded px-1.5 py-0.5"
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                      {post.tags.length > 5 && (
-                        <span className="text-xs text-muted-foreground/50">
-                          +{post.tags.length - 5}
-                        </span>
-                      )}
-                    </div>
-                  )}
-                </CardContent>
-              )}
+      {/* 본문: 필터 활성 시 평면 결과, 아니면 Featured + 시간 그루핑 */}
+      {hasFilters ? (
+        <div className="space-y-3">
+          {filtered.map((post) => (
+            <BlogCard key={post.slug} post={post} variant="default" />
+          ))}
+          {filtered.length === 0 && (
+            <Card className="border-border">
+              <CardContent className="py-10 text-center text-muted-foreground text-sm">
+                No matching posts.
+              </CardContent>
             </Card>
-          </Link>
-        ))}
+          )}
+        </div>
+      ) : (
+        <div className="space-y-10">
+          {featured && <BlogCard post={featured} variant="featured" />}
 
-        {filtered.length === 0 && (
-          <Card className="border-border">
-            <CardContent className="py-10 text-center text-muted-foreground text-sm">
-              {hasFilters ? "No matching posts." : "No posts yet."}
-            </CardContent>
-          </Card>
-        )}
-      </div>
+          {groups.map((group) => (
+            <section key={group.key} className="space-y-3">
+              <h2
+                className="font-medium text-foreground/90 tracking-tight"
+                style={{ fontSize: "var(--font-size-h3)" }}
+              >
+                {group.label}
+              </h2>
+              <div className="grid gap-3 sm:grid-cols-2">
+                {group.posts.map((post) => (
+                  <BlogCard key={post.slug} post={post} variant="default" />
+                ))}
+              </div>
+            </section>
+          ))}
+
+          {posts.length === 0 && (
+            <Card className="border-border">
+              <CardContent className="py-10 text-center text-muted-foreground text-sm">
+                No posts yet.
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      )}
     </>
   );
 }

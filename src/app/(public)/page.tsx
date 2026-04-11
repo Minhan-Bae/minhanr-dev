@@ -4,6 +4,7 @@ import { ArrowRight } from "lucide-react";
 import { getAllPosts } from "@/lib/blog";
 import { BRAND_IDENTITY } from "@/lib/brand/tokens";
 import { StateBadge } from "@/components/state-badge";
+import { HoverGauge } from "@/components/hover-gauge";
 import {
   aggregate,
   getCachedVaultIndex,
@@ -272,7 +273,7 @@ export default async function Home() {
               <li key={note.path}>
                 <Link
                   href={vaultPathToHref(note.path)}
-                  className="group flex items-start gap-4 py-3 border-b border-[var(--hairline)] transition-colors hover:border-primary/30"
+                  className="group relative flex items-start gap-4 py-3 border-b border-[var(--hairline)] transition-colors hover:border-primary/30"
                 >
                   <StateBadge status={note.status ?? null} />
                   <div className="flex-1 min-w-0">
@@ -288,6 +289,7 @@ export default async function Home() {
                   <time className="text-xs font-mono text-muted-foreground/70 whitespace-nowrap pt-0.5">
                     {formatRelative(note.created)}
                   </time>
+                  <HoverGauge align="border" />
                 </Link>
               </li>
             ))}
@@ -368,7 +370,7 @@ export default async function Home() {
             <li key={post.slug}>
               <Link
                 href={`/blog/${post.slug}`}
-                className="group flex items-start gap-4 py-3 border-b border-[var(--hairline)] transition-colors hover:border-primary/30"
+                className="group relative flex items-start gap-4 py-3 border-b border-[var(--hairline)] transition-colors hover:border-primary/30"
               >
                 <time className="text-xs font-mono text-muted-foreground/70 tabular-nums pt-0.5 whitespace-nowrap">
                   {post.date}
@@ -383,6 +385,7 @@ export default async function Home() {
                     </div>
                   )}
                 </div>
+                <HoverGauge align="border" />
               </Link>
             </li>
           ))}
@@ -516,7 +519,7 @@ function Entry({
   return (
     <Link
       href={href}
-      className="group bg-background hover:bg-[var(--surface-1)] p-6 transition-colors flex flex-col gap-2"
+      className="group relative bg-background hover:bg-[var(--surface-1)] p-6 transition-colors flex flex-col gap-2 overflow-hidden"
     >
       <div className="flex items-baseline justify-between">
         <span className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">
@@ -529,6 +532,7 @@ function Entry({
         )}
       </div>
       <span className="text-xs text-muted-foreground/70">{note}</span>
+      <HoverGauge align="edge" />
     </Link>
   );
 }
