@@ -4,6 +4,7 @@
  */
 
 import { GITHUB_REPO } from "./constants";
+import { todayKstDate, todayKstDayName } from "./time";
 
 const GITHUB_API = `https://api.github.com/repos/${GITHUB_REPO}/contents`;
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN || "";
@@ -74,19 +75,10 @@ export async function commitToGitHub(
 
 /* ── Append to Daily Note ── */
 
-function todayDate(): string {
-  const now = new Date();
-  // KST (UTC+9)
-  const kst = new Date(now.getTime() + 9 * 60 * 60 * 1000);
-  return kst.toISOString().split("T")[0];
-}
-
-function getDayName(): string {
-  const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-  const now = new Date();
-  const kst = new Date(now.getTime() + 9 * 60 * 60 * 1000);
-  return days[kst.getUTCDay()];
-}
+// KST helpers live in src/lib/time.ts — single source for the +9 hour
+// shift pattern. Local aliases keep call sites unchanged.
+const todayDate = todayKstDate;
+const getDayName = todayKstDayName;
 
 export async function appendToDailyNote(
   section: string,

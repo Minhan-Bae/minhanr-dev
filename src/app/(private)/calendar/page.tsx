@@ -3,7 +3,7 @@ import { WeeklyCalendar } from "@/components/weekly-calendar";
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "Calendar | OIKBAS",
+  title: "Calendar | minhanr.dev",
   robots: { index: false, follow: false },
 };
 

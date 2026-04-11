@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, Fragment, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
+import { nowInKST, todayKstDate, nowKstMinutes } from "@/lib/time";
 
 interface TimeBlock {
   date: string;
@@ -48,13 +49,13 @@ function catStyle(cat: string, cats: Record<string, CatConfig>) {
 const HOURS = Array.from({ length: 17 }, (_, i) => i + 7);
 const CELL_H = 48;
 
-function getNowKST() { return new Date(Date.now() + 9 * 60 * 60 * 1000); }
+// KST helpers moved to src/lib/time.ts (single source for +9 shift).
 
 // ── Main Component ──
 export function WeeklyCalendar() {
   const [data, setData] = useState<CalendarData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [baseDate, setBaseDate] = useState(() => getNowKST().toISOString().split("T")[0]);
+  const [baseDate, setBaseDate] = useState(() => todayKstDate());
   const [view, setView] = useState<"week" | "3day">("3day");
   const [categories, setCategories] = useState<Record<string, CatConfig>>(DEFAULT_CATEGORIES);
   const [showSettings, setShowSettings] = useState(false);
@@ -77,14 +78,16 @@ export function WeeklyCalendar() {
   const [editingTitle, setEditingTitle] = useState<{ date: string; value: string } | null>(null);
 
   const [submitting, setSubmitting] = useState(false);
-  const [nowMinute, setNowMinute] = useState(() => { const n = getNowKST(); return n.getUTCHours() * 60 + n.getUTCMinutes(); });
+  const [nowMinute, setNowMinute] = useState(() => nowKstMinutes());
   const scrollRef = useRef<HTMLDivElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
 
-  // Load saved categories
+  // Load saved categories from localStorage on mount. setState here is
+  // synchronous but intentional (one-time hydration of client-only state).
   useEffect(() => {
     try {
       const saved = localStorage.getItem("oikbas-cal-categories");
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       if (saved) setCategories({ ...DEFAULT_CATEGORIES, ...JSON.parse(saved) });
     } catch { /* */ }
   }, []);
@@ -98,9 +101,13 @@ export function WeeklyCalendar() {
     if (showLoading) setLoading(false);
   }, [baseDate]);
 
+  // Initial fetch on mount + on baseDate change. setState happens
+  // asynchronously inside fetchData (after the await), not synchronously
+  // in this effect body — suppress the rule for the intentional pattern.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { fetchData(true); }, [fetchData]);
   useEffect(() => {
-    const id = setInterval(() => { const n = getNowKST(); setNowMinute(n.getUTCHours() * 60 + n.getUTCMinutes()); }, 60000);
+    const id = setInterval(() => setNowMinute(nowKstMinutes()), 60000);
     return () => clearInterval(id);
   }, []);
   const hasScrolled = useRef(false);
@@ -112,7 +119,7 @@ export function WeeklyCalendar() {
     }
   }, [loading, nowMinute]);
 
-  const todayStr = getNowKST().toISOString().split("T")[0];
+  const todayStr = todayKstDate();
   function shiftWeek(dir: number) { const d = new Date(baseDate + "T00:00:00"); d.setDate(d.getDate() + dir * (view === "3day" ? 3 : 7)); setBaseDate(d.toISOString().split("T")[0]); }
   function goToday() { setBaseDate(todayStr); }
 
@@ -254,7 +261,7 @@ export function WeeklyCalendar() {
 
   // Month mini-map
   const monthDays: { date: string; hasBlocks: boolean; isToday: boolean }[] = [];
-  const now = getNowKST();
+  const now = nowInKST();
   const firstOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
   const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
   for (let d = 1; d <= daysInMonth; d++) {

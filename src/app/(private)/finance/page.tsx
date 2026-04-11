@@ -12,7 +12,7 @@ import { VaultUnreachablePrivate } from "@/components/vault-unreachable";
 import { WatchlistAdd } from "@/components/finance-actions";
 
 export const metadata = {
-  title: "Finance | OIKBAS",
+  title: "Finance | minhanr.dev",
   robots: { index: false, follow: false },
 };
 export const dynamic = "force-dynamic";

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getFileContent, commitToGitHub } from "@/lib/github";
 import { requireUser } from "@/lib/api-auth";
+import { nowInKST } from "@/lib/time";
 
 /**
  * POST /api/finance — 워치리스트 관리
@@ -18,8 +19,8 @@ export async function POST(req: NextRequest) {
 
   const ticker = symbol.toUpperCase();
 
-  // 오늘 날짜의 Insider_Scan 노트 찾기
-  const now = new Date(Date.now() + 9 * 60 * 60 * 1000); // KST
+  // 오늘 날짜의 Insider_Scan 노트 찾기 (KST)
+  const now = nowInKST();
   const dateStr = now.toISOString().split("T")[0].replace(/-/g, "").slice(2);
   const scanPath = `030_Areas/034_Finance/${dateStr}_Insider_Scan.md`;
 

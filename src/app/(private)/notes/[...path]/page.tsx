@@ -40,7 +40,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   if (!note) {
     return {
-      title: "Note Not Found | OIKBAS",
+      title: "Note Not Found | minhanr.dev",
       robots: { index: false, follow: false },
     };
   }
@@ -49,11 +49,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const summary =
     typeof note.frontmatter.summary === "string"
       ? note.frontmatter.summary
-      : `OIKBAS vault note · ${path}`;
+      : `vault note · ${path}`;
 
   // K-2 정책: Knowledge Hub의 모든 노트 페이지는 검색엔진 인덱스에서 제외.
   return {
-    title: `${title} | OIKBAS Notes`,
+    title: `${title} | minhanr.dev`,
     description: summary,
     robots: { index: false, follow: false },
     openGraph: {

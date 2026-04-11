@@ -5,7 +5,7 @@ import { VaultUnreachablePrivate } from "@/components/vault-unreachable";
 import { aggregate, getCachedVaultIndex, kbHubExcludeStatus, listNotes, type ListNotesOptions } from "@/lib/vault-index";
 
 export const metadata = {
-  title: "Notes | OIKBAS",
+  title: "Notes | minhanr.dev",
   robots: { index: false, follow: false },
 };
 export const revalidate = 300;
@@ -73,7 +73,7 @@ export default async function NotesPage({ searchParams }: PageProps) {
       <Suspense fallback={<div className="h-40 skeleton-shimmer rounded-lg bg-muted" />}>
         <NotesContent
           title="Notes"
-          subtitle="OIKBAS 볼트 전체 노트 — vault_index 기반"
+          subtitle="vault 전체 노트 — vault_index 기반"
           sp={sp}
         />
       </Suspense>

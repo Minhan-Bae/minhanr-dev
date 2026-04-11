@@ -16,7 +16,7 @@ import { aggregate, getCachedVaultIndex, KB_HUB_HIDDEN_STATUSES, listNotes } fro
 import { vaultPathToHref } from "@/lib/vault-note";
 
 export const metadata = {
-  title: "Dashboard | OIKBAS",
+  title: "Dashboard | minhanr.dev",
   robots: { index: false, follow: false },
 };
 export const dynamic = "force-dynamic";
@@ -344,7 +344,7 @@ export default function DashboardPage() {
           {getGreeting()} <span className="text-gradient">Minhan</span>
         </h1>
         <p className="text-sm text-muted-foreground">
-          {dateStr} — OIKBAS 종합 대시보드
+          {dateStr} — 종합 대시보드
         </p>
       </div>
       <Suspense fallback={<DashboardSkeleton />}>

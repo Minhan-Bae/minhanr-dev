@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Command | OIKBAS",
+  title: "Command | minhanr.dev",
   robots: { index: false, follow: false },
 };
 

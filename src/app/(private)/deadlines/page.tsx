@@ -7,7 +7,7 @@ import { getCachedVaultIndex } from "@/lib/vault-index";
 import { vaultPathToHref } from "@/lib/vault-note";
 
 export const metadata = {
-  title: "Deadlines | OIKBAS",
+  title: "Deadlines | minhanr.dev",
   robots: { index: false, follow: false },
 };
 export const revalidate = 300;

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getFileContent, commitToGitHub } from "@/lib/github";
 import { requireUser } from "@/lib/api-auth";
+import { todayKstDate } from "@/lib/time";
 
 export const dynamic = "force-dynamic";
 
@@ -20,13 +21,32 @@ interface DayData {
   blocks: TimeBlock[];
 }
 
+/**
+ * Parse `## Time Blocks` table rows out of a Daily Note's markdown.
+ *
+ * Accepted hour syntaxes (manual Obsidian edits often use the HH:MM form):
+ *   | 9-11 | ... | ... |              ← writer's canonical form
+ *   | 9 - 11 | ... | ... |
+ *   | 09-11 | ... | ... |
+ *   | 09:00-11:00 | ... | ... |       ← manual edit, common variant
+ *   | 09:00 - 11:00 | ... | ... |
+ *   | 9:00-11:00 | ... | ... |
+ *
+ * The minute portion is *captured but discarded* — TimeBlock stores
+ * integer hours only. A user who writes `9:30-11:30` will see the
+ * block silently rounded to `9-11`. This is a known limitation; an
+ * upgrade to fractional hours requires a wider TimeBlock change and
+ * lives in a future phase.
+ */
 function parseTimeBlocks(content: string, date: string): TimeBlock[] {
   const blocks: TimeBlock[] = [];
   const tbSection = content.match(/## (?:🧱 )?Time Blocks\s*\n([\s\S]*?)(?=\n## |\n---|\z)/);
   if (!tbSection) return blocks;
 
+  // `(?::\d{2})?` makes the `:MM` minute portion optional and discards it.
+  const ROW_RE = /\|\s*(\d{1,2})(?::\d{2})?\s*-\s*(\d{1,2})(?::\d{2})?\s*\|\s*([^|]+?)\s*\|\s*([^|]*?)\s*\|/;
   for (const line of tbSection[1].split("\n")) {
-    const match = line.match(/\|\s*(\d{1,2})\s*-\s*(\d{1,2})\s*\|\s*([^|]+?)\s*\|\s*([^|]*?)\s*\|/);
+    const match = line.match(ROW_RE);
     if (match) {
       blocks.push({
         date,
@@ -70,8 +90,7 @@ export async function GET(req: NextRequest) {
   const { response: authResponse } = await requireUser();
   if (authResponse) return authResponse;
   const dateParam = req.nextUrl.searchParams.get("date");
-  const now = new Date(Date.now() + 9 * 60 * 60 * 1000);
-  const baseDate = dateParam || now.toISOString().split("T")[0];
+  const baseDate = dateParam || todayKstDate();
   const weekDates = getWeekDates(baseDate);
 
   const days: DayData[] = [];
@@ -161,8 +180,13 @@ export async function DELETE(req: NextRequest) {
   const file = await getFileContent(dailyPath);
   if (!file) return NextResponse.json({ error: "Daily note not found" }, { status: 404 });
 
-  // Remove the matching table row
-  const pattern = new RegExp(`\\|\\s*${startHour}\\s*-\\s*${endHour}\\s*\\|[^\\n]*\\|[^\\n]*\\|\\n?`, "g");
+  // Remove the matching table row. Allow optional `:MM` suffix on
+  // both hours so manual `09:00-11:00` edits delete cleanly too
+  // (matches the parser strengthening above).
+  const pattern = new RegExp(
+    `\\|\\s*${startHour}(?::\\d{2})?\\s*-\\s*${endHour}(?::\\d{2})?\\s*\\|[^\\n]*\\|[^\\n]*\\|\\n?`,
+    "g"
+  );
   const updated = file.content.replace(pattern, "");
 
   if (updated === file.content) {

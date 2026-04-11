@@ -6,7 +6,7 @@ import { aggregate, getCachedVaultIndex, kbHubExcludeStatus, listNotes, type Lis
 import { PROJECTS_FOLDERS } from "@/lib/vault-tiers";
 
 export const metadata = {
-  title: "Projects | OIKBAS",
+  title: "Projects | minhanr.dev",
   robots: { index: false, follow: false },
 };
 export const revalidate = 300;

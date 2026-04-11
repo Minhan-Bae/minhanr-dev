@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { commitToGitHub } from "@/lib/github";
 import { requireUser } from "@/lib/api-auth";
+import { nowInKST } from "@/lib/time";
 
 export async function POST(request: NextRequest) {
   const { response: authResponse } = await requireUser();
@@ -10,8 +11,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "text required" }, { status: 400 });
   }
 
-  const now = new Date();
-  const kst = new Date(now.getTime() + 9 * 60 * 60 * 1000);
+  const kst = nowInKST();
   const dateStr = kst.toISOString().split("T")[0];
   const ts = kst.toISOString().replace(/[:.]/g, "-").slice(0, 19);
   const slug = text.trim().slice(0, 30).replace(/[^a-zA-Z0-9가-힣\s-]/g, "").replace(/\s+/g, "-");

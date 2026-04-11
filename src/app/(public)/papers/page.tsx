@@ -6,7 +6,7 @@ import { aggregate, getCachedVaultIndex, kbHubExcludeStatus, listNotes, type Lis
 import { PAPERS_FOLDERS } from "@/lib/vault-tiers";
 
 export const metadata = {
-  title: "Papers | OIKBAS",
+  title: "Papers | minhanr.dev",
   robots: { index: false, follow: false },
 };
 export const revalidate = 300;

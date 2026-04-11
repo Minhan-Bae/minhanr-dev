@@ -15,7 +15,7 @@ import { aggregate, getCachedVaultIndex } from "@/lib/vault-index";
 import { VaultUnreachablePrivate } from "@/components/vault-unreachable";
 
 export const metadata = {
-  title: "Statistics | OIKBAS",
+  title: "Statistics | minhanr.dev",
   robots: { index: false, follow: false },
 };
 export const revalidate = 300;
@@ -204,7 +204,7 @@ export default function StatisticsPage() {
       <div className="space-y-1">
         <h1 className="text-2xl font-bold tracking-tight">Statistics</h1>
         <p className="text-sm text-muted-foreground">
-          OIKBAS 볼트 통계 — 카테고리 · 태그 · 활동 추이 · 상태 분포
+          vault 통계 — 카테고리 · 태그 · 활동 추이 · 상태 분포
         </p>
       </div>
       <Suspense fallback={<StatisticsSkeleton />}>

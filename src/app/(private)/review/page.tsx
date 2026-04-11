@@ -12,7 +12,7 @@ import { VaultUnreachablePrivate } from "@/components/vault-unreachable";
 import { ReviewActions } from "@/components/review-actions";
 
 export const metadata = {
-  title: "Review | OIKBAS",
+  title: "Review | minhanr.dev",
   robots: { index: false, follow: false },
 };
 export const dynamic = "force-dynamic";

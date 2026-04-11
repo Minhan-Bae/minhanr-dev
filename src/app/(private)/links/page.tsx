@@ -5,7 +5,7 @@ import { VaultUnreachablePrivate } from "@/components/vault-unreachable";
 import { getCachedVaultIndex } from "@/lib/vault-index";
 
 export const metadata = {
-  title: "Links | OIKBAS",
+  title: "Links | minhanr.dev",
   robots: { index: false, follow: false },
 };
 export const revalidate = 300;

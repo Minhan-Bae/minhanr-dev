@@ -12,7 +12,7 @@ import { VaultUnreachablePrivate } from "@/components/vault-unreachable";
 import { BoostButton, SuppressButton } from "@/components/trends-actions";
 
 export const metadata = {
-  title: "Trends | OIKBAS",
+  title: "Trends | minhanr.dev",
   robots: { index: false, follow: false },
 };
 export const dynamic = "force-dynamic";

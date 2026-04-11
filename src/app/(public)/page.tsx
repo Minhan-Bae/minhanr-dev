@@ -399,8 +399,7 @@ export default async function Home() {
         <p className="text-sm text-muted-foreground leading-relaxed max-w-2xl">
           How this site is gardened — seven agents on three axes (acquisition,
           convergence, amplification), publishing through GitHub Actions into a
-          Next.js public surface. The system is named OIKBAS internally; the
-          full story is in the{" "}
+          Next.js public surface. The full story is in the{" "}
           <Link href="/colophon" className="text-primary hover:underline">
             colophon
           </Link>
