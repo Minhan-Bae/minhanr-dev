@@ -100,8 +100,8 @@ export function AppSidebar() {
     <Sidebar collapsible="icon">
       <SidebarHeader>
         <Link
-          href="/dashboard"
-          aria-label="OIKBAS Dashboard"
+          href="/"
+          aria-label="Go to home"
           className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-sidebar-accent transition-colors"
         >
           <div className="flex h-8 w-8 items-center justify-center rounded-md bg-gradient-to-br from-primary to-accent text-sidebar-primary-foreground font-bold shadow-sm shadow-primary/30">
