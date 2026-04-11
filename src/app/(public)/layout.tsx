@@ -1,65 +1,25 @@
-"use client";
+import { PublicHeader } from "@/components/public-header";
+import { createSupabaseServer } from "@/lib/supabase-server";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { ThemeSwitcher } from "@/components/theme-switcher";
-
-
-const NAV_LINKS = [
-  { href: "/blog", label: "Blog" },
-  { href: "/papers", label: "Papers" },
-  { href: "/projects", label: "Projects" },
-  { href: "/dashboard", label: "Dashboard" },
-];
-
-export default function PublicLayout({
+export default async function PublicLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const pathname = usePathname() ?? "/";
+  // Server-side auth resolution drives the trailing NAV item
+  // (Login ↔ Dashboard) so non-authenticated visitors don't hit a dead-end.
+  const supabase = await createSupabaseServer();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const isAuthenticated = !!user;
 
   return (
     <div className="flex min-h-svh flex-col">
-      <header className="sticky top-0 z-30 border-b border-border/50 bg-background/80 backdrop-blur-sm">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-12 flex items-center justify-between">
-          <Link
-            href="/"
-            className="text-sm font-bold tracking-tight hover:text-primary transition-colors"
-          >
-            <span className="text-primary font-black">M</span>inhanr
-          </Link>
-          <nav className="flex items-center gap-1">
-            {NAV_LINKS.map((link) => {
-              const active =
-                link.href === "/"
-                  ? pathname === "/"
-                  : pathname.startsWith(link.href);
-              return (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  aria-current={active ? "page" : undefined}
-                  className={`relative rounded-md px-3 py-1.5 text-sm transition-colors focus-visible:ring-1 focus-visible:ring-primary/40 outline-none ${
-                    active
-                      ? "text-foreground font-medium"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  {link.label}
-                  {active && (
-                    <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4 h-0.5 bg-primary rounded-full" />
-                  )}
-                </Link>
-              );
-            })}
-            <div className="ml-2 border-l border-border/50 pl-2">
-              <ThemeSwitcher />
-            </div>
-          </nav>
-        </div>
-      </header>
-      <main className="flex-1 animate-in fade-in slide-in-from-bottom-2 duration-500">{children}</main>
+      <PublicHeader isAuthenticated={isAuthenticated} />
+      <main className="flex-1 animate-in fade-in slide-in-from-bottom-2 duration-500">
+        {children}
+      </main>
       <footer className="border-t border-border/30 py-8">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 flex items-center justify-between">
           <p className="text-xs text-muted-foreground">

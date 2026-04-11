@@ -48,6 +48,26 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+
+  /* ── Integrated typography scale (1.25 ratio, base 16px) ──
+     Single source of truth for headings across home and sub-pages.
+     See docs/brand-tenets.md "Tenet 5: One surface, many entries". */
+  --font-size-display: 3.815rem;  /* 61px    — /colophon, special only */
+  --font-size-h1:      3.052rem;  /* 48.8px  — page hero, one per page */
+  --font-size-h2:      2.441rem;  /* 39px    — section title */
+  --font-size-h3:      1.953rem;  /* 31.25px — card / subsection */
+  --font-size-h4:      1.563rem;  /* 25px    — card emphasis */
+  --font-size-body-lg: 1.25rem;   /* 20px    — manifesto subline */
+  --font-size-body:    1rem;      /* 16px    — body text */
+  --font-size-micro:   0.8rem;    /* 12.8px  — meta, badge, timestamp */
+
+  /* State tokens (Tenet 2: Garage door open) */
+  --color-state-growing:   var(--state-growing);
+  --color-state-mature:    var(--state-mature);
+  --color-state-published: var(--state-published);
+
+  /* Thin separator (Tenet 4: Instruments over decorations) */
+  --color-hairline: var(--hairline);
 }
 
 :root {
@@ -100,6 +120,14 @@
   --glow-cyan: oklch(0.65 0.170 195 / 18%);
   --glow-pink: oklch(0.56 0.175 215 / 16%);
   --glow-foam: oklch(0.62 0.150 170 / 14%);
+
+  /* State tokens — light theme (Tenet 2) */
+  --state-growing:   oklch(0.62 0.190 30);
+  --state-mature:    oklch(0.68 0.150 80);
+  --state-published: oklch(0.62 0.140 170);
+
+  /* Hairline — light theme */
+  --hairline: oklch(0 0 0 / 6%);
 }
 
 .dark {
@@ -155,6 +183,14 @@
   --glow-cyan: oklch(0.85 0.180 195 / 35%);
   --glow-pink: oklch(0.72 0.160 215 / 30%);
   --glow-foam: oklch(0.78 0.140 170 / 25%);
+
+  /* State tokens — dark theme (Tenet 2) */
+  --state-growing:   oklch(0.74 0.180 30);
+  --state-mature:    oklch(0.78 0.160 80);
+  --state-published: oklch(0.78 0.140 170);
+
+  /* Hairline — dark theme */
+  --hairline: oklch(1 0 0 / 5%);
 }
 
 .gray {
@@ -198,6 +234,14 @@
   --glow-cyan: oklch(0.85 0.180 195 / 28%);
   --glow-pink: oklch(0.74 0.160 215 / 26%);
   --glow-foam: oklch(0.78 0.140 170 / 22%);
+
+  /* State tokens — gray theme (Tenet 2) */
+  --state-growing:   oklch(0.76 0.180 30);
+  --state-mature:    oklch(0.80 0.155 80);
+  --state-published: oklch(0.80 0.140 170);
+
+  /* Hairline — gray theme */
+  --hairline: oklch(1 0 0 / 6%);
 }
 
 /* ── Theme-aware header colors ── */

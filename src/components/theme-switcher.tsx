@@ -1,9 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useSyncExternalStore } from "react";
 
 type Theme = "dark" | "light" | "gray";
+
+// Tier 0 brand is "Minhan Bae" (see docs/brand-tenets.md). Storage key
+// follows the public-facing brand name, not the internal system codename.
+// Legacy "oikbas-theme" reads are migrated by the inline script in layout.tsx
+// before paint, so this constant is the only place the writer needs to know.
+const THEME_KEY = "minhanr-theme";
 
 const THEME_CONFIG: Record<Theme, { label: string; icon: string }> = {
   dark: { label: "Dark", icon: "●" },
@@ -24,6 +29,12 @@ export function ThemeSwitcher() {
   const [theme, setTheme] = useState<Theme>("dark");
 
   useEffect(() => {
+    // Intentional setState-in-effect: the inline script in layout.tsx has
+    // already applied the persisted theme class to <html> before hydration,
+    // so reading documentElement post-mount is the only way to learn what
+    // theme is actually live. The mounted gate below prevents the hydration
+    // mismatch that would otherwise result.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setTheme(getThemeFromDOM());
     setMounted(true);
   }, []);
@@ -32,7 +43,7 @@ export function ThemeSwitcher() {
     const html = document.documentElement;
     html.classList.remove("dark", "light", "gray");
     html.classList.add(t);
-    localStorage.setItem("oikbas-theme", t);
+    localStorage.setItem(THEME_KEY, t);
     setTheme(t);
   }
 
