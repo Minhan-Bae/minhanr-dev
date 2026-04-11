@@ -9,6 +9,7 @@ const NAV_LINKS = [
   { href: "/blog", label: "Blog" },
   { href: "/papers", label: "Papers" },
   { href: "/projects", label: "Projects" },
+  { href: "/dashboard", label: "Dashboard" },
 ];
 
 export default function PublicLayout({
