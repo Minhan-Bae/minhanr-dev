@@ -1,5 +1,6 @@
 import { ImageResponse } from "@vercel/og";
 import { BRAND_TOKENS, BRAND_IDENTITY } from "@/lib/brand/tokens";
+import { BRAND_STATS } from "@/lib/brand/stats";
 
 export const runtime = "edge";
 
@@ -21,16 +22,13 @@ export const runtime = "edge";
  * in this file — drift between OG and the live site is the bug this is
  * structured to prevent.
  *
- * Vault stat numbers below are mock placeholders. Live vault index access
- * is impossible at edge runtime; replacing them with build-injected values
- * is a planned follow-up (data/vault-stats.json automation in CI).
- * See docs/brand-tenets.md "Tenet 1: Live from the vault".
+ * Vault stat numbers come from src/lib/brand/stats.ts (manually maintained
+ * snapshot). Edge runtime can't fetch the live vault index, so this is the
+ * single source of truth for OG-channel numbers. See docs/brand-tenets.md
+ * "Tenet 1: Live from the vault" — manual but honest > forever-stale mock.
+ *
+ * Phase F follow-up: GitHub Action that auto-updates BRAND_STATS daily.
  */
-
-// ── Mock stats (TODO: replace with build-injected data/vault-stats.json) ──
-const MOCK_VAULT_NOTES = "980+";
-const MOCK_BLOG_POSTS = "80+";
-const MOCK_LAST_HARVEST = "today";
 
 // State badge color resolver (Tenet 2: Garage door open)
 function stateColor(status: string | null): string {
@@ -140,11 +138,11 @@ function renderSiteOG() {
             gap: "32px",
           }}
         >
-          {/* Vault signals (3 tiles) */}
+          {/* Vault signals (3 tiles) — values from BRAND_STATS snapshot */}
           <div style={{ display: "flex", gap: "48px" }}>
-            <Stat label="Notes" value={MOCK_VAULT_NOTES} />
-            <Stat label="Posts" value={MOCK_BLOG_POSTS} />
-            <Stat label="Last harvest" value={MOCK_LAST_HARVEST} />
+            <Stat label="Notes" value={String(BRAND_STATS.vaultNotes)} />
+            <Stat label="Posts" value={String(BRAND_STATS.blogPosts)} />
+            <Stat label="Last harvest" value={BRAND_STATS.lastHarvest} />
           </div>
 
           {/* 3-axis hairline arc (no labels — Tenet 4: Instruments over decorations) */}

@@ -2,12 +2,15 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { Badge } from "@/components/ui/badge";
+import { StateBadge } from "@/components/state-badge";
 import { GITHUB_REPO } from "@/lib/constants";
 import {
   getVaultNote,
   deriveNoteTitle,
   deriveNoteSurface,
+  vaultPathToHref,
 } from "@/lib/vault-note";
+import { getBacklinks } from "@/lib/vault-backlinks";
 import { isTier2Path } from "@/lib/vault-tiers";
 import { createSupabaseServer } from "@/lib/supabase-server";
 
@@ -83,7 +86,12 @@ export default async function NoteDetailPage({ params }: PageProps) {
     }
   }
 
-  const note = await getVaultNote(path);
+  // Fetch note body and reverse-link graph in parallel — both touch the
+  // vault index cache (5min TTL) and are independent.
+  const [note, backlinks] = await Promise.all([
+    getVaultNote(path),
+    getBacklinks(path),
+  ]);
   if (!note) {
     notFound();
   }
@@ -169,6 +177,45 @@ export default async function NoteDetailPage({ params }: PageProps) {
           dangerouslySetInnerHTML={{ __html: note.contentHtml }}
         />
       </article>
+
+      {/* ── Links to this note ──────────────────────────────────────────
+          Andy Matuschak / Maggie Appleton 모델의 시그니처 패턴.
+          Reverse-link graph가 vault index의 `related` field로 빌드됨
+          (vault-backlinks.ts). Tier 3 source는 자동 차단됨. */}
+      {backlinks.length > 0 && (
+        <section className="mt-16 pt-8 border-t border-[var(--hairline)]">
+          <h2 className="text-xs font-mono uppercase tracking-widest text-muted-foreground mb-6">
+            Links to this note · {backlinks.length}
+          </h2>
+          <ul className="space-y-1">
+            {backlinks.map((ref) => (
+              <li key={ref.path}>
+                <Link
+                  href={vaultPathToHref(ref.path)}
+                  className="group flex items-start gap-4 py-3 border-b border-[var(--hairline)] transition-colors hover:border-primary/30"
+                >
+                  {ref.status && <StateBadge status={ref.status} />}
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">
+                      {ref.title}
+                    </div>
+                    {ref.excerpt && (
+                      <div className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                        {ref.excerpt}
+                      </div>
+                    )}
+                  </div>
+                  {ref.created && (
+                    <time className="text-xs font-mono text-muted-foreground/70 whitespace-nowrap pt-0.5 tabular-nums">
+                      {ref.created}
+                    </time>
+                  )}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       <div className="mt-12 pt-6 border-t border-border flex items-center justify-between">
         <Link

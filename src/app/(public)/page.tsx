@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { getAllPosts } from "@/lib/blog";
 import { BRAND_IDENTITY } from "@/lib/brand/tokens";
+import { StateBadge } from "@/components/state-badge";
 import {
   aggregate,
   getCachedVaultIndex,
@@ -221,8 +222,8 @@ export default async function Home() {
               — a public notebook kept live by seven agents, with the door open.
             </p>
             <p className="text-sm text-white/70 leading-relaxed drop-shadow">
-              AI 연구자. 수집·수렴·확산을 매일 자동화하며, 중간 과정을 그대로
-              흘려보냅니다.
+              제가 매일 가꾸는 공개 노트북. 7개 에이전트가 함께 일하고,
+              미완성 생각도 차고문을 열어두고 그대로 보여드립니다.
             </p>
           </div>
         </div>
@@ -532,39 +533,5 @@ function Entry({
   );
 }
 
-function StateBadge({ status }: { status: string | null }) {
-  // Color resolver mirrors the OG route's stateColor() — keeps state visual
-  // consistency across home and OG. State tokens defined in globals.css.
-  let colorVar = "var(--muted-foreground)";
-  let label = status ?? "note";
-  switch (status) {
-    case "growing":
-    case "draft":
-    case "seedling":
-      colorVar = "var(--state-growing)";
-      label = status ?? "growing";
-      break;
-    case "mature":
-    case "evergreen":
-      colorVar = "var(--state-mature)";
-      label = status ?? "mature";
-      break;
-    case "published":
-    case "archived":
-      colorVar = "var(--state-published)";
-      label = status ?? "published";
-      break;
-  }
-  return (
-    <span
-      className="inline-flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-full border whitespace-nowrap mt-0.5"
-      style={{ borderColor: colorVar, color: colorVar }}
-    >
-      <span
-        className="inline-block w-1.5 h-1.5 rounded-full"
-        style={{ backgroundColor: colorVar }}
-      />
-      {label}
-    </span>
-  );
-}
+// StateBadge has been extracted to src/components/state-badge.tsx so the
+// note detail page can share the same visual vocabulary for backlinks.
