@@ -1,11 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getFileContent, commitToGitHub } from "@/lib/github";
+import { requireUser } from "@/lib/api-auth";
 
 /**
  * POST /api/finance — 워치리스트 관리
  * Body: { action: "add" | "remove", symbol: string }
  */
 export async function POST(req: NextRequest) {
+  const { response: authResponse } = await requireUser();
+  if (authResponse) return authResponse;
   const body = await req.json();
   const { action, symbol } = body as { action?: string; symbol?: string };
 

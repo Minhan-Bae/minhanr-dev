@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
 import { VAULT_INDEX_URL, CACHE_TTL_VAULT } from "@/lib/constants";
+import { requireUser } from "@/lib/api-auth";
 
 export async function GET() {
+  const { response: authResponse } = await requireUser();
+  if (authResponse) return authResponse;
   try {
     const token = process.env.GITHUB_TOKEN;
 

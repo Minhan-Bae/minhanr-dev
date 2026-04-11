@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { updateFeedbackSignals } from "@/lib/vault-write";
+import { requireUser } from "@/lib/api-auth";
 
 /**
  * POST /api/trends — 수집 방향 조정 (boost/suppress)
@@ -8,6 +9,8 @@ import { updateFeedbackSignals } from "@/lib/vault-write";
  *   - suppress: domain_suppressions에 target 추가 (7일)
  */
 export async function POST(req: NextRequest) {
+  const { response: authResponse } = await requireUser();
+  if (authResponse) return authResponse;
   const body = await req.json();
   const { action, target, value } = body as {
     action?: string;

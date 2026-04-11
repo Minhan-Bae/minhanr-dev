@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { commitToGitHub } from "@/lib/github";
+import { requireUser } from "@/lib/api-auth";
 
 export async function POST(request: NextRequest) {
+  const { response: authResponse } = await requireUser();
+  if (authResponse) return authResponse;
   const { text } = await request.json();
   if (!text?.trim()) {
     return NextResponse.json({ error: "text required" }, { status: 400 });

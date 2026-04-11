@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getFileContent, commitToGitHub } from "@/lib/github";
+import { requireUser } from "@/lib/api-auth";
 
 export const dynamic = "force-dynamic";
 
@@ -66,6 +67,8 @@ function getWeekDates(baseDate: string): string[] {
 }
 
 export async function GET(req: NextRequest) {
+  const { response: authResponse } = await requireUser();
+  if (authResponse) return authResponse;
   const dateParam = req.nextUrl.searchParams.get("date");
   const now = new Date(Date.now() + 9 * 60 * 60 * 1000);
   const baseDate = dateParam || now.toISOString().split("T")[0];
@@ -99,6 +102,8 @@ export async function GET(req: NextRequest) {
  * POST — Add a time block
  */
 export async function POST(req: NextRequest) {
+  const { response: authResponse } = await requireUser();
+  if (authResponse) return authResponse;
   const body = await req.json();
   const { date, startHour, endHour, category, memo } = body as {
     date?: string; startHour?: number; endHour?: number; category?: string; memo?: string;
@@ -143,6 +148,8 @@ export async function POST(req: NextRequest) {
  * Body: { date, startHour, endHour }
  */
 export async function DELETE(req: NextRequest) {
+  const { response: authResponse } = await requireUser();
+  if (authResponse) return authResponse;
   const body = await req.json();
   const { date, startHour, endHour } = body as { date?: string; startHour?: number; endHour?: number };
 
@@ -172,6 +179,8 @@ export async function DELETE(req: NextRequest) {
  *   action: "set_title" — { title }
  */
 export async function PATCH(req: NextRequest) {
+  const { response: authResponse } = await requireUser();
+  if (authResponse) return authResponse;
   const body = await req.json();
   const { date, action } = body as { date?: string; action?: string };
 

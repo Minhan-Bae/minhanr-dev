@@ -1,3 +1,17 @@
+/**
+ * PUBLIC ENDPOINT — Intentionally unauthenticated.
+ *
+ * Returns the GitHub commit log of the public oikbas-vault repo, classified
+ * by autonomous agent prefix (alpha:, beta:, auto: collect, etc.). The data
+ * is already public (commit history of a public repo) — exposing it via this
+ * endpoint just adds an "agent identification" lens on top.
+ *
+ * No PII, no Tier 3 data, no mutation. RSS-style external tools may rely on
+ * this endpoint. Justified by docs/brand-tenets.md "Tenet 3: Gardener, not
+ * publisher" (open by default unless there's a reason not to).
+ *
+ * Phase F-Critical decision (2026-04-11): keep public after audit.
+ */
 import { NextResponse } from "next/server";
 import { GITHUB_COMMITS_URL, COMMITS_PER_PAGE, CACHE_TTL_SHORT } from "@/lib/constants";
 

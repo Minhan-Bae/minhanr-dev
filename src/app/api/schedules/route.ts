@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
+import { requireUser } from "@/lib/api-auth";
 
 export async function GET() {
+  const { response: authResponse } = await requireUser();
+  if (authResponse) return authResponse;
   const { data, error } = await supabase
     .from("schedules")
     .select("*")
@@ -15,6 +18,8 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+  const { response: authResponse } = await requireUser();
+  if (authResponse) return authResponse;
   const body = await request.json();
   const { title, day_of_week, start_hour, end_hour, category, color, is_routine, specific_date } = body;
 
@@ -47,6 +52,8 @@ export async function POST(request: NextRequest) {
 }
 
 export async function PATCH(request: NextRequest) {
+  const { response: authResponse } = await requireUser();
+  if (authResponse) return authResponse;
   const body = await request.json();
   const { id, ...updates } = body;
 
@@ -68,6 +75,8 @@ export async function PATCH(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
+  const { response: authResponse } = await requireUser();
+  if (authResponse) return authResponse;
   const { searchParams } = new URL(request.url);
   const id = searchParams.get("id");
 

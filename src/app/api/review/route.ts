@@ -1,11 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { updateFrontmatterField } from "@/lib/vault-write";
+import { requireUser } from "@/lib/api-auth";
 
 /**
  * POST /api/review — 발행 승인/거부/보류
  * Body: { path: string, action: "approve" | "reject" | "hold" }
  */
 export async function POST(req: NextRequest) {
+  const { response: authResponse } = await requireUser();
+  if (authResponse) return authResponse;
   const body = await req.json();
   const { path, action } = body as { path?: string; action?: string };
 
