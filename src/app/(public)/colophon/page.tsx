@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Radio, Layers, Zap } from "lucide-react";
 import type { Metadata } from "next";
 import { BRAND_IDENTITY } from "@/lib/brand/tokens";
+import { AGENTS, AXIS_LABELS, type Axis } from "@/lib/agents";
 
 /**
  * Colophon — the one place where the system (OIKBAS, TrinityX) is named
@@ -10,8 +11,10 @@ import { BRAND_IDENTITY } from "@/lib/brand/tokens";
  * Per docs/brand-tenets.md: Tier 0 brand is the person, the system is
  * Tier 2 and only mentioned here.
  *
- * This is a Phase C stub. A richer about-page-style colophon (full agent
- * roster, axis details, build pipeline diagram) is a planned follow-up.
+ * Phase 7-Agent Roster (2026-04-11): Seven Agents section added below
+ * "The system" — single source is src/lib/agents.ts (also used by
+ * /command and /admin). Layout follows Tenet 4 sub-page rules: data
+ * instrument, no decoration.
  */
 
 export const metadata: Metadata = {
@@ -100,6 +103,66 @@ export default function ColophonPage() {
             brand tenets
           </a>{" "}
           for the rules of this place.
+        </p>
+      </section>
+
+      {/* ── Seven agents ── */}
+      <section className="space-y-6">
+        <h2
+          className="font-semibold tracking-tight"
+          style={{ fontSize: "var(--font-size-h2)" }}
+        >
+          Seven agents
+        </h2>
+        <p className="text-foreground/85 leading-relaxed">
+          The pipeline is staffed by seven autonomous agents organized in
+          three layers. Layer 1 orchestrates, Layer 2 refines on a deliberate
+          cadence, Layer 3 collects and synthesizes in real time. Each agent
+          is bound to one of the three axes (acquisition, convergence,
+          amplification) so the system stays balanced rather than drifting
+          toward whichever axis is loudest that week.
+        </p>
+        <div className="space-y-6">
+          {[1, 2, 3].map((layer) => {
+            const layerAgents = AGENTS.filter((a) => a.layer === layer);
+            const layerName =
+              layer === 1
+                ? "Layer 1 — Orchestration"
+                : layer === 2
+                  ? "Layer 2 — Refinement"
+                  : "Layer 3 — Real-time";
+            return (
+              <div key={layer} className="space-y-3">
+                <p className="text-xs font-mono uppercase tracking-widest text-muted-foreground">
+                  {layerName}
+                </p>
+                <ul className="space-y-2">
+                  {layerAgents.map((agent) => (
+                    <li
+                      key={agent.name}
+                      className="grid grid-cols-[auto_1fr_auto] gap-x-4 items-baseline border-b border-[var(--hairline)] pb-2"
+                    >
+                      <span className="font-mono text-sm text-foreground">
+                        {agent.label}
+                      </span>
+                      <span className="text-sm text-muted-foreground">
+                        <span className="text-foreground/80">{agent.role}</span>
+                        <span className="text-muted-foreground/60"> · </span>
+                        {agent.description}
+                      </span>
+                      <span className="text-xs font-mono text-muted-foreground/70 uppercase tracking-wide">
+                        {AXIS_LABELS[agent.axis as Axis]}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            );
+          })}
+        </div>
+        <p className="text-xs text-muted-foreground/70 leading-relaxed">
+          Source of truth: <span className="font-mono">src/lib/agents.ts</span>.
+          The same roster powers the internal /command and /admin views.
         </p>
       </section>
 
