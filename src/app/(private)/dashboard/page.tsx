@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { StatKpiCard } from "@/components/stat-kpi-card";
+import { DashboardCalendar } from "@/components/dashboard-calendar";
 import { FileText, Send, Inbox, Layers } from "lucide-react";
 import { aggregate, getCachedVaultIndex, KB_HUB_HIDDEN_STATUSES, listNotes } from "@/lib/vault-index";
 import { vaultPathToHref } from "@/lib/vault-note";
@@ -140,52 +141,20 @@ async function DashboardContent() {
     <div className="space-y-4">
       {/* KPI Strip */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatKpiCard label="Notes (7d)" value={notesThisWeek} icon={<FileText className="h-8 w-8" />} accentColor="border-l-chart-1" />
-        <StatKpiCard label="Published" value={publishedThisWeek} icon={<Send className="h-8 w-8" />} accentColor="border-l-chart-2" />
-        <StatKpiCard label="Inbox" value={inboxThisWeek} icon={<Inbox className="h-8 w-8" />} accentColor="border-l-chart-3" />
-        <StatKpiCard label="Total Notes" value={totalNotes} icon={<Layers className="h-8 w-8" />} accentColor="border-l-chart-4" />
+        <StatKpiCard label="Notes (7d)" value={notesThisWeek} icon={<FileText className="h-8 w-8" />} accentColor="border-l-chart-1" href="/notes" />
+        <StatKpiCard label="Published" value={publishedThisWeek} icon={<Send className="h-8 w-8" />} accentColor="border-l-chart-2" href="/blog" />
+        <StatKpiCard label="Inbox" value={inboxThisWeek} icon={<Inbox className="h-8 w-8" />} accentColor="border-l-chart-3" href="/notes" />
+        <StatKpiCard label="Total Notes" value={totalNotes} icon={<Layers className="h-8 w-8" />} accentColor="border-l-chart-4" href="/notes" />
       </div>
 
       {/* Main Grid */}
       <div className="grid grid-cols-12 gap-4 auto-rows-min">
-      {/* Calendar — wide */}
-      <Card className="col-span-12 lg:col-span-8 row-span-2">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm">
-            {now.toLocaleDateString("ko-KR", { year: "numeric", month: "long" })}
-          </CardTitle>
-          <CardDescription className="text-xs">
-            Daily 노트 존재일 하이라이트
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-7 gap-1 text-center text-xs text-muted-foreground mb-1">
-            {["일", "월", "화", "수", "목", "금", "토"].map((d) => (
-              <div key={d}>{d}</div>
-            ))}
-          </div>
-          <div className="grid grid-cols-7 gap-1">
-            {grid.map((cell, i) => {
-              if (!cell) return <div key={i} className="aspect-square" />;
-              const has = dailyDays.has(cell.iso);
-              const isToday = cell.iso === todayIso;
-              return (
-                <div
-                  key={i}
-                  className={[
-                    "aspect-square rounded-md flex items-center justify-center text-xs tabular-nums transition-colors",
-                    has ? "bg-primary/15 text-foreground font-medium" : "text-muted-foreground/60",
-                    isToday ? "ring-1 ring-primary" : "",
-                  ].join(" ")}
-                  title={cell.iso}
-                >
-                  {cell.date.getDate()}
-                </div>
-              );
-            })}
-          </div>
-        </CardContent>
-      </Card>
+      <DashboardCalendar
+        monthLabel={now.toLocaleDateString("ko-KR", { year: "numeric", month: "long" })}
+        grid={grid.map((c) => (c ? { iso: c.iso, day: c.date.getDate() } : null))}
+        dailyDays={Array.from(dailyDays)}
+        todayIso={todayIso}
+      />
 
       {/* Today deadlines */}
       <Card className="col-span-12 lg:col-span-4">

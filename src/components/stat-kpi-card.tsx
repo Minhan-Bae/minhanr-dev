@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Card, CardContent, CardDescription, CardTitle } from "@/components/ui/card";
 import { TrendingUp, TrendingDown, Minus } from "lucide-react";
 
@@ -8,6 +9,7 @@ export interface StatKpiCardProps {
   icon?: React.ReactNode;
   trend?: "up" | "down" | "flat";
   accentColor?: string;
+  href?: string;
 }
 
 const trendIcons = {
@@ -16,12 +18,12 @@ const trendIcons = {
   flat: <Minus className="h-3.5 w-3.5 text-muted-foreground" />,
 };
 
-export function StatKpiCard({ label, value, hint, icon, trend, accentColor }: StatKpiCardProps) {
-  return (
+export function StatKpiCard({ label, value, hint, icon, trend, accentColor, href }: StatKpiCardProps) {
+  const card = (
     <Card
-      className={`relative overflow-hidden ${
+      className={`relative overflow-hidden transition-all duration-200 ${
         accentColor ? `border-l-2 ${accentColor}` : ""
-      }`}
+      } ${href ? "card-lift cursor-pointer hover:border-primary/40 hover:shadow-lg hover:shadow-primary/10" : ""}`}
     >
       <CardContent className="py-4">
         {icon && (
@@ -42,4 +44,13 @@ export function StatKpiCard({ label, value, hint, icon, trend, accentColor }: St
       </CardContent>
     </Card>
   );
+
+  if (href) {
+    return (
+      <Link href={href} aria-label={`${label}: ${value}`} className="block">
+        {card}
+      </Link>
+    );
+  }
+  return card;
 }

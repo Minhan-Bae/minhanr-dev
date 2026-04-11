@@ -19,11 +19,20 @@ export default function Home() {
   const recentPosts = allPosts.slice(1, 4);
 
   return (
-    <div className="relative max-w-6xl mx-auto px-4 sm:px-6 py-16 sm:py-24 space-y-16 mesh-aurora">
+    <div className="relative max-w-6xl mx-auto px-4 sm:px-6 py-16 sm:py-24 space-y-16 mesh-aurora caustic-rays">
       {/* Floating orbs background */}
       <div className="absolute top-0 left-[10%] w-[400px] h-[400px] orb orb-primary orb-anim-1" />
       <div className="absolute top-[40%] right-[5%] w-[350px] h-[350px] orb orb-pink orb-anim-2" />
       <div className="absolute bottom-[10%] left-[30%] w-[300px] h-[300px] orb orb-cyan orb-anim-1" />
+
+      {/* Floating bubbles — ocean ambience */}
+      <div className="bubble" style={{ left: "8%", "--size": "10px", "--duration": "14s", "--delay": "0s", "--drift": "30px" } as React.CSSProperties} />
+      <div className="bubble" style={{ left: "22%", "--size": "16px", "--duration": "18s", "--delay": "3s", "--drift": "-25px" } as React.CSSProperties} />
+      <div className="bubble" style={{ left: "38%", "--size": "8px", "--duration": "12s", "--delay": "6s", "--drift": "20px" } as React.CSSProperties} />
+      <div className="bubble" style={{ left: "55%", "--size": "14px", "--duration": "16s", "--delay": "1s", "--drift": "-35px" } as React.CSSProperties} />
+      <div className="bubble" style={{ left: "68%", "--size": "11px", "--duration": "20s", "--delay": "8s", "--drift": "25px" } as React.CSSProperties} />
+      <div className="bubble" style={{ left: "82%", "--size": "13px", "--duration": "15s", "--delay": "4s", "--drift": "-20px" } as React.CSSProperties} />
+      <div className="bubble" style={{ left: "92%", "--size": "9px", "--duration": "17s", "--delay": "10s", "--drift": "30px" } as React.CSSProperties} />
 
       {/* ── Hero ── */}
       <section className="relative">

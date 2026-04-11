@@ -99,8 +99,12 @@ export function AppSidebar() {
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>
-        <div className="flex items-center gap-2 px-2 py-1.5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-md bg-gradient-to-br from-primary to-primary/70 text-sidebar-primary-foreground font-bold shadow-sm shadow-primary/20">
+        <Link
+          href="/dashboard"
+          aria-label="OIKBAS Dashboard"
+          className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-sidebar-accent transition-colors"
+        >
+          <div className="flex h-8 w-8 items-center justify-center rounded-md bg-gradient-to-br from-primary to-accent text-sidebar-primary-foreground font-bold shadow-sm shadow-primary/30">
             O
           </div>
           <div className="flex flex-col group-data-[collapsible=icon]:hidden">
@@ -109,7 +113,7 @@ export function AppSidebar() {
               Knowledge Hub
             </span>
           </div>
-        </div>
+        </Link>
       </SidebarHeader>
       <SidebarContent>
         {NAV_GROUPS.map((group) => (
