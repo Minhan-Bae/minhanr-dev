@@ -10,6 +10,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { StatKpiCard } from "@/components/stat-kpi-card";
 import { DashboardCalendar } from "@/components/dashboard-calendar";
+import { VaultUnreachablePrivate } from "@/components/vault-unreachable";
 import { FileText, Send, Inbox, Layers } from "lucide-react";
 import { aggregate, getCachedVaultIndex, KB_HUB_HIDDEN_STATUSES, listNotes } from "@/lib/vault-index";
 import { vaultPathToHref } from "@/lib/vault-note";
@@ -47,14 +48,7 @@ async function DashboardContent() {
   try {
     index = await getCachedVaultIndex();
   } catch (e) {
-    return (
-      <Card className="border-destructive/40">
-        <CardHeader>
-          <CardTitle className="text-destructive text-sm">Vault index 로드 실패</CardTitle>
-          <CardDescription>{e instanceof Error ? e.message : String(e)}</CardDescription>
-        </CardHeader>
-      </Card>
-    );
+    return <VaultUnreachablePrivate error={e} />;
   }
   const agg = aggregate(index);
 

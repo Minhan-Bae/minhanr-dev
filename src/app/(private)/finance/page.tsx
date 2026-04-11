@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { getCachedVaultIndex } from "@/lib/vault-index";
+import { VaultUnreachablePrivate } from "@/components/vault-unreachable";
 import { WatchlistAdd } from "@/components/finance-actions";
 
 export const metadata = {
@@ -28,14 +29,8 @@ async function FinanceContent() {
   let index;
   try {
     index = await getCachedVaultIndex();
-  } catch {
-    return (
-      <Card className="border-destructive/40">
-        <CardHeader>
-          <CardTitle className="text-destructive text-sm">Vault index 로드 실패</CardTitle>
-        </CardHeader>
-      </Card>
-    );
+  } catch (e) {
+    return <VaultUnreachablePrivate error={e} />;
   }
 
   const financeNotes: FinanceNote[] = [];

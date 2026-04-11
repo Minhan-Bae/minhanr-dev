@@ -12,6 +12,7 @@ import { TagTopBarChart } from "@/components/charts/tag-top-bar-chart";
 import { ActivityLineChart } from "@/components/charts/activity-line-chart";
 import { StatusDonutChart } from "@/components/charts/status-donut-chart";
 import { aggregate, getCachedVaultIndex } from "@/lib/vault-index";
+import { VaultUnreachablePrivate } from "@/components/vault-unreachable";
 
 export const metadata = {
   title: "Statistics | OIKBAS",
@@ -24,14 +25,7 @@ async function StatisticsContent() {
   try {
     agg = aggregate(await getCachedVaultIndex());
   } catch (e) {
-    return (
-      <Card className="border-destructive/40">
-        <CardHeader>
-          <CardTitle className="text-destructive">Vault index 로드 실패</CardTitle>
-          <CardDescription>{e instanceof Error ? e.message : String(e)}</CardDescription>
-        </CardHeader>
-      </Card>
-    );
+    return <VaultUnreachablePrivate error={e} />;
   }
 
   const matureCount = agg.by_status.mature || 0;

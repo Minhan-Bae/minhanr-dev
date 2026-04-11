@@ -1,6 +1,7 @@
 import { Suspense } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { VaultUnreachablePrivate } from "@/components/vault-unreachable";
 import { getCachedVaultIndex } from "@/lib/vault-index";
 
 export const metadata = {
@@ -37,14 +38,7 @@ async function LinksContent() {
   try {
     index = await getCachedVaultIndex();
   } catch (e) {
-    return (
-      <Card className="border-destructive/40">
-        <CardHeader>
-          <CardTitle className="text-destructive text-sm">Vault index 로드 실패</CardTitle>
-          <CardDescription>{e instanceof Error ? e.message : String(e)}</CardDescription>
-        </CardHeader>
-      </Card>
-    );
+    return <VaultUnreachablePrivate error={e} />;
   }
   const items: LinkItem[] = [];
   for (const [path, rec] of Object.entries(index.notes || {})) {

@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { NoteBrowserControls } from "@/components/note-browser-controls";
 import { NoteList } from "@/components/note-list";
+import { VaultUnreachablePrivate } from "@/components/vault-unreachable";
 import { aggregate, getCachedVaultIndex, kbHubExcludeStatus, listNotes, type ListNotesOptions } from "@/lib/vault-index";
 
 export const metadata = {
@@ -21,8 +22,14 @@ async function NotesContent({ folder, title, subtitle, sp }: {
   subtitle: string;
   sp: Record<string, string | undefined>;
 }) {
-  const index = await getCachedVaultIndex();
-  const agg = aggregate(index);
+  // Phase G-defense-private: 다른 (private) 페이지들과 동일한 graceful guard.
+  let index, agg;
+  try {
+    index = await getCachedVaultIndex();
+    agg = aggregate(index);
+  } catch (e) {
+    return <VaultUnreachablePrivate error={e} />;
+  }
   const page = Math.max(1, parseInt(sp.page || "1", 10) || 1);
   const opts: ListNotesOptions = {
     folder,

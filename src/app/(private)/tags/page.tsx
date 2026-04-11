@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { TagTopBarChart } from "@/components/charts/tag-top-bar-chart";
+import { VaultUnreachablePrivate } from "@/components/vault-unreachable";
 import { aggregate, getCachedVaultIndex } from "@/lib/vault-index";
 
 export const metadata = {
@@ -15,14 +16,7 @@ async function TagsContent() {
   try {
     agg = aggregate(await getCachedVaultIndex());
   } catch (e) {
-    return (
-      <Card className="border-destructive/40">
-        <CardHeader>
-          <CardTitle className="text-destructive text-sm">Vault index 로드 실패</CardTitle>
-          <CardDescription>{e instanceof Error ? e.message : String(e)}</CardDescription>
-        </CardHeader>
-      </Card>
-    );
+    return <VaultUnreachablePrivate error={e} />;
   }
   const top30 = agg.by_tag_top.slice(0, 30);
   const top10 = agg.by_tag_top.slice(0, 10);

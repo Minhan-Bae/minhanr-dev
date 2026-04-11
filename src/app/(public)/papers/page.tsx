@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { NoteBrowserControls } from "@/components/note-browser-controls";
 import { NoteList } from "@/components/note-list";
+import { VaultUnreachablePublic } from "@/components/vault-unreachable";
 import { aggregate, getCachedVaultIndex, kbHubExcludeStatus, listNotes, type ListNotesOptions } from "@/lib/vault-index";
 import { PAPERS_FOLDERS } from "@/lib/vault-tiers";
 
@@ -41,14 +42,7 @@ async function PapersContent({ sp }: { sp: Record<string, string | undefined> })
     agg = aggregate(index);
     listed = listNotes(index, opts);
   } catch {
-    return (
-      <div className="space-y-2">
-        <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">Papers</h1>
-        <p className="text-sm text-muted-foreground">
-          vault index unreachable — placeholder until token / data flow restored.
-        </p>
-      </div>
-    );
+    return <VaultUnreachablePublic label="Papers" />;
   }
 
   const { notes, total } = listed;
