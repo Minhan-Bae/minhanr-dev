@@ -137,6 +137,28 @@ export default function ColophonPage() {
         </div>
       </section>
 
+      {/* ── Voice ── */}
+      <section className="space-y-6">
+        <h2
+          className="font-semibold tracking-tight"
+          style={{ fontSize: "var(--font-size-h2)" }}
+        >
+          Voice
+        </h2>
+        <p className="text-foreground/85 leading-relaxed">
+          I write in first person. Posts are dated, half-finished, and
+          revised in place — the garage door stays open. When I don&rsquo;t
+          know something, the page says so instead of hiding behind a
+          coming-soon. When a number comes from the vault, it&rsquo;s the
+          number; when it can&rsquo;t be obtained, it shows a placeholder
+          rather than a lie.
+        </p>
+        <p className="text-sm text-muted-foreground leading-relaxed">
+          The agents draft and curate, but the voice that ships to a public
+          surface is mine. They are gardening tools, not ghostwriters.
+        </p>
+      </section>
+
       {/* ── Stack ── */}
       <section className="space-y-6">
         <h2
@@ -167,6 +189,28 @@ export default function ColophonPage() {
             generation, ISR
           </li>
         </ul>
+      </section>
+
+      {/* ── Subscribe ── */}
+      <section className="space-y-4">
+        <h2
+          className="font-semibold tracking-tight"
+          style={{ fontSize: "var(--font-size-h2)" }}
+        >
+          Subscribe
+        </h2>
+        <p className="text-sm text-muted-foreground leading-relaxed">
+          New posts are syndicated as RSS at{" "}
+          <a
+            href="/feed.xml"
+            className="text-primary hover:underline font-mono"
+          >
+            /feed.xml
+          </a>{" "}
+          for readers who already speak the language of feeds. There is no
+          newsletter — the linear feed is a 2nd-class surface here, the
+          home index is the canonical entry point.
+        </p>
       </section>
 
       {/* ── Back link ── */}
