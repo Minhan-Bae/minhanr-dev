@@ -32,6 +32,8 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+# Track the template — devs need to know which env vars exist.
+!.env.local.example
 
 # vercel
 .vercel
