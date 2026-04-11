@@ -28,7 +28,7 @@ const QUADRANTS: Quadrant[] = [
   { priority: "P0", label: "DO NOW", sublabel: "긴급 + 중요", color: "text-red-400", borderColor: "border-red-500/40", bgColor: "bg-red-500/5" },
   { priority: "P1", label: "SCHEDULE", sublabel: "비긴급 + 중요", color: "text-primary", borderColor: "border-primary/40", bgColor: "bg-primary/5" },
   { priority: "P2", label: "DELEGATE", sublabel: "긴급 + 비중요", color: "text-amber-400", borderColor: "border-amber-500/40", bgColor: "bg-amber-500/5" },
-  { priority: "P3", label: "ELIMINATE", sublabel: "비긴급 + 비중요", color: "text-neutral-400", borderColor: "border-neutral-500/40", bgColor: "bg-neutral-500/5" },
+  { priority: "P3", label: "ELIMINATE", sublabel: "비긴급 + 비중요", color: "text-muted-foreground", borderColor: "border-muted-foreground/40", bgColor: "bg-muted-foreground/5" },
 ];
 
 const AXIS_BADGE: Record<string, string> = {
@@ -79,11 +79,11 @@ export function EisenhowerMatrix({
   }
 
   return (
-    <Card className="border-neutral-800">
+    <Card className="border-border">
       <CardHeader className="p-4 pb-2">
         <div className="flex items-center justify-between">
           <CardTitle className="text-sm font-semibold">Eisenhower Matrix</CardTitle>
-          <span className="text-[10px] text-neutral-500">{activeTasks.length} active</span>
+          <span className="text-xs text-muted-foreground">{activeTasks.length} active</span>
         </div>
       </CardHeader>
       <CardContent className="p-4 pt-2">
@@ -92,11 +92,11 @@ export function EisenhowerMatrix({
           {/* Corner */}
           <div />
           {/* Column headers */}
-          <div className="flex items-center justify-center text-[9px] font-medium text-neutral-500">Urgent</div>
-          <div className="flex items-center justify-center text-[9px] font-medium text-neutral-500">Not Urgent</div>
+          <div className="flex items-center justify-center text-xs font-medium text-muted-foreground">Urgent</div>
+          <div className="flex items-center justify-center text-xs font-medium text-muted-foreground">Not Urgent</div>
 
           {/* Row header: Important */}
-          <div className="flex items-center justify-center text-[9px] font-medium text-neutral-500" style={{ writingMode: "vertical-lr", transform: "rotate(180deg)" }}>Important</div>
+          <div className="flex items-center justify-center text-xs font-medium text-muted-foreground" style={{ writingMode: "vertical-lr", transform: "rotate(180deg)" }}>Important</div>
 
           {/* Q1: P0 DO NOW */}
           {renderQuadrant(QUADRANTS[0], activeTasks)}
@@ -105,7 +105,7 @@ export function EisenhowerMatrix({
           {renderQuadrant(QUADRANTS[1], activeTasks)}
 
           {/* Row header: Not Important */}
-          <div className="flex items-center justify-center text-[9px] font-medium text-neutral-500" style={{ writingMode: "vertical-lr", transform: "rotate(180deg)" }}>Not Important</div>
+          <div className="flex items-center justify-center text-xs font-medium text-muted-foreground" style={{ writingMode: "vertical-lr", transform: "rotate(180deg)" }}>Not Important</div>
 
           {/* Q3: P2 DELEGATE */}
           {renderQuadrant(QUADRANTS[2], activeTasks)}
@@ -132,12 +132,12 @@ export function EisenhowerMatrix({
       >
         <div className="flex items-center justify-between mb-2">
           <div>
-            <span className={`text-[10px] font-bold ${q.color}`}>{q.priority}: {q.label}</span>
-            <span className="text-[8px] text-neutral-600 ml-1.5">{q.sublabel}</span>
+            <span className={`text-xs font-bold ${q.color}`}>{q.priority}: {q.label}</span>
+            <span className="text-xs text-muted-foreground/50 ml-1.5">{q.sublabel}</span>
           </div>
           <button
             onClick={() => { setInlineCreate(inlineCreate === q.priority ? null : q.priority); setNewTitle(""); }}
-            className="text-neutral-600 hover:text-neutral-400 text-xs"
+            className="text-muted-foreground/50 hover:text-muted-foreground text-xs"
           >
             +
           </button>
@@ -153,7 +153,7 @@ export function EisenhowerMatrix({
               onKeyDown={(e) => { if (e.key === "Enter") handleInlineCreate(q.priority); if (e.key === "Escape") setInlineCreate(null); }}
               placeholder="Task title..."
               autoFocus
-              className="w-full rounded border border-neutral-700 bg-neutral-950 px-1.5 py-1 text-[10px] text-neutral-200 placeholder:text-neutral-600 focus:border-primary focus:outline-none"
+              className="w-full rounded border border-border bg-background px-1.5 py-1 text-xs text-foreground placeholder:text-muted-foreground/50 focus:border-primary focus:outline-none"
             />
           </div>
         )}
@@ -165,23 +165,23 @@ export function EisenhowerMatrix({
               key={t.id}
               draggable
               onDragStart={(e) => handleDragStart(e, t.id)}
-              className="rounded border border-neutral-800 bg-neutral-950/80 px-2 py-1.5 cursor-grab active:cursor-grabbing hover:border-neutral-600 transition-colors"
+              className="rounded border border-border bg-background/80 px-2 py-1.5 cursor-grab active:cursor-grabbing hover:border-border transition-colors"
             >
               <div className="flex items-start justify-between gap-1">
-                <span className="text-[10px] text-neutral-200 leading-tight">{t.title}</span>
+                <span className="text-xs text-foreground leading-tight">{t.title}</span>
                 <button
                   onClick={() => onDelete(t.id)}
-                  className="text-neutral-700 hover:text-red-400 text-[9px] shrink-0"
+                  className="text-muted-foreground/50 hover:text-red-400 text-xs shrink-0"
                 >
                   &times;
                 </button>
               </div>
               <div className="flex items-center gap-1 mt-0.5">
-                <span className={`rounded px-1 py-0 text-[8px] ${AXIS_BADGE[t.axis] || "bg-neutral-400/20 text-neutral-300"}`}>
+                <span className={`rounded px-1 py-0 text-xs ${AXIS_BADGE[t.axis] || "bg-muted-foreground/20 text-foreground/80"}`}>
                   {AXIS_LABELS[t.axis as Axis] || t.axis}
                 </span>
                 {t.assigned_to && (
-                  <span className="text-[8px] text-neutral-600">@{t.assigned_to}</span>
+                  <span className="text-xs text-muted-foreground/50">@{t.assigned_to}</span>
                 )}
               </div>
             </div>

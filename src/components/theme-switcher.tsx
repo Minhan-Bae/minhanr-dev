@@ -50,11 +50,11 @@ export function ThemeSwitcher() {
   return (
     <button
       onClick={cycle}
-      className="flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors"
+      className="flex items-center gap-1.5 px-2 py-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors duration-200"
       title={`Theme: ${THEME_CONFIG[theme].label}`}
     >
       <span className="text-xs">{THEME_CONFIG[theme].icon}</span>
-      <span className="text-[10px] hidden sm:inline">{THEME_CONFIG[theme].label}</span>
+      <span className="text-xs hidden sm:inline">{THEME_CONFIG[theme].label}</span>
     </button>
   );
 }

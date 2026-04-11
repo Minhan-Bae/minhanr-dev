@@ -20,6 +20,9 @@ export function NoteBrowserControls({ statusOptions, tagOptions }: NoteBrowserCo
     { shallow: false }
   );
 
+  const selectClass =
+    "h-8 rounded-lg border border-input bg-background/50 px-2.5 text-sm transition-colors hover:bg-muted/30 focus:border-ring focus:ring-2 focus:ring-ring/20 outline-none";
+
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
       <Input
@@ -31,7 +34,7 @@ export function NoteBrowserControls({ statusOptions, tagOptions }: NoteBrowserCo
       <select
         value={status}
         onChange={(e) => setQuery({ status: e.target.value || null, page: 1 })}
-        className="h-8 rounded-md border border-input bg-background px-2 text-sm"
+        className={selectClass}
       >
         <option value="">모든 status</option>
         {statusOptions.map((s) => (
@@ -43,7 +46,7 @@ export function NoteBrowserControls({ statusOptions, tagOptions }: NoteBrowserCo
       <select
         value={tag}
         onChange={(e) => setQuery({ tag: e.target.value || null, page: 1 })}
-        className="h-8 rounded-md border border-input bg-background px-2 text-sm"
+        className={selectClass}
       >
         <option value="">모든 tag</option>
         {tagOptions.map((t) => (
@@ -55,7 +58,7 @@ export function NoteBrowserControls({ statusOptions, tagOptions }: NoteBrowserCo
       <select
         value={sort}
         onChange={(e) => setQuery({ sort: e.target.value || null })}
-        className="h-8 rounded-md border border-input bg-background px-2 text-sm"
+        className={selectClass}
       >
         <option value="created_desc">최신순</option>
         <option value="created_asc">오래된순</option>

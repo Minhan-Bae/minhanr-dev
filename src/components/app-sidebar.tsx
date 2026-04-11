@@ -20,6 +20,7 @@ import {
   TrendingUp,
   Wallet,
   Calendar,
+  Clock,
 } from "lucide-react";
 
 import {
@@ -53,9 +54,9 @@ const NAV_GROUPS: NavGroup[] = [
   {
     label: "Workspace",
     items: [
-      { title: "Home", href: "/", icon: Home },
-      { title: "Calendar", href: "/calendar", icon: Calendar },
       { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+      { title: "Calendar", href: "/calendar", icon: Calendar },
+      { title: "Deadlines", href: "/deadlines", icon: Clock },
     ],
   },
   {
@@ -64,6 +65,9 @@ const NAV_GROUPS: NavGroup[] = [
       { title: "Notes", href: "/notes", icon: FileText },
       { title: "Papers", href: "/papers", icon: BookOpen },
       { title: "Projects", href: "/projects", icon: FolderKanban },
+      { title: "Tags", href: "/tags", icon: Tag },
+      { title: "Links", href: "/links", icon: Link2 },
+      { title: "Blog", href: "/blog", icon: Newspaper },
     ],
   },
   {
@@ -71,19 +75,14 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { title: "Trends", href: "/trends", icon: TrendingUp },
       { title: "Finance", href: "/finance", icon: Wallet },
-    ],
-  },
-  {
-    label: "Actions",
-    items: [
-      { title: "Review", href: "/review", icon: CheckCircle2 },
-      { title: "Blog", href: "/blog", icon: Newspaper },
+      { title: "Statistics", href: "/statistics", icon: BarChart3 },
     ],
   },
   {
     label: "System",
     items: [
       { title: "Command", href: "/command", icon: Activity },
+      { title: "Review", href: "/review", icon: CheckCircle2 },
       { title: "Admin", href: "/admin", icon: Shield },
     ],
   },
@@ -101,12 +100,12 @@ export function AppSidebar() {
     <Sidebar collapsible="icon">
       <SidebarHeader>
         <div className="flex items-center gap-2 px-2 py-1.5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-md bg-sidebar-primary text-sidebar-primary-foreground font-bold">
+          <div className="flex h-8 w-8 items-center justify-center rounded-md bg-gradient-to-br from-primary to-primary/70 text-sidebar-primary-foreground font-bold shadow-sm shadow-primary/20">
             O
           </div>
           <div className="flex flex-col group-data-[collapsible=icon]:hidden">
             <span className="text-sm font-bold leading-tight">OIKBAS</span>
-            <span className="text-[10px] text-sidebar-foreground/60 leading-tight">
+            <span className="text-xs text-sidebar-foreground/60 leading-tight">
               Knowledge Hub
             </span>
           </div>

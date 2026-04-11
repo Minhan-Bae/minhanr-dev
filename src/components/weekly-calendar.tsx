@@ -36,7 +36,7 @@ const DEFAULT_CATEGORIES: Record<string, CatConfig> = {
   "학습":   { bg: "bg-cyan-500/20",    border: "border-cyan-500/40",    text: "text-cyan-300",    dot: "bg-cyan-400",    barBg: "bg-cyan-500/30" },
   "운동":   { bg: "bg-green-500/20",   border: "border-green-500/40",   text: "text-green-300",   dot: "bg-green-400",   barBg: "bg-green-500/30" },
   "식사":   { bg: "bg-amber-500/20",   border: "border-amber-500/40",   text: "text-amber-300",   dot: "bg-amber-400",   barBg: "bg-amber-500/30" },
-  "휴식":   { bg: "bg-neutral-500/20", border: "border-neutral-500/40", text: "text-neutral-400", dot: "bg-neutral-400", barBg: "bg-neutral-500/30" },
+  "휴식":   { bg: "bg-muted/50",       border: "border-border",          text: "text-muted-foreground", dot: "bg-muted-foreground", barBg: "bg-muted/60" },
   "수면":   { bg: "bg-indigo-900/30",  border: "border-indigo-800/40",  text: "text-indigo-400",  dot: "bg-indigo-500",  barBg: "bg-indigo-900/40" },
   "사이드": { bg: "bg-pink-500/20",    border: "border-pink-500/40",    text: "text-pink-300",    dot: "bg-pink-400",    barBg: "bg-pink-500/30" },
 };
@@ -140,7 +140,7 @@ export function WeeklyCalendar() {
     if (!isDragging || !dragStart || !dragEnd || date !== dragStart.date) return false;
     return hour >= Math.min(dragStart.hour, dragEnd.hour) && hour <= Math.max(dragStart.hour, dragEnd.hour);
   }
-  useEffect(() => { function onUp() { if (isDragging) { setIsDragging(false); setDragStart(null); setDragEnd(null); } } window.addEventListener("mouseup", onUp); return () => window.removeEventListener("mouseup", onUp); });
+  useEffect(() => { function onUp() { if (isDragging) { setIsDragging(false); setDragStart(null); setDragEnd(null); } } window.addEventListener("mouseup", onUp); return () => window.removeEventListener("mouseup", onUp); }, [isDragging]);
 
   // ── Optimistic helpers ──
   function updateLocalData(mutator: (d: CalendarData) => CalendarData) {
@@ -233,7 +233,7 @@ export function WeeklyCalendar() {
     return () => window.removeEventListener("click", onClick);
   }, []);
 
-  if (loading) return <div className="h-[600px] bg-muted/10 rounded-xl animate-pulse" />;
+  if (loading) return <div className="h-[600px] bg-muted/10 rounded-xl skeleton-shimmer" />;
   if (!data) return <div className="text-muted-foreground text-sm">캘린더 로드 실패</div>;
 
   // View filter
@@ -276,7 +276,7 @@ export function WeeklyCalendar() {
         </div>
         <div className="text-center">
           <div className="text-sm font-semibold tracking-tight">{data.week[0]?.slice(5)} — {data.week[6]?.slice(5)}</div>
-          <div className="text-[10px] text-muted-foreground">{totalBlocks}블록 · {totalHours}h</div>
+          <div className="text-xs text-muted-foreground">{totalBlocks}블록 · {totalHours}h</div>
         </div>
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-1 bg-muted/30 rounded-lg p-0.5">
@@ -290,12 +290,12 @@ export function WeeklyCalendar() {
         {/* Month mini-map */}
         <div className="hidden lg:block shrink-0 w-[180px] space-y-2">
           <div className="text-xs font-medium text-muted-foreground">{now.getFullYear()}년 {now.getMonth() + 1}월</div>
-          <div className="grid grid-cols-7 gap-0.5 text-[9px]">
+          <div className="grid grid-cols-7 gap-0.5 text-xs">
             {["일","월","화","수","목","금","토"].map((d) => <div key={d} className="text-center text-muted-foreground/40">{d}</div>)}
             {Array.from({ length: monthStartOffset }).map((_, i) => <div key={`e-${i}`} />)}
             {monthDays.map((md) => (
               <button key={md.date} onClick={() => setBaseDate(md.date)}
-                className={`aspect-square rounded-sm flex items-center justify-center text-[10px] transition-colors ${
+                className={`aspect-square rounded-sm flex items-center justify-center text-xs transition-colors ${
                   md.isToday ? "bg-primary text-primary-foreground font-bold" :
                   md.hasBlocks ? "bg-primary/15 text-foreground" :
                   "text-muted-foreground/50 hover:bg-muted/20"
@@ -308,11 +308,11 @@ export function WeeklyCalendar() {
           {/* Legend */}
           <div className="space-y-0.5 pt-2 border-t border-border/30">
             {Object.entries(categories).map(([cat, s]) => (
-              <div key={cat} className="flex items-center gap-1.5 text-[10px] text-muted-foreground/60">
+              <div key={cat} className="flex items-center gap-1.5 text-xs text-muted-foreground/60">
                 <span className={`w-2 h-2 rounded-full ${s.dot}`} />{cat}
               </div>
             ))}
-            <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground/60">
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground/60">
               <span className="w-2 h-2 rounded-full bg-red-500" />now
             </div>
           </div>
@@ -329,23 +329,23 @@ export function WeeklyCalendar() {
               return (
                 <div key={day.date} className={`border-l border-b border-border px-3 py-2.5 ${isToday ? "bg-primary/10" : "bg-muted/10"}`}>
                   <div className="flex items-center gap-2">
-                    <span className={`text-[11px] ${isToday ? "text-primary font-semibold" : "text-muted-foreground"}`}>{day.day}</span>
+                    <span className={`text-xs ${isToday ? "text-primary font-semibold" : "text-muted-foreground"}`}>{day.day}</span>
                     {isToday ? (
                       <span className="bg-primary text-primary-foreground w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold">{dateNum}</span>
                     ) : (
                       <span className="text-lg font-bold tabular-nums">{dateNum}</span>
                     )}
-                    <Link href={`/notes/010_Daily/${day.date}.md`} className="ml-auto text-[10px] text-muted-foreground/40 hover:text-primary transition-colors" title="Daily Note 열기">📎</Link>
+                    <Link href={`/notes/010_Daily/${day.date}.md`} className="ml-auto text-xs text-muted-foreground/40 hover:text-primary transition-colors" title="Daily Note 열기">📎</Link>
                   </div>
                   {/* Editable title */}
                   {editingTitle?.date === day.date ? (
-                    <input className="w-full mt-1 text-[11px] bg-transparent border-b border-primary/30 outline-none text-foreground"
+                    <input className="w-full mt-1 text-xs bg-transparent border-b border-primary/30 outline-none text-foreground"
                       value={editingTitle.value} autoFocus
                       onChange={(e) => setEditingTitle({ ...editingTitle, value: e.target.value })}
                       onBlur={() => saveTitle(day.date, editingTitle.value)}
                       onKeyDown={(e) => { if (e.key === "Enter") saveTitle(day.date, editingTitle.value); if (e.key === "Escape") setEditingTitle(null); }} />
                   ) : (
-                    <div className="text-[11px] text-muted-foreground/70 mt-1 cursor-text hover:text-muted-foreground transition-colors line-clamp-2 leading-snug min-h-[16px]"
+                    <div className="text-xs text-muted-foreground/70 mt-1 cursor-text hover:text-muted-foreground transition-colors line-clamp-2 leading-snug min-h-[16px]"
                       onClick={() => setEditingTitle({ date: day.date, value: day.title || day.focus || "" })}
                       title="클릭하여 일자 메모 편집">
                       {day.title || day.focus || <span className="italic text-muted-foreground/30">+ 메모 추가</span>}
@@ -362,55 +362,72 @@ export function WeeklyCalendar() {
               onMouseUp={handleMouseUp}>
               {HOURS.map((hour) => (
                 <Fragment key={`row-${hour}`}>
-                  <div className={`text-[11px] text-muted-foreground/40 text-right pr-2 pt-1 border-t border-border/20 ${hour === 12 ? "border-t-border/60 text-muted-foreground/60 font-medium" : ""}`}
+                  <div className={`text-xs text-muted-foreground/40 text-right pr-2 pt-1 border-t border-border/20 ${hour === 12 ? "border-t-border/60 text-muted-foreground/60 font-medium" : ""}`}
                     style={{ height: `${CELL_H}px` }}>{hour}</div>
                   {days.map((day) => {
                     const isToday = day.date === todayStr;
-                    const block = day.blocks.find((b) => b.startHour <= hour && b.endHour > hour);
-                    const isStart = block?.startHour === hour;
-                    const span = block ? block.endHour - block.startHour : 1;
-                    const s = block ? catStyle(block.category, categories) : null;
+                    // Find ALL blocks that start at this hour (for overlap rendering)
+                    const blocksAtHour = day.blocks.filter((b) => b.startHour === hour);
+                    const hasBlock = day.blocks.some((b) => b.startHour <= hour && b.endHour > hour);
                     const selected = isDragSelected(day.date, hour);
+
+                    // Compute overlap columns for blocks starting at this hour
+                    const overlapCount = blocksAtHour.length > 1 ? blocksAtHour.length : 0;
 
                     return (
                       <div key={`${day.date}-${hour}`}
-                        className={`relative border-l border-t border-border/20 transition-colors ${isToday ? "bg-primary/[0.04]" : ""} ${selected ? "bg-primary/20 border-primary/30" : ""} ${!block ? "cursor-crosshair hover:bg-muted/10" : ""} ${hour === 12 ? "border-t-border/60" : ""}`}
+                        className={`relative border-l border-t border-border/20 transition-colors ${isToday ? "bg-primary/[0.04]" : ""} ${selected ? "bg-primary/20 border-primary/30" : ""} ${!hasBlock ? "cursor-crosshair hover:bg-muted/10" : ""} ${hour === 12 ? "border-t-border/60" : ""}`}
                         style={{ height: `${CELL_H}px` }}
-                        onMouseDown={(e) => { if (!block) { e.preventDefault(); handleMouseDown(day.date, hour, e); }}}
-                        onMouseEnter={() => { if (!block) handleMouseEnter(day.date, hour); }}>
+                        onMouseDown={(e) => { if (!hasBlock) { e.preventDefault(); handleMouseDown(day.date, hour, e); }}}
+                        onMouseEnter={() => { if (!hasBlock) handleMouseEnter(day.date, hour); }}>
 
-                        {isStart && s && block && (
-                          <div className={`absolute inset-x-1 top-1 rounded-lg border ${s.bg} ${s.border} ${s.text} overflow-hidden z-10 shadow-sm hover:shadow-md transition-shadow cursor-pointer group`}
-                            style={{ height: `${span * CELL_H - 6}px` }}
-                            onClick={(e) => { e.stopPropagation(); setContextBlock({ block, x: e.clientX - (gridRef.current?.getBoundingClientRect().left || 0), y: e.clientY - (gridRef.current?.getBoundingClientRect().top || 0) }); }}>
-                            {/* Candle bar style for 업무 */}
-                            {(block.category === "업무" || block.category === "회의") && span >= 2 ? (
-                              <div className="h-full flex flex-col">
-                                <div className={`h-1 ${s.barBg} rounded-t-lg`} />
-                                <div className={`flex-1 ${s.bg} px-2 py-1`}>
+                        {blocksAtHour.map((block, colIdx) => {
+                          const span = block.endHour - block.startHour;
+                          const s = catStyle(block.category, categories);
+                          // If blocks overlap, split the width evenly
+                          const colTotal = overlapCount || 1;
+                          const leftPct = overlapCount ? `${(colIdx / colTotal) * 100}%` : undefined;
+                          const widthPct = overlapCount ? `${(1 / colTotal) * 100}%` : undefined;
+
+                          return (
+                            <div key={`${block.startHour}-${block.endHour}-${colIdx}`}
+                              className={`absolute top-1 rounded-lg border ${s.bg} ${s.border} ${s.text} overflow-hidden z-10 shadow-sm hover:shadow-md transition-shadow cursor-pointer group`}
+                              style={{
+                                height: `${span * CELL_H - 6}px`,
+                                left: leftPct ?? '4px',
+                                right: overlapCount ? undefined : '4px',
+                                width: widthPct ? `calc(${widthPct} - 8px)` : undefined,
+                              }}
+                              onClick={(e) => { e.stopPropagation(); setContextBlock({ block, x: e.clientX - (gridRef.current?.getBoundingClientRect().left || 0), y: e.clientY - (gridRef.current?.getBoundingClientRect().top || 0) }); }}>
+                              {/* Candle bar style for 업무 */}
+                              {(block.category === "업무" || block.category === "회의") && span >= 2 ? (
+                                <div className="h-full flex flex-col">
+                                  <div className={`h-1 ${s.barBg} rounded-t-lg`} />
+                                  <div className={`flex-1 ${s.bg} px-2 py-1`}>
+                                    <div className="flex items-center gap-1.5">
+                                      <span className={`w-2 h-2 rounded-full shrink-0 ${s.dot}`} />
+                                      <span className="text-xs font-semibold truncate">{block.category}</span>
+                                      <span className="text-xs opacity-40 ml-auto shrink-0">{block.startHour}–{block.endHour}</span>
+                                    </div>
+                                    {block.memo && <div className="text-xs opacity-60 mt-0.5 line-clamp-2 leading-snug">{block.memo}</div>}
+                                  </div>
+                                  <div className={`h-1 ${s.barBg} rounded-b-lg`} />
+                                </div>
+                              ) : (
+                                <div className="px-2 py-1 h-full">
                                   <div className="flex items-center gap-1.5">
                                     <span className={`w-2 h-2 rounded-full shrink-0 ${s.dot}`} />
                                     <span className="text-xs font-semibold truncate">{block.category}</span>
-                                    <span className="text-[10px] opacity-40 ml-auto shrink-0">{block.startHour}–{block.endHour}</span>
+                                    <span className="text-xs opacity-40 ml-auto shrink-0">{block.startHour}–{block.endHour}</span>
                                   </div>
-                                  {block.memo && <div className="text-[11px] opacity-60 mt-0.5 line-clamp-2 leading-snug">{block.memo}</div>}
+                                  {block.memo && span > 1 && <div className="text-xs opacity-60 mt-0.5 line-clamp-2 leading-snug">{block.memo}</div>}
                                 </div>
-                                <div className={`h-1 ${s.barBg} rounded-b-lg`} />
-                              </div>
-                            ) : (
-                              <div className="px-2 py-1 h-full">
-                                <div className="flex items-center gap-1.5">
-                                  <span className={`w-2 h-2 rounded-full shrink-0 ${s.dot}`} />
-                                  <span className="text-xs font-semibold truncate">{block.category}</span>
-                                  <span className="text-[10px] opacity-40 ml-auto shrink-0">{block.startHour}–{block.endHour}</span>
-                                </div>
-                                {block.memo && span > 1 && <div className="text-[11px] opacity-60 mt-0.5 line-clamp-2 leading-snug">{block.memo}</div>}
-                              </div>
-                            )}
-                            {/* Hover action hint */}
-                            <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity text-[9px] text-muted-foreground">⋯</div>
-                          </div>
-                        )}
+                              )}
+                              {/* Hover action hint */}
+                              <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity text-xs text-muted-foreground">⋯</div>
+                            </div>
+                          );
+                        })}
                       </div>
                     );
                   })}
@@ -433,13 +450,13 @@ export function WeeklyCalendar() {
               style={{ left: `${Math.min(popup.x, 300)}px`, top: `${popup.y + 60}px` }}
               onClick={(e) => e.stopPropagation()}>
               <div className="flex items-center justify-between">
-                <span className="text-[11px] font-medium text-primary">{popup.date.slice(5)} · {popup.startHour}:00–{popup.endHour}:00</span>
+                <span className="text-xs font-medium text-primary">{popup.date.slice(5)} · {popup.startHour}:00–{popup.endHour}:00</span>
                 <button className="text-muted-foreground hover:text-foreground text-xs" onClick={() => setPopup(null)}>✕</button>
               </div>
               <div className="flex gap-1 flex-wrap">
                 {Object.entries(categories).map(([cat, s]) => (
                   <button key={cat}
-                    className={`px-2 py-0.5 rounded-md text-[10px] transition-all ${popupForm.category === cat ? `${s.bg} ${s.border} ${s.text} font-semibold border` : "text-muted-foreground hover:text-foreground"}`}
+                    className={`px-2 py-0.5 rounded-md text-xs transition-all ${popupForm.category === cat ? `${s.bg} ${s.border} ${s.text} font-semibold border` : "text-muted-foreground hover:text-foreground"}`}
                     onClick={() => setPopupForm({ ...popupForm, category: cat })}>
                     <span className={`inline-block w-1.5 h-1.5 rounded-full mr-0.5 ${s.dot}`} />{cat}
                   </button>
@@ -458,8 +475,8 @@ export function WeeklyCalendar() {
               style={{ left: `${Math.min(contextBlock.x, 300)}px`, top: `${contextBlock.y + 60}px` }}
               onClick={(e) => e.stopPropagation()}>
               <div className="p-2 border-b border-border/50">
-                <div className="text-[11px] font-medium">{contextBlock.block.category} · {contextBlock.block.startHour}–{contextBlock.block.endHour}</div>
-                {contextBlock.block.memo && <div className="text-[10px] text-muted-foreground">{contextBlock.block.memo}</div>}
+                <div className="text-xs font-medium">{contextBlock.block.category} · {contextBlock.block.startHour}–{contextBlock.block.endHour}</div>
+                {contextBlock.block.memo && <div className="text-xs text-muted-foreground">{contextBlock.block.memo}</div>}
               </div>
               <button className="w-full px-3 py-2 text-left text-xs hover:bg-muted/20 transition-colors flex items-center gap-2"
                 onClick={() => { setEditing(contextBlock.block); setEditForm({ startHour: String(contextBlock.block.startHour), endHour: String(contextBlock.block.endHour), category: contextBlock.block.category, memo: contextBlock.block.memo }); setContextBlock(null); }}>
@@ -482,15 +499,15 @@ export function WeeklyCalendar() {
               <div className="w-80 rounded-xl border border-border bg-card shadow-2xl p-4 space-y-3" onClick={(e) => e.stopPropagation()}>
                 <div className="text-sm font-semibold">블록 수정</div>
                 <div className="flex gap-2">
-                  <div className="space-y-0.5 flex-1"><label className="text-[10px] text-muted-foreground">시작</label>
+                  <div className="space-y-0.5 flex-1"><label className="text-xs text-muted-foreground">시작</label>
                     <Input className="h-8" value={editForm.startHour} onChange={(e) => setEditForm({ ...editForm, startHour: e.target.value })} /></div>
-                  <div className="space-y-0.5 flex-1"><label className="text-[10px] text-muted-foreground">종료</label>
+                  <div className="space-y-0.5 flex-1"><label className="text-xs text-muted-foreground">종료</label>
                     <Input className="h-8" value={editForm.endHour} onChange={(e) => setEditForm({ ...editForm, endHour: e.target.value })} /></div>
                 </div>
                 <div className="flex gap-1 flex-wrap">
                   {Object.entries(categories).map(([cat, s]) => (
                     <button key={cat}
-                      className={`px-2 py-1 rounded-md text-[10px] transition-all ${editForm.category === cat ? `${s.bg} ${s.border} ${s.text} font-semibold border` : "text-muted-foreground hover:text-foreground"}`}
+                      className={`px-2 py-1 rounded-md text-xs transition-all ${editForm.category === cat ? `${s.bg} ${s.border} ${s.text} font-semibold border` : "text-muted-foreground hover:text-foreground"}`}
                       onClick={() => setEditForm({ ...editForm, category: cat })}>
                       <span className={`inline-block w-1.5 h-1.5 rounded-full mr-0.5 ${s.dot}`} />{cat}
                     </button>

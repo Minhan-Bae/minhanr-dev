@@ -39,7 +39,7 @@ export function FloatingQuickNote() {
     <>
       {/* Toast */}
       {toast && (
-        <div className="fixed top-16 right-4 z-50 rounded-lg border border-neutral-700 bg-neutral-900 px-3 py-2 text-[10px] text-neutral-300 shadow-lg animate-in fade-in slide-in-from-top-2 duration-200">
+        <div className="fixed top-16 right-4 z-50 rounded-lg border border-border bg-card px-3 py-2 text-xs text-foreground/80 shadow-lg animate-in fade-in slide-in-from-top-2 duration-200">
           {toast}
         </div>
       )}
@@ -57,12 +57,12 @@ export function FloatingQuickNote() {
 
       {/* Expanded input */}
       {open && (
-        <div className="fixed bottom-6 right-6 z-40 w-80 rounded-lg border border-neutral-700 bg-neutral-900 shadow-xl p-3 space-y-2 animate-in fade-in slide-in-from-bottom-2 duration-150">
+        <div className="fixed bottom-6 right-6 z-40 w-80 rounded-lg border border-border bg-card shadow-xl p-3 space-y-2 animate-in fade-in slide-in-from-bottom-2 duration-150">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] text-neutral-400 font-medium">
+            <span className="text-xs text-muted-foreground font-medium">
               Quick Note → Vault Inbox
             </span>
-            <button onClick={() => setOpen(false)} className="text-neutral-600 hover:text-neutral-400 text-sm">&times;</button>
+            <button onClick={() => setOpen(false)} className="text-muted-foreground/50 hover:text-muted-foreground text-sm">&times;</button>
           </div>
           <textarea
             value={text}
@@ -76,14 +76,14 @@ export function FloatingQuickNote() {
                 handleSave();
               }
             }}
-            className="w-full rounded border border-neutral-700 bg-neutral-950 px-2 py-1.5 text-xs text-neutral-100 placeholder:text-neutral-600 focus:border-primary focus:outline-none resize-none"
+            className="w-full rounded border border-border bg-background px-2 py-1.5 text-xs text-foreground placeholder:text-muted-foreground/50 focus:border-primary focus:outline-none resize-none"
           />
           <div className="flex items-center justify-between">
-            <span className="text-[8px] text-neutral-600">Enter to save · Shift+Enter for newline</span>
+            <span className="text-xs text-muted-foreground/50">Enter to save · Shift+Enter for newline</span>
             <button
               onClick={handleSave}
               disabled={!text.trim() || saving}
-              className="rounded bg-primary hover:bg-primary/80 disabled:bg-neutral-700 px-2.5 py-1 text-[10px] text-white font-medium transition-colors"
+              className="rounded bg-primary hover:bg-primary/80 disabled:bg-muted px-2.5 py-1 text-xs text-white font-medium transition-colors"
             >
               {saving ? "..." : "Save"}
             </button>

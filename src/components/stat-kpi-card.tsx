@@ -1,22 +1,44 @@
 import { Card, CardContent, CardDescription, CardTitle } from "@/components/ui/card";
+import { TrendingUp, TrendingDown, Minus } from "lucide-react";
 
 export interface StatKpiCardProps {
   label: string;
   value: string | number;
   hint?: string;
+  icon?: React.ReactNode;
+  trend?: "up" | "down" | "flat";
+  accentColor?: string;
 }
 
-export function StatKpiCard({ label, value, hint }: StatKpiCardProps) {
+const trendIcons = {
+  up: <TrendingUp className="h-3.5 w-3.5 text-chart-3" />,
+  down: <TrendingDown className="h-3.5 w-3.5 text-destructive" />,
+  flat: <Minus className="h-3.5 w-3.5 text-muted-foreground" />,
+};
+
+export function StatKpiCard({ label, value, hint, icon, trend, accentColor }: StatKpiCardProps) {
   return (
-    <Card>
+    <Card
+      className={`relative overflow-hidden ${
+        accentColor ? `border-l-2 ${accentColor}` : ""
+      }`}
+    >
       <CardContent className="py-4">
-        <CardDescription className="text-[11px] uppercase tracking-wider">
+        {icon && (
+          <div className="absolute top-3 right-3 text-muted-foreground/15">
+            <div className="h-8 w-8">{icon}</div>
+          </div>
+        )}
+        <CardDescription className="text-xs uppercase tracking-wider">
           {label}
         </CardDescription>
-        <CardTitle className="mt-1 text-3xl font-bold tabular-nums">
-          {value}
-        </CardTitle>
-        {hint && <p className="mt-1 text-[11px] text-muted-foreground">{hint}</p>}
+        <div className="flex items-end gap-2 mt-1">
+          <CardTitle className="text-3xl sm:text-4xl font-bold tabular-nums">
+            {value}
+          </CardTitle>
+          {trend && trendIcons[trend]}
+        </div>
+        {hint && <p className="mt-1 text-xs text-muted-foreground">{hint}</p>}
       </CardContent>
     </Card>
   );

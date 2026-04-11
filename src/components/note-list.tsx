@@ -23,6 +23,14 @@ function buildHref(base: string, params: Record<string, string | number | undefi
   return qs ? `${base}?${qs}` : base;
 }
 
+const STATUS_COLORS: Record<string, string> = {
+  seed: "bg-chart-4/15 text-chart-4 border-chart-4/30",
+  growing: "bg-chart-1/15 text-chart-1 border-chart-1/30",
+  mature: "bg-primary/15 text-primary border-primary/30",
+  active: "bg-chart-3/15 text-chart-3 border-chart-3/30",
+  _default: "bg-muted/15 text-muted-foreground border-border/30",
+};
+
 export function NoteList({ notes, total, page, pageSize, baseHref, searchParams }: NoteListProps) {
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
   const prevHref = page > 1 ? buildHref(baseHref, { ...searchParams, page: page - 1 }) : null;
@@ -43,36 +51,40 @@ export function NoteList({ notes, total, page, pageSize, baseHref, searchParams 
         <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {notes.map((n) => {
             const href = vaultPathToHref(n.path);
+            const statusClass = n.status ? (STATUS_COLORS[n.status] || STATUS_COLORS._default) : "";
             return (
               <li key={n.path}>
-                <Card className="h-full transition-colors hover:border-primary/40">
+                <Card className="h-full transition-all duration-200 hover:border-primary/40 hover:bg-[var(--surface-1)] card-lift">
                   <CardContent className="py-3 space-y-2">
                     <Link
                       href={href}
-                      className="block font-medium text-sm leading-tight line-clamp-2 hover:underline"
+                      className="block font-medium text-sm leading-tight line-clamp-2 hover:text-primary transition-colors"
                     >
                       {n.title}
                     </Link>
                     {typeof n.excerpt === "string" && n.excerpt && (
-                      <p className="text-[11px] text-muted-foreground/80 line-clamp-2 leading-relaxed">
+                      <p className="text-xs text-muted-foreground/80 line-clamp-2 leading-relaxed">
                         {n.excerpt}
                       </p>
                     )}
-                    <p className="text-[10px] text-muted-foreground/60 truncate">{n.path}</p>
-                    <div className="flex flex-wrap items-center gap-1.5 text-[10px]">
+                    <p className="text-xs text-muted-foreground/60 truncate">{n.path}</p>
+                    <div className="flex flex-wrap items-center gap-1.5 text-xs">
                       {n.status && (
-                        <Badge variant="outline" className="font-normal">
+                        <Badge
+                          variant="outline"
+                          className={`font-normal text-xs ${statusClass}`}
+                        >
                           {n.status}
                         </Badge>
                       )}
                       {n.created && (
-                        <span className="text-muted-foreground tabular-nums">
+                        <span className="text-muted-foreground tabular-nums text-xs">
                           {n.created}
                         </span>
                       )}
                       {Array.isArray(n.tags) &&
                         n.tags.slice(0, 3).map((t) => (
-                          <Badge key={t} variant="outline" className="font-normal text-[9px]">
+                          <Badge key={t} variant="outline" className="font-normal text-xs">
                             #{t}
                           </Badge>
                         ))}
@@ -84,16 +96,22 @@ export function NoteList({ notes, total, page, pageSize, baseHref, searchParams 
           })}
         </ul>
       )}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between pt-2">
         {prevHref ? (
-          <Link href={prevHref} className="text-xs underline">
+          <Link
+            href={prevHref}
+            className="text-xs px-3 py-1.5 rounded-md border border-border hover:bg-muted/50 hover:border-primary/30 transition-colors"
+          >
             ← 이전
           </Link>
         ) : (
           <span />
         )}
         {nextHref ? (
-          <Link href={nextHref} className="text-xs underline">
+          <Link
+            href={nextHref}
+            className="text-xs px-3 py-1.5 rounded-md border border-border hover:bg-muted/50 hover:border-primary/30 transition-colors"
+          >
             다음 →
           </Link>
         ) : (

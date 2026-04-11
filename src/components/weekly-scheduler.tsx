@@ -33,7 +33,7 @@ const CELL_H = 24;
 
 const DEFAULT_ROUTINES: RoutineBlock[] = [
   { label: "수면", start: 0, end: 6, color: "bg-indigo-950/50" },
-  { label: "출근", start: 6, end: 9, color: "bg-neutral-900/40" },
+  { label: "출근", start: 6, end: 9, color: "bg-muted/40" },
   { label: "업무", start: 9, end: 18, color: "bg-emerald-950/30" },
   { label: "휴식", start: 18, end: 23, color: "bg-purple-950/30" },
   { label: "수면", start: 23, end: 24, color: "bg-indigo-950/50" },
@@ -43,7 +43,7 @@ const ROUTINE_COLORS = [
   { label: "남색 (수면)", value: "bg-indigo-950/50" },
   { label: "초록 (업무)", value: "bg-emerald-950/30" },
   { label: "보라 (휴식)", value: "bg-purple-950/30" },
-  { label: "회색", value: "bg-neutral-900/40" },
+  { label: "회색", value: "bg-muted/40" },
   { label: "주황", value: "bg-orange-950/30" },
   { label: "없음", value: "" },
 ];
@@ -53,7 +53,7 @@ const CAT_COLORS: Record<string, string> = {
   meeting: "bg-orange-500 border-orange-400",
   workout: "bg-green-500 border-green-400",
   study: "bg-cyan-500 border-cyan-400",
-  routine: "bg-neutral-600 border-neutral-400",
+  routine: "bg-muted-foreground/50 border-muted-foreground",
 };
 
 /* ── Date Helpers ── */
@@ -222,24 +222,24 @@ export function WeeklyScheduler() {
 
   /* ── Form ── */
   const formEl = showForm ? (
-    <div className={`rounded-lg border border-neutral-700 bg-neutral-900 p-3 space-y-2 shadow-xl z-30 ${formPos ? "absolute" : ""}`} style={formPos ? { left: formPos.x, top: formPos.y, width: 280 } : undefined}>
+    <div className={`rounded-lg border border-border bg-card p-3 space-y-2 shadow-xl z-30 ${formPos ? "absolute" : ""}`} style={formPos ? { left: formPos.x, top: formPos.y, width: 280 } : undefined}>
       <form onSubmit={handleSubmit} className="space-y-2">
         <div className="flex items-center justify-between">
-          <span className="text-[10px] text-neutral-400 font-medium">
+          <span className="text-xs text-muted-foreground font-medium">
             {editTarget ? "Edit" : "New"} — {DAY_LABELS[form.day_of_week]} {formatDate(weekDates[form.day_of_week])} {String(form.start_hour).padStart(2, "0")}:00~{form.end_hour === 24 ? "24" : String(form.end_hour).padStart(2, "0")}:00
           </span>
-          <button type="button" onClick={closeForm} className="text-neutral-600 hover:text-neutral-400 text-sm leading-none">&times;</button>
+          <button type="button" onClick={closeForm} className="text-muted-foreground/50 hover:text-muted-foreground text-sm leading-none">&times;</button>
         </div>
-        <input type="text" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="What's happening?" required autoFocus className="w-full rounded border border-neutral-700 bg-neutral-950 px-2 py-1.5 text-xs text-neutral-100 placeholder:text-neutral-600 focus:border-primary focus:outline-none" />
+        <input type="text" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="What's happening?" required autoFocus className="w-full rounded border border-border bg-background px-2 py-1.5 text-xs text-foreground placeholder:text-muted-foreground/50 focus:border-ring focus:outline-none" />
         <div className="grid grid-cols-2 gap-2">
-          <select value={form.start_hour} onChange={(e) => setForm({ ...form, start_hour: Number(e.target.value) })} className="rounded border border-neutral-700 bg-neutral-950 px-1 py-1 text-[10px] text-neutral-300">
+          <select value={form.start_hour} onChange={(e) => setForm({ ...form, start_hour: Number(e.target.value) })} className="rounded border border-border bg-background px-1 py-1 text-xs text-foreground/80">
             {HOURS.map((h) => <option key={h} value={h}>{String(h).padStart(2, "0")}:00</option>)}
           </select>
-          <select value={form.end_hour} onChange={(e) => setForm({ ...form, end_hour: Number(e.target.value) })} className="rounded border border-neutral-700 bg-neutral-950 px-1 py-1 text-[10px] text-neutral-300">
+          <select value={form.end_hour} onChange={(e) => setForm({ ...form, end_hour: Number(e.target.value) })} className="rounded border border-border bg-background px-1 py-1 text-xs text-foreground/80">
             {HOURS.filter((h) => h > form.start_hour).concat([24]).map((h) => <option key={h} value={h}>{h === 24 ? "24:00" : `${String(h).padStart(2, "0")}:00`}</option>)}
           </select>
         </div>
-        <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className="w-full rounded border border-neutral-700 bg-neutral-950 px-2 py-1 text-[10px] text-neutral-300">
+        <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className="w-full rounded border border-border bg-background px-2 py-1 text-xs text-foreground/80">
           <option value="event">Event</option>
           <option value="meeting">Meeting</option>
           <option value="workout">Workout</option>
@@ -249,11 +249,11 @@ export function WeeklyScheduler() {
         <div className="flex items-center justify-between pt-1">
           <label className="flex items-center gap-1.5">
             <input type="checkbox" checked={form.is_routine} onChange={(e) => setForm({ ...form, is_routine: e.target.checked })} className="rounded" />
-            <span className="text-[10px] text-neutral-400">Every week</span>
+            <span className="text-xs text-muted-foreground">Every week</span>
           </label>
           <div className="flex gap-1.5">
-            {editTarget && <Button type="button" variant="destructive" size="xs" className="text-[9px] h-5" onClick={() => handleDelete(editTarget.id)}>Delete</Button>}
-            <Button type="submit" size="xs" className="text-[9px] h-5">{editTarget ? "Save" : "Create"}</Button>
+            {editTarget && <Button type="button" variant="destructive" size="xs" className="text-xs h-5" onClick={() => handleDelete(editTarget.id)}>Delete</Button>}
+            <Button type="submit" size="xs" className="text-xs h-5">{editTarget ? "Save" : "Create"}</Button>
           </div>
         </div>
       </form>
@@ -261,13 +261,13 @@ export function WeeklyScheduler() {
   ) : null;
 
   return (
-    <Card className="border-neutral-800">
+    <Card className="border-border">
       <CardHeader className="p-4 pb-2">
         <div className="flex items-center justify-between">
           <CardTitle className="text-sm font-semibold">Weekly Schedule</CardTitle>
           <div className="flex items-center gap-2">
-            <span className="text-[10px] text-neutral-500">{schedules.length} events</span>
-            <Button variant="outline" size="xs" className="text-[9px] h-5 border-neutral-700" onClick={() => setShowSettings(!showSettings)}>
+            <span className="text-xs text-muted-foreground">{schedules.length} events</span>
+            <Button variant="outline" size="xs" className="text-xs h-5 border-border" onClick={() => setShowSettings(!showSettings)}>
               {showSettings ? "Close" : "Settings"}
             </Button>
           </div>
@@ -276,18 +276,18 @@ export function WeeklyScheduler() {
       <CardContent className="p-4 pt-2 space-y-3">
         {/* Week Navigation */}
         <div className="flex items-center justify-between">
-          <Button variant="outline" size="xs" className="text-[10px] h-6 border-neutral-700 px-2" onClick={() => setWeekStart(addDays(weekStart, -7))}>
+          <Button variant="outline" size="xs" className="text-xs h-6 border-border px-2" onClick={() => setWeekStart(addDays(weekStart, -7))}>
             &larr; Prev
           </Button>
           <div className="flex items-center gap-2">
-            <span className="text-xs font-medium text-neutral-300">{formatWeekRange(weekStart)}</span>
+            <span className="text-xs font-medium text-foreground/80">{formatWeekRange(weekStart)}</span>
             {!isThisWeek && (
-              <Button variant="outline" size="xs" className="text-[9px] h-5 border-neutral-700" onClick={() => setWeekStart(getMonday(new Date()))}>
+              <Button variant="outline" size="xs" className="text-xs h-5 border-border" onClick={() => setWeekStart(getMonday(new Date()))}>
                 Today
               </Button>
             )}
           </div>
-          <Button variant="outline" size="xs" className="text-[10px] h-6 border-neutral-700 px-2" onClick={() => setWeekStart(addDays(weekStart, 7))}>
+          <Button variant="outline" size="xs" className="text-xs h-6 border-border px-2" onClick={() => setWeekStart(addDays(weekStart, 7))}>
             Next &rarr;
           </Button>
         </div>
@@ -296,17 +296,17 @@ export function WeeklyScheduler() {
         {showForm && !formPos && formEl}
 
         {/* Grid */}
-        <div className="overflow-x-auto rounded border border-neutral-800 relative" ref={gridRef} onMouseUp={handleMouseUp}>
+        <div className="overflow-x-auto rounded border border-border relative" ref={gridRef} onMouseUp={handleMouseUp}>
           {showForm && formPos && formEl}
           <div className="grid min-w-[640px]" style={{ gridTemplateColumns: "36px repeat(7, 1fr)" }}>
             {/* Header */}
-            <div className="sticky top-0 bg-neutral-950 border-b border-neutral-800 h-8 z-10" />
+            <div className="sticky top-0 bg-background border-b border-border h-8 z-10" />
             {weekDates.map((date, i) => {
               const isToday = toISODate(date) === toISODate(new Date());
               return (
-                <div key={i} className={`sticky top-0 bg-neutral-950 border-b border-neutral-800 h-8 flex flex-col items-center justify-center z-10 ${isToday ? "!bg-primary/10" : ""}`}>
-                  <span className={`text-[9px] font-medium ${isToday ? "text-primary" : "text-neutral-400"}`}>{DAY_LABELS[i]}</span>
-                  <span className={`text-[8px] ${isToday ? "text-primary font-bold" : "text-neutral-600"}`}>{formatDate(date)}</span>
+                <div key={i} className={`sticky top-0 bg-background border-b border-border h-8 flex flex-col items-center justify-center z-10 ${isToday ? "!bg-primary/10" : ""}`}>
+                  <span className={`text-xs font-medium ${isToday ? "text-primary" : "text-muted-foreground"}`}>{DAY_LABELS[i]}</span>
+                  <span className={`text-xs ${isToday ? "text-primary font-bold" : "text-muted-foreground/50"}`}>{formatDate(date)}</span>
                 </div>
               );
             })}
@@ -314,7 +314,7 @@ export function WeeklyScheduler() {
             {/* Rows */}
             {HOURS.map((hour) => (
               <div key={hour} className="contents">
-                <div className="flex items-start justify-end pr-1 text-[8px] text-neutral-600 border-r border-neutral-800/60" style={{ height: CELL_H }}>
+                <div className="flex items-start justify-end pr-1 text-xs text-muted-foreground/50 border-r border-border" style={{ height: CELL_H }}>
                   {String(hour).padStart(2, "0")}
                 </div>
                 {weekDates.map((date, dayIdx) => {
@@ -326,7 +326,7 @@ export function WeeklyScheduler() {
                   return (
                     <div
                       key={dayIdx}
-                      className={`relative border-b border-r border-neutral-800/30 select-none transition-colors ${bgClass} ${
+                      className={`relative border-b border-r border-border/30 select-none transition-colors ${bgClass} ${
                         isDragSelected(dayIdx, hour) ? "!bg-primary/30" : "hover:brightness-125"
                       } ${isToday ? "bg-primary/5" : ""} ${occupied ? "cursor-default" : "cursor-crosshair"}`}
                       style={{ height: CELL_H }}
@@ -357,14 +357,14 @@ export function WeeklyScheduler() {
         {/* Legend */}
         <div className="flex flex-wrap gap-x-3 gap-y-1">
           {routines.filter((b, i, arr) => arr.findIndex((x) => x.label === b.label) === i).map((b) => (
-            <div key={b.label + b.start} className="flex items-center gap-1"><span className={`h-1.5 w-1.5 rounded-sm ${b.color.split("/")[0]}`} /><span className="text-[8px] text-neutral-600">{b.label}</span></div>
+            <div key={b.label + b.start} className="flex items-center gap-1"><span className={`h-1.5 w-1.5 rounded-sm ${b.color.split("/")[0]}`} /><span className="text-xs text-muted-foreground/50">{b.label}</span></div>
           ))}
-          <span className="text-neutral-800">|</span>
+          <span className="text-border">|</span>
           {Object.entries(CAT_COLORS).map(([cat, c]) => (
-            <div key={cat} className="flex items-center gap-1"><span className={`h-1.5 w-1.5 rounded-sm ${c.split(" ")[0]}`} /><span className="text-[8px] text-neutral-600">{cat}</span></div>
+            <div key={cat} className="flex items-center gap-1"><span className={`h-1.5 w-1.5 rounded-sm ${c.split(" ")[0]}`} /><span className="text-xs text-muted-foreground/50">{cat}</span></div>
           ))}
-          <span className="text-neutral-800">|</span>
-          <span className="text-[8px] text-neutral-600">Drag to create · ← → navigate weeks</span>
+          <span className="text-border">|</span>
+          <span className="text-xs text-muted-foreground/50">Drag to create · ← → navigate weeks</span>
         </div>
       </CardContent>
     </Card>
@@ -377,31 +377,31 @@ function RoutineSettings({ routines, onSave }: { routines: RoutineBlock[]; onSav
   const [blocks, setBlocks] = useState<RoutineBlock[]>(routines);
   function update(i: number, f: keyof RoutineBlock, v: string | number) { const n = [...blocks]; n[i] = { ...n[i], [f]: v }; setBlocks(n); }
   return (
-    <div className="rounded border border-neutral-700 bg-neutral-900/50 p-3 space-y-3">
+    <div className="rounded border border-border bg-card/50 p-3 space-y-3">
       <div className="flex items-center justify-between">
-        <span className="text-[10px] text-neutral-300 font-medium">Background Time Blocks</span>
-        <Button variant="outline" size="xs" className="text-[9px] h-5 border-neutral-700" onClick={() => setBlocks([...blocks, { label: "New", start: 0, end: 1, color: "bg-neutral-900/40" }])}>+ Block</Button>
+        <span className="text-xs text-foreground/80 font-medium">Background Time Blocks</span>
+        <Button variant="outline" size="xs" className="text-xs h-5 border-border" onClick={() => setBlocks([...blocks, { label: "New", start: 0, end: 1, color: "bg-muted/40" }])}>+ Block</Button>
       </div>
       <div className="space-y-1.5">
         {blocks.map((b, i) => (
           <div key={i} className="grid grid-cols-[1fr_60px_60px_1fr_24px] gap-1.5 items-center">
-            <input value={b.label} onChange={(e) => update(i, "label", e.target.value)} className="rounded border border-neutral-700 bg-neutral-950 px-1.5 py-0.5 text-[10px] text-neutral-300 focus:outline-none focus:border-primary" />
-            <select value={b.start} onChange={(e) => update(i, "start", Number(e.target.value))} className="rounded border border-neutral-700 bg-neutral-950 px-0.5 py-0.5 text-[9px] text-neutral-300">
+            <input value={b.label} onChange={(e) => update(i, "label", e.target.value)} className="rounded border border-border bg-background px-1.5 py-0.5 text-xs text-foreground/80 focus:outline-none focus:border-ring" />
+            <select value={b.start} onChange={(e) => update(i, "start", Number(e.target.value))} className="rounded border border-border bg-background px-0.5 py-0.5 text-xs text-foreground/80">
               {HOURS.map((h) => <option key={h} value={h}>{String(h).padStart(2, "0")}:00</option>)}
             </select>
-            <select value={b.end} onChange={(e) => update(i, "end", Number(e.target.value))} className="rounded border border-neutral-700 bg-neutral-950 px-0.5 py-0.5 text-[9px] text-neutral-300">
+            <select value={b.end} onChange={(e) => update(i, "end", Number(e.target.value))} className="rounded border border-border bg-background px-0.5 py-0.5 text-xs text-foreground/80">
               {HOURS.filter((h) => h > b.start).concat([24]).map((h) => <option key={h} value={h}>{h === 24 ? "24:00" : `${String(h).padStart(2, "0")}:00`}</option>)}
             </select>
-            <select value={b.color} onChange={(e) => update(i, "color", e.target.value)} className="rounded border border-neutral-700 bg-neutral-950 px-0.5 py-0.5 text-[9px] text-neutral-300">
+            <select value={b.color} onChange={(e) => update(i, "color", e.target.value)} className="rounded border border-border bg-background px-0.5 py-0.5 text-xs text-foreground/80">
               {ROUTINE_COLORS.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
             </select>
-            <button onClick={() => setBlocks(blocks.filter((_, j) => j !== i))} className="text-neutral-600 hover:text-red-400 text-[10px] text-center">&times;</button>
+            <button onClick={() => setBlocks(blocks.filter((_, j) => j !== i))} className="text-muted-foreground/50 hover:text-red-400 text-xs text-center">&times;</button>
           </div>
         ))}
       </div>
       <div className="flex justify-between">
-        <Button variant="outline" size="xs" className="text-[9px] h-5 border-neutral-700" onClick={() => { setBlocks(DEFAULT_ROUTINES); onSave(DEFAULT_ROUTINES); }}>Reset</Button>
-        <Button size="xs" className="text-[9px] h-5" onClick={() => onSave(blocks)}>Apply</Button>
+        <Button variant="outline" size="xs" className="text-xs h-5 border-border" onClick={() => { setBlocks(DEFAULT_ROUTINES); onSave(DEFAULT_ROUTINES); }}>Reset</Button>
+        <Button size="xs" className="text-xs h-5" onClick={() => onSave(blocks)}>Apply</Button>
       </div>
     </div>
   );

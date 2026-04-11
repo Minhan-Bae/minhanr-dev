@@ -76,7 +76,7 @@ export function QuickNote() {
   return (
     <div className="space-y-4">
       {/* Compose */}
-      <Card className="border-neutral-800">
+      <Card className="border-border">
         <CardContent className="p-4">
           <form onSubmit={handleCreate} className="space-y-2">
             <textarea
@@ -84,7 +84,7 @@ export function QuickNote() {
               onChange={(e) => setDraft(e.target.value)}
               placeholder="Quick thought, idea, or note..."
               rows={3}
-              className="w-full rounded border border-neutral-700 bg-neutral-900 px-3 py-2 text-xs text-neutral-100 placeholder:text-neutral-600 focus:border-primary focus:outline-none resize-none"
+              className="w-full rounded border border-border bg-card px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground/50 focus:border-primary focus:outline-none resize-none"
               onKeyDown={(e) => {
                 if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
                   e.preventDefault();
@@ -93,8 +93,8 @@ export function QuickNote() {
               }}
             />
             <div className="flex items-center justify-between">
-              <span className="text-[9px] text-neutral-600">Ctrl+Enter to save</span>
-              <Button type="submit" size="xs" className="text-[9px] h-5" disabled={!draft.trim()}>
+              <span className="text-xs text-muted-foreground/50">Ctrl+Enter to save</span>
+              <Button type="submit" size="xs" className="text-xs h-5" disabled={!draft.trim()}>
                 Save Note
               </Button>
             </div>
@@ -107,18 +107,18 @@ export function QuickNote() {
         {notes.map((note) => (
           <Card
             key={note.id}
-            className={`border-neutral-800 ${note.pinned ? "ring-1 ring-amber-500/30" : ""}`}
+            className={`border-border ${note.pinned ? "ring-1 ring-amber-500/30" : ""}`}
           >
             <CardHeader className="p-3 pb-1">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-[10px] text-neutral-500">
+                <CardTitle className="text-xs text-muted-foreground">
                   {timeAgo(note.created_at)} ago
                   {note.pinned && <span className="ml-1 text-amber-400">pinned</span>}
                 </CardTitle>
                 <div className="flex gap-1">
                   <button
                     onClick={() => handlePin(note.id, note.pinned)}
-                    className={`text-[10px] px-1 transition-colors ${note.pinned ? "text-amber-400" : "text-neutral-600 hover:text-amber-400"}`}
+                    className={`text-xs px-1 transition-colors ${note.pinned ? "text-amber-400" : "text-muted-foreground/50 hover:text-amber-400"}`}
                     title={note.pinned ? "Unpin" : "Pin"}
                   >
                     {note.pinned ? "★" : "☆"}
@@ -128,13 +128,13 @@ export function QuickNote() {
                       setEditId(editId === note.id ? null : note.id);
                       setEditContent(note.content);
                     }}
-                    className="text-[10px] text-neutral-600 hover:text-primary transition-colors px-1"
+                    className="text-xs text-muted-foreground/50 hover:text-primary transition-colors px-1"
                   >
                     ✎
                   </button>
                   <button
                     onClick={() => handleDelete(note.id)}
-                    className="text-[10px] text-neutral-600 hover:text-red-400 transition-colors px-1"
+                    className="text-xs text-muted-foreground/50 hover:text-red-400 transition-colors px-1"
                   >
                     ×
                   </button>
@@ -148,15 +148,15 @@ export function QuickNote() {
                     value={editContent}
                     onChange={(e) => setEditContent(e.target.value)}
                     rows={3}
-                    className="w-full rounded border border-neutral-700 bg-neutral-900 px-2 py-1 text-[11px] text-neutral-200 focus:border-primary focus:outline-none resize-none"
+                    className="w-full rounded border border-border bg-card px-2 py-1 text-xs text-foreground focus:border-primary focus:outline-none resize-none"
                   />
                   <div className="flex gap-1 justify-end">
-                    <Button size="xs" variant="outline" className="text-[8px] h-4" onClick={() => setEditId(null)}>Cancel</Button>
-                    <Button size="xs" className="text-[8px] h-4" onClick={() => handleEdit(note.id)}>Save</Button>
+                    <Button size="xs" variant="outline" className="text-xs h-4" onClick={() => setEditId(null)}>Cancel</Button>
+                    <Button size="xs" className="text-xs h-4" onClick={() => handleEdit(note.id)}>Save</Button>
                   </div>
                 </div>
               ) : (
-                <p className="text-[11px] text-neutral-300 whitespace-pre-wrap leading-relaxed">
+                <p className="text-xs text-foreground/80 whitespace-pre-wrap leading-relaxed">
                   {note.content}
                 </p>
               )}
@@ -166,8 +166,8 @@ export function QuickNote() {
       </div>
 
       {notes.length === 0 && (
-        <Card className="border-neutral-800">
-          <CardContent className="py-8 text-center text-neutral-600 text-xs">
+        <Card className="border-border">
+          <CardContent className="py-8 text-center text-muted-foreground/50 text-xs">
             No notes yet. Write your first quick note above.
           </CardContent>
         </Card>

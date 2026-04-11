@@ -20,6 +20,21 @@ interface PostMeta {
   summary: string;
 }
 
+const CATEGORY_COLORS: Record<string, string> = {
+  AI: "border-l-primary",
+  VFX: "border-l-chart-3",
+  Research: "border-l-chart-1",
+  "Creative Technology": "border-l-chart-4",
+  TrinityX: "border-l-chart-2",
+};
+
+function getCategoryBorder(categories: string[]): string {
+  for (const cat of categories) {
+    if (CATEGORY_COLORS[cat]) return CATEGORY_COLORS[cat];
+  }
+  return "border-l-border";
+}
+
 export function BlogList({ posts }: { posts: PostMeta[] }) {
   const [query, setQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -77,12 +92,13 @@ export function BlogList({ posts }: { posts: PostMeta[] }) {
           placeholder="Search posts..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          className="w-full rounded-lg border border-neutral-800 bg-neutral-900 px-4 py-2.5 text-sm text-neutral-200 placeholder:text-neutral-600 focus:border-neutral-600 focus:outline-none transition-colors"
+          className="w-full rounded-lg border border-border bg-card px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/50 focus:border-primary/50 focus:outline-none focus:ring-1 focus:ring-primary/20 transition-all"
         />
         {query && (
           <button
             onClick={() => setQuery("")}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-neutral-300 text-xs"
+            aria-label="Clear search"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground/80 text-xs"
           >
             Clear
           </button>
@@ -98,7 +114,7 @@ export function BlogList({ posts }: { posts: PostMeta[] }) {
             className={`rounded-full px-3 py-1 text-xs border transition-colors ${
               selectedCategory === cat
                 ? "border-primary bg-primary/10 text-primary"
-                : "border-neutral-800 text-neutral-500 hover:border-neutral-600 hover:text-neutral-300"
+                : "border-border text-muted-foreground hover:border-primary/30 hover:text-foreground/80"
             }`}
           >
             {cat}
@@ -112,10 +128,10 @@ export function BlogList({ posts }: { posts: PostMeta[] }) {
           <button
             key={tag}
             onClick={() => setSelectedTag(selectedTag === tag ? null : tag)}
-            className={`rounded px-2 py-0.5 text-[10px] transition-colors ${
+            className={`rounded px-2 py-0.5 text-xs transition-colors ${
               selectedTag === tag
-                ? "bg-neutral-700 text-neutral-200"
-                : "bg-neutral-800/50 text-neutral-500 hover:bg-neutral-800 hover:text-neutral-400"
+                ? "bg-primary/15 text-primary"
+                : "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground/80"
             }`}
           >
             {tag}
@@ -125,9 +141,9 @@ export function BlogList({ posts }: { posts: PostMeta[] }) {
 
       {/* 필터 상태 */}
       {hasFilters && (
-        <div className="flex items-center gap-2 text-xs text-neutral-500">
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
           <span>{filtered.length} / {posts.length} posts</span>
-          <button onClick={clearFilters} className="text-neutral-400 hover:text-neutral-200 underline">
+          <button onClick={clearFilters} className="text-muted-foreground hover:text-primary underline">
             Reset
           </button>
         </div>
@@ -135,32 +151,45 @@ export function BlogList({ posts }: { posts: PostMeta[] }) {
 
       {/* 포스트 목록 */}
       <div className="space-y-4">
-        {filtered.map((post) => (
-          <Link key={post.slug} href={`/blog/${post.slug}`} className="block group">
-            <Card className="border-neutral-800 hover:border-neutral-600 transition-colors">
+        {filtered.map((post, index) => (
+          <Link
+            key={post.slug}
+            href={`/blog/${post.slug}`}
+            className="block group animate-fade-up"
+            style={{ animationDelay: `${index * 60}ms` }}
+          >
+            <Card
+              className={`border-border hover:border-primary/20 hover:bg-[var(--surface-1)] card-lift transition-all border-l-4 ${getCategoryBorder(post.categories)} ${
+                index === 0 && !hasFilters ? "ring-1 ring-primary/10" : ""
+              }`}
+            >
               <CardHeader className="p-4 pb-2">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <CardDescription className="text-[11px] text-neutral-500">
+                  <CardDescription className="text-xs text-muted-foreground tabular-nums">
                     {post.date}
                   </CardDescription>
                   {post.categories.map((cat) => (
                     <Badge
                       key={cat}
-                      variant="outline"
-                      className="text-[9px] px-1.5 py-0 text-neutral-400 border-neutral-700"
+                      variant="secondary"
+                      className="text-xs px-1.5 py-0"
                     >
                       {cat}
                     </Badge>
                   ))}
                 </div>
-                <CardTitle className="text-sm font-medium text-neutral-200 group-hover:text-neutral-50 transition-colors leading-relaxed mt-1">
+                <CardTitle
+                  className={`font-medium text-foreground group-hover:text-primary transition-colors leading-relaxed mt-1 ${
+                    index === 0 && !hasFilters ? "text-base" : "text-sm"
+                  }`}
+                >
                   {post.title}
                 </CardTitle>
               </CardHeader>
               {(post.summary || post.tags.length > 0) && (
                 <CardContent className="p-4 pt-0">
                   {post.summary && (
-                    <p className="text-xs text-neutral-400 line-clamp-2 mb-2">
+                    <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
                       {post.summary}
                     </p>
                   )}
@@ -169,13 +198,13 @@ export function BlogList({ posts }: { posts: PostMeta[] }) {
                       {post.tags.slice(0, 5).map((tag) => (
                         <span
                           key={tag}
-                          className="text-[9px] text-neutral-500 bg-neutral-800/50 rounded px-1.5 py-0.5"
+                          className="text-xs text-primary/80 bg-primary/10 rounded px-1.5 py-0.5"
                         >
                           {tag}
                         </span>
                       ))}
                       {post.tags.length > 5 && (
-                        <span className="text-[9px] text-neutral-600">
+                        <span className="text-xs text-muted-foreground/50">
                           +{post.tags.length - 5}
                         </span>
                       )}
@@ -188,8 +217,8 @@ export function BlogList({ posts }: { posts: PostMeta[] }) {
         ))}
 
         {filtered.length === 0 && (
-          <Card className="border-neutral-800">
-            <CardContent className="py-10 text-center text-neutral-500 text-sm">
+          <Card className="border-border">
+            <CardContent className="py-10 text-center text-muted-foreground text-sm">
               {hasFilters ? "No matching posts." : "No posts yet."}
             </CardContent>
           </Card>

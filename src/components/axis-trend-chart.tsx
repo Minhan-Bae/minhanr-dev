@@ -58,7 +58,7 @@ export function AxisTrendChart({ history }: { history: AxisMetricRow[] }) {
 
   if (chartData.length === 0) {
     return (
-      <div className="flex items-center justify-center h-48 text-neutral-500 text-sm">
+      <div className="flex items-center justify-center h-48 text-muted-foreground text-sm">
         No trend data available
       </div>
     );

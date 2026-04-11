@@ -6,6 +6,7 @@ import remarkParse from "remark-parse";
 import remarkGfm from "remark-gfm";
 import remarkRehype from "remark-rehype";
 import rehypeRaw from "rehype-raw";
+import rehypeSlug from "rehype-slug";
 import rehypeHighlight from "rehype-highlight";
 import rehypeStringify from "rehype-stringify";
 
@@ -94,6 +95,7 @@ export async function getPostBySlug(slug: string): Promise<BlogPost | null> {
         .use(remarkGfm)
         .use(remarkRehype, { allowDangerousHtml: true })
         .use(rehypeRaw)
+        .use(rehypeSlug)
         .use(rehypeHighlight, { detect: true })
         .use(rehypeStringify)
         .process(content);
@@ -115,6 +117,26 @@ export async function getPostBySlug(slug: string): Promise<BlogPost | null> {
   }
 
   return null;
+}
+
+export interface TocHeading {
+  id: string;
+  text: string;
+  level: 2 | 3;
+}
+
+export function extractHeadings(html: string): TocHeading[] {
+  const regex = /<h([23])\s+id="([^"]+)"[^>]*>(.*?)<\/h[23]>/gi;
+  const headings: TocHeading[] = [];
+  let match;
+  while ((match = regex.exec(html)) !== null) {
+    headings.push({
+      id: match[2],
+      text: match[3].replace(/<[^>]*>/g, ""),
+      level: parseInt(match[1]) as 2 | 3,
+    });
+  }
+  return headings;
 }
 
 export function getAllSlugs(): string[] {
