@@ -105,12 +105,12 @@ export function AppSidebar() {
           className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-sidebar-accent transition-colors"
         >
           <div className="flex h-8 w-8 items-center justify-center rounded-md bg-gradient-to-br from-primary to-accent text-sidebar-primary-foreground font-bold shadow-sm shadow-primary/30">
-            O
+            M
           </div>
           <div className="flex flex-col group-data-[collapsible=icon]:hidden">
-            <span className="text-sm font-bold leading-tight">OIKBAS</span>
+            <span className="text-sm font-bold leading-tight">Minhan Bae</span>
             <span className="text-xs text-sidebar-foreground/60 leading-tight">
-              Knowledge Hub
+              Workspace
             </span>
           </div>
         </Link>

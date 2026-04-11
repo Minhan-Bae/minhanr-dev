@@ -42,38 +42,74 @@ interface HomeData {
   recentGrowing: VaultNote[];
   /** Recently modified non-published vault notes (fallback for "Now growing") */
   recentNotes: VaultNote[];
+  /**
+   * ISO timestamp of the most recent agent harvest. Read directly from
+   * `index._meta.last_delta_update`, which `aggregate()` does not surface
+   * (it only exposes `last_full_scan` = index rebuild time, a different
+   * concept). Falls back to `last_full_scan` if delta is missing.
+   */
+  lastHarvestIso: string | null;
 }
+
+/** Target count for the "Now growing" section. */
+const NOW_GROWING_TARGET = 4;
+/** Minimum cards before we consider the section visually thin. */
+const NOW_GROWING_MIN = 3;
 
 async function loadHomeData(): Promise<HomeData> {
   try {
     const index = await getCachedVaultIndex();
     const agg = aggregate(index);
+
     // CRITICAL: filter by Tier 2 whitelist path before exposing on the
     // public home. The vault index contains EVERYTHING — including
     // 030_Areas/034_Finance/ (insider scans) and 010_Daily/ (private logs)
     // — and `recent_growing` only filters by status, not by path.
     // The middleware at src/lib/supabase-middleware.ts uses the same
     // `isTier2Path` check; this is the same single source of truth.
-    const recentGrowing = agg.recent_growing
-      .filter((n) => isTier2Path(n.path))
-      .slice(0, 4);
-    // Fallback pool: most recent non-published notes within Tier 2.
-    // Pull more than needed, then filter, then trim — `listNotes` itself
-    // doesn't expose a path-prefix-OR matcher beyond a single `folder`.
+    const growingTier2 = agg.recent_growing.filter((n) => isTier2Path(n.path));
+
+    // Fallback pool: most recent non-published Tier 2 notes. Pull a wide
+    // window so the path filter still leaves enough to fill the section.
+    // listNotes doesn't expose a path-prefix-OR matcher beyond a single
+    // `folder`, so we filter post-hoc.
     const { notes: rawRecent } = listNotes(index, {
       excludeStatus: [...KB_HUB_HIDDEN_STATUSES],
       sort: "created_desc",
-      limit: 40,
+      limit: 80,
     });
-    const recentNotes = rawRecent
-      .filter((n) => isTier2Path(n.path))
-      .slice(0, 4);
-    return { agg, recentGrowing, recentNotes };
+    const recentTier2 = rawRecent.filter((n) => isTier2Path(n.path));
+
+    // Tenet 2 (Garage door open): the section must always show something.
+    // Strategy: take growing first, then top up from recent non-published,
+    // dedupe by path, cap at NOW_GROWING_TARGET. Always meets NOW_GROWING_MIN
+    // unless the entire Tier 2 surface is empty.
+    const seen = new Set<string>();
+    const merged: typeof growingTier2 = [];
+    for (const note of [...growingTier2, ...recentTier2]) {
+      if (seen.has(note.path)) continue;
+      seen.add(note.path);
+      merged.push(note);
+      if (merged.length >= NOW_GROWING_TARGET) break;
+    }
+
+    return {
+      agg,
+      recentGrowing: merged,
+      recentNotes: recentTier2.slice(0, NOW_GROWING_TARGET),
+      lastHarvestIso:
+        index._meta.last_delta_update ?? index._meta.last_full_scan ?? null,
+    };
   } catch {
     // Vault index unreachable (no GITHUB_TOKEN, network error, etc.).
     // Render the page without vault signals — Tenet 1 says label the
     // placeholder explicitly rather than committing a lie.
-    return { agg: null, recentGrowing: [], recentNotes: [] };
+    return {
+      agg: null,
+      recentGrowing: [],
+      recentNotes: [],
+      lastHarvestIso: null,
+    };
   }
 }
 
@@ -102,15 +138,20 @@ function vaultPathToHref(path: string): string {
 export default async function Home() {
   const allPosts = getAllPosts();
   const recentPosts = allPosts.slice(0, 3);
-  const { agg, recentGrowing, recentNotes } = await loadHomeData();
+  const { agg, recentGrowing, recentNotes, lastHarvestIso } =
+    await loadHomeData();
 
-  // "Now growing" prefers explicit status=growing notes, falls back to most
-  // recent non-published notes if the growing pool is empty (Tenet 2).
-  const growingDisplay = recentGrowing.length > 0 ? recentGrowing : recentNotes;
+  // recentGrowing already merges growing + recent fallback (loadHomeData).
+  // Use it directly; recentNotes is kept as a deeper fallback for the
+  // section's empty-state branch only.
+  const growingDisplay =
+    recentGrowing.length >= NOW_GROWING_MIN ? recentGrowing : recentNotes;
 
-  // Vault stat tiles (Tenet 1: live data, no hardcoded counts)
+  // Vault stat tiles (Tenet 1: live data, no hardcoded counts).
+  // `lastHarvestIso` is `last_delta_update` (agents last touched the vault),
+  // not `last_full_scan` (index rebuild time) — see HomeData docstring.
   const vaultNoteCount = agg?.total_notes ?? null;
-  const lastHarvest = formatRelative(agg?.last_full_scan ?? null);
+  const lastHarvest = formatRelative(lastHarvestIso);
 
   return (
     <>
@@ -155,9 +196,17 @@ export default async function Home() {
 
         <div className="relative z-10 mx-auto w-full max-w-5xl px-4 sm:px-6 py-24 sm:py-36">
           <div className="space-y-6 max-w-2xl">
+            {/* h1 uses text-gradient (transparent fill) so text-white is
+                meaningless and Tailwind's drop-shadow-lg can't shadow
+                transparent glyphs. `filter: drop-shadow(...)` is pixel-based
+                and DOES anchor to the rendered gradient pixels, so the
+                shadow stays legible against any region of the photo. */}
             <h1
-              className="font-bold tracking-tight leading-[1.05] text-white drop-shadow-lg text-gradient"
-              style={{ fontSize: "var(--font-size-h1)" }}
+              className="font-bold tracking-tight leading-[1.05] text-gradient"
+              style={{
+                fontSize: "var(--font-size-h1)",
+                filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.7))",
+              }}
             >
               {BRAND_IDENTITY.person}
             </h1>
@@ -190,7 +239,8 @@ export default async function Home() {
         </p>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
           <Signal
-            label="Notes"
+            label="Notes total"
+            sublabel="garden + vault"
             value={vaultNoteCount !== null ? String(vaultNoteCount) : "—"}
           />
           <Signal label="Posts" value={String(allPosts.length)} />
@@ -422,7 +472,15 @@ function OceanWaves() {
   );
 }
 
-function Signal({ label, value }: { label: string; value: string }) {
+function Signal({
+  label,
+  value,
+  sublabel,
+}: {
+  label: string;
+  value: string;
+  sublabel?: string;
+}) {
   return (
     <div>
       <div
@@ -434,6 +492,11 @@ function Signal({ label, value }: { label: string; value: string }) {
       <div className="text-xs font-mono uppercase tracking-wider text-muted-foreground mt-1">
         {label}
       </div>
+      {sublabel && (
+        <div className="text-[10px] font-mono text-muted-foreground/60 mt-0.5 lowercase tracking-wide">
+          {sublabel}
+        </div>
+      )}
     </div>
   );
 }

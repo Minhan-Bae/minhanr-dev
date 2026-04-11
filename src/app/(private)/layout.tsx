@@ -18,7 +18,7 @@ export default function PrivateLayout({
           <SidebarTrigger className="-ml-1" />
           <div className="flex flex-1 items-center justify-between">
             <span className="text-sm font-bold tracking-tight text-foreground">
-              OIKBAS
+              Workspace
             </span>
           </div>
         </header>
@@ -26,7 +26,7 @@ export default function PrivateLayout({
           {children}
         </main>
         <footer className="border-t border-border/30 px-6 py-2.5 text-xs text-muted-foreground/50 text-center">
-          minhanr.dev · TrinityX v7.0
+          minhanr.dev
         </footer>
       </SidebarInset>
     </SidebarProvider>
