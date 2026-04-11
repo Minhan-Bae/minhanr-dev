@@ -107,17 +107,23 @@ export function WeeklyScheduler() {
   const [formPos, setFormPos] = useState<{ x: number; y: number } | null>(null);
   const gridRef = useRef<HTMLDivElement>(null);
 
-  // Drag
+  // Drag — isDragging is state (not ref) so isDragSelected can read it
+  // safely during render. Phase G-part-2 (2026-04-11): pre-existing
+  // react-hooks/refs lint error fix.
   const [dragStart, setDragStart] = useState<{ day: number; hour: number } | null>(null);
   const [dragEnd, setDragEnd] = useState<{ day: number; hour: number } | null>(null);
-  const isDragging = useRef(false);
+  const [isDragging, setIsDragging] = useState(false);
 
   // Week dates
   const weekDates = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
   const isThisWeek = toISODate(getMonday(new Date())) === toISODate(weekStart);
 
   useEffect(() => {
+    // One-time hydration of client-only routines from localStorage —
+    // setState here is intentional. Same precedent as
+    // weekly-calendar.tsx#categories. Suppress the rule.
     const saved = localStorage.getItem("oikbas-routines");
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (saved) { try { setRoutines(JSON.parse(saved)); } catch { /* */ } }
   }, []);
 
@@ -135,6 +141,10 @@ export function WeeklyScheduler() {
     }
   }, []);
 
+  // setState happens asynchronously inside load (after the await), not
+  // synchronously in this effect body. Same precedent as
+  // weekly-calendar.tsx#fetchData. Suppress the rule.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { load(); }, [load]);
 
   // Filter schedules for current week
@@ -155,20 +165,20 @@ export function WeeklyScheduler() {
 
   function handleMouseDown(dayIdx: number, hour: number, e: React.MouseEvent) {
     e.preventDefault();
-    isDragging.current = true;
+    setIsDragging(true);
     setDragStart({ day: dayIdx, hour });
     setDragEnd({ day: dayIdx, hour });
   }
 
   function handleMouseEnter(dayIdx: number, hour: number) {
-    if (isDragging.current && dragStart && dayIdx === dragStart.day) {
+    if (isDragging && dragStart && dayIdx === dragStart.day) {
       setDragEnd({ day: dayIdx, hour });
     }
   }
 
   function handleMouseUp(e: React.MouseEvent) {
-    if (!isDragging.current || !dragStart || !dragEnd) return;
-    isDragging.current = false;
+    if (!isDragging || !dragStart || !dragEnd) return;
+    setIsDragging(false);
     if (dragStart.day === dragEnd.day) {
       const startH = Math.min(dragStart.hour, dragEnd.hour);
       const endH = Math.max(dragStart.hour, dragEnd.hour) + 1;
@@ -186,13 +196,13 @@ export function WeeklyScheduler() {
   }
 
   useEffect(() => {
-    function up() { isDragging.current = false; setDragStart(null); setDragEnd(null); }
+    function up() { setIsDragging(false); setDragStart(null); setDragEnd(null); }
     window.addEventListener("mouseup", up);
     return () => window.removeEventListener("mouseup", up);
   }, []);
 
   function isDragSelected(dayIdx: number, hour: number) {
-    if (!isDragging.current || !dragStart || !dragEnd || dayIdx !== dragStart.day) return false;
+    if (!isDragging || !dragStart || !dragEnd || dayIdx !== dragStart.day) return false;
     return hour >= Math.min(dragStart.hour, dragEnd.hour) && hour <= Math.max(dragStart.hour, dragEnd.hour);
   }
 

@@ -59,7 +59,6 @@ export function WeeklyCalendar() {
   const [baseDate, setBaseDate] = useState(() => todayKstDate());
   const [view, setView] = useState<"week" | "3day">("3day");
   const [categories, setCategories] = useState<Record<string, CatConfig>>(DEFAULT_CATEGORIES);
-  const [showSettings, setShowSettings] = useState(false);
 
   // Drag
   const [dragStart, setDragStart] = useState<{ date: string; hour: number } | null>(null);
@@ -78,7 +77,6 @@ export function WeeklyCalendar() {
   // Title edit
   const [editingTitle, setEditingTitle] = useState<{ date: string; value: string } | null>(null);
 
-  const [submitting, setSubmitting] = useState(false);
   const [nowMinute, setNowMinute] = useState(() => nowKstMinutes());
   const scrollRef = useRef<HTMLDivElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
@@ -125,7 +123,7 @@ export function WeeklyCalendar() {
   function goToday() { setBaseDate(todayStr); }
 
   // ── Drag ──
-  function handleMouseDown(date: string, hour: number, e: React.MouseEvent) {
+  function handleMouseDown(date: string, hour: number) {
     setDragStart({ date, hour }); setDragEnd({ date, hour }); setIsDragging(true);
     setPopup(null); setContextBlock(null);
   }
@@ -403,7 +401,7 @@ export function WeeklyCalendar() {
                       <div key={`${day.date}-${hour}`}
                         className={`relative border-l border-t border-border/20 transition-colors ${isToday ? "bg-primary/[0.04]" : ""} ${selected ? "bg-primary/20 border-primary/30" : ""} ${!hasBlock ? "cursor-crosshair hover:bg-muted/10" : ""} ${hour === 12 ? "border-t-border/60" : ""}`}
                         style={{ height: `${CELL_H}px` }}
-                        onMouseDown={(e) => { if (!hasBlock) { e.preventDefault(); handleMouseDown(day.date, hour, e); }}}
+                        onMouseDown={(e) => { if (!hasBlock) { e.preventDefault(); handleMouseDown(day.date, hour); }}}
                         onMouseEnter={() => { if (!hasBlock) handleMouseEnter(day.date, hour); }}>
 
                         {blocksAtHour.map((block, colIdx) => {
@@ -490,7 +488,7 @@ export function WeeklyCalendar() {
               <Input className="h-7 text-xs" placeholder="메모" value={popupForm.memo}
                 onChange={(e) => setPopupForm({ ...popupForm, memo: e.target.value })}
                 onKeyDown={(e) => e.key === "Enter" && addBlock()} autoFocus />
-              <Button size="sm" className="w-full h-7 text-xs" disabled={submitting} onClick={addBlock}>{submitting ? "..." : "추가"}</Button>
+              <Button size="sm" className="w-full h-7 text-xs" onClick={addBlock}>추가</Button>
             </div>
           )}
 
@@ -541,7 +539,7 @@ export function WeeklyCalendar() {
                 <Input className="h-8" placeholder="메모" value={editForm.memo} onChange={(e) => setEditForm({ ...editForm, memo: e.target.value })}
                   onKeyDown={(e) => e.key === "Enter" && updateBlock()} />
                 <div className="flex gap-2">
-                  <Button size="sm" className="flex-1 h-8" disabled={submitting} onClick={updateBlock}>{submitting ? "..." : "저장"}</Button>
+                  <Button size="sm" className="flex-1 h-8" onClick={updateBlock}>저장</Button>
                   <Button size="sm" variant="ghost" className="h-8" onClick={() => setEditing(null)}>취소</Button>
                 </div>
               </div>
