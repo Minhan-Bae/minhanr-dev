@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { AGENTS, AXIS_LABELS, type Axis } from "@/lib/agents";
 import { supabase } from "@/lib/supabase";
+import { apiFetch } from "@/lib/api-fetch";
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
@@ -826,16 +827,20 @@ function CreateTaskForm({ onCreated }: { onCreated: () => void }) {
     e.preventDefault();
     if (!title.trim()) return;
 
-    await fetch("/api/tasks", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        title: title.trim(),
-        axis,
-        priority,
-        assigned_to: assignedTo || null,
-      }),
-    });
+    try {
+      await apiFetch("/api/tasks", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: title.trim(),
+          axis,
+          priority,
+          assigned_to: assignedTo || null,
+        }),
+      });
+    } catch {
+      // 401 redirects; other failures are surfaced via the next reload
+    }
 
     setTitle("");
     onCreated();
@@ -901,40 +906,52 @@ export default function AdminDashboard() {
   const [loggingOut, setLoggingOut] = useState(false);
   const [activeTab, setActiveTab] = useState<"dashboard" | "eisenhower" | "schedule" | "quicknote">("dashboard");
 
+  // Phase F-2-RLS: agent_heartbeats now has RLS enabled with no policies,
+  // so the browser anon client can no longer read it directly. Route the
+  // poll through /api/heartbeat (server-side service-role admin client).
+  // redirectOn401: false so a background poll near session-expiry doesn't
+  // yank the user off the page mid-task.
   const loadAgents = useCallback(async () => {
-    const { data } = await supabase
-      .from("agent_heartbeats")
-      .select("*")
-      .order("agent_layer")
-      .order("agent_name");
-    if (data) setAgents(data);
+    try {
+      const d = await apiFetch<{ agents?: AgentHeartbeat[] }>("/api/heartbeat", { redirectOn401: false });
+      if (d?.agents) setAgents(d.agents);
+    } catch {
+      // background poll — silent on failure
+    }
   }, []);
 
   const loadTasks = useCallback(async () => {
-    const res = await fetch("/api/tasks");
-    const d = await res.json();
-    if (d.tasks) setTasks(d.tasks);
+    try {
+      const d = await apiFetch<{ tasks?: Task[] }>("/api/tasks");
+      if (d?.tasks) setTasks(d.tasks);
+    } catch {
+      // 401 redirects via apiFetch
+    }
   }, []);
 
   const loadCommits = useCallback(async () => {
-    const res = await fetch("/api/activity");
-    const d = await res.json();
-    setCommits(d.commits || []);
+    try {
+      const d = await apiFetch<{ commits?: Commit[] }>("/api/activity", { redirectOn401: false });
+      setCommits(d?.commits ?? []);
+    } catch {
+      // /api/activity is intentionally public; only network errors land here
+    }
   }, []);
 
   const loadVault = useCallback(async () => {
     try {
-      const res = await fetch("/api/vault");
-      if (res.ok) {
-        const d = await res.json();
-        setVault(d);
-      }
+      const d = await apiFetch<VaultData>("/api/vault", { redirectOn401: false });
+      if (d) setVault(d);
     } catch {
       // vault fetch is optional
     }
   }, []);
 
   useEffect(() => {
+    // setState happens asynchronously inside each loader (after the
+    // await), not synchronously in this effect body — same precedent
+    // as weekly-calendar.tsx#fetchData. Suppress the rule.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadAgents();
     loadTasks();
     loadCommits();
@@ -946,16 +963,24 @@ export default function AdminDashboard() {
   }, [loadAgents, loadTasks, loadCommits, loadVault]);
 
   async function moveTask(id: string, newStatus: string) {
-    await fetch("/api/tasks", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, status: newStatus }),
-    });
+    try {
+      await apiFetch("/api/tasks", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, status: newStatus }),
+      });
+    } catch {
+      // 401 redirects; other failures fall through to loadTasks() refresh
+    }
     loadTasks();
   }
 
   async function deleteTask(id: string) {
-    await fetch(`/api/tasks?id=${id}`, { method: "DELETE" });
+    try {
+      await apiFetch(`/api/tasks?id=${id}`, { method: "DELETE" });
+    } catch {
+      // 401 redirects; other failures fall through to loadTasks() refresh
+    }
     loadTasks();
   }
 
@@ -1089,20 +1114,28 @@ export default function AdminDashboard() {
         <EisenhowerMatrix
           tasks={tasks}
           onMove={async (id, priority) => {
-            await fetch("/api/vault-sync/task", {
-              method: "PATCH",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ id, priority }),
-            });
+            try {
+              await apiFetch("/api/vault-sync/task", {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ id, priority }),
+              });
+            } catch {
+              // 401 redirects; other failures fall through to loadTasks() refresh
+            }
             loadTasks();
           }}
           onDelete={deleteTask}
           onCreate={async (title, priority) => {
-            await fetch("/api/vault-sync/task", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ title, axis: "convergence", priority }),
-            });
+            try {
+              await apiFetch("/api/vault-sync/task", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ title, axis: "convergence", priority }),
+              });
+            } catch {
+              // 401 redirects; other failures fall through to loadTasks() refresh
+            }
             loadTasks();
           }}
         />

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { nowInKST, todayKstDate, nowKstMinutes } from "@/lib/time";
+import { apiFetch } from "@/lib/api-fetch";
 
 interface TimeBlock {
   date: string;
@@ -95,8 +96,8 @@ export function WeeklyCalendar() {
   const fetchData = useCallback(async (showLoading = false) => {
     if (showLoading) setLoading(true);
     try {
-      const res = await fetch(`/api/calendar?date=${baseDate}&_t=${Date.now()}`, { cache: "no-store" });
-      setData(await res.json());
+      const json = await apiFetch<CalendarData>(`/api/calendar?date=${baseDate}&_t=${Date.now()}`, { cache: "no-store" });
+      setData(json);
     } catch { if (showLoading) setData(null); }
     if (showLoading) setLoading(false);
   }, [baseDate]);
@@ -169,10 +170,12 @@ export function WeeklyCalendar() {
 
     // Background API
     try {
-      const res = await fetch("/api/calendar", { method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newBlock) });
-      const result = await res.json();
-      if (!result.ok) fetchData(); // rollback on failure
+      const result = await apiFetch<{ ok?: boolean }>("/api/calendar", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newBlock),
+      });
+      if (!result?.ok) fetchData(); // rollback on failure
     } catch { fetchData(); }
   }
 
@@ -186,9 +189,12 @@ export function WeeklyCalendar() {
     setContextBlock(null);
 
     try {
-      const res = await fetch("/api/calendar", { method: "DELETE", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ date: block.date, startHour: block.startHour, endHour: block.endHour }) });
-      if (!(await res.json()).ok) fetchData();
+      const result = await apiFetch<{ ok?: boolean }>("/api/calendar", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ date: block.date, startHour: block.startHour, endHour: block.endHour }),
+      });
+      if (!result?.ok) fetchData();
     } catch { fetchData(); }
   }
 
@@ -209,12 +215,21 @@ export function WeeklyCalendar() {
     setEditing(null);
 
     try {
-      const res = await fetch("/api/calendar", { method: "PATCH", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ date: editing.date, action: "update_block",
-          oldStartHour: editing.startHour, oldEndHour: editing.endHour,
-          startHour: updatedBlock.startHour, endHour: updatedBlock.endHour,
-          category: updatedBlock.category, memo: updatedBlock.memo }) });
-      if (!(await res.json()).ok) fetchData();
+      const result = await apiFetch<{ ok?: boolean }>("/api/calendar", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          date: editing.date,
+          action: "update_block",
+          oldStartHour: editing.startHour,
+          oldEndHour: editing.endHour,
+          startHour: updatedBlock.startHour,
+          endHour: updatedBlock.endHour,
+          category: updatedBlock.category,
+          memo: updatedBlock.memo,
+        }),
+      });
+      if (!result?.ok) fetchData();
     } catch { fetchData(); }
   }
 
@@ -228,8 +243,11 @@ export function WeeklyCalendar() {
     setEditingTitle(null);
 
     try {
-      await fetch("/api/calendar", { method: "PATCH", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ date, action: "set_title", title }) });
+      await apiFetch("/api/calendar", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ date, action: "set_title", title }),
+      });
     } catch { fetchData(); }
   }
 

@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { apiFetch } from "@/lib/api-fetch";
 
 /* ── Types ── */
 
@@ -126,9 +127,12 @@ export function WeeklyScheduler() {
   }
 
   const load = useCallback(async () => {
-    const res = await fetch("/api/schedules");
-    const d = await res.json();
-    if (d.schedules) setSchedules(d.schedules);
+    try {
+      const d = await apiFetch<{ schedules?: Schedule[] }>("/api/schedules");
+      if (d?.schedules) setSchedules(d.schedules);
+    } catch {
+      // 401 redirects, other errors leave schedules empty
+    }
   }, []);
 
   useEffect(() => { load(); }, [load]);
@@ -203,17 +207,33 @@ export function WeeklyScheduler() {
     e.preventDefault();
     if (!form.title.trim()) return;
     const payload = { ...form, specific_date: form.is_routine ? null : form.specific_date };
-    if (editTarget) {
-      await fetch("/api/schedules", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: editTarget.id, ...payload }) });
-    } else {
-      await fetch("/api/schedules", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+    try {
+      if (editTarget) {
+        await apiFetch("/api/schedules", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: editTarget.id, ...payload }),
+        });
+      } else {
+        await apiFetch("/api/schedules", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+      }
+    } catch {
+      // 401 redirects; other failures fall through to load() refresh
     }
     closeForm();
     load();
   }
 
   async function handleDelete(id: string) {
-    await fetch(`/api/schedules?id=${id}`, { method: "DELETE" });
+    try {
+      await apiFetch(`/api/schedules?id=${id}`, { method: "DELETE" });
+    } catch {
+      // 401 redirects; other failures fall through to load() refresh
+    }
     closeForm();
     load();
   }

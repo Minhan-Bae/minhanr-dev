@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { AGENTS, AXIS_LABELS, AXIS_COLORS, type Axis } from "@/lib/agents";
 import { DASHBOARD_POLL_MS, TIMELINE_DISPLAY } from "@/lib/constants";
+import { apiFetch } from "@/lib/api-fetch";
 import {
   Card,
   CardContent,
@@ -387,21 +388,28 @@ export default function Dashboard() {
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
 
   const fetchAll = useCallback(async () => {
+    // Background poll: never trigger a hard redirect on 401 (the user
+    // might be staring at the page when their session expires — let
+    // them keep what's on screen and surface the error elsewhere).
     const results = await Promise.allSettled([
-      fetch("/api/heartbeat").then((r) => r.json()),
-      fetch("/api/vault").then((r) => r.json()),
-      fetch("/api/stats").then((r) => r.json()),
-      fetch("/api/activity").then((r) => r.json()),
+      apiFetch<{ agents?: AgentHeartbeat[] }>("/api/heartbeat", { redirectOn401: false }),
+      apiFetch<VaultStats>("/api/vault", { redirectOn401: false }),
+      apiFetch<AxisMetrics>("/api/stats", { redirectOn401: false }),
+      apiFetch<{ commits?: Commit[] }>("/api/activity", { redirectOn401: false }),
     ]);
 
-    if (results[0].status === "fulfilled") setAgents(results[0].value.agents || []);
+    if (results[0].status === "fulfilled") setAgents(results[0].value?.agents ?? []);
     if (results[1].status === "fulfilled") setVault(results[1].value);
     if (results[2].status === "fulfilled") setMetrics(results[2].value);
-    if (results[3].status === "fulfilled") setCommits(results[3].value.commits || []);
+    if (results[3].status === "fulfilled") setCommits(results[3].value?.commits ?? []);
     setLoading(false);
   }, []);
 
   useEffect(() => {
+    // setState happens asynchronously inside fetchAll (after the await),
+    // not synchronously in this effect body — same precedent as
+    // weekly-calendar.tsx#fetchData. Suppress the rule.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchAll();
     const interval = setInterval(fetchAll, DASHBOARD_POLL_MS);
     return () => clearInterval(interval);
