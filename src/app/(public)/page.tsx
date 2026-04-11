@@ -10,6 +10,7 @@ import {
   type VaultAggregates,
   type VaultNote,
 } from "@/lib/vault-index";
+import { isTier2Path } from "@/lib/vault-tiers";
 
 /**
  * Home — 8 blocks IA, designed against docs/brand-tenets.md.
@@ -40,14 +41,26 @@ async function loadHomeData(): Promise<HomeData> {
   try {
     const index = await getCachedVaultIndex();
     const agg = aggregate(index);
-    // Primary: notes explicitly marked status=growing
-    const recentGrowing = agg.recent_growing.slice(0, 4);
-    // Fallback pool: most recent non-published notes
-    const { notes: recentNotes } = listNotes(index, {
+    // CRITICAL: filter by Tier 2 whitelist path before exposing on the
+    // public home. The vault index contains EVERYTHING — including
+    // 030_Areas/034_Finance/ (insider scans) and 010_Daily/ (private logs)
+    // — and `recent_growing` only filters by status, not by path.
+    // The middleware at src/lib/supabase-middleware.ts uses the same
+    // `isTier2Path` check; this is the same single source of truth.
+    const recentGrowing = agg.recent_growing
+      .filter((n) => isTier2Path(n.path))
+      .slice(0, 4);
+    // Fallback pool: most recent non-published notes within Tier 2.
+    // Pull more than needed, then filter, then trim — `listNotes` itself
+    // doesn't expose a path-prefix-OR matcher beyond a single `folder`.
+    const { notes: rawRecent } = listNotes(index, {
       excludeStatus: [...KB_HUB_HIDDEN_STATUSES],
       sort: "created_desc",
-      limit: 4,
+      limit: 40,
     });
+    const recentNotes = rawRecent
+      .filter((n) => isTier2Path(n.path))
+      .slice(0, 4);
     return { agg, recentGrowing, recentNotes };
   } catch {
     // Vault index unreachable (no GITHUB_TOKEN, network error, etc.).
@@ -108,28 +121,36 @@ export default async function Home() {
 
       {/* ───────────────────────────────────────────────────────────── */}
       {/* 2. Manifesto — the only large-type moment on the page         */}
-      {/*    Ambient ocean atmosphere (.mesh-aurora) is concentrated    */}
-      {/*    here and nowhere else — single visual moment per Tenet 5.  */}
-      {/*    Tenet 4 OK: CSS-only, ≤0.25 effective opacity, no stock.   */}
+      {/*    Single concentrated visual moment per Tenet 5:             */}
+      {/*    .mesh-aurora ambient atmosphere + 3-layer parallax SVG     */}
+      {/*    waves. CSS/SVG only, theme-aware, no external assets.      */}
       {/* ───────────────────────────────────────────────────────────── */}
-      <section className="mesh-aurora py-16 sm:py-24 space-y-6">
-        <h1
-          className="font-bold tracking-tight leading-[1.05] text-gradient"
-          style={{ fontSize: "var(--font-size-h1)" }}
-        >
-          {BRAND_IDENTITY.person}
-        </h1>
-        <p
-          className="text-foreground/85 max-w-2xl leading-relaxed"
-          style={{ fontSize: "var(--font-size-body-lg)" }}
-        >
-          I garden{" "}
-          <span className="font-mono text-primary">{BRAND_IDENTITY.domain}</span>{" "}
-          — a public notebook kept live by seven agents, with the door open.
-        </p>
-        <p className="text-sm text-muted-foreground max-w-2xl leading-relaxed">
-          AI 연구자. 수집·수렴·확산을 매일 자동화하며, 중간 과정을 그대로 흘려보냅니다.
-        </p>
+      <section className="mesh-aurora relative overflow-hidden py-16 sm:py-28 -mx-4 sm:-mx-6 px-4 sm:px-6">
+        {/* Ocean waves — bottom-anchored, 3 parallax layers */}
+        <OceanWaves />
+
+        <div className="relative z-10 space-y-6">
+          <h1
+            className="font-bold tracking-tight leading-[1.05] text-gradient"
+            style={{ fontSize: "var(--font-size-h1)" }}
+          >
+            {BRAND_IDENTITY.person}
+          </h1>
+          <p
+            className="text-foreground/85 max-w-2xl leading-relaxed"
+            style={{ fontSize: "var(--font-size-body-lg)" }}
+          >
+            I garden{" "}
+            <span className="font-mono text-primary">
+              {BRAND_IDENTITY.domain}
+            </span>{" "}
+            — a public notebook kept live by seven agents, with the door open.
+          </p>
+          <p className="text-sm text-muted-foreground max-w-2xl leading-relaxed">
+            AI 연구자. 수집·수렴·확산을 매일 자동화하며, 중간 과정을 그대로
+            흘려보냅니다.
+          </p>
+        </div>
       </section>
 
       {/* ───────────────────────────────────────────────────────────── */}
@@ -311,6 +332,66 @@ export default async function Home() {
 // ─────────────────────────────────────────────────────────────────────────
 // Sub-components
 // ─────────────────────────────────────────────────────────────────────────
+
+/**
+ * OceanWaves — 3 parallax SVG wave layers anchored to the bottom of the
+ * parent. Each layer is a 2× wide SVG path that translates by -50% to loop.
+ *
+ * Why SVG and not a video file:
+ *   - Self-made, no asset payload (a few KB inline vs 500KB-3MB MP4/GIF)
+ *   - Theme-aware: fills come from CSS variables (--primary, --accent),
+ *     so dark/light/gray themes get coherent colors automatically
+ *   - Scales to any viewport without quality loss
+ *   - prefers-reduced-motion respected (animation: none in globals.css)
+ *
+ * If a literal video file is wanted later, swap this component for a
+ * <video autoplay loop muted playsinline poster="..."> in /public.
+ */
+function OceanWaves() {
+  // Path is 2400 wide (2× viewBox cycle). 4 cubic curves form 2 full waves;
+  // start and end Y both = 100, so translate -50% loops seamlessly.
+  const wavePath =
+    "M0,100 C200,40 400,40 600,100 C800,160 1000,160 1200,100 " +
+    "C1400,40 1600,40 1800,100 C2000,160 2200,160 2400,100 " +
+    "L2400,200 L0,200 Z";
+
+  return (
+    <div
+      aria-hidden
+      className="absolute inset-x-0 bottom-0 h-40 sm:h-56 pointer-events-none"
+    >
+      {/* Each layer is a wide SVG that translates horizontally to loop.
+          width 200% so the -50% translate cycles one full path width. */}
+      <svg
+        className="ocean-wave-back absolute inset-0 h-full"
+        width="200%"
+        viewBox="0 0 2400 200"
+        preserveAspectRatio="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path d={wavePath} fill="var(--primary)" opacity={0.08} />
+      </svg>
+      <svg
+        className="ocean-wave-mid absolute inset-x-0 bottom-0 h-[80%]"
+        width="200%"
+        viewBox="0 0 2400 200"
+        preserveAspectRatio="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path d={wavePath} fill="var(--primary)" opacity={0.14} />
+      </svg>
+      <svg
+        className="ocean-wave-front absolute inset-x-0 bottom-0 h-[60%]"
+        width="200%"
+        viewBox="0 0 2400 200"
+        preserveAspectRatio="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path d={wavePath} fill="var(--accent)" opacity={0.12} />
+      </svg>
+    </div>
+  );
+}
 
 function Signal({ label, value }: { label: string; value: string }) {
   return (

@@ -74,25 +74,41 @@ garden is a place. PKM-as-brand is a place.
 
 ## 4. Instruments over decorations
 
-Visual impact comes from rendered data — vault statistics, hairline arcs
-showing the 3-axis flux, status badges, tabular numerals — not from stock
-images, illustrations, or decorative gradients.
+Visual impact comes primarily from rendered data — vault statistics,
+hairline arcs showing the 3-axis flux, status badges, tabular numerals.
+External stock imagery is forbidden. Self-made visual anchors that
+embody the brand identity (ocean / depth / motion) are allowed *if*
+they are concentrated in one place per Tenet 5 and never compete with
+content for attention.
 
 **Why**: A site run by an engineer who operates seven autonomous agents
 should not pad its hero with an Unsplash photo of an ocean. The identity
-mismatch destroys credibility. The instruments themselves are beautiful
-enough.
+mismatch destroys credibility. *But* an entirely text-only home reads as
+indifferent to its own ocean / depth metaphor — and the OKLCH palette,
+the `mesh-aurora` class, and the `--depth-layer` utilities all already
+encode that identity. Refusing to render them at all is a different kind
+of inconsistency.
 
 **How to apply**:
-- No external stock images (Unsplash, Pexels, etc.) on any public surface.
-- No decorative SVG illustrations that do not encode data. Self-made
-  illustrations that DO encode data (e.g., a 3-axis arc whose lengths reflect
-  agent activity) are fine.
-- CSS gradients (`mesh-aurora`, `caustic-rays`) may be used as
-  ultra-low-opacity backgrounds (≤ 0.25), never as foreground decoration.
-- Iconography is monochrome lucide, used sparingly.
-- The brand's signature visual moment is a tabular number rendered in
-  Geist Mono.
+- **Forbidden**: External stock images / GIFs / videos (Unsplash, Pexels,
+  Giphy, Tenor, etc.) on any public surface.
+- **Forbidden**: Decorative SVG illustrations that do not encode anything
+  meaningful, scattered across multiple sections.
+- **Allowed**: Self-made CSS / SVG visual anchors (the `mesh-aurora`
+  atmosphere, the `OceanWaves` SVG component, the 3-axis hairline arc in
+  the OG image) — but **only one concentrated visual moment per page**
+  per Tenet 5. The home page's manifesto section is that moment.
+- **Allowed**: Self-made illustrations that DO encode data (e.g., a wave
+  amplitude that reflects daily vault activity). These are instruments in
+  disguise and should be encouraged.
+- **Allowed**: Self-recorded or self-generated `<video>` elements (not
+  stock) if the asset is owned by the user. Same one-concentrated-moment
+  rule applies.
+- **Effective opacity ≤ 0.25** for any decorative layer that lives behind
+  text content. Wave fills must use CSS variables, never hardcoded color.
+- Iconography stays monochrome lucide, used sparingly.
+- The brand's signature *moment* may be visual; the brand's signature
+  *substance* is still a tabular number in Geist Mono.
 
 ---
 

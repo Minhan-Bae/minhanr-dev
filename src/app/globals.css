@@ -577,6 +577,31 @@
   pointer-events: none;
 }
 
+/* ── Animated SVG ocean waves — parallax 3 layers ──
+   Used by the manifesto section on the home page. The SVG path is twice
+   the visual width and translates by -50% to loop seamlessly. Three layers
+   with different speeds create a parallax depth effect.
+
+   Tenet 4 note (docs/brand-tenets.md): self-made, theme-aware, encodes the
+   "ocean / depth" identity that's already in the OKLCH palette. Not stock,
+   not external, no asset payload. The single concentrated visual moment
+   on the home, by Tenet 5 limited to one section. */
+@keyframes ocean-wave-shift {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(-50%, 0, 0); }
+}
+.ocean-wave-back  { animation: ocean-wave-shift 26s linear infinite; }
+.ocean-wave-mid   { animation: ocean-wave-shift 18s linear infinite; }
+.ocean-wave-front { animation: ocean-wave-shift 12s linear infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ocean-wave-back,
+  .ocean-wave-mid,
+  .ocean-wave-front {
+    animation: none;
+  }
+}
+
 /* ── Depth layer (vertical ocean depth gradient) ── */
 .depth-layer {
   background: linear-gradient(180deg,
