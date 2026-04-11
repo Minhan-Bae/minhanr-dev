@@ -1,259 +1,397 @@
-import Image from "next/image";
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import { getAllPosts } from "@/lib/blog";
-import { Badge } from "@/components/ui/badge";
+import { BRAND_IDENTITY } from "@/lib/brand/tokens";
 import {
-  ArrowRight,
-  BookOpen,
-  Bot,
-  FolderKanban,
-  Newspaper,
-  Zap,
-  Layers,
-  Radio,
-  Sparkles,
-} from "lucide-react";
+  aggregate,
+  getCachedVaultIndex,
+  listNotes,
+  KB_HUB_HIDDEN_STATUSES,
+  type VaultAggregates,
+  type VaultNote,
+} from "@/lib/vault-index";
 
-const HERO_IMAGE = "https://images.unsplash.com/photo-1505142468610-359e7d316be0?w=1920&q=80&auto=format&fit=crop";
+/**
+ * Home — 8 blocks IA, designed against docs/brand-tenets.md.
+ *
+ *   1. Identity strip       — name + role + last harvest (Tenet 5)
+ *   2. Manifesto            — h1 + tagline (Tenet 5: only large type moment)
+ *   3. Live vault signals   — 4 tabular tiles (Tenet 1)
+ *   4. Now growing          — recent_growing notes (Tenet 2: garage door open)
+ *   5. Wander the garden    — 4 sub-garden entry points (Tenet 3)
+ *   6. Recently published   — 3 latest posts (linear feed, demoted)
+ *   7. The system           — one paragraph + /colophon link
+ *   8. Footer               — owned by (public)/layout.tsx
+ *
+ * The home is an INDEX, not a landing. No external stock images, no hero
+ * larger than the integrated h1 scale. Visual impact comes from data.
+ */
 
-export default function Home() {
+interface HomeData {
+  /** Aggregated vault index, or null if fetch failed (no token, network, etc.) */
+  agg: VaultAggregates | null;
+  /** Recent growing notes (from agg.recent_growing if available) */
+  recentGrowing: VaultNote[];
+  /** Recently modified non-published vault notes (fallback for "Now growing") */
+  recentNotes: VaultNote[];
+}
+
+async function loadHomeData(): Promise<HomeData> {
+  try {
+    const index = await getCachedVaultIndex();
+    const agg = aggregate(index);
+    // Primary: notes explicitly marked status=growing
+    const recentGrowing = agg.recent_growing.slice(0, 4);
+    // Fallback pool: most recent non-published notes
+    const { notes: recentNotes } = listNotes(index, {
+      excludeStatus: [...KB_HUB_HIDDEN_STATUSES],
+      sort: "created_desc",
+      limit: 4,
+    });
+    return { agg, recentGrowing, recentNotes };
+  } catch {
+    // Vault index unreachable (no GITHUB_TOKEN, network error, etc.).
+    // Render the page without vault signals — Tenet 1 says label the
+    // placeholder explicitly rather than committing a lie.
+    return { agg: null, recentGrowing: [], recentNotes: [] };
+  }
+}
+
+function formatRelative(iso: string | null | undefined): string {
+  if (!iso) return "—";
+  const then = new Date(iso).getTime();
+  if (Number.isNaN(then)) return "—";
+  const diffMs = Date.now() - then;
+  const hours = Math.floor(diffMs / 3_600_000);
+  if (hours < 1) return "just now";
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days}d ago`;
+  const weeks = Math.floor(days / 7);
+  if (weeks < 4) return `${weeks}w ago`;
+  const months = Math.floor(days / 30);
+  return `${months}mo ago`;
+}
+
+function vaultPathToHref(path: string): string {
+  // Vault paths are stored without leading slash; /notes/[...path] expects
+  // URL-encoded segments.
+  return "/notes/" + path.split("/").map(encodeURIComponent).join("/");
+}
+
+export default async function Home() {
   const allPosts = getAllPosts();
-  const featured = allPosts[0];
-  const recentPosts = allPosts.slice(1, 4);
+  const recentPosts = allPosts.slice(0, 3);
+  const { agg, recentGrowing, recentNotes } = await loadHomeData();
+
+  // "Now growing" prefers explicit status=growing notes, falls back to most
+  // recent non-published notes if the growing pool is empty (Tenet 2).
+  const growingDisplay = recentGrowing.length > 0 ? recentGrowing : recentNotes;
+
+  // Vault stat tiles (Tenet 1: live data, no hardcoded counts)
+  const vaultNoteCount = agg?.total_notes ?? null;
+  const lastHarvest = formatRelative(agg?.last_full_scan ?? null);
 
   return (
-    <div>
-      {/* ── Hero with image background ── */}
-      <section className="relative w-full overflow-hidden">
-        {/* Optimized hero image (next/image with priority + AVIF/WebP) */}
-        <Image
-          src={HERO_IMAGE}
-          alt=""
-          fill
-          priority
-          sizes="100vw"
-          className="object-cover -z-10"
-        />
-        {/* Dark gradient overlay for text legibility */}
-        <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-background/60 to-background" />
-        <div className="absolute inset-0 bg-gradient-to-r from-background/70 via-background/30 to-transparent" />
-
-        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 py-24 sm:py-36 lg:py-44">
-          <div className="space-y-6 max-w-2xl">
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 backdrop-blur-md px-4 py-1.5 text-sm text-white">
-              <Sparkles className="h-4 w-4" />
-              AI-powered knowledge system
-            </div>
-            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.05] text-white drop-shadow-lg">
-              Minhan Bae
-            </h1>
-            <p className="text-lg sm:text-xl text-white/90 leading-relaxed drop-shadow">
-              AI Researcher & Engineer. 에이전트 7대가 24/7 수집 · 수렴 · 발행하는
-              개인 지식 시스템을 설계하고 운용합니다.
-            </p>
-            <div className="flex flex-wrap gap-3 pt-2">
-              <Link
-                href="/blog"
-                className="group inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40 hover:-translate-y-0.5 transition-all duration-200"
-              >
-                블로그 읽기
-                <ArrowRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
-              </Link>
-              <Link
-                href="#oikbas"
-                className="inline-flex items-center gap-2 rounded-xl border border-white/30 bg-white/10 backdrop-blur-md px-6 py-3 text-sm font-semibold text-white hover:bg-white/20 transition-all duration-200"
-              >
-                시스템 둘러보기
-              </Link>
-            </div>
-          </div>
+    <div className="mx-auto w-full max-w-5xl px-4 sm:px-6">
+      {/* ───────────────────────────────────────────────────────────── */}
+      {/* 1. Identity strip — hairline, no hero (Tenet 5)               */}
+      {/* ───────────────────────────────────────────────────────────── */}
+      <section className="flex items-center justify-between border-b border-[var(--hairline)] py-6 text-xs text-muted-foreground">
+        <div className="font-mono tracking-wide">
+          {BRAND_IDENTITY.person} · {BRAND_IDENTITY.role}
+        </div>
+        <div className="font-mono tabular-nums">
+          last harvest <span className="text-foreground">{lastHarvest}</span>
         </div>
       </section>
 
-      {/* ── Content sections ── */}
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-16 sm:py-20 space-y-16">
-        {/* Bento Grid */}
-        <section className="grid grid-cols-1 md:grid-cols-6 gap-4">
-          {/* Featured Post — tall card */}
-          {featured && (
-            <Link
-              href={`/blog/${featured.slug}`}
-              className="md:col-span-2 md:row-span-2 rounded-2xl border border-border bg-card p-6 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/10 card-lift transition-all duration-300 group flex flex-col justify-between"
-            >
-              <div className="space-y-3">
-                <Badge variant="secondary" className="text-xs bg-primary/15 text-primary border-primary/20">
-                  {featured.categories[0] || "Featured"}
-                </Badge>
-                <h3 className="text-xl sm:text-2xl font-bold group-hover:text-primary transition-colors leading-tight">
-                  {featured.title}
-                </h3>
-                {featured.summary && (
-                  <p className="text-sm text-muted-foreground line-clamp-5 leading-relaxed">
-                    {featured.summary}
-                  </p>
-                )}
-              </div>
-              <div className="flex items-center justify-between mt-4 pt-4 border-t border-border/50">
-                <time className="text-xs text-muted-foreground tabular-nums">
-                  {featured.date}
-                </time>
-                <span className="text-xs text-primary group-hover:translate-x-1 transition-transform flex items-center gap-1 font-medium">
-                  Read <ArrowRight className="h-3 w-3" />
-                </span>
-              </div>
-            </Link>
-          )}
+      {/* ───────────────────────────────────────────────────────────── */}
+      {/* 2. Manifesto — the only large-type moment on the page         */}
+      {/*    Ambient ocean atmosphere (.mesh-aurora) is concentrated    */}
+      {/*    here and nowhere else — single visual moment per Tenet 5.  */}
+      {/*    Tenet 4 OK: CSS-only, ≤0.25 effective opacity, no stock.   */}
+      {/* ───────────────────────────────────────────────────────────── */}
+      <section className="mesh-aurora py-16 sm:py-24 space-y-6">
+        <h1
+          className="font-bold tracking-tight leading-[1.05] text-gradient"
+          style={{ fontSize: "var(--font-size-h1)" }}
+        >
+          {BRAND_IDENTITY.person}
+        </h1>
+        <p
+          className="text-foreground/85 max-w-2xl leading-relaxed"
+          style={{ fontSize: "var(--font-size-body-lg)" }}
+        >
+          I garden{" "}
+          <span className="font-mono text-primary">{BRAND_IDENTITY.domain}</span>{" "}
+          — a public notebook kept live by seven agents, with the door open.
+        </p>
+        <p className="text-sm text-muted-foreground max-w-2xl leading-relaxed">
+          AI 연구자. 수집·수렴·확산을 매일 자동화하며, 중간 과정을 그대로 흘려보냅니다.
+        </p>
+      </section>
 
-          {/* Stats 2×2 Grid */}
-          <div className="md:col-span-4 rounded-2xl border border-border bg-card p-6">
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4">
-              System Overview
-            </p>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              {[
-                { label: "Vault Notes", value: "980+", icon: Layers, color: "text-chart-1" },
-                { label: "Blog Posts", value: `${allPosts.length}`, icon: Newspaper, color: "text-chart-2" },
-                { label: "Agents", value: "7", icon: Bot, color: "text-chart-3" },
-                { label: "Axes", value: "3", icon: Zap, color: "text-chart-4" },
-              ].map((stat) => (
-                <div
-                  key={stat.label}
-                  className="text-center space-y-1.5 p-3 rounded-xl hover:bg-[var(--surface-1)] transition-colors"
-                >
-                  <stat.icon className={`h-5 w-5 mx-auto ${stat.color}`} />
-                  <p className="text-3xl sm:text-4xl font-bold tabular-nums text-foreground">
-                    {stat.value}
-                  </p>
-                  <p className="text-xs text-muted-foreground">{stat.label}</p>
-                </div>
-              ))}
-            </div>
-          </div>
+      {/* ───────────────────────────────────────────────────────────── */}
+      {/* 3. Live vault signals — 4 tabular tiles (Tenet 1)             */}
+      {/* ───────────────────────────────────────────────────────────── */}
+      <section className="border-y border-[var(--hairline)] py-8 sm:py-10">
+        <p className="text-xs font-mono uppercase tracking-widest text-muted-foreground mb-6">
+          Vault signals
+        </p>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
+          <Signal
+            label="Notes"
+            value={vaultNoteCount !== null ? String(vaultNoteCount) : "—"}
+          />
+          <Signal label="Posts" value={String(allPosts.length)} />
+          <Signal label="Agents" value="7" />
+          <Signal label="Last harvest" value={lastHarvest} />
+        </div>
+      </section>
 
-          {/* Projects Card */}
-          <Link
-            href="/projects"
-            className="md:col-span-2 rounded-2xl border border-border bg-card p-5 hover:border-chart-3/40 hover:shadow-lg hover:shadow-chart-3/10 card-lift transition-all duration-300 group"
+      {/* ───────────────────────────────────────────────────────────── */}
+      {/* 4. Now growing — the heart of PKM-as-brand (Tenet 2)          */}
+      {/* ───────────────────────────────────────────────────────────── */}
+      <section className="py-12 sm:py-16">
+        <div className="flex items-baseline justify-between mb-6">
+          <h2
+            className="font-semibold tracking-tight"
+            style={{ fontSize: "var(--font-size-h3)" }}
           >
-            <div className="flex items-center gap-2.5 mb-2">
-              <div className="p-2 rounded-lg bg-chart-3/15">
-                <FolderKanban className="h-5 w-5 text-chart-3" />
-              </div>
-              <h3 className="text-base font-semibold group-hover:text-chart-3 transition-colors">
-                Projects
-              </h3>
-            </div>
-            <p className="text-sm text-muted-foreground">
-              R&D 프로젝트 및 TrinityX 시스템 기록
-            </p>
-          </Link>
+            Now growing
+          </h2>
+          <span className="text-xs text-muted-foreground font-mono">
+            garage door open
+          </span>
+        </div>
 
-          {/* Papers Card */}
-          <Link
-            href="/papers"
-            className="md:col-span-2 rounded-2xl border border-border bg-card p-5 hover:border-chart-1/40 hover:shadow-lg hover:shadow-chart-1/10 card-lift transition-all duration-300 group"
-          >
-            <div className="flex items-center gap-2.5 mb-2">
-              <div className="p-2 rounded-lg bg-chart-1/15">
-                <BookOpen className="h-5 w-5 text-chart-1" />
-              </div>
-              <h3 className="text-base font-semibold group-hover:text-chart-1 transition-colors">
-                Papers & Research
-              </h3>
-            </div>
-            <p className="text-sm text-muted-foreground">
-              AI/VFX 기술 논문 리뷰 및 연구 노트
-            </p>
-          </Link>
-
-          {/* Recent Posts — full row */}
-          <div className="md:col-span-6 space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Newspaper className="h-4 w-4 text-primary" />
-                <h2 className="text-lg font-semibold">Recent Posts</h2>
-              </div>
-              <Link
-                href="/blog"
-                className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-1 group"
-              >
-                전체 보기{" "}
-                <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform" />
-              </Link>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {recentPosts.map((post) => (
+        {growingDisplay.length > 0 ? (
+          <ul className="space-y-3">
+            {growingDisplay.map((note) => (
+              <li key={note.path}>
                 <Link
-                  key={post.slug}
-                  href={`/blog/${post.slug}`}
-                  className="rounded-2xl border border-border bg-card p-5 hover:border-primary/40 hover:shadow-lg hover:shadow-primary/10 card-lift transition-all duration-300 group"
+                  href={vaultPathToHref(note.path)}
+                  className="group flex items-start gap-4 py-3 border-b border-[var(--hairline)] transition-colors hover:border-primary/30"
                 >
-                  <div className="flex items-center gap-2 mb-2">
-                    <time className="text-xs text-muted-foreground tabular-nums">
-                      {post.date}
-                    </time>
-                    {post.categories.slice(0, 1).map((cat) => (
-                      <Badge key={cat} variant="secondary" className="text-xs px-1.5 py-0">
-                        {cat}
-                      </Badge>
-                    ))}
+                  <StateBadge status={note.status ?? null} />
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-medium text-foreground group-hover:text-primary transition-colors truncate">
+                      {note.title}
+                    </div>
+                    {typeof note.summary === "string" && note.summary && (
+                      <div className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                        {note.summary}
+                      </div>
+                    )}
                   </div>
-                  <h3 className="text-sm font-semibold group-hover:text-primary transition-colors leading-snug line-clamp-2">
-                    {post.title}
-                  </h3>
-                  {post.summary && (
-                    <p className="text-xs text-muted-foreground mt-1.5 line-clamp-2 leading-relaxed">
-                      {post.summary}
-                    </p>
-                  )}
+                  <time className="text-xs font-mono text-muted-foreground/70 whitespace-nowrap pt-0.5">
+                    {formatRelative(note.created)}
+                  </time>
                 </Link>
-              ))}
-            </div>
-          </div>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-sm text-muted-foreground">
+            {agg === null
+              ? "vault index unreachable — placeholder until token / data flow restored."
+              : "nothing growing right now."}
+          </p>
+        )}
+      </section>
 
-          {/* OIKBAS — full row */}
-          <section
-            id="oikbas"
-            className="md:col-span-6 rounded-2xl border border-primary/20 bg-card p-6 sm:p-10 space-y-6 scroll-mt-20"
+      {/* ───────────────────────────────────────────────────────────── */}
+      {/* 5. Wander the garden — sub-garden entry points (Tenet 3)      */}
+      {/* ───────────────────────────────────────────────────────────── */}
+      <section className="border-t border-[var(--hairline)] py-12 sm:py-16">
+        <div className="flex items-baseline justify-between mb-6">
+          <h2
+            className="font-semibold tracking-tight"
+            style={{ fontSize: "var(--font-size-h3)" }}
           >
-            <div className="flex items-center gap-2">
-              <div className="h-1 w-8 rounded-full bg-gradient-to-r from-primary to-accent" />
-              <h2 className="text-xs font-bold text-primary uppercase tracking-widest">
-                About OIKBAS
-              </h2>
-            </div>
-            <p className="text-base sm:text-lg text-foreground/85 leading-relaxed max-w-3xl">
-              <span className="font-bold text-foreground">
-                Open Intelligence Knowledge-Base Agent System
-              </span>{" "}
-              — 7개의 자율 에이전트가 3축으로 지식을 운용하는 개인 지식 시스템입니다.
-            </p>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              {[
-                { axis: "Acquisition", label: "수집", desc: "웹/논문/뉴스에서 자동 수집", color: "text-chart-1", borderColor: "border-chart-1/30", bgColor: "bg-chart-1/10", icon: Radio },
-                { axis: "Convergence", label: "수렴", desc: "태그·링크·요약으로 정제", color: "text-chart-2", borderColor: "border-chart-2/30", bgColor: "bg-chart-2/10", icon: Layers },
-                { axis: "Amplification", label: "확산", desc: "블로그·리포트로 자동 발행", color: "text-chart-3", borderColor: "border-chart-3/30", bgColor: "bg-chart-3/10", icon: Zap },
-              ].map((a) => (
-                <div
-                  key={a.axis}
-                  className={`rounded-xl border ${a.borderColor} ${a.bgColor} p-4 space-y-2 hover:scale-[1.02] transition-all duration-300`}
-                >
-                  <div className="flex items-center gap-2">
-                    <a.icon className={`h-5 w-5 ${a.color}`} />
-                    <span className={`text-sm font-bold ${a.color}`}>{a.axis}</span>
+            Wander the garden
+          </h2>
+          <span className="text-xs text-muted-foreground font-mono">
+            no chronology, just rooms
+          </span>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-px bg-[var(--hairline)]">
+          <Entry
+            href="/blog"
+            label="Blog"
+            count={allPosts.length}
+            note="recently published"
+          />
+          <Entry
+            href="/papers"
+            label="Papers"
+            count={agg?.by_research_category ? Object.values(agg.by_research_category).reduce((a, b) => a + b, 0) : null}
+            note="research notes"
+          />
+          <Entry
+            href="/projects"
+            label="Projects"
+            count={null}
+            note="R&D logs"
+          />
+          <Entry
+            href="/colophon"
+            label="Colophon"
+            count={null}
+            note="how this is built"
+          />
+        </div>
+      </section>
+
+      {/* ───────────────────────────────────────────────────────────── */}
+      {/* 6. Recently published — linear feed, demoted to 2nd class     */}
+      {/* ───────────────────────────────────────────────────────────── */}
+      <section className="py-12 sm:py-16">
+        <div className="flex items-baseline justify-between mb-6">
+          <h2
+            className="font-semibold tracking-tight"
+            style={{ fontSize: "var(--font-size-h3)" }}
+          >
+            Recently published
+          </h2>
+          <Link
+            href="/blog"
+            className="text-xs text-muted-foreground hover:text-primary transition-colors flex items-center gap-1 group font-mono"
+          >
+            wander all posts
+            <ArrowRight className="h-3 w-3 group-hover:translate-x-0.5 transition-transform" />
+          </Link>
+        </div>
+        <ul className="space-y-3">
+          {recentPosts.map((post) => (
+            <li key={post.slug}>
+              <Link
+                href={`/blog/${post.slug}`}
+                className="group flex items-start gap-4 py-3 border-b border-[var(--hairline)] transition-colors hover:border-primary/30"
+              >
+                <time className="text-xs font-mono text-muted-foreground/70 tabular-nums pt-0.5 whitespace-nowrap">
+                  {post.date}
+                </time>
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">
+                    {post.title}
                   </div>
-                  <p className="text-xs text-muted-foreground leading-relaxed">
-                    <span className="font-semibold text-foreground/80">{a.label}</span> — {a.desc}
-                  </p>
+                  {post.summary && (
+                    <div className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                      {post.summary}
+                    </div>
+                  )}
                 </div>
-              ))}
-            </div>
-            <p className="text-xs text-muted-foreground/70">
-              Built with Next.js · Supabase · Claude · GitHub Actions
-            </p>
-          </section>
-        </section>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      {/* ───────────────────────────────────────────────────────────── */}
+      {/* 7. The system — one paragraph, links to /colophon             */}
+      {/* ───────────────────────────────────────────────────────────── */}
+      <section className="border-t border-[var(--hairline)] py-12 sm:py-16">
+        <p className="text-sm text-muted-foreground leading-relaxed max-w-2xl">
+          How this site is gardened — seven agents on three axes (acquisition,
+          convergence, amplification), publishing through GitHub Actions into a
+          Next.js public surface. The system is named OIKBAS internally; the
+          full story is in the{" "}
+          <Link href="/colophon" className="text-primary hover:underline">
+            colophon
+          </Link>
+          .
+        </p>
+      </section>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// Sub-components
+// ─────────────────────────────────────────────────────────────────────────
+
+function Signal({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <div
+        className="font-mono font-semibold text-foreground tabular-nums tracking-tight"
+        style={{ fontSize: "var(--font-size-h3)" }}
+      >
+        {value}
+      </div>
+      <div className="text-xs font-mono uppercase tracking-wider text-muted-foreground mt-1">
+        {label}
       </div>
     </div>
+  );
+}
+
+function Entry({
+  href,
+  label,
+  count,
+  note,
+}: {
+  href: string;
+  label: string;
+  count: number | null;
+  note: string;
+}) {
+  return (
+    <Link
+      href={href}
+      className="group bg-background hover:bg-[var(--surface-1)] p-6 transition-colors flex flex-col gap-2"
+    >
+      <div className="flex items-baseline justify-between">
+        <span className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">
+          {label}
+        </span>
+        {count !== null && (
+          <span className="text-xs font-mono tabular-nums text-muted-foreground">
+            {count}
+          </span>
+        )}
+      </div>
+      <span className="text-xs text-muted-foreground/70">{note}</span>
+    </Link>
+  );
+}
+
+function StateBadge({ status }: { status: string | null }) {
+  // Color resolver mirrors the OG route's stateColor() — keeps state visual
+  // consistency across home and OG. State tokens defined in globals.css.
+  let colorVar = "var(--muted-foreground)";
+  let label = status ?? "note";
+  switch (status) {
+    case "growing":
+    case "draft":
+    case "seedling":
+      colorVar = "var(--state-growing)";
+      label = status ?? "growing";
+      break;
+    case "mature":
+    case "evergreen":
+      colorVar = "var(--state-mature)";
+      label = status ?? "mature";
+      break;
+    case "published":
+    case "archived":
+      colorVar = "var(--state-published)";
+      label = status ?? "published";
+      break;
+  }
+  return (
+    <span
+      className="inline-flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-full border whitespace-nowrap mt-0.5"
+      style={{ borderColor: colorVar, color: colorVar }}
+    >
+      <span
+        className="inline-block w-1.5 h-1.5 rounded-full"
+        style={{ backgroundColor: colorVar }}
+      />
+      {label}
+    </span>
   );
 }
