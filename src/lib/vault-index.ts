@@ -110,7 +110,7 @@ export async function fetchVaultIndex(): Promise<VaultIndexFile> {
 export const getCachedVaultIndex = unstable_cache(
   fetchVaultIndex,
   ["vault-index"],
-  { revalidate: 30, tags: ["vault-index"] }
+  { revalidate: 300, tags: ["vault-index"] }
 );
 
 function topFolderOf(path: string): string {

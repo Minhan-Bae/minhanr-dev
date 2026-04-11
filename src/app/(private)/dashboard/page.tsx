@@ -58,32 +58,70 @@ async function DashboardContent() {
   }
   const agg = aggregate(index);
 
-  // Daily 노트 존재일 set
-  const dailyDays = new Set<string>();
-  for (const path of Object.keys(index.notes || {})) {
-    if (!path.startsWith("010_Daily/")) continue;
-    const m = /(\d{4}-\d{2}-\d{2})\.md$/.exec(path);
-    if (m) dailyDays.add(m[1]);
-  }
-
   const now = new Date();
   const grid = buildMonthGrid(now.getFullYear(), now.getMonth());
   const todayIso = ymd(now);
+  const weekAgoIso = ymd(new Date(now.getTime() - 7 * 86400000));
 
-  // 주간 KPI (최근 7일)
-  const weekAgo = new Date(now.getTime() - 7 * 86400000);
-  const weekAgoIso = ymd(weekAgo);
+  // ── Single-pass aggregation: 4개의 vault 순회를 1번으로 통합 ──
+  const dailyDays = new Set<string>();
   let notesThisWeek = 0;
   let publishedThisWeek = 0;
   let inboxThisWeek = 0;
+  const linkNotesRaw: Array<{ path: string; created: string; source_url: string; rec: typeof index.notes[string] }> = [];
+  const todayDeadlines: Array<{ path: string; title: string; deadline: string; status?: string }> = [];
+  let totalNotes = 0;
+
   for (const [path, rec] of Object.entries(index.notes || {})) {
+    totalNotes += 1;
     const created = typeof rec.created === "string" ? rec.created : "";
-    if (created >= weekAgoIso) notesThisWeek += 1;
-    if (rec.status === "published" && created >= weekAgoIso) publishedThisWeek += 1;
-    if (path.startsWith("000_Inbox/") && created >= weekAgoIso) inboxThisWeek += 1;
+
+    // Daily note dates
+    if (path.startsWith("010_Daily/")) {
+      const m = /(\d{4}-\d{2}-\d{2})\.md$/.exec(path);
+      if (m) dailyDays.add(m[1]);
+    }
+
+    // Weekly KPIs
+    if (created >= weekAgoIso) {
+      notesThisWeek += 1;
+      if (rec.status === "published") publishedThisWeek += 1;
+      if (path.startsWith("000_Inbox/")) inboxThisWeek += 1;
+    }
+
+    // Recent links (source_url 보유 노트)
+    if (typeof rec.source_url === "string" && rec.source_url.startsWith("http")) {
+      linkNotesRaw.push({ path, created, source_url: rec.source_url, rec });
+    }
+
+    // Today's deadlines
+    const dl = typeof rec.deadline === "string" ? rec.deadline : "";
+    if (/^\d{4}-\d{2}-\d{2}/.test(dl)) {
+      const d = new Date(dl);
+      if (
+        d.getFullYear() === now.getFullYear() &&
+        d.getMonth() === now.getMonth() &&
+        d.getDate() === now.getDate()
+      ) {
+        todayDeadlines.push({
+          path,
+          title: (path.split("/").pop() || path).replace(/\.md$/, ""),
+          deadline: dl,
+          status: typeof rec.status === "string" ? rec.status : undefined,
+        });
+      }
+    }
   }
 
-  // 진행 중 프로젝트 top 3 (published/archived 제외 — 작업 중인 것만)
+  // Sort + slice link notes
+  linkNotesRaw.sort((a, b) => (b.created || "").localeCompare(a.created || ""));
+  const recentLinks = linkNotesRaw.slice(0, 5).map((l) => ({
+    ...l.rec,
+    path: l.path,
+    title: (l.path.split("/").pop() || l.path).replace(/\.md$/, ""),
+  }));
+
+  // 진행 중 프로젝트 top 3 (listNotes는 별도 인덱스 함수, 1패스 안에서 처리 못함)
   const { notes: activeProjects } = listNotes(index, {
     folder: "020_Projects/",
     excludeStatus: [...KB_HUB_HIDDEN_STATUSES],
@@ -94,48 +132,12 @@ async function DashboardContent() {
   // 추천 (growing top 3)
   const recommended = agg.recent_growing.slice(0, 3);
 
-  // 최근 노트 5 (published/archived 제외 — 작업 중인 것만)
+  // 최근 노트 5 (published/archived 제외)
   const { notes: recentNotes } = listNotes(index, {
     excludeStatus: [...KB_HUB_HIDDEN_STATUSES],
     sort: "created_desc",
     limit: 5,
   });
-
-  // 최근 링크 5 (source_url 가진 노트)
-  const linkNotes: typeof recentNotes = [];
-  for (const [path, rec] of Object.entries(index.notes || {})) {
-    if (typeof rec.source_url !== "string" || !rec.source_url.startsWith("http")) continue;
-    linkNotes.push({
-      ...rec,
-      path,
-      title: (path.split("/").pop() || path).replace(/\.md$/, ""),
-    });
-  }
-  linkNotes.sort((a, b) => (b.created || "").localeCompare(a.created || ""));
-  const recentLinks = linkNotes.slice(0, 5);
-
-  // 오늘 마감
-  const today = now;
-  const todayDeadlines: Array<{ path: string; title: string; deadline: string; status?: string }> = [];
-  for (const [path, rec] of Object.entries(index.notes || {})) {
-    const dl = typeof rec.deadline === "string" ? rec.deadline : "";
-    if (!/^\d{4}-\d{2}-\d{2}/.test(dl)) continue;
-    const d = new Date(dl);
-    if (
-      d.getFullYear() === today.getFullYear() &&
-      d.getMonth() === today.getMonth() &&
-      d.getDate() === today.getDate()
-    ) {
-      todayDeadlines.push({
-        path,
-        title: (path.split("/").pop() || path).replace(/\.md$/, ""),
-        deadline: dl,
-        status: typeof rec.status === "string" ? rec.status : undefined,
-      });
-    }
-  }
-
-  const totalNotes = Object.keys(index.notes || {}).length;
 
   return (
     <div className="space-y-4">

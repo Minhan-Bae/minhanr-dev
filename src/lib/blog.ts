@@ -38,12 +38,19 @@ export interface BlogPostMeta {
   author?: string;
 }
 
-export function getAllPosts(): BlogPostMeta[] {
+// ── Module-scope cache ──
+// Lifetime: Vercel serverless instance reuse window (~minutes to hours).
+// Same-instance subsequent calls hit cache, avoiding 116 file reads each time.
+let _allPostsCache: BlogPostMeta[] | null = null;
+let _slugToFileName: Map<string, string> | null = null;
+
+function buildIndex(): { posts: BlogPostMeta[]; slugMap: Map<string, string> } {
   if (!fs.existsSync(postsDirectory)) {
-    return [];
+    return { posts: [], slugMap: new Map() };
   }
 
   const fileNames = fs.readdirSync(postsDirectory).filter((f) => f.endsWith(".md"));
+  const slugMap = new Map<string, string>();
 
   const posts = fileNames
     .map((fileName) => {
@@ -56,6 +63,7 @@ export function getAllPosts(): BlogPostMeta[] {
       }
 
       const slug = data.slug || fileName.replace(/\.md$/, "");
+      slugMap.set(slug, fileName);
 
       const meta: BlogPostMeta = {
         title: data.title || slug,
@@ -72,51 +80,60 @@ export function getAllPosts(): BlogPostMeta[] {
 
   posts.sort((a, b) => (a.date > b.date ? -1 : 1));
 
-  return posts;
+  return { posts, slugMap };
+}
+
+function ensureIndex(): void {
+  if (_allPostsCache && _slugToFileName) return;
+  const { posts, slugMap } = buildIndex();
+  _allPostsCache = posts;
+  _slugToFileName = slugMap;
+}
+
+export function getAllPosts(): BlogPostMeta[] {
+  ensureIndex();
+  return _allPostsCache ?? [];
+}
+
+export function getAllSlugs(): string[] {
+  ensureIndex();
+  return _slugToFileName ? Array.from(_slugToFileName.keys()) : [];
 }
 
 export async function getPostBySlug(slug: string): Promise<BlogPost | null> {
-  if (!fs.existsSync(postsDirectory)) {
-    return null;
-  }
+  ensureIndex();
+  const fileName = _slugToFileName?.get(slug);
+  if (!fileName) return null;
 
-  const fileNames = fs.readdirSync(postsDirectory).filter((f) => f.endsWith(".md"));
+  const filePath = path.join(postsDirectory, fileName);
+  if (!fs.existsSync(filePath)) return null;
 
-  for (const fileName of fileNames) {
-    const filePath = path.join(postsDirectory, fileName);
-    const fileContents = fs.readFileSync(filePath, "utf8");
-    const { data, content } = matter(fileContents);
+  const fileContents = fs.readFileSync(filePath, "utf8");
+  const { data, content } = matter(fileContents);
 
-    const postSlug = data.slug || fileName.replace(/\.md$/, "");
+  const processedContent = await unified()
+    .use(remarkParse)
+    .use(remarkGfm)
+    .use(remarkRehype, { allowDangerousHtml: true })
+    .use(rehypeRaw)
+    .use(rehypeSlug)
+    .use(rehypeHighlight, { detect: true })
+    .use(rehypeStringify)
+    .process(content);
+  const contentHtml = processedContent.toString();
 
-    if (postSlug === slug) {
-      const processedContent = await unified()
-        .use(remarkParse)
-        .use(remarkGfm)
-        .use(remarkRehype, { allowDangerousHtml: true })
-        .use(rehypeRaw)
-        .use(rehypeSlug)
-        .use(rehypeHighlight, { detect: true })
-        .use(rehypeStringify)
-        .process(content);
-      const contentHtml = processedContent.toString();
-
-      return {
-        title: data.title || slug,
-        date: data.date ? new Date(data.date).toISOString().split("T")[0] : "",
-        slug: postSlug,
-        tags: Array.isArray(data.tags) ? data.tags : [],
-        categories: Array.isArray(data.categories) ? data.categories : [],
-        summary: data.summary || "",
-        content: contentHtml,
-        cover: data.cover || undefined,
-        author: data.author || undefined,
-        draft: data.draft || false,
-      };
-    }
-  }
-
-  return null;
+  return {
+    title: data.title || slug,
+    date: data.date ? new Date(data.date).toISOString().split("T")[0] : "",
+    slug,
+    tags: Array.isArray(data.tags) ? data.tags : [],
+    categories: Array.isArray(data.categories) ? data.categories : [],
+    summary: data.summary || "",
+    content: contentHtml,
+    cover: data.cover || undefined,
+    author: data.author || undefined,
+    draft: data.draft || false,
+  };
 }
 
 export interface TocHeading {
@@ -137,19 +154,4 @@ export function extractHeadings(html: string): TocHeading[] {
     });
   }
   return headings;
-}
-
-export function getAllSlugs(): string[] {
-  if (!fs.existsSync(postsDirectory)) {
-    return [];
-  }
-
-  const fileNames = fs.readdirSync(postsDirectory).filter((f) => f.endsWith(".md"));
-
-  return fileNames.map((fileName) => {
-    const filePath = path.join(postsDirectory, fileName);
-    const fileContents = fs.readFileSync(filePath, "utf8");
-    const { data } = matter(fileContents);
-    return data.slug || fileName.replace(/\.md$/, "");
-  });
 }

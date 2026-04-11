@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { getAllPosts } from "@/lib/blog";
 import { Badge } from "@/components/ui/badge";
@@ -13,7 +14,7 @@ import {
   Sparkles,
 } from "lucide-react";
 
-const HERO_IMAGE = "https://images.unsplash.com/photo-1505142468610-359e7d316be0?w=2400&q=80&auto=format&fit=crop";
+const HERO_IMAGE = "https://images.unsplash.com/photo-1505142468610-359e7d316be0?w=1920&q=80&auto=format&fit=crop";
 
 export default function Home() {
   const allPosts = getAllPosts();
@@ -23,14 +24,16 @@ export default function Home() {
   return (
     <div>
       {/* ── Hero with image background ── */}
-      <section
-        className="relative w-full overflow-hidden"
-        style={{
-          backgroundImage: `url(${HERO_IMAGE})`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-        }}
-      >
+      <section className="relative w-full overflow-hidden">
+        {/* Optimized hero image (next/image with priority + AVIF/WebP) */}
+        <Image
+          src={HERO_IMAGE}
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover -z-10"
+        />
         {/* Dark gradient overlay for text legibility */}
         <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-background/60 to-background" />
         <div className="absolute inset-0 bg-gradient-to-r from-background/70 via-background/30 to-transparent" />

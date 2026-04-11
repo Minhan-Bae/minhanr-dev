@@ -56,6 +56,11 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="theme-color" content="#16132a" />
+        {/* Performance: pre-establish connections to external hosts */}
+        <link rel="preconnect" href="https://images.unsplash.com" crossOrigin="" />
+        <link rel="dns-prefetch" href="https://images.unsplash.com" />
+        <link rel="dns-prefetch" href="https://api.github.com" />
+        <link rel="dns-prefetch" href="https://raw.githubusercontent.com" />
         <script
           dangerouslySetInnerHTML={{
             __html: `(function(){try{var t=localStorage.getItem("oikbas-theme");if(t&&["dark","light","gray"].includes(t)){document.documentElement.classList.remove("dark","light","gray");document.documentElement.classList.add(t)}}catch(e){}})()`,
