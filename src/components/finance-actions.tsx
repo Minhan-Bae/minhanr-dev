@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { apiFetch, ApiFetchError } from "@/lib/api-fetch";
 
 export function WatchlistAdd() {
   const [symbol, setSymbol] = useState("");
@@ -13,24 +14,27 @@ export function WatchlistAdd() {
     if (!symbol.trim()) return;
     setStatus("loading");
     try {
-      const res = await fetch("/api/finance", {
+      const data = await apiFetch<{ ok?: boolean; error?: string }>("/api/finance", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "add", symbol: symbol.trim() }),
       });
-      const data = await res.json();
-      if (data.ok) {
+      if (data?.ok) {
         setStatus("done");
         setMessage(`${symbol.toUpperCase()} 추가됨`);
         setSymbol("");
         setTimeout(() => setStatus("idle"), 2000);
       } else {
         setStatus("error");
-        setMessage(data.error || "실패");
+        setMessage(data?.error || "실패");
       }
-    } catch {
+    } catch (e) {
       setStatus("error");
-      setMessage("네트워크 오류");
+      const msg =
+        e instanceof ApiFetchError && typeof (e.data as { error?: string } | null)?.error === "string"
+          ? (e.data as { error: string }).error
+          : "네트워크 오류";
+      setMessage(msg);
     }
   }
 

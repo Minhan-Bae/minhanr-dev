@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { apiFetch, ApiFetchError } from "@/lib/api-fetch";
 
 export function FloatingQuickNote() {
   const [open, setOpen] = useState(false);
@@ -13,22 +14,22 @@ export function FloatingQuickNote() {
     setSaving(true);
 
     try {
-      const res = await fetch("/api/vault-sync/note", {
+      await apiFetch("/api/vault-sync/note", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text: text.trim() }),
       });
-      const d = await res.json();
-
-      if (res.ok) {
-        setText("");
-        setOpen(false);
-        setToast("Saved to vault");
-      } else {
-        setToast(d.error || "Save failed");
-      }
-    } catch {
-      setToast("Network error");
+      setText("");
+      setOpen(false);
+      setToast("Saved to vault");
+    } catch (e) {
+      // 401 has already redirected to /login at this point.
+      const msg =
+        e instanceof ApiFetchError &&
+        typeof (e.data as { error?: string } | null)?.error === "string"
+          ? (e.data as { error: string }).error
+          : "Save failed";
+      setToast(msg);
     } finally {
       setSaving(false);
       setTimeout(() => setToast(null), 2500);

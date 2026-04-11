@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Zap } from "lucide-react";
+import { apiFetch } from "@/lib/api-fetch";
 
 interface UsageBucket {
   input: number;
@@ -36,8 +37,9 @@ export function TokenUsageIndicator() {
   const [data, setData] = useState<UsageData | null>(null);
 
   useEffect(() => {
-    fetch("/api/claude-usage")
-      .then((r) => r.json())
+    // Background poll — fail silently on 401 (don't redirect away from
+    // whatever surface the user is on for an indicator widget).
+    apiFetch<UsageData>("/api/claude-usage", { redirectOn401: false })
       .then((d) => setData(d))
       .catch(() => {});
   }, []);

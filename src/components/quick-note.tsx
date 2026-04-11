@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { apiFetch } from "@/lib/api-fetch";
 
 interface Note {
   id: string;
@@ -29,48 +30,71 @@ export function QuickNote() {
   const [editContent, setEditContent] = useState("");
 
   const load = useCallback(async () => {
-    const res = await fetch("/api/quicknotes");
-    const d = await res.json();
-    if (d.notes) setNotes(d.notes);
+    try {
+      const d = await apiFetch<{ notes?: Note[] }>("/api/quicknotes");
+      if (d?.notes) setNotes(d.notes);
+    } catch {
+      // 401 already redirected; other errors leave the list as-is.
+    }
   }, []);
 
+  // Load notes on mount. setState happens asynchronously inside `load`,
+  // not synchronously in this effect body, but the rule still warns —
+  // suppress because this is the intended on-mount fetch pattern.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { load(); }, [load]);
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
     if (!draft.trim()) return;
-    await fetch("/api/quicknotes", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ content: draft }),
-    });
-    setDraft("");
-    load();
+    try {
+      await apiFetch("/api/quicknotes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: draft }),
+      });
+      setDraft("");
+      load();
+    } catch {
+      // 401 already redirected.
+    }
   }
 
   async function handlePin(id: string, pinned: boolean) {
-    await fetch("/api/quicknotes", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, pinned: !pinned }),
-    });
-    load();
+    try {
+      await apiFetch("/api/quicknotes", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, pinned: !pinned }),
+      });
+      load();
+    } catch {
+      // 401 already redirected.
+    }
   }
 
   async function handleDelete(id: string) {
-    await fetch(`/api/quicknotes?id=${id}`, { method: "DELETE" });
-    load();
+    try {
+      await apiFetch(`/api/quicknotes?id=${id}`, { method: "DELETE" });
+      load();
+    } catch {
+      // 401 already redirected.
+    }
   }
 
   async function handleEdit(id: string) {
     if (!editContent.trim()) return;
-    await fetch("/api/quicknotes", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, content: editContent.trim() }),
-    });
-    setEditId(null);
-    load();
+    try {
+      await apiFetch("/api/quicknotes", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, content: editContent.trim() }),
+      });
+      setEditId(null);
+      load();
+    } catch {
+      // 401 already redirected.
+    }
   }
 
   return (

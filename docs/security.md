@@ -221,19 +221,66 @@ the API auth layer (defense layer 1). Supabase RLS is the second
 defense layer — it ensures that even with the anon key, a request can
 only see/modify rows belonging to the authenticated user.
 
-A future Phase F-2 should:
+### Why RLS matters even with API auth in place
 
-1. Open Supabase dashboard → Database → Tables
-2. For each user-scoped table (`tasks`, `schedules`, `quicknotes`,
-   `claude_usage`, `axis_metrics`, `agent_heartbeats`, etc.), verify
-   that RLS is **enabled** and that the policy correctly restricts
-   `select`/`insert`/`update`/`delete` to `auth.uid() = user_id` (or
-   the appropriate column).
-3. Tables that should NOT have user-scoping (e.g., shared lookup
-   tables) are exceptions but should be explicitly documented.
+The API auth check (`requireUser()`) protects every server route in
+`/api/*`, but the anon Supabase key (`NEXT_PUBLIC_SUPABASE_ANON_KEY`)
+is **shipped to the client** by design. Anyone reading the page source
+can see it. Without RLS, that key could be used outside the API
+routes — directly against Supabase REST/Realtime endpoints — to
+read or modify any row in any table.
 
-Without RLS, the anon key in `NEXT_PUBLIC_SUPABASE_ANON_KEY` could be
-used by anyone (it ships to the client) to read/write the table.
+**Both layers are required**: API auth catches the in-app path; RLS
+catches everything else.
+
+### RLS audit checklist (manual, ~30 min)
+
+This is a Supabase dashboard task; the codebase cannot do it for you.
+Run through it once after deploying any new user-scoped table.
+
+1. Open Supabase dashboard → **Database** → **Tables**.
+2. For each user-scoped table — current candidates from the codebase:
+   - `tasks`
+   - `schedules`
+   - `quicknotes`
+   - `claude_usage`
+   - `axis_metrics`
+   - `agent_heartbeats`
+   - any new table introduced by future phases
+3. Click the table → **RLS** tab → confirm **Enable Row Level Security**
+   is **ON**.
+4. For each policy (`SELECT`, `INSERT`, `UPDATE`, `DELETE`), verify
+   the expression restricts rows to the current user. Typical pattern:
+   ```sql
+   (auth.uid() = user_id)
+   ```
+   Or, for a join-scoped table:
+   ```sql
+   (auth.uid() = (SELECT user_id FROM parent WHERE id = parent_id))
+   ```
+5. Tables that intentionally have **no** user scoping (shared lookup
+   tables, public read-only data) are exceptions — document them in a
+   small `docs/rls-exceptions.md` if/when they exist, with the
+   reasoning per table.
+
+### Verification — direct Supabase test
+
+After enabling RLS, verify it actually rejects unauthenticated reads:
+
+```bash
+# Should return 401 / empty result
+curl -s "${NEXT_PUBLIC_SUPABASE_URL}/rest/v1/tasks?select=*" \
+  -H "apikey: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}"
+```
+
+If this returns rows without an `Authorization: Bearer <jwt>` header,
+RLS is not active on the `tasks` table.
+
+### Future automation
+
+A `scripts/verify-rls.ts` script that lists all tables via the
+management API and asserts `rls_enabled = true` would catch silent
+drift. Tracked as a follow-up; not blocking.
 
 ---
 

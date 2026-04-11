@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { apiFetch, ApiFetchError } from "@/lib/api-fetch";
 
 export function ReviewActions({ path, isPublished }: { path: string; isPublished: boolean }) {
   const [status, setStatus] = useState<"idle" | "loading" | "done" | "error">("idle");
@@ -14,22 +15,25 @@ export function ReviewActions({ path, isPublished }: { path: string; isPublished
   async function handleAction(action: "approve" | "reject") {
     setStatus("loading");
     try {
-      const res = await fetch("/api/review", {
+      const data = await apiFetch<{ ok?: boolean; error?: string }>("/api/review", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ path, action }),
       });
-      const data = await res.json();
-      if (data.ok) {
+      if (data?.ok) {
         setStatus("done");
         setResult(action === "approve" ? "승인됨" : "거부됨");
       } else {
         setStatus("error");
-        setResult(data.error || "실패");
+        setResult(data?.error || "실패");
       }
     } catch (e) {
       setStatus("error");
-      setResult("네트워크 오류");
+      const msg =
+        e instanceof ApiFetchError && typeof (e.data as { error?: string } | null)?.error === "string"
+          ? (e.data as { error: string }).error
+          : "네트워크 오류";
+      setResult(msg);
     }
   }
 

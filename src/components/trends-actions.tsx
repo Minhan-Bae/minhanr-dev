@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { apiFetch } from "@/lib/api-fetch";
 
 export function BoostButton({ target, label }: { target: string; label: string }) {
   const [status, setStatus] = useState<"idle" | "loading" | "done" | "error">("idle");
@@ -9,13 +10,12 @@ export function BoostButton({ target, label }: { target: string; label: string }
   async function handleBoost() {
     setStatus("loading");
     try {
-      const res = await fetch("/api/trends", {
+      const data = await apiFetch<{ ok?: boolean }>("/api/trends", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "boost", target, value: 1.5 }),
       });
-      const data = await res.json();
-      setStatus(data.ok ? "done" : "error");
+      setStatus(data?.ok ? "done" : "error");
     } catch {
       setStatus("error");
     }
@@ -37,13 +37,12 @@ export function SuppressButton({ target }: { target: string }) {
   async function handleSuppress() {
     setStatus("loading");
     try {
-      const res = await fetch("/api/trends", {
+      const data = await apiFetch<{ ok?: boolean }>("/api/trends", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "suppress", target }),
       });
-      const data = await res.json();
-      setStatus(data.ok ? "done" : "error");
+      setStatus(data?.ok ? "done" : "error");
     } catch {
       setStatus("error");
     }
