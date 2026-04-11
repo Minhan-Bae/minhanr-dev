@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { getAllPosts } from "@/lib/blog";
@@ -11,6 +12,12 @@ import {
   type VaultNote,
 } from "@/lib/vault-index";
 import { isTier2Path } from "@/lib/vault-tiers";
+
+// Hero atmosphere — properly licensed stock photo (Unsplash, free license).
+// Tenet 4 allows licensed stock as a single concentrated visual moment.
+// Subject: ocean waves, matching the brand's ocean / depth identity.
+const HERO_IMAGE =
+  "https://images.unsplash.com/photo-1505142468610-359e7d316be0?w=1920&q=80&auto=format&fit=crop";
 
 /**
  * Home — 8 blocks IA, designed against docs/brand-tenets.md.
@@ -106,52 +113,73 @@ export default async function Home() {
   const lastHarvest = formatRelative(agg?.last_full_scan ?? null);
 
   return (
-    <div className="mx-auto w-full max-w-5xl px-4 sm:px-6">
+    <>
       {/* ───────────────────────────────────────────────────────────── */}
       {/* 1. Identity strip — hairline, no hero (Tenet 5)               */}
       {/* ───────────────────────────────────────────────────────────── */}
-      <section className="flex items-center justify-between border-b border-[var(--hairline)] py-6 text-xs text-muted-foreground">
-        <div className="font-mono tracking-wide">
-          {BRAND_IDENTITY.person} · {BRAND_IDENTITY.role}
-        </div>
-        <div className="font-mono tabular-nums">
-          last harvest <span className="text-foreground">{lastHarvest}</span>
-        </div>
-      </section>
+      <div className="mx-auto w-full max-w-5xl px-4 sm:px-6">
+        <section className="flex items-center justify-between border-b border-[var(--hairline)] py-6 text-xs text-muted-foreground">
+          <div className="font-mono tracking-wide">
+            {BRAND_IDENTITY.person} · {BRAND_IDENTITY.role}
+          </div>
+          <div className="font-mono tabular-nums">
+            last harvest <span className="text-foreground">{lastHarvest}</span>
+          </div>
+        </section>
+      </div>
 
       {/* ───────────────────────────────────────────────────────────── */}
-      {/* 2. Manifesto — the only large-type moment on the page         */}
-      {/*    Single concentrated visual moment per Tenet 5:             */}
-      {/*    .mesh-aurora ambient atmosphere + 3-layer parallax SVG     */}
-      {/*    waves. CSS/SVG only, theme-aware, no external assets.      */}
+      {/* 2. Manifesto — full-bleed hero, the page's single visual      */}
+      {/*    moment per Tenet 5. Stock ocean photo (Tenet 4 licensed)   */}
+      {/*    + dark gradient overlays for text legibility + SVG wave    */}
+      {/*    parallax for motion. Three layers compose into "ocean      */}
+      {/*    photographed once, moving forever".                         */}
       {/* ───────────────────────────────────────────────────────────── */}
-      <section className="mesh-aurora relative overflow-hidden py-16 sm:py-28 -mx-4 sm:-mx-6 px-4 sm:px-6">
-        {/* Ocean waves — bottom-anchored, 3 parallax layers */}
+      <section className="relative w-full overflow-hidden">
+        {/* Optimized hero image (next/image priority + AVIF/WebP) */}
+        <Image
+          src={HERO_IMAGE}
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover -z-10"
+        />
+
+        {/* Dark gradient overlays — vertical legibility + horizontal vignette */}
+        <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-background/60 to-background -z-0" />
+        <div className="absolute inset-0 bg-gradient-to-r from-background/70 via-background/30 to-transparent -z-0" />
+
+        {/* SVG wave parallax — bottom-anchored motion on top of the photo */}
         <OceanWaves />
 
-        <div className="relative z-10 space-y-6">
-          <h1
-            className="font-bold tracking-tight leading-[1.05] text-gradient"
-            style={{ fontSize: "var(--font-size-h1)" }}
-          >
-            {BRAND_IDENTITY.person}
-          </h1>
-          <p
-            className="text-foreground/85 max-w-2xl leading-relaxed"
-            style={{ fontSize: "var(--font-size-body-lg)" }}
-          >
-            I garden{" "}
-            <span className="font-mono text-primary">
-              {BRAND_IDENTITY.domain}
-            </span>{" "}
-            — a public notebook kept live by seven agents, with the door open.
-          </p>
-          <p className="text-sm text-muted-foreground max-w-2xl leading-relaxed">
-            AI 연구자. 수집·수렴·확산을 매일 자동화하며, 중간 과정을 그대로
-            흘려보냅니다.
-          </p>
+        <div className="relative z-10 mx-auto w-full max-w-5xl px-4 sm:px-6 py-24 sm:py-36">
+          <div className="space-y-6 max-w-2xl">
+            <h1
+              className="font-bold tracking-tight leading-[1.05] text-white drop-shadow-lg text-gradient"
+              style={{ fontSize: "var(--font-size-h1)" }}
+            >
+              {BRAND_IDENTITY.person}
+            </h1>
+            <p
+              className="text-white/90 leading-relaxed drop-shadow"
+              style={{ fontSize: "var(--font-size-body-lg)" }}
+            >
+              I garden{" "}
+              <span className="font-mono text-primary">
+                {BRAND_IDENTITY.domain}
+              </span>{" "}
+              — a public notebook kept live by seven agents, with the door open.
+            </p>
+            <p className="text-sm text-white/70 leading-relaxed drop-shadow">
+              AI 연구자. 수집·수렴·확산을 매일 자동화하며, 중간 과정을 그대로
+              흘려보냅니다.
+            </p>
+          </div>
         </div>
       </section>
+
+      <div className="mx-auto w-full max-w-5xl px-4 sm:px-6">
 
       {/* ───────────────────────────────────────────────────────────── */}
       {/* 3. Live vault signals — 4 tabular tiles (Tenet 1)             */}
@@ -325,7 +353,8 @@ export default async function Home() {
           .
         </p>
       </section>
-    </div>
+      </div>
+    </>
   );
 }
 
@@ -369,7 +398,7 @@ function OceanWaves() {
         preserveAspectRatio="none"
         xmlns="http://www.w3.org/2000/svg"
       >
-        <path d={wavePath} fill="var(--primary)" opacity={0.08} />
+        <path d={wavePath} fill="var(--primary)" opacity={0.18} />
       </svg>
       <svg
         className="ocean-wave-mid absolute inset-x-0 bottom-0 h-[80%]"
@@ -378,7 +407,7 @@ function OceanWaves() {
         preserveAspectRatio="none"
         xmlns="http://www.w3.org/2000/svg"
       >
-        <path d={wavePath} fill="var(--primary)" opacity={0.14} />
+        <path d={wavePath} fill="var(--primary)" opacity={0.24} />
       </svg>
       <svg
         className="ocean-wave-front absolute inset-x-0 bottom-0 h-[60%]"
@@ -387,7 +416,7 @@ function OceanWaves() {
         preserveAspectRatio="none"
         xmlns="http://www.w3.org/2000/svg"
       >
-        <path d={wavePath} fill="var(--accent)" opacity={0.12} />
+        <path d={wavePath} fill="var(--accent)" opacity={0.20} />
       </svg>
     </div>
   );

@@ -72,40 +72,44 @@ garden is a place. PKM-as-brand is a place.
 
 ---
 
-## 4. Instruments over decorations
+## 4. Instruments first, atmosphere allowed
 
-Visual impact comes primarily from rendered data — vault statistics,
-hairline arcs showing the 3-axis flux, status badges, tabular numerals.
-External stock imagery is forbidden. Self-made visual anchors that
-embody the brand identity (ocean / depth / motion) are allowed *if*
-they are concentrated in one place per Tenet 5 and never compete with
-content for attention.
+Visual *substance* comes from rendered data — vault statistics, hairline
+arcs showing the 3-axis flux, status badges, tabular numerals. Visual
+*atmosphere* (ocean photography, animated waves, ambient gradients) is
+allowed when it embodies the brand identity and is concentrated in one
+place per Tenet 5.
 
 **Why**: A site run by an engineer who operates seven autonomous agents
-should not pad its hero with an Unsplash photo of an ocean. The identity
-mismatch destroys credibility. *But* an entirely text-only home reads as
-indifferent to its own ocean / depth metaphor — and the OKLCH palette,
-the `mesh-aurora` class, and the `--depth-layer` utilities all already
-encode that identity. Refusing to render them at all is a different kind
-of inconsistency.
+should not be a stock-photo brochure — but it also should not be an
+entirely text-only sheet that reads as indifferent to its own ocean /
+depth metaphor. The OKLCH palette, the `mesh-aurora` class, and the
+`OceanWaves` component all already encode that identity. The home page's
+manifesto section is the place where that atmosphere can be felt.
 
 **How to apply**:
-- **Forbidden**: External stock images / GIFs / videos (Unsplash, Pexels,
-  Giphy, Tenor, etc.) on any public surface.
-- **Forbidden**: Decorative SVG illustrations that do not encode anything
-  meaningful, scattered across multiple sections.
+- **Allowed**: Properly licensed stock photography (Unsplash, Pexels,
+  CC0 / CC-BY, paid stock) used as a single hero / atmosphere anchor.
+  Prefer ocean / depth / cloud subjects that match the brand palette.
+- **Allowed**: Self-recorded or self-generated `<video>` elements owned
+  by the user. Same one-concentrated-moment rule applies.
 - **Allowed**: Self-made CSS / SVG visual anchors (the `mesh-aurora`
   atmosphere, the `OceanWaves` SVG component, the 3-axis hairline arc in
-  the OG image) — but **only one concentrated visual moment per page**
-  per Tenet 5. The home page's manifesto section is that moment.
+  the OG image).
 - **Allowed**: Self-made illustrations that DO encode data (e.g., a wave
   amplitude that reflects daily vault activity). These are instruments in
-  disguise and should be encouraged.
-- **Allowed**: Self-recorded or self-generated `<video>` elements (not
-  stock) if the asset is owned by the user. Same one-concentrated-moment
-  rule applies.
-- **Effective opacity ≤ 0.25** for any decorative layer that lives behind
-  text content. Wave fills must use CSS variables, never hardcoded color.
+  disguise and should be encouraged — they grow the brand more than
+  any static asset.
+- **Forbidden**: Random low-quality animated GIFs (Giphy / Tenor scrapes),
+  unlicensed images, hotlinked clipart, screenshots used as decoration.
+- **One concentrated visual moment per page** (Tenet 5). The home page's
+  manifesto block is that moment; sub-pages get hairlines and data only.
+- **Text legibility is non-negotiable**: any image background must carry
+  a gradient overlay so text never falls below WCAG AA contrast.
+- **Effective opacity ≤ 0.25** for any decorative layer that sits *over*
+  text content (not the background image itself, which is below the text).
+- Wave / overlay fills should use CSS variables when possible, so they
+  re-color across dark / light / gray themes automatically.
 - Iconography stays monochrome lucide, used sparingly.
 - The brand's signature *moment* may be visual; the brand's signature
   *substance* is still a tabular number in Geist Mono.
