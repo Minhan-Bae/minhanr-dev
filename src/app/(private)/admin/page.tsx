@@ -7,6 +7,7 @@ import { apiFetch } from "@/lib/api-fetch";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { ADMIN_POLL_MS } from "@/lib/constants";
+import { WeeklyCalendar } from "@/components/weekly-calendar";
 
 import { HeartbeatMonitor } from "@/components/admin/heartbeat-monitor";
 import { CostTracker } from "@/components/admin/cost-tracker";
@@ -151,6 +152,16 @@ export default function AdminDashboard() {
           onFilterChange={setLogFilter}
           agents={agents}
         />
+      </section>
+
+      <Separator />
+
+      {/* Calendar */}
+      <section className="space-y-3">
+        <h2 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+          Calendar
+        </h2>
+        <WeeklyCalendar />
       </section>
     </div>
   );
