@@ -4,6 +4,8 @@ import "./globals.css";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { BRAND_IDENTITY } from "@/lib/brand/tokens";
+import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -75,6 +77,8 @@ export default function RootLayout({
             {children}
           </TooltipProvider>
         </NuqsAdapter>
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
