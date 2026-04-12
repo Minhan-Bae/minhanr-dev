@@ -86,17 +86,34 @@ function getWeekDates(baseDate: string): string[] {
   return dates;
 }
 
+function getMonthDates(baseDate: string): string[] {
+  const d = new Date(baseDate + "T00:00:00+09:00");
+  const year = d.getFullYear();
+  const month = d.getMonth();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const dates: string[] = [];
+  for (let day = 1; day <= daysInMonth; day++) {
+    const dt = new Date(year, month, day);
+    dates.push(dt.toISOString().split("T")[0]);
+  }
+  return dates;
+}
+
 export async function GET(req: NextRequest) {
   const { response: authResponse } = await requireUser();
   if (authResponse) return authResponse;
   const dateParam = req.nextUrl.searchParams.get("date");
+  const range = req.nextUrl.searchParams.get("range");
   const baseDate = dateParam || todayKstDate();
-  const weekDates = getWeekDates(baseDate);
+
+  const targetDates = range === "month"
+    ? getMonthDates(baseDate)
+    : getWeekDates(baseDate);
 
   const days: DayData[] = [];
   const dayNames = ["일", "월", "화", "수", "목", "금", "토"];
 
-  for (const date of weekDates) {
+  for (const date of targetDates) {
     const file = await getFileContent(`010_Daily/${date}.md`);
     const d = new Date(date + "T00:00:00");
     const dayName = dayNames[d.getDay()];
@@ -114,7 +131,17 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  return NextResponse.json({ week: weekDates, days });
+  const datelist = targetDates;
+  if (range === "month") {
+    const d = new Date(baseDate + "T00:00:00+09:00");
+    return NextResponse.json({
+      week: datelist,
+      days,
+      month: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`,
+    });
+  }
+
+  return NextResponse.json({ week: datelist, days });
 }
 
 /**

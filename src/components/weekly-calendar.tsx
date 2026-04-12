@@ -57,7 +57,7 @@ export function WeeklyCalendar() {
   const [data, setData] = useState<CalendarData | null>(null);
   const [loading, setLoading] = useState(true);
   const [baseDate, setBaseDate] = useState(() => todayKstDate());
-  const [view, setView] = useState<"week" | "3day">("3day");
+  const [view, setView] = useState<"3day" | "week" | "month">("3day");
   const [categories, setCategories] = useState<Record<string, CatConfig>>(DEFAULT_CATEGORIES);
 
   // Drag
@@ -94,11 +94,12 @@ export function WeeklyCalendar() {
   const fetchData = useCallback(async (showLoading = false) => {
     if (showLoading) setLoading(true);
     try {
-      const json = await apiFetch<CalendarData>(`/api/calendar?date=${baseDate}&_t=${Date.now()}`, { cache: "no-store" });
+      const range = view === "month" ? "&range=month" : "";
+      const json = await apiFetch<CalendarData>(`/api/calendar?date=${baseDate}&_t=${Date.now()}${range}`, { cache: "no-store" });
       setData(json);
     } catch { if (showLoading) setData(null); }
     if (showLoading) setLoading(false);
-  }, [baseDate]);
+  }, [baseDate, view]);
 
   // Initial fetch on mount + on baseDate change. setState happens
   // asynchronously inside fetchData (after the await), not synchronously
@@ -119,7 +120,15 @@ export function WeeklyCalendar() {
   }, [loading, nowMinute]);
 
   const todayStr = todayKstDate();
-  function shiftWeek(dir: number) { const d = new Date(baseDate + "T00:00:00"); d.setDate(d.getDate() + dir * (view === "3day" ? 3 : 7)); setBaseDate(d.toISOString().split("T")[0]); }
+  function shiftWeek(dir: number) {
+    const d = new Date(baseDate + "T00:00:00");
+    if (view === "month") {
+      d.setMonth(d.getMonth() + dir);
+    } else {
+      d.setDate(d.getDate() + dir * (view === "3day" ? 3 : 7));
+    }
+    setBaseDate(d.toISOString().split("T")[0]);
+  }
   function goToday() { setBaseDate(todayStr); }
 
   // ── Drag ──
@@ -261,7 +270,9 @@ export function WeeklyCalendar() {
 
   // View filter
   let days: DayData[];
-  if (view === "3day") {
+  if (view === "month") {
+    days = data.days;
+  } else if (view === "3day") {
     const todayIdx = data.days.findIndex((d) => d.date === todayStr);
     const start = todayIdx >= 0 ? Math.max(0, todayIdx - 1) : 0;
     days = data.days.slice(start, start + 3);
@@ -298,17 +309,98 @@ export function WeeklyCalendar() {
           <Button variant="outline" size="sm" className="h-8 text-xs" onClick={() => shiftWeek(1)}>→</Button>
         </div>
         <div className="text-center">
-          <div className="text-sm font-semibold tracking-tight">{data.week[0]?.slice(5)} — {data.week[6]?.slice(5)}</div>
-          <div className="text-xs text-muted-foreground">{totalBlocks}블록 · {totalHours}h</div>
+          {view === "month" ? (
+            <>
+              <div className="text-sm font-semibold tracking-tight">{now.getFullYear()}년 {now.getMonth() + 1}월</div>
+              <div className="text-xs text-muted-foreground">{totalBlocks}블록 · {totalHours}h</div>
+            </>
+          ) : (
+            <>
+              <div className="text-sm font-semibold tracking-tight">{data.week[0]?.slice(5)} — {data.week[data.week.length - 1]?.slice(5)}</div>
+              <div className="text-xs text-muted-foreground">{totalBlocks}블록 · {totalHours}h</div>
+            </>
+          )}
         </div>
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-1 bg-muted/30 rounded-lg p-0.5">
             <button className={`px-3 py-1 rounded-md text-xs transition-all ${view === "3day" ? "bg-background shadow-sm font-medium" : "text-muted-foreground hover:text-foreground"}`} onClick={() => setView("3day")}>3일</button>
             <button className={`px-3 py-1 rounded-md text-xs transition-all ${view === "week" ? "bg-background shadow-sm font-medium" : "text-muted-foreground hover:text-foreground"}`} onClick={() => setView("week")}>주간</button>
+            <button className={`px-3 py-1 rounded-md text-xs transition-all ${view === "month" ? "bg-background shadow-sm font-medium" : "text-muted-foreground hover:text-foreground"}`} onClick={() => setView("month")}>월간</button>
           </div>
         </div>
       </div>
 
+      {/* ── Month view ── */}
+      {view === "month" && (
+        <div className="rounded-xl border border-border bg-background p-4">
+          <div className="grid grid-cols-7 gap-0.5 text-xs text-center mb-2">
+            {["일","월","화","수","목","금","토"].map((d) => (
+              <div key={d} className="py-1 text-muted-foreground/50 font-medium">{d}</div>
+            ))}
+          </div>
+          <div className="grid grid-cols-7 gap-1">
+            {/* Empty cells for offset */}
+            {(() => {
+              const firstDate = data.days[0]?.date;
+              if (!firstDate) return null;
+              const offset = new Date(firstDate + "T00:00:00").getDay();
+              return Array.from({ length: offset }).map((_, i) => (
+                <div key={`empty-${i}`} className="aspect-[4/3]" />
+              ));
+            })()}
+            {data.days.map((day) => {
+              const dayNum = parseInt(day.date.split("-")[2]);
+              const isToday = day.date === todayStr;
+              const hours = day.blocks.reduce((h, b) => h + (b.endHour - b.startHour), 0);
+              const topCats = [...new Set(day.blocks.map((b) => b.category))].slice(0, 3);
+              return (
+                <button
+                  key={day.date}
+                  onClick={() => { setView("3day"); setBaseDate(day.date); }}
+                  className={`aspect-[4/3] rounded-lg border p-1.5 flex flex-col items-start justify-between text-left transition-all hover:brightness-110 ${
+                    isToday
+                      ? "border-primary bg-primary/10"
+                      : day.blocks.length > 0
+                        ? "border-border bg-card/60"
+                        : "border-border/30 bg-transparent"
+                  }`}
+                >
+                  <span className={`text-xs tabular-nums ${isToday ? "text-primary font-bold" : "text-foreground/80"}`}>
+                    {dayNum}
+                  </span>
+                  {hours > 0 && (
+                    <div className="w-full space-y-0.5">
+                      <span className="text-xs text-muted-foreground tabular-nums">{hours}h</span>
+                      <div className="flex gap-0.5">
+                        {topCats.map((cat) => {
+                          const s = categories[cat];
+                          return (
+                            <span
+                              key={cat}
+                              className={`w-1.5 h-1.5 rounded-full ${s?.dot ?? "bg-muted-foreground"}`}
+                            />
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+          {/* Legend */}
+          <div className="flex flex-wrap gap-3 mt-4 pt-3 border-t border-border/30">
+            {Object.entries(categories).map(([cat, s]) => (
+              <div key={cat} className="flex items-center gap-1.5 text-xs text-muted-foreground/60">
+                <span className={`w-2 h-2 rounded-full ${s.dot}`} />{cat}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ── 3day / week view ── */}
+      {view !== "month" && (
       <div className="flex gap-3">
         {/* Month mini-map */}
         <div className="hidden lg:block shrink-0 w-[180px] space-y-2">
@@ -547,6 +639,7 @@ export function WeeklyCalendar() {
           )}
         </div>
       </div>
+      )}
     </div>
   );
 }
