@@ -9,15 +9,12 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { WeeklyScheduler } from "@/components/weekly-scheduler";
 import { EisenhowerMatrix } from "@/components/eisenhower-matrix";
-import { FloatingQuickNote } from "@/components/floating-quicknote";
 import { ADMIN_POLL_MS } from "@/lib/constants";
 
 import { HeartbeatMonitor } from "@/components/admin/heartbeat-monitor";
 import { CostTracker } from "@/components/admin/cost-tracker";
 import { VaultExplorer } from "@/components/admin/vault-explorer";
-import { TaskKanban } from "@/components/admin/task-kanban";
 import { SystemLog } from "@/components/admin/system-log";
-import { CreateTaskForm } from "@/components/admin/create-task-form";
 import type {
   AgentHeartbeat,
   Task,
@@ -110,19 +107,6 @@ export default function AdminDashboard() {
     const interval = setInterval(loadAgents, ADMIN_POLL_MS);
     return () => clearInterval(interval);
   }, [loadAgents, loadTasks, loadCommits, loadVault]);
-
-  async function moveTask(id: string, newStatus: string) {
-    try {
-      await apiFetch("/api/tasks", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id, status: newStatus }),
-      });
-    } catch {
-      // 401 redirects; other failures fall through to loadTasks() refresh
-    }
-    loadTasks();
-  }
 
   async function deleteTask(id: string) {
     try {
@@ -219,21 +203,6 @@ export default function AdminDashboard() {
 
             <Separator />
 
-            {/* Task Kanban */}
-            <section className="space-y-3">
-              <h2 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                Task Kanban
-              </h2>
-              <CreateTaskForm onCreated={loadTasks} />
-              <TaskKanban
-                tasks={tasks}
-                onMove={moveTask}
-                onDelete={deleteTask}
-              />
-            </section>
-
-            <Separator />
-
             {/* System Log */}
             <section className="space-y-3">
               <h2 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
@@ -301,8 +270,6 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        {/* Floating Quick Note (always visible) */}
-        <FloatingQuickNote />
       </div>
     </div>
   );
