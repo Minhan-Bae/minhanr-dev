@@ -411,8 +411,21 @@ export default function Dashboard() {
     // weekly-calendar.tsx#fetchData. Suppress the rule.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchAll();
-    const interval = setInterval(fetchAll, DASHBOARD_POLL_MS);
-    return () => clearInterval(interval);
+    // Pause polling when tab is hidden to save bandwidth
+    let interval = setInterval(fetchAll, DASHBOARD_POLL_MS);
+    function onVisibility() {
+      if (document.hidden) {
+        clearInterval(interval);
+      } else {
+        fetchAll();
+        interval = setInterval(fetchAll, DASHBOARD_POLL_MS);
+      }
+    }
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
   }, [fetchAll]);
 
   const acq = metrics?.latest?.acquisition;

@@ -20,31 +20,31 @@ export async function POST(request: NextRequest) {
   }
 
   const prio = priority || "P2";
-
-  // 1. Supabase INSERT
-  const { data, error } = await supabase
-    .from("tasks")
-    .insert({
-      title: title.trim(),
-      axis: axis || "convergence",
-      priority: prio,
-      assigned_to: assigned_to || null,
-      status: "backlog",
-    })
-    .select()
-    .single();
-
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
-
-  // 2. Daily Note append (best-effort)
   const label = PRIORITY_LABELS[prio] || prio;
   const line = `- [ ] ${title.trim()} (${prio} ${label})${assigned_to ? ` @${assigned_to}` : ""}`;
-  const vaultResult = await appendToDailyNote("Tasks", line);
+
+  // Supabase INSERT + Daily Note append are independent — run in parallel.
+  const [dbResult, vaultResult] = await Promise.all([
+    supabase
+      .from("tasks")
+      .insert({
+        title: title.trim(),
+        axis: axis || "convergence",
+        priority: prio,
+        assigned_to: assigned_to || null,
+        status: "backlog",
+      })
+      .select()
+      .single(),
+    appendToDailyNote("Tasks", line),
+  ]);
+
+  if (dbResult.error) {
+    return NextResponse.json({ error: dbResult.error.message }, { status: 500 });
+  }
 
   return NextResponse.json({
-    task: data,
+    task: dbResult.data,
     vault: vaultResult.ok ? "synced" : vaultResult.error || "skipped",
   }, { status: 201 });
 }

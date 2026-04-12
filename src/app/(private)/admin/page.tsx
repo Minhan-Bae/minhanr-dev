@@ -86,9 +86,21 @@ export default function AdminDashboard() {
     loadCommits();
     loadVault();
 
-    // Poll heartbeats every 10s
-    const interval = setInterval(loadAgents, ADMIN_POLL_MS);
-    return () => clearInterval(interval);
+    // Poll heartbeats every 10s, pause when tab is hidden
+    let interval = setInterval(loadAgents, ADMIN_POLL_MS);
+    function onVisibility() {
+      if (document.hidden) {
+        clearInterval(interval);
+      } else {
+        loadAgents();
+        interval = setInterval(loadAgents, ADMIN_POLL_MS);
+      }
+    }
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
   }, [loadAgents, loadCommits, loadVault]);
 
   async function handleLogout() {
