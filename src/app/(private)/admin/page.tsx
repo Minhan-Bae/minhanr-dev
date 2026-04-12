@@ -4,11 +4,8 @@ import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { apiFetch } from "@/lib/api-fetch";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { WeeklyScheduler } from "@/components/weekly-scheduler";
-import { EisenhowerMatrix } from "@/components/eisenhower-matrix";
 import { ADMIN_POLL_MS } from "@/lib/constants";
 
 import { HeartbeatMonitor } from "@/components/admin/heartbeat-monitor";
@@ -17,7 +14,6 @@ import { VaultExplorer } from "@/components/admin/vault-explorer";
 import { SystemLog } from "@/components/admin/system-log";
 import type {
   AgentHeartbeat,
-  Task,
   Commit,
   VaultData,
 } from "@/components/admin/types";
@@ -36,14 +32,10 @@ import type {
 export default function AdminDashboard() {
   const router = useRouter();
   const [agents, setAgents] = useState<AgentHeartbeat[]>([]);
-  const [tasks, setTasks] = useState<Task[]>([]);
   const [commits, setCommits] = useState<Commit[]>([]);
   const [vault, setVault] = useState<VaultData | null>(null);
   const [logFilter, setLogFilter] = useState("");
   const [loggingOut, setLoggingOut] = useState(false);
-  const [activeTab, setActiveTab] = useState<"dashboard" | "planning">(
-    "dashboard"
-  );
 
   // Phase F-2-RLS: agent_heartbeats has RLS enabled with no policies, so the
   // browser anon client can no longer read it directly. Route the poll
@@ -59,15 +51,6 @@ export default function AdminDashboard() {
       if (d?.agents) setAgents(d.agents);
     } catch {
       // background poll — silent on failure
-    }
-  }, []);
-
-  const loadTasks = useCallback(async () => {
-    try {
-      const d = await apiFetch<{ tasks?: Task[] }>("/api/tasks");
-      if (d?.tasks) setTasks(d.tasks);
-    } catch {
-      // 401 redirects via apiFetch
     }
   }, []);
 
@@ -99,23 +82,13 @@ export default function AdminDashboard() {
     // weekly-calendar.tsx#fetchData. Suppress the rule.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     loadAgents();
-    loadTasks();
     loadCommits();
     loadVault();
 
     // Poll heartbeats every 10s
     const interval = setInterval(loadAgents, ADMIN_POLL_MS);
     return () => clearInterval(interval);
-  }, [loadAgents, loadTasks, loadCommits, loadVault]);
-
-  async function deleteTask(id: string) {
-    try {
-      await apiFetch(`/api/tasks?id=${id}`, { method: "DELETE" });
-    } catch {
-      // 401 redirects; other failures fall through to loadTasks() refresh
-    }
-    loadTasks();
-  }
+  }, [loadAgents, loadCommits, loadVault]);
 
   async function handleLogout() {
     setLoggingOut(true);
@@ -123,154 +96,62 @@ export default function AdminDashboard() {
     router.push("/login");
   }
 
-  const SIDEBAR_ITEMS = [
-    { key: "dashboard" as const, label: "Dashboard", icon: "▦" },
-    { key: "planning" as const, label: "Planning", icon: "▤" },
-  ];
-
   return (
-    <div className="flex min-h-[calc(100vh-100px)]">
-      {/* Sidebar */}
-      <aside className="w-14 sm:w-48 shrink-0 border-r border-border bg-background flex flex-col">
-        <div className="p-3 border-b border-border hidden sm:block">
-          <h1 className="text-base font-bold tracking-tight">Admin</h1>
-        </div>
-        <nav className="flex-1 py-2 space-y-0.5">
-          {SIDEBAR_ITEMS.map((item) => (
-            <button
-              key={item.key}
-              onClick={() => setActiveTab(item.key)}
-              className={`w-full flex items-center gap-2.5 px-3 py-2 text-xs transition-colors ${
-                activeTab === item.key
-                  ? "bg-primary/10 text-primary border-r-2 border-primary"
-                  : "text-muted-foreground hover:text-foreground/80 hover:bg-muted/50"
-              }`}
-            >
-              <span className="text-sm shrink-0">{item.icon}</span>
-              <span className="hidden sm:inline">{item.label}</span>
-            </button>
-          ))}
-        </nav>
-        <div className="p-3 border-t border-border space-y-2">
-          <Badge
-            variant="outline"
-            className="text-xs text-green-400 border-green-400/30 hidden sm:inline-flex"
-          >
-            Authenticated
-          </Badge>
-          <Button
-            variant="outline"
-            size="sm"
-            className="w-full text-xs h-7 border-border text-muted-foreground hover:text-red-400 hover:border-red-400/30"
-            onClick={handleLogout}
-            disabled={loggingOut}
-          >
-            {loggingOut ? "..." : "Logout"}
-          </Button>
-        </div>
-      </aside>
-
-      {/* Main content */}
-      <div className="flex-1 px-4 sm:px-6 py-6 space-y-8 overflow-auto">
-        {/* Tab: Dashboard */}
-        {activeTab === "dashboard" && (
-          <div className="space-y-8">
-            {/* Heartbeat Monitor */}
-            <section className="space-y-3">
-              <h2 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                Heartbeat Monitor
-              </h2>
-              <HeartbeatMonitor agents={agents} commits={commits} />
-            </section>
-
-            <Separator />
-
-            {/* Cost Tracker + Vault Explorer side by side */}
-            <section className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              <div className="space-y-3">
-                <h2 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                  Cost Tracker
-                </h2>
-                <CostTracker commits={commits} />
-              </div>
-              <div className="space-y-3">
-                <h2 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                  Vault Explorer
-                </h2>
-                <VaultExplorer vault={vault} />
-              </div>
-            </section>
-
-            <Separator />
-
-            {/* System Log */}
-            <section className="space-y-3">
-              <h2 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                System Log
-              </h2>
-              <SystemLog
-                commits={commits}
-                filter={logFilter}
-                onFilterChange={setLogFilter}
-                agents={agents}
-              />
-            </section>
-          </div>
-        )}
-
-        {/* Tab: Planning (Schedule + Eisenhower) */}
-        {activeTab === "planning" && (
-          <div className="space-y-8">
-            <section className="space-y-3">
-              <h2 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                Weekly Schedule
-              </h2>
-              <WeeklyScheduler />
-            </section>
-
-            <Separator />
-
-            <section className="space-y-3">
-              <h2 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                Eisenhower Matrix
-              </h2>
-              <EisenhowerMatrix
-                tasks={tasks}
-                onMove={async (id, priority) => {
-                  try {
-                    await apiFetch("/api/vault-sync/task", {
-                      method: "PATCH",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({ id, priority }),
-                    });
-                  } catch {
-                    // 401 redirects; other failures fall through to loadTasks() refresh
-                  }
-                  loadTasks();
-                }}
-                onDelete={deleteTask}
-                onCreate={async (title, priority) => {
-                  try {
-                    await apiFetch("/api/vault-sync/task", {
-                      method: "POST",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({
-                        title,
-                        axis: "convergence",
-                        priority,
-                      }),
-                    });
-                  } catch {
-                    // 401 redirects; other failures fall through to loadTasks() refresh
-                  }
-                  loadTasks();
-                }}
-              />
-            </section>
-          </div>
-        )}
-
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 space-y-8">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <h1 className="text-xl sm:text-2xl font-bold tracking-tight">Admin</h1>
+        <Button
+          variant="outline"
+          size="sm"
+          className="text-xs h-7 border-border text-muted-foreground hover:text-red-400 hover:border-red-400/30"
+          onClick={handleLogout}
+          disabled={loggingOut}
+        >
+          {loggingOut ? "..." : "Logout"}
+        </Button>
       </div>
+
+      {/* Heartbeat Monitor */}
+      <section className="space-y-3">
+        <h2 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+          Heartbeat Monitor
+        </h2>
+        <HeartbeatMonitor agents={agents} commits={commits} />
+      </section>
+
+      <Separator />
+
+      {/* Cost Tracker + Vault Explorer side by side */}
+      <section className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="space-y-3">
+          <h2 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+            Cost Tracker
+          </h2>
+          <CostTracker commits={commits} />
+        </div>
+        <div className="space-y-3">
+          <h2 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+            Vault Explorer
+          </h2>
+          <VaultExplorer vault={vault} />
+        </div>
+      </section>
+
+      <Separator />
+
+      {/* System Log */}
+      <section className="space-y-3">
+        <h2 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+          System Log
+        </h2>
+        <SystemLog
+          commits={commits}
+          filter={logFilter}
+          onFilterChange={setLogFilter}
+          agents={agents}
+        />
+      </section>
     </div>
   );
 }
