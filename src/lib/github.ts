@@ -29,10 +29,26 @@ function fromBase64(b64: string): string {
 
 /* ── Read file ── */
 
+/**
+ * Read a file from the vault via GitHub Contents API.
+ *
+ * @param revalidate  Next.js fetch cache TTL in seconds.
+ *   - 0 (default): no cache — always hits GitHub. Use for write paths
+ *     that need the latest SHA (POST/PATCH/DELETE in calendar API).
+ *   - 60: 1-minute cache — good for read-only calendar GET (user sees
+ *     data at most 1 min stale, saves 7-30 GitHub round-trips).
+ */
 export async function getFileContent(
-  path: string
+  path: string,
+  revalidate: number = 0,
 ): Promise<{ content: string; sha: string } | null> {
-  const res = await fetch(`${GITHUB_API}/${path}`, { headers: headers() });
+  const fetchOptions: RequestInit & { next?: { revalidate: number } } = {
+    headers: headers(),
+  };
+  if (revalidate > 0) {
+    fetchOptions.next = { revalidate };
+  }
+  const res = await fetch(`${GITHUB_API}/${path}`, fetchOptions);
   if (!res.ok) return null;
   const data = await res.json();
   return {

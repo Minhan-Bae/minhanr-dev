@@ -112,10 +112,11 @@ export async function GET(req: NextRequest) {
 
   const dayNames = ["일", "월", "화", "수", "목", "금", "토"];
 
-  // Fetch all Daily Notes in parallel to avoid sequential latency.
-  // For a month view this reduces ~30 × 200ms = 6s → ~200ms (single round).
+  // Fetch all Daily Notes in parallel with 60s cache.
+  // Read-only path — 1 minute staleness is acceptable for calendar view.
+  // Write paths (POST/PATCH/DELETE below) use revalidate=0 to get fresh SHA.
   const files = await Promise.all(
-    targetDates.map((date) => getFileContent(`010_Daily/${date}.md`))
+    targetDates.map((date) => getFileContent(`010_Daily/${date}.md`, 60))
   );
 
   const days: DayData[] = targetDates.map((date, i) => {
