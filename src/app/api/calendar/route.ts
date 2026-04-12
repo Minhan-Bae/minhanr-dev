@@ -110,26 +110,29 @@ export async function GET(req: NextRequest) {
     ? getMonthDates(baseDate)
     : getWeekDates(baseDate);
 
-  const days: DayData[] = [];
   const dayNames = ["일", "월", "화", "수", "목", "금", "토"];
 
-  for (const date of targetDates) {
-    const file = await getFileContent(`010_Daily/${date}.md`);
+  // Fetch all Daily Notes in parallel to avoid sequential latency.
+  // For a month view this reduces ~30 × 200ms = 6s → ~200ms (single round).
+  const files = await Promise.all(
+    targetDates.map((date) => getFileContent(`010_Daily/${date}.md`))
+  );
+
+  const days: DayData[] = targetDates.map((date, i) => {
+    const file = files[i];
     const d = new Date(date + "T00:00:00");
     const dayName = dayNames[d.getDay()];
-
     if (file) {
-      days.push({
+      return {
         date,
         day: dayName,
         focus: parseFocus(file.content),
         title: parseTitle(file.content),
         blocks: parseTimeBlocks(file.content, date),
-      });
-    } else {
-      days.push({ date, day: dayName, focus: "", title: "", blocks: [] });
+      };
     }
-  }
+    return { date, day: dayName, focus: "", title: "", blocks: [] };
+  });
 
   const datelist = targetDates;
   if (range === "month") {
