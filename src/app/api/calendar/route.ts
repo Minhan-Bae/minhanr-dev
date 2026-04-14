@@ -228,10 +228,11 @@ export async function DELETE(req: NextRequest) {
 }
 
 /**
- * PATCH — Update a time block or daily title
+ * PATCH — Update a time block, daily title, or focus
  * Body: { date, action, ... }
  *   action: "update_block" — { oldStartHour, oldEndHour, startHour, endHour, category, memo }
  *   action: "set_title" — { title }
+ *   action: "set_focus" — { focus }
  */
 export async function PATCH(req: NextRequest) {
   const { response: authResponse } = await requireUser();
@@ -271,6 +272,26 @@ export async function PATCH(req: NextRequest) {
       }
     }
     return NextResponse.json(await commitToGitHub(dailyPath, updated, `daily: set title "${title.slice(0, 30)}"`, file.sha));
+  }
+
+  if (action === "set_focus") {
+    const { focus } = body as { focus: string };
+    const newFocusLine = `- [ ] ${focus.trim()}`;
+    let updated: string;
+    if (/## Focus\s*\n- \[.\].*/.test(file.content)) {
+      updated = file.content.replace(/## Focus\s*\n- \[.\].*/, `## Focus\n${newFocusLine}`);
+    } else if (file.content.includes("## Focus")) {
+      updated = file.content.replace(/## Focus\s*\n/, `## Focus\n${newFocusLine}\n`);
+    } else {
+      // Insert before Time Blocks if present, else append
+      const tbIdx = file.content.indexOf("## Time Blocks");
+      if (tbIdx >= 0) {
+        updated = file.content.slice(0, tbIdx) + `## Focus\n${newFocusLine}\n\n` + file.content.slice(tbIdx);
+      } else {
+        updated = file.content.trimEnd() + `\n\n## Focus\n${newFocusLine}\n`;
+      }
+    }
+    return NextResponse.json(await commitToGitHub(dailyPath, updated, `daily: set focus "${focus.slice(0, 40)}"`, file.sha));
   }
 
   return NextResponse.json({ error: "Unknown action" }, { status: 400 });

@@ -65,3 +65,33 @@ export function nowKstMinutes(): number {
   const n = nowInKST();
   return n.getUTCHours() * 60 + n.getUTCMinutes();
 }
+
+/**
+ * ISO 8601 week id for a KST date string (`YYYY-MM-DD` → `YYYY-Www`).
+ * Week starts Monday; week 1 contains the year's first Thursday.
+ * The returned year is the ISO week-year (may differ from calendar year
+ * near Jan 1 / Dec 31).
+ */
+export function isoWeek(dateStr: string): string {
+  const d = new Date(dateStr + "T00:00:00+09:00");
+  const target = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
+  const dayNr = (target.getUTCDay() + 6) % 7;
+  target.setUTCDate(target.getUTCDate() - dayNr + 3);
+  const firstThursday = target.valueOf();
+  const yearStart = new Date(Date.UTC(target.getUTCFullYear(), 0, 4));
+  const yearStartDayNr = (yearStart.getUTCDay() + 6) % 7;
+  yearStart.setUTCDate(yearStart.getUTCDate() - yearStartDayNr + 3);
+  const weekNumber = 1 + Math.round((firstThursday - yearStart.valueOf()) / 604800000);
+  return `${target.getUTCFullYear()}-W${String(weekNumber).padStart(2, "0")}`;
+}
+
+/**
+ * Given a KST date string, return the Monday (`YYYY-MM-DD`) of that
+ * ISO week. Used for aggregating weekly review data.
+ */
+export function isoWeekMonday(dateStr: string): string {
+  const d = new Date(dateStr + "T00:00:00+09:00");
+  const dayNr = (d.getUTCDay() + 6) % 7;
+  d.setUTCDate(d.getUTCDate() - dayNr);
+  return d.toISOString().split("T")[0];
+}
