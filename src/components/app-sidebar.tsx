@@ -18,6 +18,7 @@ import {
   TrendingUp,
   Wallet,
   Calendar,
+  CalendarCheck,
   Clock,
 } from "lucide-react";
 
@@ -55,6 +56,7 @@ const NAV_GROUPS: NavGroup[] = [
       { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
       { title: "Calendar", href: "/calendar", icon: Calendar },
       { title: "Deadlines", href: "/deadlines", icon: Clock },
+      { title: "Weekly", href: "/review/weekly", icon: CalendarCheck },
     ],
   },
   {
