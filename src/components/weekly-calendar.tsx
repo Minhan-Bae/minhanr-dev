@@ -282,6 +282,18 @@ export function WeeklyCalendar() {
   const colCount = days.length;
   const totalBlocks = data.days.reduce((s, d) => s + d.blocks.length, 0);
   const totalHours = data.days.reduce((s, d) => s + d.blocks.reduce((h, b) => h + (b.endHour - b.startHour), 0), 0);
+
+  // Category breakdown for current view (3day/week)
+  const catTotals = (() => {
+    const m: Record<string, number> = {};
+    for (const d of (view === "month" ? data.days : days)) {
+      for (const b of d.blocks) {
+        m[b.category] = (m[b.category] || 0) + Math.max(0, b.endHour - b.startHour);
+      }
+    }
+    return Object.entries(m).sort((a, b) => b[1] - a[1]);
+  })();
+  const focusEmptyDays = days.filter((d) => !(d.title || d.focus)).length;
   const nowHour = Math.floor(nowMinute / 60);
   const nowFrac = (nowMinute % 60) / 60;
   const nowTop = (nowHour - 7) * CELL_H + nowFrac * CELL_H;
@@ -329,6 +341,28 @@ export function WeeklyCalendar() {
           </div>
         </div>
       </div>
+
+      {/* ── Category breakdown + focus hint (week/3day only) ── */}
+      {view !== "month" && (catTotals.length > 0 || focusEmptyDays > 0) && (
+        <div className="flex items-center justify-between gap-3 flex-wrap text-xs px-1">
+          <div className="flex items-center gap-1.5 flex-wrap">
+            {catTotals.map(([cat, hrs]) => {
+              const s = catStyle(cat, categories);
+              return (
+                <span key={cat} className={`inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 border ${s.bg} ${s.border} ${s.text} tabular-nums`}>
+                  <span className={`h-1.5 w-1.5 rounded-full ${s.dot}`} />
+                  {cat} {hrs}h
+                </span>
+              );
+            })}
+          </div>
+          {focusEmptyDays > 0 && (
+            <span className="text-muted-foreground italic">
+              focus 미설정 {focusEmptyDays}일 — 헤더 클릭으로 anchor 잡기
+            </span>
+          )}
+        </div>
+      )}
 
       {/* ── Month view ── */}
       {view === "month" && (

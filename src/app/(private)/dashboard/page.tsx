@@ -9,11 +9,12 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { StatKpiCard } from "@/components/stat-kpi-card";
-import { DashboardCalendar } from "@/components/dashboard-calendar";
+import { DashboardCalendar, type CalendarEvent, type WeekCommitment } from "@/components/dashboard-calendar";
 import { VaultUnreachablePrivate } from "@/components/vault-unreachable";
 import { FileText, Send, Inbox, Layers } from "lucide-react";
 import { aggregate, getCachedVaultIndex, KB_HUB_HIDDEN_STATUSES, listNotes } from "@/lib/vault-index";
 import { vaultPathToHref } from "@/lib/vault-note";
+import { isoWeek, isoWeekMonday } from "@/lib/time";
 
 export const metadata = {
   title: "Dashboard | minhanr.dev",
@@ -56,24 +57,47 @@ async function DashboardContent() {
   const grid = buildMonthGrid(now.getFullYear(), now.getMonth());
   const todayIso = ymd(now);
   const weekAgoIso = ymd(new Date(now.getTime() - 7 * 86400000));
+  const monthStart = ymd(new Date(now.getFullYear(), now.getMonth(), 1));
+  const monthEnd = ymd(new Date(now.getFullYear(), now.getMonth() + 1, 0));
+  const mondayIso = isoWeekMonday(todayIso);
+  const sundayOfWeekMs = new Date(mondayIso + "T00:00:00+09:00").getTime() + 6 * 86400000;
+  const sundayIso = ymd(new Date(sundayOfWeekMs));
 
-  // ── Single-pass aggregation: 4개의 vault 순회를 1번으로 통합 ──
-  const dailyDays = new Set<string>();
+  // ── Single-pass aggregation ──
   let notesThisWeek = 0;
   let publishedThisWeek = 0;
   let inboxThisWeek = 0;
   const linkNotesRaw: Array<{ path: string; created: string; source_url: string; rec: typeof index.notes[string] }> = [];
-  const todayDeadlines: Array<{ path: string; title: string; deadline: string; status?: string }> = [];
+  const events: CalendarEvent[] = [];
+  const weekCommitments: WeekCommitment[] = [];
   let totalNotes = 0;
 
   for (const [path, rec] of Object.entries(index.notes || {})) {
     totalNotes += 1;
     const created = typeof rec.created === "string" ? rec.created : "";
 
-    // Daily note dates
-    if (path.startsWith("010_Daily/")) {
-      const m = /(\d{4}-\d{2}-\d{2})\.md$/.exec(path);
-      if (m) dailyDays.add(m[1]);
+    // Daily note → events (current month only)
+    const dailyMatch = /^010_Daily\/(\d{4}-\d{2}-\d{2})\.md$/.exec(path);
+    if (dailyMatch) {
+      const iso = dailyMatch[1];
+      if (iso >= monthStart && iso <= monthEnd) {
+        events.push({
+          iso,
+          type: "daily",
+          title: `데일리 ${iso}`,
+          href: `/notes/010_Daily/${iso}.md`,
+        });
+      }
+    }
+
+    // Published note in current month
+    if (rec.status === "published" && created >= monthStart && created <= monthEnd) {
+      events.push({
+        iso: created,
+        type: "published",
+        title: (path.split("/").pop() || path).replace(/\.md$/, "").replace(/_/g, " "),
+        href: vaultPathToHref(path),
+      });
     }
 
     // Weekly KPIs
@@ -83,29 +107,52 @@ async function DashboardContent() {
       if (path.startsWith("000_Inbox/")) inboxThisWeek += 1;
     }
 
-    // Recent links (source_url 보유 노트)
+    // Recent links
     if (typeof rec.source_url === "string" && rec.source_url.startsWith("http")) {
       linkNotesRaw.push({ path, created, source_url: rec.source_url, rec });
     }
 
-    // Today's deadlines
+    // Deadlines
     const dl = typeof rec.deadline === "string" ? rec.deadline : "";
     if (/^\d{4}-\d{2}-\d{2}/.test(dl)) {
-      const d = new Date(dl);
-      if (
-        d.getFullYear() === now.getFullYear() &&
-        d.getMonth() === now.getMonth() &&
-        d.getDate() === now.getDate()
-      ) {
-        todayDeadlines.push({
-          path,
-          title: (path.split("/").pop() || path).replace(/\.md$/, ""),
-          deadline: dl,
+      // Event on calendar (current month)
+      if (dl >= monthStart && dl <= monthEnd) {
+        events.push({
+          iso: dl,
+          type: "deadline",
+          title: (path.split("/").pop() || path).replace(/\.md$/, "").replace(/_/g, " "),
+          href: vaultPathToHref(path),
           status: typeof rec.status === "string" ? rec.status : undefined,
         });
       }
+      // Commitment: overdue, today, or this-week
+      const st = typeof rec.status === "string" ? rec.status : "";
+      const doneLike = ["published", "archived", "completed", "done"].includes(st);
+      if (!doneLike) {
+        const title = (path.split("/").pop() || path).replace(/\.md$/, "");
+        if (dl < todayIso) {
+          weekCommitments.push({ path, title, deadline: dl, status: st || undefined, priority: typeof rec.priority === "string" ? rec.priority : undefined, bucket: "overdue" });
+        } else if (dl === todayIso) {
+          weekCommitments.push({ path, title, deadline: dl, status: st || undefined, priority: typeof rec.priority === "string" ? rec.priority : undefined, bucket: "today" });
+        } else if (dl >= mondayIso && dl <= sundayIso) {
+          weekCommitments.push({ path, title, deadline: dl, status: st || undefined, priority: typeof rec.priority === "string" ? rec.priority : undefined, bucket: "this_week" });
+        }
+      }
     }
   }
+
+  weekCommitments.sort((a, b) => {
+    const order = { overdue: 0, today: 1, this_week: 2 } as const;
+    if (order[a.bucket] !== order[b.bucket]) return order[a.bucket] - order[b.bucket];
+    return a.deadline.localeCompare(b.deadline);
+  });
+
+  // Weekly review 배너: 일요일이거나 지난주 회고가 vault 에 없으면 표시
+  const priorWeek = isoWeek(ymd(new Date(now.getTime() - 7 * 86400000)));
+  const priorWeekPath = `010_Daily/Weekly/${priorWeek}.md`;
+  const hasPriorWeekReview = Boolean(index.notes?.[priorWeekPath]);
+  const isSunday = now.getDay() === 0;
+  const showWeeklyReviewBanner = !hasPriorWeekReview && (isSunday || new Date(sundayIso).getTime() < now.getTime());
 
   // Sort + slice link notes
   linkNotesRaw.sort((a, b) => (b.created || "").localeCompare(a.created || ""));
@@ -148,34 +195,12 @@ async function DashboardContent() {
       <DashboardCalendar
         monthLabel={now.toLocaleDateString("ko-KR", { year: "numeric", month: "long" })}
         grid={grid.map((c) => (c ? { iso: c.iso, day: c.date.getDate() } : null))}
-        dailyDays={Array.from(dailyDays)}
         todayIso={todayIso}
+        monthStart={monthStart}
+        events={events}
+        weekCommitments={weekCommitments}
+        showWeeklyReviewBanner={showWeeklyReviewBanner}
       />
-
-      {/* Today deadlines */}
-      <Card className="col-span-12 lg:col-span-4">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm">오늘 마감</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {todayDeadlines.length === 0 ? (
-            <p className="text-xs text-muted-foreground">오늘 마감 항목 없음</p>
-          ) : (
-            <ul className="space-y-1.5 text-sm">
-              {todayDeadlines.map((d) => (
-                <li key={d.path} className="flex items-center justify-between gap-2">
-                  <span className="truncate">{d.title}</span>
-                  {d.status && (
-                    <Badge variant="outline" className="font-normal text-xs">
-                      {d.status}
-                    </Badge>
-                  )}
-                </li>
-              ))}
-            </ul>
-          )}
-        </CardContent>
-      </Card>
 
       {/* Active projects */}
       <Card className="col-span-12 lg:col-span-6">
@@ -310,12 +335,17 @@ async function DashboardContent() {
 
 function DashboardSkeleton() {
   return (
-    <div className="grid grid-cols-12 gap-4">
-      <div className="col-span-12 lg:col-span-7 row-span-2 h-96 rounded-lg skeleton-shimmer" />
-      <div className="col-span-6 lg:col-span-5 h-32 rounded-lg skeleton-shimmer" />
-      <div className="col-span-6 lg:col-span-5 h-32 rounded-lg skeleton-shimmer" />
-      <div className="col-span-12 lg:col-span-6 h-48 rounded-lg skeleton-shimmer" />
-      <div className="col-span-12 lg:col-span-6 h-48 rounded-lg skeleton-shimmer" />
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {[0,1,2,3].map((i) => <div key={i} className="h-24 rounded-lg skeleton-shimmer" />)}
+      </div>
+      <div className="grid grid-cols-12 gap-4">
+        <div className="col-span-12 h-80 rounded-lg skeleton-shimmer" />
+        <div className="col-span-12 lg:col-span-6 h-48 rounded-lg skeleton-shimmer" />
+        <div className="col-span-12 lg:col-span-6 h-48 rounded-lg skeleton-shimmer" />
+        <div className="col-span-12 lg:col-span-6 h-48 rounded-lg skeleton-shimmer" />
+        <div className="col-span-12 lg:col-span-6 h-48 rounded-lg skeleton-shimmer" />
+      </div>
     </div>
   );
 }
