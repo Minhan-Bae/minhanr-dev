@@ -24,8 +24,8 @@ function identifyAgent(msg: string): string | null {
 }
 
 async function sendTelegramAlert(message: string) {
-  const token = process.env.TELEGRAM_BOT_TOKEN;
-  const chatId = process.env.TELEGRAM_CHAT_ID;
+  const token = process.env.TELEGRAM_ALERT_BOT_TOKEN;
+  const chatId = process.env.TELEGRAM_ALERT_CHAT_ID;
   if (!token || !chatId) return;
 
   await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
