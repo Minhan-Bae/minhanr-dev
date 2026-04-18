@@ -56,7 +56,7 @@ export default async function ArchiveYearPage({
     <>
       <section className="relative mx-auto w-full max-w-[1440px] px-6 pt-20 pb-12 sm:px-10 sm:pt-28 sm:pb-16">
         <Link
-          href="/blog"
+          href="/blog/archive"
           className="font-technical inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] text-muted-foreground transition-colors hover:text-foreground"
         >
           <ArrowLeft className="h-3.5 w-3.5" strokeWidth={1.75} />

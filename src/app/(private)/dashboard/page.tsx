@@ -185,7 +185,7 @@ async function DashboardContent() {
     <div className="space-y-6">
       {/* KPI Bento — 4 cards with hover lift. Each card fades up on
           mount with a 60ms stagger so the row reads as one sweep. */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="dashboard-snap-section grid grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="hover-lift animate-fade-up" style={{ animationDelay: "0ms" }}><StatKpiCard label="Notes (7d)" value={notesThisWeek} icon={<FileText className="h-8 w-8" />} accentColor="border-l-chart-1" href="/notes" /></div>
         <div className="hover-lift animate-fade-up" style={{ animationDelay: "60ms" }}><StatKpiCard label="Published" value={publishedThisWeek} icon={<Send className="h-8 w-8" />} accentColor="border-l-chart-2" href="/blog" /></div>
         <div className="hover-lift animate-fade-up" style={{ animationDelay: "120ms" }}><StatKpiCard label="Inbox" value={inboxThisWeek} icon={<Inbox className="h-8 w-8" />} accentColor="border-l-chart-3" href="/notes" /></div>
@@ -193,7 +193,7 @@ async function DashboardContent() {
       </div>
 
       {/* Calendar hero — full-width, keeps internal month grid */}
-      <div className="grid grid-cols-12 gap-4 animate-fade-up" style={{ animationDelay: "260ms" }}>
+      <div className="dashboard-snap-section grid grid-cols-12 gap-4 animate-fade-up" style={{ animationDelay: "260ms" }}>
         <DashboardCalendar
           monthLabel={now.toLocaleDateString("ko-KR", { year: "numeric", month: "long" })}
           grid={grid.map((c) => (c ? { iso: c.iso, day: c.date.getDate() } : null))}
@@ -206,12 +206,12 @@ async function DashboardContent() {
       </div>
 
       {/* Quick Capture — Inbox 신규 노트 즉시 저장 (Server Action + useOptimistic) */}
-      <div className="animate-fade-up" style={{ animationDelay: "340ms" }}>
+      <div className="dashboard-snap-section animate-fade-up" style={{ animationDelay: "340ms" }}>
         <QuickCapture />
       </div>
 
       {/* Bento row 1 — asymmetric: featured projects (7/12) + compact recommendation (5/12) */}
-      <div className="grid grid-cols-12 gap-4 reveal-up">
+      <div className="dashboard-snap-section grid grid-cols-12 gap-4 reveal-up">
         {/* Active projects — Server Component → Client Component(useOptimistic+ServerAction) */}
         <ActiveProjectsCard
           projects={activeProjects.map((p) => ({
@@ -255,7 +255,7 @@ async function DashboardContent() {
       </div>
 
       {/* Bento row 2 — asymmetric flipped: recent notes (5/12) + links timeline (7/12) */}
-      <div className="grid grid-cols-12 gap-4 reveal-up">
+      <div className="dashboard-snap-section grid grid-cols-12 gap-4 reveal-up">
         {/* Recent notes — compact dense list */}
         <Card className="col-span-12 lg:col-span-5 hover-lift">
           <CardHeader className="pb-2">
@@ -357,15 +357,16 @@ export default function DashboardPage() {
     weekday: "short",
   });
 
-  // Intentionally NOT a SlideDeck. The dashboard is a workspace with
-  // live forms (QuickCapture), an interactive calendar, and a long
-  // scrolling list of projects / notes / links — wheel-locked slide
-  // navigation would fight every one of those primary actions.
-  // Instead we keep a natural vertical flow with entry motion (fade-up
-  // stagger on the greeting + KPI row, reveal-up on the bento rows).
+  // Strategy D — scroll-snap proximity, not a SlideDeck.
+  // Workflow pages (live forms, interactive calendar, scrollable
+  // lists) can't tolerate wheel lockdown, so we give this surface a
+  // subtle section-snap rhythm via CSS `scroll-snap-type: y proximity`
+  // (see globals.css `html:has(.dashboard-snap-root)`). Each widget
+  // group gets `.dashboard-snap-section`, and the browser snaps near
+  // section boundaries without blocking free scroll or input.
   return (
-    <div className="mx-auto max-w-6xl space-y-6 px-4 py-6 sm:px-6">
-      <div className="space-y-1">
+    <div className="dashboard-snap-root mx-auto max-w-6xl space-y-6 px-4 py-6 sm:px-6">
+      <div className="dashboard-snap-section space-y-1">
         <h1
           className="text-2xl sm:text-3xl font-bold tracking-tight animate-fade-up"
           style={{ animationDelay: "0ms" }}

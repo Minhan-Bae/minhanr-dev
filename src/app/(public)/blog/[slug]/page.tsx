@@ -101,7 +101,7 @@ export default async function BlogPostPage({
       {/* ─── Masthead ─────────────────────────────────────────────── */}
       <section className="relative mx-auto w-full max-w-[1440px] px-6 pt-12 sm:px-10 sm:pt-16">
         <Link
-          href="/blog"
+          href="/blog/archive"
           className="font-technical inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] text-muted-foreground transition-colors hover:text-foreground"
         >
           <ArrowLeft className="h-3.5 w-3.5" strokeWidth={1.75} />
@@ -258,7 +258,7 @@ export default async function BlogPostPage({
           />
           <div className="mt-16 flex items-center justify-between">
             <Link
-              href="/blog"
+              href="/blog/archive"
               className="group font-technical inline-flex items-center gap-2 text-[13px] uppercase tracking-[0.16em] text-muted-foreground transition-colors hover:text-foreground"
             >
               <ArrowLeft

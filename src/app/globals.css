@@ -595,6 +595,33 @@
    ────────────────────────────────────────────────────────────────── */
 
 /* ══════════════════════════════════════════════════════════════════
+   Dashboard scroll-snap — subtle "section" snap on /dashboard.
+   The studio is too workflow-heavy for a wheel-locked slide deck
+   (QuickCapture form, interactive calendar, scrolling lists) but we
+   still want a beat when moving between widget groups. Proximity
+   mode means the browser only snaps near a snap point and leaves
+   free scrolling alone the rest of the time — no wheel hijack, all
+   inputs work.
+
+   Scoped to a `.dashboard-snap-root` scroll container rather than
+   set on html so the home SlideDeck is unaffected.
+   ────────────────────────────────────────────────────────────────── */
+/* Scope the snap to html only when a `.dashboard-snap-root` is
+   present (i.e. the dashboard page is mounted). `:has()` keeps this
+   zero-JS: no class-on-body toggling, no route listener. Home and
+   other public pages stay on free scroll. */
+html:has(.dashboard-snap-root) {
+  scroll-snap-type: y proximity;
+  /* Account for the private layout's sticky top header (h-12 = 3rem)
+     so snap targets land below it, not behind it. */
+  scroll-padding-top: 3rem;
+}
+.dashboard-snap-section {
+  scroll-snap-align: start;
+  scroll-margin-top: 3rem;
+}
+
+/* ══════════════════════════════════════════════════════════════════
    Graph panel — dark glass behind NotesGraph so the rain-on-glass
    scene doesn't compete with the graph nodes for attention.
    ────────────────────────────────────────────────────────────────── */
