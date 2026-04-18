@@ -95,7 +95,7 @@ const WORK: WorkItem[] = [
     role: "Designer, engineer",
     summary:
       "An editorial portfolio built on top of the same agents that maintain the work it showcases.",
-    body: `Designed as a quiet magazine. One serif display face, one sans, one vermilion accent. The content model is deliberate: every piece is hand-lifted into version control — no live database renders on the public surface.`,
+    body: `Designed as a quiet magazine. One serif display face, one sans, and a 2026 palette — Phthalo Green ground, Cloud Dancer text, Transformative Teal keyline, Divine Damson accent. The content model is deliberate: every piece is hand-lifted into version control — no live database renders on the public surface.`,
     facts: [
       { label: "Stack", value: "Next.js 16 · React 19 · OKLCH tokens" },
       { label: "Hosting", value: "Vercel Edge" },

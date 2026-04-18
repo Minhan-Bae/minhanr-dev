@@ -8,7 +8,7 @@ import { WorkCover } from "@/components/work-cover";
 /**
  * Home — editorial portfolio index, per brand-tenets v2.
  *
- *   1. Masthead       — wordmark, practice, vermilion bar
+ *   1. Masthead       — wordmark, practice, teal keyline bar
  *   2. Lede           — one-sentence manifesto
  *   3. Selected Work  — curator-ordered case grid (asymmetric)
  *   4. Selected Writing — 3 most recent posts

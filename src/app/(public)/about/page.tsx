@@ -106,9 +106,11 @@ export default function AboutPage() {
             <p>
               Built with Next.js and React on Vercel's edge. Typeset in
               Instrument Serif for display, Geist for running text, and
-              Geist Mono for labels and timestamps. The single accent is a
-              warm vermilion, chosen for the way it reads across dark and
-              paper backgrounds.
+              Geist Mono for labels and timestamps. The palette is a 2026
+              quartet — Cloud Dancer off-white, Phthalo Green ground,
+              Transformative Teal keyline, Divine Damson warm accent —
+              chosen for the way they read across dark and paper backgrounds
+              without reaching for neon.
             </p>
             <p>
               The content model is deliberate. Every piece of work and every

@@ -7,29 +7,34 @@
  * When you change a color in globals.css's `.dark` block, update the
  * matching entry here in the same commit.
  *
- * Palette: "Ink" — near-black cool ground, ivory text, cinematic vermilion
- * accent. See docs/brand-tenets.md (v2) for the rationale.
+ * Palette: "Phthalo" — 2026 color-of-the-year quartet.
+ *   Cloud Dancer (Pantone 11-4201) #F0EFEB      — soft off-white
+ *   Phthalo Green                  #123524      — deep botanic
+ *   Transformative Teal (WGSN)     #2F6364      — primary accent
+ *   Divine Damson (Graham & Brown) #4A2D3C      — secondary accent
+ *
+ * See docs/brand-tenets.md (v2) for the editorial rationale.
  */
 
 export const BRAND_TOKENS = {
   // ── Surface (dark theme — the canonical brand face) ──
-  background: "#0e0f14",   // deep ink
-  card:       "#161822",
-  popover:    "#131521",
+  background: "#0f2619",   // Phthalo base, slightly darker for UI depth
+  card:       "#123524",   // Phthalo Green (raw)
+  popover:    "#102c1e",
 
   // ── Text ──
-  foreground:       "#f3eee3", // warm ivory
-  mutedForeground:  "#9e9789",
-  muted:            "#1a1c26",
+  foreground:       "#f0efeb", // Cloud Dancer
+  mutedForeground:  "#a8b0a5",
+  muted:            "#173a28",
 
   // ── Brand accent ──
-  primary:            "#e16a3e", // warm vermilion
-  primaryForeground:  "#131521",
-  accent:             "#e16a3e",
-  accentForeground:   "#131521",
+  primary:            "#2f6364", // Transformative Teal
+  primaryForeground:  "#f0efeb",
+  accent:             "#4a2d3c", // Divine Damson
+  accentForeground:   "#f0efeb",
 
   // ── Hairline (thin separator) ──
-  hairline: "rgba(255, 255, 255, 0.08)",
+  hairline: "rgba(240, 239, 235, 0.10)",
 } as const;
 
 /**

@@ -32,46 +32,58 @@ const LOCAL_ENV = path.resolve(ROOT, ".env.local");
 const OUT_ROOT = path.resolve(ROOT, "public/work");
 
 // ── Prompts — one per work slug ──────────────────────────────────────
-// Each prompt is a cinematic editorial brief tuned to the brand palette
-// (deep ink ground, ivory text, warm vermilion accent). Keep the subject
-// abstract and visual — avoid literal UI screenshots.
+// Palette keywords tuned to the 2026 colour-of-the-year quartet so that
+// generated imagery coheres with the site tokens:
+//
+//   Cloud Dancer   — soft off-white (#F0EFEB), Pantone 11-4201, 2026 COY
+//   Phthalo Green  — deep botanic dark (#123524)
+//   Transformative Teal — primary accent (#2F6364), WGSN/Coloro 2026 COY
+//   Divine Damson  — warm secondary accent (#4A2D3C), Graham & Brown 2026
+//
+// Each prompt is an editorial brief. Avoid neon, saturated blues, or
+// warm vermilion (previous palette). Favour natural, matte, grounded,
+// organic texture — in line with Adobe's 2026 trend forecast.
 const PROMPTS = {
   "oikbas-ecosystem": {
     aspectRatio: "4:5",
     prompt: [
-      "Editorial cinematic photograph, medium format aesthetic.",
-      "Abstract visualization of an autonomous knowledge system:",
-      "seven glowing luminous nodes connected by soft flowing threads of light,",
-      "suspended in a deep ink-blue volumetric haze.",
-      "One node glows warm vermilion — the others pale ivory.",
-      "Composition: negative space top-left, nodes clustered bottom-right.",
-      "Soft caustic light, gentle film grain, shallow depth of field.",
-      "No text, no UI, no logos. Editorial print quality.",
+      "Editorial cinematic still, medium format aesthetic.",
+      "Abstract visualisation of an autonomous knowledge network:",
+      "seven soft luminous nodes connected by thin organic threads,",
+      "suspended in a deep phthalo green botanic haze (#123524).",
+      "The nodes glow pale Cloud Dancer off-white (#F0EFEB);",
+      "one node is accented with Transformative Teal (#2F6364),",
+      "another with a subtle Divine Damson warm plum (#4A2D3C).",
+      "Composition: generous negative space top-left, nodes clustered bottom-right.",
+      "Soft diffused studio light, fine film grain, matte finish, shallow depth of field.",
+      "No text, no UI, no logos, no neon, no digital glow. Organic editorial print quality.",
     ].join(" "),
   },
   "vfx-research-pipeline": {
     aspectRatio: "16:9",
     prompt: [
       "Cinematic still, editorial tone, shot on medium format film.",
-      "A lone silhouetted figure in a dark studio,",
-      "illuminated by a single volumetric beam of warm vermilion light",
-      "cutting across dense atmospheric haze.",
+      "A lone silhouetted figure in a dim phthalo-green studio (#123524),",
+      "illuminated by a single soft beam of Transformative Teal light (#2F6364)",
+      "cutting across misty atmospheric haze.",
       "The figure studies projected abstract geometric forms on a wall —",
-      "soft caustic patterns, deep shadow, subtle film grain.",
-      "Palette: deep ink blue-black, ivory highlights, warm vermilion accent.",
-      "No text, no logos, no recognizable products. Wide cinematic composition.",
+      "soft caustic patterns in Cloud Dancer off-white (#F0EFEB),",
+      "a faint Divine Damson plum reflection (#4A2D3C) in the backlight.",
+      "Deep botanic shadow, subtle film grain, natural matte surfaces.",
+      "No text, no logos, no neon, no warm red. Wide cinematic composition, grounded and contemplative.",
     ].join(" "),
   },
   "minhanr-dev": {
     aspectRatio: "4:5",
     prompt: [
-      "Editorial flat-lay photograph on warm cream paper background.",
-      "A minimal quiet-magazine composition: a single serif display letter rendered large,",
-      "a thin vermilion accent bar to its left,",
-      "fragments of typographic specimens and hairline-ruled paper sheets arranged asymmetrically.",
-      "Overhead lighting, soft shadow, medium format sharpness.",
-      "Palette: cream ivory, graphite ink, warm vermilion.",
-      "No text content, no logos. Editorial print quality, Kinfolk-style.",
+      "Editorial flat-lay photograph on soft Cloud Dancer off-white paper (#F0EFEB).",
+      "A quiet-magazine composition: a single serif display letter rendered large in deep phthalo green ink (#123524),",
+      "a thin vertical Transformative Teal accent bar to its left (#2F6364),",
+      "fragments of typographic specimens, pressed botanical leaves, and hairline-ruled paper sheets arranged asymmetrically,",
+      "a small swatch of Divine Damson (#4A2D3C) as an inkblot in the corner.",
+      "Soft overhead natural light, long gentle shadow, medium format sharpness, matte texture.",
+      "Palette: Cloud Dancer, Phthalo Green, Transformative Teal, Divine Damson. No neon, no digital glow, no warm red.",
+      "Kinfolk-style editorial print quality.",
     ].join(" "),
   },
 };
