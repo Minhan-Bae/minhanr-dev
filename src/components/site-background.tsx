@@ -1,23 +1,22 @@
 import Image from "next/image";
 
 /**
- * SiteBackground — a single generative image sitting behind every
- * public page, slowly animated with a Ken-Burns-style pan+zoom.
+ * SiteBackground — the full-bleed generative image sitting behind every
+ * public page.
+ *
+ * Works together with RainEffect: the image here is rendered with a
+ * soft `filter: blur(…)` so that each rain drop — which uses
+ * `background-attachment: fixed` on the same `bg.jpg` — can act as a
+ * clear lens over a blurred window. That's the codrops/RainEffect
+ * trick: un-blur through the drops, not blur inside them.
  *
  * Layers (back → front):
- *   1. Full-bleed <Image> with `ken-burns-drift` CSS animation
- *   2. Vertical gradient overlay — transparent at top, solid at bottom
- *      so long paragraphs at scroll-bottom stay readable
- *   3. Fine grain texture at ~3% opacity (tied into the existing
- *      `.grain` primitive)
+ *   1. Blurred <Image> with `ken-burns-drift` animation
+ *   2. Gradient overlay — transparent at top, solid at bottom — kept
+ *      muted enough that the rain lenses still have something to look at
  *
  * Placed inside `(public)/layout.tsx` so the studio surfaces
- * (/dashboard and friends) stay on solid colour — a conscious
- * separation between the public face and the working back-room.
- *
- * Asset: `/public/bg.jpg` — generated via scripts/generate-backgrounds.mjs.
- * When missing, the background simply renders the solid theme colour and
- * the overlay still sits above it. No broken image state.
+ * (/dashboard and friends) stay on solid colour.
  */
 export function SiteBackground() {
   return (
@@ -32,11 +31,13 @@ export function SiteBackground() {
           fill
           priority
           sizes="100vw"
-          className="object-cover opacity-[0.22]"
+          className="object-cover opacity-[0.55]"
+          style={{ filter: "blur(6px) saturate(0.9)" }}
         />
       </div>
-      {/* Legibility gradient — stronger at the fold so text stays crisp. */}
-      <div className="absolute inset-0 bg-gradient-to-b from-background/30 via-background/65 to-background" />
+      {/* Softer legibility gradient — rain lenses need something to
+          magnify, so we back off the previous near-opaque bottom fill. */}
+      <div className="absolute inset-0 bg-gradient-to-b from-background/20 via-background/35 to-background/55" />
     </div>
   );
 }

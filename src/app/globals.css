@@ -607,22 +607,27 @@
   position: absolute;
   border-radius: 50%;
   transform: translate(-50%, -50%);
-  /* The lens — this is what sells the "it's actually glass" read.
-     Without it, even well-shaded circles look like stickers. */
-  backdrop-filter: blur(4px) saturate(1.4);
-  -webkit-backdrop-filter: blur(4px) saturate(1.4);
-  /* Rim + bottom shadow gives the drop a body. The inset shadows
-     work because backdrop-filter paints under the element's own fill. */
+  /* The lens — each drop paints the un-blurred bg at its own
+     viewport position via `background-attachment: fixed`. Because
+     the site background image is rendered with blur (see
+     site-background.tsx), the drop becomes a clear magnifier cut
+     into a foggy window. This is the codrops trick, minus the
+     WebGL. */
+  background-image: url("/bg.jpg");
+  background-attachment: fixed;
+  background-size: cover;
+  background-position: center;
+  /* Glass body — white rim top-left, dark rim bottom-right. The
+     combination of the inset rims + the moving lens gives the drop
+     dimensional weight. */
   box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.14),
-    inset 2px 2px 3px rgba(255, 255, 255, 0.22),
-    inset -2px -3px 4px rgba(0, 0, 0, 0.22),
-    0 1px 3px rgba(0, 0, 0, 0.22);
-  background:
-    radial-gradient(circle at 32% 30%,
-      rgba(255, 255, 255, 0.32) 0%,
-      rgba(255, 255, 255, 0.06) 40%,
-      rgba(255, 255, 255, 0) 70%);
+    inset 2px 2px 4px rgba(255, 255, 255, 0.32),
+    inset -2px -3px 6px rgba(0, 0, 0, 0.35),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.18),
+    0 2px 4px rgba(0, 0, 0, 0.3);
+  /* Gentle refraction — drops are slightly more saturated / brighter
+     than the fog, matching how real water acts as a contrast lens. */
+  filter: saturate(1.2) brightness(1.08);
   animation: rain-bead-in 0.9s var(--ease-out) both;
   will-change: transform, opacity;
 }

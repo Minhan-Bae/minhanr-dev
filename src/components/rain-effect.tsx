@@ -3,28 +3,29 @@
 import { useEffect, useState } from "react";
 
 /**
- * RainEffect — DOM-based rain-on-glass layer (v2).
+ * RainEffect — codrops/RainEffect style, in pure CSS.
  *
- * The v1 canvas approach painted small translucent circles, which read
- * as bubble stickers rather than water. The codrops reference gets its
- * weight from each drop being an actual *lens* over the background —
- * the pixels behind each drop are blurred and slightly desaturated, so
- * your eye reads it as glass with water on it.
+ * The trick: we don't try to blur the background through the drops.
+ * Instead the whole site background is pre-blurred (see
+ * SiteBackground), and each drop paints a fragment of the *un-blurred*
+ * `bg.jpg` via `background-attachment: fixed`. Because the fixed
+ * attachment anchors the image to the viewport, the pixels visible
+ * inside a drop are exactly the pixels at that viewport position —
+ * so each drop reads as a clear lens over the foggy window behind.
  *
- * We reproduce that by rendering each drop as an absolutely-positioned
- * `<div>` with `backdrop-filter: blur() saturate()` and a subtle inset
- * shadow for rim depth. Browsers composite backdrop-filter on the GPU,
- * so 30–40 drops is cheap. Drops form in with a scale animation; a
- * subset are tagged as "falling" and slide down the window with a CSS
- * transform.
+ *   viewport → blurred bg.jpg (SiteBackground)
+ *              ↑  the window is foggy
+ *   drops   → sharp   bg.jpg via attachment: fixed
+ *              ↑  lens view, aligned by position
  *
- * Self-resolving procedural spawn — we keep a pool at capacity, drop
- * the oldest when adding new ones, so the layer never feels static.
- * All animation is CSS; React only owns the list.
+ * Rim shadows + a top-left specular highlight sell the glass bead
+ * depth. A subset of drops is tagged as "falling" and slides down the
+ * viewport with a vertical squash. All motion is CSS; React owns the
+ * list and re-spawns on a 2.4s interval so the window keeps evolving.
  *
- *   • fixed, -z-5, pointer-events: none
- *   • clamps drop count and size to viewport size
- *   • re-spawns every ~2.4 s for continuous evolution
+ *   • fixed, -z-[5], pointer-events: none
+ *   • 34 static beads + 5 falling drops
+ *   • GPU-composited — 40 drops is cheap
  */
 
 interface Drop {
@@ -35,40 +36,34 @@ interface Drop {
   topPct: number;
   /** px diameter */
   size: number;
-  /** some drops slide; most stay beaded */
+  /** true = animates falling down */
   falling: boolean;
-  /** seconds of fall animation (randomised per drop) */
+  /** seconds of fall animation */
   fallDuration: number;
   /** seconds delay before the fall starts */
   fallDelay: number;
 }
 
-const STATIC_COUNT = 32;
-const FALLING_COUNT = 4;
-/** Larger minimum so drops read as weight, not speckle. */
-const MIN_SIZE = 14;
-const MAX_SIZE = 54;
-/** Larger drops get a higher chance of being the ones that fall. */
+const STATIC_COUNT = 34;
+const FALLING_COUNT = 5;
+const MIN_SIZE = 18;
+const MAX_SIZE = 74;
 
 let nextId = 0;
 
 function makeDrop(falling: boolean): Drop {
-  // Falling drops tend to start larger (they're the heavy ones that
-  // exceeded surface tension and detached).
   const size = falling
-    ? MAX_SIZE * (0.65 + Math.random() * 0.35)
+    ? MAX_SIZE * (0.7 + Math.random() * 0.3)
     : MIN_SIZE + Math.random() * (MAX_SIZE - MIN_SIZE) * 0.85;
 
   return {
     id: nextId++,
     leftPct: Math.random() * 98 + 1,
-    topPct: falling
-      ? Math.random() * 35 // falling drops start in upper portion
-      : Math.random() * 92 + 4,
+    topPct: falling ? Math.random() * 30 : Math.random() * 90 + 5,
     size,
     falling,
-    fallDuration: falling ? 4 + Math.random() * 4 : 0,
-    fallDelay: falling ? Math.random() * 3 : 0,
+    fallDuration: falling ? 5 + Math.random() * 5 : 0,
+    fallDelay: falling ? Math.random() * 4 : 0,
   };
 }
 
@@ -85,19 +80,17 @@ export function RainEffect() {
   useEffect(() => {
     setDrops(seed());
 
-    // Every few seconds, retire a small batch and introduce fresh drops
-    // so the window stays in motion without the whole layer flashing.
     const interval = window.setInterval(() => {
       setDrops((prev) => {
         const retireCount = 3 + Math.floor(Math.random() * 3);
         const kept = prev.slice(retireCount);
         const fresh = [
           ...Array.from({ length: retireCount - 1 }, () => makeDrop(false)),
-          makeDrop(Math.random() < 0.35), // occasional fresh faller
+          makeDrop(Math.random() < 0.4),
         ];
         return [...kept, ...fresh];
       });
-    }, 2400);
+    }, 2600);
 
     return () => window.clearInterval(interval);
   }, []);
@@ -117,7 +110,9 @@ export function RainEffect() {
             width: `${d.size}px`,
             height: `${d.size}px`,
             animationDelay: d.falling ? `${d.fallDelay}s` : "0s",
-            animationDuration: d.falling ? `${d.fallDuration}s` : undefined,
+            animationDuration: d.falling
+              ? `${d.fallDuration}s`
+              : undefined,
           }}
         />
       ))}
