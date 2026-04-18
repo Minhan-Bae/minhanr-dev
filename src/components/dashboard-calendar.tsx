@@ -12,6 +12,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { apiFetch } from "@/lib/api-fetch";
+import { NoteQuickActions } from "@/components/note-quick-actions";
 
 export type EventType = "daily" | "deadline" | "published" | "timeblocked";
 
@@ -261,9 +262,10 @@ export function DashboardCalendar({
               ) : (
                 <ul className="space-y-1.5 text-sm">
                   {weekCommitments.slice(0, 5).map((c) => (
-                    <li key={c.path} className="flex items-center justify-between gap-2">
-                      <span className="truncate">{c.title.replace(/_/g, " ")}</span>
+                    <li key={c.path} className="group flex items-center justify-between gap-2 py-1 px-2 -mx-2 rounded hover:bg-muted/50 transition-colors">
+                      <span className="truncate flex-1 min-w-0">{c.title.replace(/_/g, " ")}</span>
                       <div className="flex items-center gap-1.5 shrink-0 text-xs">
+                        <NoteQuickActions path={c.path} />
                         {c.bucket === "overdue" && (
                           <Badge variant="outline" className="font-normal text-destructive border-destructive/40">
                             지남
