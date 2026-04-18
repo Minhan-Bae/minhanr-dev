@@ -1,3 +1,5 @@
+import { TypewriterLoop } from "@/components/typewriter-loop";
+
 interface SectionKickerProps {
   /** Small-caps kicker label, e.g. "Selected Work · 01" */
   kicker: string;
@@ -12,9 +14,12 @@ interface SectionKickerProps {
  * work, writing, and closing acts. Editorial style: kicker → display
  * headline → one-line note, all left-aligned on a generous canvas.
  *
- * Kept in its own component so page.tsx can slot it wherever a new
- * act begins. Marked `data-slide` so the SlideDeck treats it as its
- * own stop.
+ * The headline now boomerangs via TypewriterLoop so the home deck
+ * carries the same identity-defining type motion on every slide, not
+ * just the hero. Visibility-gated — the loop only runs while the
+ * slide is on-screen (see TypewriterLoop's IntersectionObserver), so
+ * the synthesized click SFX and animation stop whenever the deck
+ * moves to a different slide.
  */
 export function SectionKicker({ kicker, headline, note }: SectionKickerProps) {
   return (
@@ -24,15 +29,19 @@ export function SectionKicker({ kicker, headline, note }: SectionKickerProps) {
     >
       <div className="max-w-4xl">
         <p className="kicker mb-6">{kicker}</p>
-        <h2
-          className="font-display italic tracking-[-0.025em] text-foreground"
+        <TypewriterLoop
+          as="h2"
+          text={headline}
+          typeDelay={85}
+          eraseDelay={45}
+          holdMs={5200}
+          pauseMs={900}
+          className="font-display italic tracking-[-0.025em] text-foreground block"
           style={{
             fontSize: "clamp(2.75rem, 9vw, 7.5rem)",
             lineHeight: "1.02",
           }}
-        >
-          {headline}
-        </h2>
+        />
         {note && (
           <p className="mt-10 max-w-xl text-[15px] leading-[1.7] text-muted-foreground sm:text-[16px]">
             {note}

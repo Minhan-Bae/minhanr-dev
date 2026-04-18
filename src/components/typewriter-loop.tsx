@@ -35,19 +35,25 @@ interface TypewriterLoopProps {
   lang?: string;
   /** Show a blinking cursor at the current typing head. */
   cursor?: boolean;
+  /** Emit a synthesized key-click on each letter mount / unmount. */
+  sfx?: boolean;
 }
 
 /**
  * TypewriterLoop — boomerang typewriter with a cursor that tracks the
  * typing head.
  *
- * Only letters that have been typed are rendered in the DOM; the
- * blinking cursor is rendered immediately after the last visible
- * letter. That way the cursor "advances" with the text as it types in
- * and "retreats" as it erases, instead of camping at the end of the
- * full word. Each newly-mounted letter runs `tw-letter-in` so it
- * fades-and-drops into place; erased letters are unmounted and read
- * as a hard backspace — fast and legible.
+ * Types in → holds → erases right-to-left → pauses → cycles. Each
+ * letter fades and drops into place on mount; erased letters unmount
+ * and read as a hard backspace.
+ *
+ * Visibility gating: the animation only runs while the wrapper is at
+ * least partially in the viewport. When the home's SlideDeck moves to
+ * another slide, `IntersectionObserver` fires with
+ * `isIntersecting: false` and the state machine parks itself — no
+ * more timers, no more synthesized clicks. On re-entry (visitor
+ * scrolls back to this slide) the machine resumes from whatever phase
+ * and count it was in.
  *
  * Client component — the server render is empty; JS fills in on mount.
  * The boomerang IS the brand motion, so the brief empty moment before
@@ -64,16 +70,32 @@ export function TypewriterLoop({
   style,
   lang,
   cursor = true,
+  sfx = true,
 }: TypewriterLoopProps) {
   const Tag = (as ?? "span") as ElementType;
   const letters = [...text];
   const [visibleCount, setVisibleCount] = useState(0);
   const [phase, setPhase] = useState<Phase>("typing");
+  const [isActive, setIsActive] = useState(true);
   const timerRef = useRef<number | null>(null);
+  const wrapperRef = useRef<HTMLElement | null>(null);
 
   // Prime the Web Audio context + hook first-gesture unlock once.
   useEffect(() => {
     ensureTypewriterAudio();
+  }, []);
+
+  // Visibility gate — pause the state machine when the wrapper is
+  // scrolled (or SlideDeck-translated) out of view.
+  useEffect(() => {
+    const el = wrapperRef.current;
+    if (!el || typeof IntersectionObserver === "undefined") return;
+    const obs = new IntersectionObserver(
+      ([entry]) => setIsActive(entry.isIntersecting),
+      { threshold: 0.1 }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
   }, []);
 
   useEffect(() => {
@@ -84,11 +106,18 @@ export function TypewriterLoop({
       }
     };
 
+    if (!isActive) {
+      // Parked — cancel any pending tick and emit no sound. When the
+      // slide comes back into view, isActive flips true and this
+      // effect re-fires from the current (phase, visibleCount).
+      return clearTimer;
+    }
+
     if (phase === "typing") {
       if (visibleCount < letters.length) {
         timerRef.current = window.setTimeout(() => {
           setVisibleCount((c) => c + 1);
-          playTypewriterClick();
+          if (sfx) playTypewriterClick();
         }, typeDelay);
       } else {
         timerRef.current = window.setTimeout(() => setPhase("hold"), holdMs);
@@ -99,7 +128,7 @@ export function TypewriterLoop({
       if (visibleCount > 0) {
         timerRef.current = window.setTimeout(() => {
           setVisibleCount((c) => c - 1);
-          playTypewriterClick({ volume: 0.07 });
+          if (sfx) playTypewriterClick({ volume: 0.07 });
         }, eraseDelay);
       } else {
         timerRef.current = window.setTimeout(() => setPhase("pause"), pauseMs);
@@ -109,10 +138,16 @@ export function TypewriterLoop({
     }
 
     return clearTimer;
-  }, [phase, visibleCount, letters.length, typeDelay, eraseDelay, holdMs, pauseMs]);
+  }, [phase, visibleCount, letters.length, typeDelay, eraseDelay, holdMs, pauseMs, isActive, sfx]);
 
   return (
-    <Tag className={className} style={style} lang={lang} aria-label={text}>
+    <Tag
+      ref={wrapperRef as React.Ref<HTMLElement>}
+      className={className}
+      style={style}
+      lang={lang}
+      aria-label={text}
+    >
       {letters.slice(0, visibleCount).map((char, i) => {
         if (char === " ") {
           return (

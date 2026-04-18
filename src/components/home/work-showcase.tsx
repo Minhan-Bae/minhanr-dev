@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import type { WorkItem } from "@/lib/work";
 import { WorkCover } from "@/components/work-cover";
+import { TypewriterLoop } from "@/components/typewriter-loop";
 
 interface WorkShowcaseProps {
   items: WorkItem[];
@@ -92,15 +93,19 @@ export function WorkSlide({
             {item.discipline} · {item.year}
           </p>
 
-          <h3
-            className="mt-3 font-display italic tracking-[-0.02em] text-foreground"
+          <TypewriterLoop
+            as="h3"
+            text={item.title}
+            typeDelay={95}
+            eraseDelay={50}
+            holdMs={5600}
+            pauseMs={800}
+            className="mt-3 font-display italic tracking-[-0.02em] text-foreground block"
             style={{
               fontSize: "clamp(1.75rem, 3.6vw, 3rem)",
               lineHeight: "1.05",
             }}
-          >
-            {item.title}
-          </h3>
+          />
 
           <p className="mt-5 max-w-prose text-[14px] leading-[1.7] text-muted-foreground sm:text-[15px]">
             {item.summary}

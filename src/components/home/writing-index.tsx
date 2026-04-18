@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import type { BlogPostMeta } from "@/lib/blog";
+import { TypewriterLoop } from "@/components/typewriter-loop";
 
 interface WritingIndexProps {
   posts: BlogPostMeta[];
@@ -25,12 +26,16 @@ export function WritingIndex({ posts, total }: WritingIndexProps) {
       <header className="mb-8 flex flex-col gap-3 sm:mb-12 sm:flex-row sm:items-baseline sm:justify-between">
         <div>
           <p className="kicker mb-3">Writing · 02</p>
-          <h2
-            className="font-display italic tracking-[-0.025em] text-foreground"
+          <TypewriterLoop
+            as="h2"
+            text="Notes from the studio."
+            typeDelay={80}
+            eraseDelay={45}
+            holdMs={5200}
+            pauseMs={900}
+            className="font-display italic tracking-[-0.025em] text-foreground block"
             style={{ fontSize: "clamp(2rem, 5.5vw, 4rem)", lineHeight: "1.02" }}
-          >
-            Notes from the studio.
-          </h2>
+          />
         </div>
         <div className="flex items-baseline gap-6 font-technical text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
           <span>

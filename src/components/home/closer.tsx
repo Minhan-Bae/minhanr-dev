@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { BRAND_IDENTITY } from "@/lib/brand/tokens";
+import { TypewriterLoop } from "@/components/typewriter-loop";
 
 /**
  * Closer — final slide. Oversized italic manifesto with a hanging
@@ -24,15 +25,19 @@ export function Closer() {
             &ldquo;
           </span>
 
-          <blockquote
-            className="relative max-w-[18ch] font-display italic tracking-[-0.025em] text-foreground sm:max-w-[22ch]"
+          <TypewriterLoop
+            as="blockquote"
+            text={BRAND_IDENTITY.manifestoEn}
+            typeDelay={75}
+            eraseDelay={40}
+            holdMs={6000}
+            pauseMs={900}
+            className="relative block max-w-[18ch] font-display italic tracking-[-0.025em] text-foreground sm:max-w-[22ch]"
             style={{
               fontSize: "clamp(2.5rem, 7vw, 5.5rem)",
               lineHeight: "1.05",
             }}
-          >
-            {BRAND_IDENTITY.manifestoEn}
-          </blockquote>
+          />
 
           <p className="mt-10 font-technical text-[11px] uppercase tracking-[0.22em] text-muted-foreground sm:mt-12">
             — {BRAND_IDENTITY.studio}.dev · brand tenets v2
