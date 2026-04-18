@@ -12,6 +12,7 @@ import { DashboardCalendar, type CalendarEvent, type WeekCommitment } from "@/co
 import { VaultUnreachablePrivate } from "@/components/vault-unreachable";
 import { ActiveProjectsCard } from "@/components/dashboard/active-projects-card";
 import { QuickCapture } from "@/components/dashboard/quick-capture";
+import { TimeThisWeekCard } from "@/components/dashboard/time-this-week-card";
 import { FileText, Send, Inbox, Layers } from "lucide-react";
 import { aggregate, getCachedVaultIndex, KB_HUB_HIDDEN_STATUSES, listNotes } from "@/lib/vault-index";
 import { vaultPathToHref } from "@/lib/vault-note";
@@ -190,6 +191,13 @@ async function DashboardContent() {
         <div className="hover-lift animate-fade-up" style={{ animationDelay: "60ms" }}><StatKpiCard label="Published" value={publishedThisWeek} icon={<Send className="h-8 w-8" />} accentColor="border-l-chart-2" href="/blog" /></div>
         <div className="hover-lift animate-fade-up" style={{ animationDelay: "120ms" }}><StatKpiCard label="Inbox" value={inboxThisWeek} icon={<Inbox className="h-8 w-8" />} accentColor="border-l-chart-3" href="/notes" /></div>
         <div className="hover-lift animate-fade-up" style={{ animationDelay: "180ms" }}><StatKpiCard label="Total Notes" value={totalNotes} icon={<Layers className="h-8 w-8" />} accentColor="border-l-chart-4" href="/notes" /></div>
+      </div>
+
+      {/* Time this week — category roll-up with coloured bars. Sits
+          between KPIs and the month calendar so the first thing the
+          eye hits below the top stats is "where did my week go". */}
+      <div className="dashboard-snap-section animate-fade-up" style={{ animationDelay: "220ms" }}>
+        <TimeThisWeekCard />
       </div>
 
       {/* Calendar hero — full-width, keeps internal month grid */}
