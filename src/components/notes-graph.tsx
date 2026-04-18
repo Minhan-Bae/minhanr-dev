@@ -248,6 +248,17 @@ export function NotesGraph({ posts }: NotesGraphProps) {
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const draggingRef = useRef<string | null>(null);
   const dragMovedRef = useRef(false);
+  // Drag-velocity tracker: exponential moving average of pointer
+  // displacement per 60fps frame, in viewBox units. On pointer-up we
+  // inject this into the node's vx/vy so a flung drag carries through
+  // the spring network instead of stopping dead at the release point.
+  const dragVelRef = useRef<{
+    vx: number;
+    vy: number;
+    lastX: number;
+    lastY: number;
+    lastT: number;
+  }>({ vx: 0, vy: 0, lastX: 0, lastY: 0, lastT: 0 });
 
   // ─────────────────────────────────────────────────────────────────
   // Graph data lives in a ref, not in useMemo, for a very specific
@@ -458,6 +469,16 @@ export function NotesGraph({ posts }: NotesGraphProps) {
     draggingRef.current = node.id;
     dragMovedRef.current = false;
     node.fixed = true;
+    // Reset drag velocity tracker — the next pointer-move will seed it
+    // from the pointer's initial viewBox position.
+    const p = pointerToSvg(ev);
+    dragVelRef.current = {
+      vx: 0,
+      vy: 0,
+      lastX: p?.x ?? node.x,
+      lastY: p?.y ?? node.y,
+      lastT: performance.now(),
+    };
   }
 
   function onSvgPointerMove(ev: React.PointerEvent<SVGSVGElement>) {
@@ -475,11 +496,31 @@ export function NotesGraph({ posts }: NotesGraphProps) {
     if (!p) return;
     const node = nodeById.get(drag);
     if (!node) return;
+
     const dx = p.x - node.x;
     const dy = p.y - node.y;
     if (Math.hypot(dx, dy) > 3) dragMovedRef.current = true;
+
+    // Track drag velocity so a flung release carries inertia. We
+    // normalise per-ms and rescale to per-frame (16ms ≈ 60fps) so
+    // the inertia feels the same regardless of how often pointermove
+    // fires. EMA blends in the latest sample at 0.4 weight — low
+    // enough that a jittery pointer doesn't produce wild kicks.
+    const now = performance.now();
+    const dragVel = dragVelRef.current;
+    const dt = Math.max(1, now - dragVel.lastT);
+    const instVx = ((p.x - dragVel.lastX) / dt) * 16;
+    const instVy = ((p.y - dragVel.lastY) / dt) * 16;
+    dragVel.vx = dragVel.vx * 0.6 + instVx * 0.4;
+    dragVel.vy = dragVel.vy * 0.6 + instVy * 0.4;
+    dragVel.lastX = p.x;
+    dragVel.lastY = p.y;
+    dragVel.lastT = now;
+
     node.x = p.x;
     node.y = p.y;
+    // Keep vx/vy at zero while pinned — inertia is injected only at
+    // the moment of release.
     node.vx = 0;
     node.vy = 0;
   }
@@ -488,6 +529,14 @@ export function NotesGraph({ posts }: NotesGraphProps) {
     if (draggingRef.current === node.id) {
       draggingRef.current = null;
       node.fixed = false;
+      // Inject tracked drag velocity as initial inertia. MAX_STEP's
+      // per-axis clamp in step() keeps genuinely wild flings bounded.
+      const dv = dragVelRef.current;
+      // Scale factor: drag feels naturally "heavier" than free
+      // simulation, so we give it a small boost rather than
+      // 1:1 transfer.
+      node.vx = dv.vx * 1.15;
+      node.vy = dv.vy * 1.15;
     }
     // Treat a no-movement pointerup as a click.
     if (!dragMovedRef.current && node.kind === "public") {
@@ -500,7 +549,7 @@ export function NotesGraph({ posts }: NotesGraphProps) {
 
   return (
     <figure
-      className="relative w-full"
+      className="relative w-full overflow-hidden rounded-sm border border-[var(--hairline)]"
       aria-label="스튜디오 노트 네트워크 — force-directed 그래프"
       role="img"
     >
@@ -542,7 +591,7 @@ export function NotesGraph({ posts }: NotesGraphProps) {
                     : "var(--muted-foreground)"
                 }
                 strokeOpacity={isHot ? 0.55 : 0.12}
-                strokeWidth={isHot ? 1.2 : 0.6}
+                strokeWidth={isHot ? 1.6 : 1}
                 style={{
                   transition:
                     "stroke-opacity 220ms ease, stroke-width 220ms ease",
