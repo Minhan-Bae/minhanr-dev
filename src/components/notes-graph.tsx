@@ -5,32 +5,48 @@ import { useRouter } from "next/navigation";
 import type { BlogPostMeta } from "@/lib/blog";
 
 /**
- * NotesGraph — a constellation map of the studio's notes.
+ * NotesGraph — live force-directed constellation of the studio's notes.
  *
- * Public nodes are blog posts (src/content/posts/*): clickable, coloured
- * by primary category, positioned in a radial layout where each category
- * owns an angular sector and recency sets the radius (newest closer to
- * the centre).
+ * Every frame:
+ *   1. Coulomb-like repulsion between every pair within REPEL_CUTOFF.
+ *   2. Spring attraction along each edge (Hooke, rest length = SPRING_REST).
+ *   3. Weak gravity toward the viewBox centre so the graph doesn't drift.
+ *   4. Velocity integration with damping; positions written straight to
+ *      SVG transform attributes (React state stays out of the hot path).
  *
- * Private nodes are five labelled "shadow" categories at the centre —
- * label only, no title/count/date, satisfying brand-tenets-v2 §4
- * (Privacy first) while still signalling the studio has work off-surface.
+ * Interactions:
+ *   - Pointer-drag a node: it's pinned to the cursor and drags its
+ *     neighbours through the spring network (Obsidian-style).
+ *   - Pointer-up without movement = click: navigate to `/blog/${slug}`
+ *     for public nodes. Private nodes never navigate.
+ *   - Hover a public node: same-tag neighbours + their edges are
+ *     highlighted, everything else dims.
  *
- * Interaction:
- *   - Idle breathing (per-node seeded sin/cos)
- *   - Cursor proximity pull on public nodes (gentle spring)
- *   - Hover a public node → shared-tag neighbours fade in, others dim
- *   - Click a public node → router.push(`/blog/${slug}`)
- *   - prefers-reduced-motion → no rAF loop, static constellation
+ * Accessibility / motion:
+ *   - `role="img"` + aria-label on the figure.
+ *   - `prefers-reduced-motion`: the simulation still runs but the
+ *     initial placement is settled immediately (many sub-steps) so the
+ *     reader sees a stable layout without ongoing jiggle.
  *
- * Positions are deterministic (seeded from slug hash) so SSR and CSR
- * hydrate identically.
+ * Public nodes are blog posts. Private nodes are five labelled shadow
+ * categories held near the centre by an extra-strong gravity anchor.
  */
 
+// ── Palette / layout constants ──────────────────────────────────────
+
 const VB_W = 1400;
-const VB_H = 720;
+const VB_H = 760;
 const CX = VB_W / 2;
 const CY = VB_H / 2;
+
+// Physics — tuned against ~116 public nodes + 5 shadows
+const REPEL_STRENGTH = 340;  // Coulomb constant
+const REPEL_CUTOFF   = 260;  // ignore pairs beyond this distance
+const SPRING_REST    = 90;
+const SPRING_K       = 0.018;
+const GRAVITY        = 0.006; // pull toward (CX, CY)
+const DAMPING        = 0.82;
+const MAX_STEP       = 12;    // clamp per-tick displacement per axis
 
 const CATEGORY_ORDER = [
   "AI",
@@ -54,47 +70,53 @@ const CATEGORY_STYLE: Record<
 };
 
 const PRIVATE_CATEGORIES = [
-  { id: "priv-daily",   label: "일지",        color: "var(--muted-foreground)" },
-  { id: "priv-archive", label: "아카이브",    color: "var(--muted-foreground)" },
-  { id: "priv-wip",     label: "작업 중",     color: "var(--muted-foreground)" },
-  { id: "priv-finance", label: "재무",        color: "var(--muted-foreground)" },
-  { id: "priv-raw",     label: "리서치 원본", color: "var(--muted-foreground)" },
+  { id: "priv-daily",   label: "일지" },
+  { id: "priv-archive", label: "아카이브" },
+  { id: "priv-wip",     label: "작업 중" },
+  { id: "priv-finance", label: "재무" },
+  { id: "priv-raw",     label: "리서치 원본" },
 ];
 
-// ── Types ────────────────────────────────────────────────────────────
+// ── Types ───────────────────────────────────────────────────────────
 
-interface PublicNode {
-  kind: "public";
-  id: string;
-  title: string;
-  slug: string;
-  tags: string[];
-  category: CategoryKey;
-  color: string;
-  seed: number;
-  bx: number;
-  by: number;
-  r: number;
-}
-
-interface PrivateNode {
-  kind: "private";
+interface BaseNode {
   id: string;
   label: string;
   color: string;
-  seed: number;
-  bx: number;
-  by: number;
   r: number;
+  /** physics state */
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  /** pinned by drag */
+  fixed: boolean;
+  /** extra gravity anchor (for shadow/private nodes) */
+  anchor?: { x: number; y: number; k: number };
 }
+interface PublicNodeData extends BaseNode {
+  kind: "public";
+  slug: string;
+  tags: string[];
+  category: CategoryKey;
+}
+interface PrivateNodeData extends BaseNode {
+  kind: "private";
+}
+type NodeData = PublicNodeData | PrivateNodeData;
 
-type GraphNode = PublicNode | PrivateNode;
+interface EdgeData {
+  from: string;
+  to: string;
+  /** number of shared tags (or 0 for same-category fallback) */
+  weight: number;
+}
 
 interface NotesGraphProps {
   posts: BlogPostMeta[];
 }
 
-// ── Layout ───────────────────────────────────────────────────────────
+// ── Utilities ───────────────────────────────────────────────────────
 
 function hashString(s: string): number {
   let h = 2166136261;
@@ -114,77 +136,125 @@ function resolveCategory(post: BlogPostMeta): CategoryKey {
   return "General";
 }
 
-function computeNodes(posts: BlogPostMeta[]): GraphNode[] {
-  const byCat = new Map<CategoryKey, BlogPostMeta[]>();
-  for (const cat of CATEGORY_ORDER) byCat.set(cat, []);
-  for (const p of posts) byCat.get(resolveCategory(p))!.push(p);
+/**
+ * Build nodes and edges.
+ *   - Edges exist when two public posts share ≥ 1 tag; weight = count.
+ *   - To avoid a hairball, each node keeps only its top K strongest edges.
+ */
+function buildGraph(posts: BlogPostMeta[]): {
+  nodes: NodeData[];
+  edges: EdgeData[];
+} {
+  const MAX_EDGES_PER_NODE = 4;
+  const nodes: NodeData[] = [];
 
-  const totalCats = CATEGORY_ORDER.length;
-  const sectorWidth = (2 * Math.PI) / totalCats;
-  const nodes: GraphNode[] = [];
-  const innerR = Math.min(VB_W, VB_H) * 0.14;
-  const outerR = Math.min(VB_W, VB_H) * 0.44;
-
-  CATEGORY_ORDER.forEach((cat, catIdx) => {
-    const catPosts = byCat.get(cat) ?? [];
-    const sectorStart = catIdx * sectorWidth - Math.PI / 2;
-    catPosts.forEach((post, i) => {
-      const seed = hashString(post.slug);
-      const jitter = (seed - 0.5) * sectorWidth * 0.78;
-      const angle = sectorStart + sectorWidth / 2 + jitter;
-      const ageRatio = catPosts.length <= 1 ? 0.3 : i / (catPosts.length - 1);
-      const radiusJitter = ((seed * 97) % 1) * 20 - 10;
-      const radius =
-        innerR + (outerR - innerR) * (0.15 + 0.85 * ageRatio) + radiusJitter;
-
-      nodes.push({
-        kind: "public",
-        id: post.slug,
-        title: post.title,
-        slug: post.slug,
-        tags: post.tags,
-        category: cat,
-        color: CATEGORY_STYLE[cat].color,
-        seed,
-        bx: CX + Math.cos(angle) * radius,
-        by: CY + Math.sin(angle) * radius,
-        r: 3.5,
-      });
+  // Public nodes — scatter on an initial circle so repulsion has room
+  // to start pushing immediately.
+  posts.forEach((post, i) => {
+    const seed = hashString(post.slug);
+    const angle = seed * Math.PI * 2;
+    const r0 =
+      Math.min(VB_W, VB_H) * 0.28 + (i % 5) * 14; // mild jitter band
+    const cat = resolveCategory(post);
+    nodes.push({
+      kind: "public",
+      id: post.slug,
+      label: post.title,
+      slug: post.slug,
+      tags: post.tags,
+      category: cat,
+      color: CATEGORY_STYLE[cat].color,
+      r: 3.5,
+      x: CX + Math.cos(angle) * r0,
+      y: CY + Math.sin(angle) * r0,
+      vx: (seed - 0.5) * 2,
+      vy: ((seed * 7) % 1 - 0.5) * 2,
+      fixed: false,
     });
   });
 
+  // Private shadow nodes — clamped near the centre via an anchor.
   PRIVATE_CATEGORIES.forEach((p, i) => {
-    const angle =
-      (i / PRIVATE_CATEGORIES.length) * 2 * Math.PI - Math.PI / 2;
-    const radius = innerR * 0.42;
+    const angle = (i / PRIVATE_CATEGORIES.length) * Math.PI * 2 - Math.PI / 2;
+    const r0 = 60;
+    const ax = CX + Math.cos(angle) * r0;
+    const ay = CY + Math.sin(angle) * r0;
     nodes.push({
       kind: "private",
       id: p.id,
       label: p.label,
-      color: p.color,
-      seed: hashString(p.id),
-      bx: CX + Math.cos(angle) * radius,
-      by: CY + Math.sin(angle) * radius,
+      color: "var(--muted-foreground)",
       r: 4.5,
+      x: ax,
+      y: ay,
+      vx: 0,
+      vy: 0,
+      fixed: false,
+      anchor: { x: ax, y: ay, k: 0.08 },
     });
   });
 
-  return nodes;
+  // Build edges from tag overlap among public nodes.
+  const pub = nodes.filter((n): n is PublicNodeData => n.kind === "public");
+  const pairs: Array<{ from: string; to: string; weight: number }> = [];
+  for (let i = 0; i < pub.length; i++) {
+    const a = pub[i];
+    if (a.tags.length === 0) continue;
+    const aTags = new Set(a.tags);
+    for (let j = i + 1; j < pub.length; j++) {
+      const b = pub[j];
+      if (b.tags.length === 0) continue;
+      let shared = 0;
+      for (const t of b.tags) if (aTags.has(t)) shared++;
+      if (shared > 0) pairs.push({ from: a.id, to: b.id, weight: shared });
+    }
+  }
+
+  // Keep only the top-K edges per node (by weight).
+  const perNode = new Map<string, Array<{ to: string; weight: number }>>();
+  for (const n of pub) perNode.set(n.id, []);
+  // Sort pairs by weight desc to prefer high-overlap edges.
+  pairs.sort((a, b) => b.weight - a.weight);
+  const accepted = new Set<string>();
+  for (const p of pairs) {
+    const key = p.from + "|" + p.to;
+    const a = perNode.get(p.from)!;
+    const b = perNode.get(p.to)!;
+    if (a.length < MAX_EDGES_PER_NODE && b.length < MAX_EDGES_PER_NODE) {
+      a.push({ to: p.to, weight: p.weight });
+      b.push({ to: p.from, weight: p.weight });
+      accepted.add(key);
+    }
+  }
+  const edges: EdgeData[] = pairs
+    .filter((p) => accepted.has(p.from + "|" + p.to))
+    .map((p) => ({ from: p.from, to: p.to, weight: p.weight }));
+
+  return { nodes, edges };
 }
 
-// ── Component ────────────────────────────────────────────────────────
+// ── Component ───────────────────────────────────────────────────────
 
 export function NotesGraph({ posts }: NotesGraphProps) {
   const router = useRouter();
   const svgRef = useRef<SVGSVGElement | null>(null);
   const nodeRefs = useRef<Map<string, SVGGElement>>(new Map());
-  const mouseRef = useRef<{ x: number; y: number } | null>(null);
-  const positionsRef = useRef<Map<string, { x: number; y: number }>>(new Map());
+  const edgeRefs = useRef<Map<string, SVGLineElement>>(new Map());
+
   const [hoveredId, setHoveredId] = useState<string | null>(null);
+  const draggingRef = useRef<string | null>(null);
+  const dragMovedRef = useRef(false);
 
-  const nodes = useMemo(() => computeNodes(posts), [posts]);
+  // Build graph once per posts[] (mostly once).
+  const { nodes, edges } = useMemo(() => buildGraph(posts), [posts]);
 
-  // Tag → set of public-node ids (for shared-tag neighbour edges).
+  const nodeById = useMemo(() => {
+    const m = new Map<string, NodeData>();
+    for (const n of nodes) m.set(n.id, n);
+    return m;
+  }, [nodes]);
+
+  // Tag index for hover highlight (not used by physics; just UI).
   const tagIndex = useMemo(() => {
     const m = new Map<string, Set<string>>();
     for (const n of nodes) {
@@ -199,7 +269,7 @@ export function NotesGraph({ posts }: NotesGraphProps) {
 
   const neighbours = useMemo(() => {
     if (!hoveredId) return null;
-    const node = nodes.find((n) => n.id === hoveredId);
+    const node = nodeById.get(hoveredId);
     if (!node || node.kind !== "public") return null;
     const set = new Set<string>();
     for (const t of node.tags) {
@@ -208,110 +278,189 @@ export function NotesGraph({ posts }: NotesGraphProps) {
       for (const id of tagSet) if (id !== hoveredId) set.add(id);
     }
     return set;
-  }, [hoveredId, nodes, tagIndex]);
+  }, [hoveredId, nodeById, tagIndex]);
 
+  // Physics + render loop
   useEffect(() => {
-    for (const n of nodes) {
-      positionsRef.current.set(n.id, { x: n.bx, y: n.by });
-    }
+    const prefersReduce =
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    const prefersReduce = window.matchMedia(
-      "(prefers-reduced-motion: reduce)"
-    ).matches;
+    // Settle the layout quickly for reduced-motion users.
     if (prefersReduce) {
-      applyTransforms();
+      for (let i = 0; i < 240; i++) step();
+      paint();
       return;
     }
 
     let raf = 0;
-    let lastT = performance.now();
-
-    function frame(t: number) {
-      const dt = Math.min(32, t - lastT);
-      lastT = t;
-      const phase = t * 0.0004;
-      const mouse = mouseRef.current;
-
-      for (const n of nodes) {
-        const amp = n.kind === "private" ? 2.2 : 3.5;
-        const floatX = Math.sin(phase + n.seed * 6.28) * amp;
-        const floatY = Math.cos(phase * 0.72 + n.seed * 4.1) * (amp * 0.75);
-
-        let attractX = 0;
-        let attractY = 0;
-        if (mouse && n.kind === "public") {
-          const dx = mouse.x - n.bx;
-          const dy = mouse.y - n.by;
-          const dist = Math.hypot(dx, dy) || 1;
-          const radius = 280;
-          if (dist < radius) {
-            const pull = (1 - dist / radius) * 0.16;
-            attractX = dx * pull;
-            attractY = dy * pull;
-          }
-        }
-
-        const prev = positionsRef.current.get(n.id)!;
-        const targetX = n.bx + floatX + attractX;
-        const targetY = n.by + floatY + attractY;
-        const lerp = 1 - Math.exp(-dt / 140);
-        prev.x += (targetX - prev.x) * lerp;
-        prev.y += (targetY - prev.y) * lerp;
-      }
-
-      applyTransforms();
+    function frame() {
+      step();
+      paint();
       raf = requestAnimationFrame(frame);
     }
-
     raf = requestAnimationFrame(frame);
     return () => cancelAnimationFrame(raf);
-  }, [nodes]);
+    // We intentionally don't rerun the loop when neighbours/hover change —
+    // those affect paint() via the closed-over state refs, not the loop.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [nodes, edges]);
 
-  function applyTransforms() {
-    for (const n of nodes) {
-      const p = positionsRef.current.get(n.id);
-      const g = nodeRefs.current.get(n.id);
-      if (p && g) g.setAttribute("transform", `translate(${p.x} ${p.y})`);
+  /**
+   * One physics tick. Mutates node.x/y/vx/vy in place. Drag-fixed nodes
+   * are moved directly to the cursor elsewhere; here we just zero their
+   * velocity so they don't drift when released.
+   */
+  function step() {
+    const n = nodes.length;
+
+    // 1. Repulsion — O(n^2) but n ~ 121, cheap.
+    for (let i = 0; i < n; i++) {
+      const a = nodes[i];
+      for (let j = i + 1; j < n; j++) {
+        const b = nodes[j];
+        const dx = b.x - a.x;
+        const dy = b.y - a.y;
+        const dsq = dx * dx + dy * dy;
+        if (dsq > REPEL_CUTOFF * REPEL_CUTOFF) continue;
+        const dist = Math.sqrt(dsq) || 0.01;
+        const force = REPEL_STRENGTH / (dist * dist);
+        const fx = (dx / dist) * force;
+        const fy = (dy / dist) * force;
+        a.vx -= fx;
+        a.vy -= fy;
+        b.vx += fx;
+        b.vy += fy;
+      }
+    }
+
+    // 2. Springs
+    for (const e of edges) {
+      const a = nodeById.get(e.from)!;
+      const b = nodeById.get(e.to)!;
+      const dx = b.x - a.x;
+      const dy = b.y - a.y;
+      const dist = Math.hypot(dx, dy) || 0.01;
+      const force = SPRING_K * (dist - SPRING_REST);
+      const fx = (dx / dist) * force;
+      const fy = (dy / dist) * force;
+      a.vx += fx;
+      a.vy += fy;
+      b.vx -= fx;
+      b.vy -= fy;
+    }
+
+    // 3. Gravity toward (CX, CY) + per-node anchor (shadow nodes)
+    for (const node of nodes) {
+      node.vx += (CX - node.x) * GRAVITY;
+      node.vy += (CY - node.y) * GRAVITY;
+      if (node.anchor) {
+        node.vx += (node.anchor.x - node.x) * node.anchor.k;
+        node.vy += (node.anchor.y - node.y) * node.anchor.k;
+      }
+    }
+
+    // 4. Integrate + damping + optional drag fixation
+    const drag = draggingRef.current;
+    for (const node of nodes) {
+      if (node.id === drag) {
+        node.vx = 0;
+        node.vy = 0;
+        continue;
+      }
+      node.vx *= DAMPING;
+      node.vy *= DAMPING;
+      // Clamp step size for stability
+      if (node.vx > MAX_STEP) node.vx = MAX_STEP;
+      if (node.vx < -MAX_STEP) node.vx = -MAX_STEP;
+      if (node.vy > MAX_STEP) node.vy = MAX_STEP;
+      if (node.vy < -MAX_STEP) node.vy = -MAX_STEP;
+      node.x += node.vx;
+      node.y += node.vy;
     }
   }
 
-  function onPointerMove(ev: React.PointerEvent<SVGSVGElement>) {
+  function paint() {
+    for (const node of nodes) {
+      const g = nodeRefs.current.get(node.id);
+      if (g) g.setAttribute("transform", `translate(${node.x} ${node.y})`);
+    }
+    for (const e of edges) {
+      const a = nodeById.get(e.from)!;
+      const b = nodeById.get(e.to)!;
+      const line = edgeRefs.current.get(e.from + "→" + e.to);
+      if (line) {
+        line.setAttribute("x1", String(a.x));
+        line.setAttribute("y1", String(a.y));
+        line.setAttribute("x2", String(b.x));
+        line.setAttribute("y2", String(b.y));
+      }
+    }
+  }
+
+  /** Convert a client-space pointer to viewBox coords. */
+  function pointerToSvg(ev: React.PointerEvent) {
     const svg = svgRef.current;
-    if (!svg) return;
+    if (!svg) return null;
     const pt = svg.createSVGPoint();
     pt.x = ev.clientX;
     pt.y = ev.clientY;
     const ctm = svg.getScreenCTM();
-    if (!ctm) return;
-    const { x, y } = pt.matrixTransform(ctm.inverse());
-    mouseRef.current = { x, y };
-  }
-  function onPointerLeave() {
-    mouseRef.current = null;
+    if (!ctm) return null;
+    return pt.matrixTransform(ctm.inverse());
   }
 
-  function onNodeClick(node: GraphNode) {
-    if (node.kind !== "public") return;
-    router.push(`/blog/${node.slug}`);
+  function onNodePointerDown(ev: React.PointerEvent, node: NodeData) {
+    ev.stopPropagation();
+    (ev.currentTarget as Element).setPointerCapture(ev.pointerId);
+    draggingRef.current = node.id;
+    dragMovedRef.current = false;
+    node.fixed = true;
   }
 
-  const hovered = hoveredId
-    ? nodes.find((n) => n.id === hoveredId) ?? null
-    : null;
+  function onSvgPointerMove(ev: React.PointerEvent<SVGSVGElement>) {
+    const drag = draggingRef.current;
+    if (!drag) return;
+    const p = pointerToSvg(ev);
+    if (!p) return;
+    const node = nodeById.get(drag);
+    if (!node) return;
+    // Mark that we actually moved, so the pointerup doesn't register a click.
+    const dx = p.x - node.x;
+    const dy = p.y - node.y;
+    if (Math.hypot(dx, dy) > 3) dragMovedRef.current = true;
+    node.x = p.x;
+    node.y = p.y;
+    node.vx = 0;
+    node.vy = 0;
+  }
+
+  function onNodePointerUp(ev: React.PointerEvent, node: NodeData) {
+    if (draggingRef.current === node.id) {
+      draggingRef.current = null;
+      node.fixed = false;
+    }
+    // Treat a no-movement pointerup as a click.
+    if (!dragMovedRef.current && node.kind === "public") {
+      router.push(`/blog/${node.slug}`);
+    }
+    dragMovedRef.current = false;
+  }
+
+  const hovered = hoveredId ? nodeById.get(hoveredId) ?? null : null;
 
   return (
     <figure
       className="relative w-full"
-      aria-label="스튜디오 노트 네트워크 — 공개 글과 비공개 카테고리"
+      aria-label="스튜디오 노트 네트워크 — force-directed 그래프"
       role="img"
     >
       <svg
         ref={svgRef}
         viewBox={`0 0 ${VB_W} ${VB_H}`}
         preserveAspectRatio="xMidYMid meet"
-        className="block h-[70vh] max-h-[720px] w-full"
-        onPointerMove={onPointerMove}
-        onPointerLeave={onPointerLeave}
+        className="block h-[70vh] max-h-[760px] w-full touch-none select-none"
+        onPointerMove={onSvgPointerMove}
       >
         <defs>
           <radialGradient id="ng2-bg" cx="50%" cy="50%" r="58%">
@@ -321,31 +470,38 @@ export function NotesGraph({ posts }: NotesGraphProps) {
         </defs>
         <rect x={0} y={0} width={VB_W} height={VB_H} fill="url(#ng2-bg)" />
 
-        {/* Edges — shown only for hovered public node's shared-tag
-            neighbours. Default state is edgeless (constellation). */}
-        {hovered && hovered.kind === "public" && neighbours && (
-          <g>
-            {nodes
-              .filter((n) => n.kind === "public" && neighbours.has(n.id))
-              .map((n) => {
-                const a = positionsRef.current.get(hovered.id);
-                const b = positionsRef.current.get(n.id);
-                if (!a || !b) return null;
-                return (
-                  <line
-                    key={hovered.id + "→" + n.id}
-                    x1={a.x}
-                    y1={a.y}
-                    x2={b.x}
-                    y2={b.y}
-                    stroke={hovered.color}
-                    strokeOpacity={0.5}
-                    strokeWidth={0.8}
-                  />
-                );
-              })}
-          </g>
-        )}
+        {/* Edges — always visible but quiet; the hovered node's edges
+            get a brief boost in opacity/stroke. */}
+        <g>
+          {edges.map((e) => {
+            const key = e.from + "→" + e.to;
+            const isHot =
+              hovered?.id === e.from || hovered?.id === e.to;
+            return (
+              <line
+                key={key}
+                ref={(el) => {
+                  if (el) edgeRefs.current.set(key, el);
+                }}
+                x1={0}
+                y1={0}
+                x2={0}
+                y2={0}
+                stroke={
+                  isHot && hovered?.kind === "public"
+                    ? hovered.color
+                    : "var(--muted-foreground)"
+                }
+                strokeOpacity={isHot ? 0.55 : 0.12}
+                strokeWidth={isHot ? 1.2 : 0.6}
+                style={{
+                  transition:
+                    "stroke-opacity 220ms ease, stroke-width 220ms ease",
+                }}
+              />
+            );
+          })}
+        </g>
 
         {/* Nodes */}
         <g>
@@ -356,9 +512,9 @@ export function NotesGraph({ posts }: NotesGraphProps) {
               ? !isHovered && !isNeighbour && n.kind === "public"
               : false;
             const rEff = isHovered
-              ? n.r * 2
+              ? n.r * 1.9
               : isNeighbour
-              ? n.r * 1.35
+              ? n.r * 1.3
               : n.r;
             const isPrivate = n.kind === "private";
 
@@ -370,16 +526,17 @@ export function NotesGraph({ posts }: NotesGraphProps) {
                 }}
                 onPointerEnter={() => setHoveredId(n.id)}
                 onPointerLeave={() => setHoveredId(null)}
-                onClick={() => onNodeClick(n)}
+                onPointerDown={(ev) => onNodePointerDown(ev, n)}
+                onPointerUp={(ev) => onNodePointerUp(ev, n)}
                 style={{
-                  cursor: isPrivate ? "default" : "pointer",
+                  cursor: isPrivate ? "grab" : "pointer",
                   opacity: dim ? 0.22 : 1,
                   transition: "opacity 280ms ease",
                 }}
               >
                 <title>
                   {n.kind === "public"
-                    ? `${n.title} · ${CATEGORY_STYLE[n.category].label}`
+                    ? `${n.label} · ${CATEGORY_STYLE[n.category].label}`
                     : `비공개 · ${n.label}`}
                 </title>
                 {isHovered && n.kind === "public" && (
@@ -416,7 +573,7 @@ export function NotesGraph({ posts }: NotesGraphProps) {
         </g>
       </svg>
 
-      {/* Floating tooltip */}
+      {/* Floating tooltip / caption */}
       <div
         className="font-technical pointer-events-none absolute left-1/2 top-3 w-max max-w-[86%] -translate-x-1/2 rounded-sm bg-[var(--card)]/85 px-3 py-1.5 text-[12px] text-foreground backdrop-blur-sm transition-opacity duration-200"
         style={{
@@ -430,15 +587,15 @@ export function NotesGraph({ posts }: NotesGraphProps) {
               className="mr-2 inline-block h-[6px] w-[6px] rounded-full align-middle"
               style={{ background: hovered.color }}
             />
-            {hovered.title}
+            {hovered.label}
             <span className="ml-2 text-muted-foreground">
-              · {CATEGORY_STYLE[hovered.category].label} · 클릭하여 열기
+              · {CATEGORY_STYLE[hovered.category].label} · 클릭 열기 · 드래그
             </span>
           </span>
         )}
         {hovered?.kind === "private" && (
           <span className="text-muted-foreground">
-            비공개 · {hovered.label}
+            비공개 · {hovered.label} · 드래그
           </span>
         )}
       </div>
