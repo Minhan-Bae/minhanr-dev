@@ -55,6 +55,13 @@ export function WritingFeatured({ posts }: WritingFeaturedProps) {
                         fill
                         sizes="(min-width: 768px) 36vw, 100vw"
                         priority={i === 0}
+                        // Skip the /_next/image proxy for these covers —
+                        // they already come from the /api/og edge route
+                        // pre-rendered at the right aspect, and the
+                        // proxy's localPatterns matcher rejects URLs
+                        // whose pathname + query combination isn't in
+                        // the exact allowed shape.
+                        unoptimized
                         className="object-cover"
                       />
                     ) : (
