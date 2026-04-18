@@ -54,12 +54,12 @@ export function SmoothScroll() {
       const diff = target - current;
       if (Math.abs(diff) < EPSILON) {
         current = target;
-        window.scrollTo(0, current);
+        window.scrollTo({ top: current, behavior: "instant" });
         running = false;
         return;
       }
       current += diff * EASE;
-      window.scrollTo(0, current);
+      window.scrollTo({ top: current, behavior: "instant" });
       requestAnimationFrame(tick);
     };
 
