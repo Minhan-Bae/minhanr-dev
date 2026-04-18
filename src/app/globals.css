@@ -288,12 +288,10 @@
     scroll-snap-align: start;
     scroll-snap-stop: always;
   }
-  /* Under reduce-motion we still navigate slides (one per gesture is
-     the mitigation), but we drop the smooth transition curve so it
-     feels instant — matches the rest of the reduce-motion policy. */
-  @media (prefers-reduced-motion: reduce) {
-    html { scroll-behavior: auto; }
-  }
+  /* Editorial site policy: animations are unconditionally on. The
+     slide deck's own rAF loop drives the transition curve, so we
+     don't need CSS `scroll-behavior: smooth` to be honoured by the
+     browser under reduce-motion. See src/components/slide-deck.tsx. */
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "ss01", "cv02", "cv11";
@@ -365,7 +363,7 @@
 }
 
 /* ══════════════════════════════════════════════════════════════════
-   Motion — restrained, calibrated to prefers-reduced-motion
+   Motion — editorial, always on.
    ────────────────────────────────────────────────────────────────── */
 :root {
   --ease-linear:    linear;
@@ -481,18 +479,22 @@
 @keyframes vt-fade-in  { from { opacity: 0; } to { opacity: 1; } }
 
 /* ══════════════════════════════════════════════════════════════════
-   Reduced motion respect
+   Reduced-motion policy — intentionally absent.
+
+   minhanr.dev is a portfolio/brand site where motion IS part of
+   the work on display (typewriter hero, slide-deck navigation,
+   Ken-Burns background, marquee ticker, reveal-on-scroll). The
+   author has opted to keep every animation running regardless of
+   the visitor's OS-level preference, since a) Windows 11 ships with
+   "Animation effects" off by default and we were losing those
+   visitors to a static page, and b) the animations here are
+   editorial, not informational, and none of them are vestibular
+   triggers at the intensities used.
+
+   If a future surface (e.g. a utility dashboard) needs to respect
+   reduce-motion, scope that opt-out locally — do not add a global
+   block here.
    ────────────────────────────────────────────────────────────────── */
-@media (prefers-reduced-motion: reduce) {
-  .animate-fade-up,
-  .animate-fade-in { animation: none; opacity: 1; transform: none; }
-  .hover-lift:hover,
-  .media-zoom:hover > :first-child { transform: none; }
-  .skeleton-shimmer { animation: none; }
-  .ken-burns-drift { animation: none; transform: scale(1.04); }
-  ::view-transition-old(root),
-  ::view-transition-new(root) { animation: none; }
-}
 
 /* ══════════════════════════════════════════════════════════════════
    Editorial primitives

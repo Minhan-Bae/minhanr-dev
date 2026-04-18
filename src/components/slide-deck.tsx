@@ -12,20 +12,30 @@ import { useEffect } from "react";
  * still works for nested scrollers, and we defer to CSS scroll-snap
  * for touch devices (browsers handle swipe snap natively).
  *
- * Transitions use `scrollIntoView({ behavior: "smooth" })` so the
- * actual slide movement is the browser's smooth scroll engine — same
- * curve as an anchor-link jump, but fired in response to the wheel.
- * A brief cooldown (`COOLDOWN_MS`) prevents a single wheel gesture
- * from eating multiple slides.
+ * Transitions are driven by a rAF loop with an ease-in-out cubic
+ * curve (`animateTo`). We deliberately do NOT rely on
+ * `scrollIntoView({ behavior: "smooth" })` here: Chrome degrades that
+ * smooth curve to `auto` (instant) when Windows has "Animation
+ * effects" off (prefers-reduced-motion: reduce), so the transition
+ * would pop instead of slide. Driving the scroll position ourselves
+ * via `scrollTo({ behavior: "instant" })` each frame bypasses the
+ * CSS scroll-behavior cascade entirely.
  *
- * We don't bail under `prefers-reduced-motion` — navigating one slide
- * per gesture IS a mitigation, not an aggravation, and the Ken-Burns
- * background (the only genuinely large motion) is already opted out.
+ * This site is a portfolio; the animations ARE the design, so we
+ * render them unconditionally. If a visitor's OS-level preference
+ * conflicts, the one-slide-per-gesture pacing is already a strong
+ * mitigation on its own.
  */
 
 const COOLDOWN_MS = 820;
+const TRANSITION_MS = 700;
 /** Wheel deltas below this are treated as trackpad noise and ignored. */
 const WHEEL_DEADBAND = 8;
+
+/** Ease-in-out cubic — matches `cubic-bezier(0.65, 0, 0.35, 1)` */
+function easeInOutCubic(t: number): number {
+  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+}
 
 export function SlideDeck() {
   useEffect(() => {
@@ -36,6 +46,7 @@ export function SlideDeck() {
 
     let transitioning = false;
     let lastFire = 0;
+    let animRaf: number | null = null;
 
     const currentIdx = () => {
       const ss = slidesOf();
@@ -50,12 +61,33 @@ export function SlideDeck() {
       return ss.length - 1;
     };
 
+    /** Own-rAF smooth scroll — does not depend on CSS scroll-behavior. */
+    const animateTo = (targetY: number, duration = TRANSITION_MS) => {
+      if (animRaf !== null) cancelAnimationFrame(animRaf);
+      const startY = window.scrollY;
+      const diff = targetY - startY;
+      if (Math.abs(diff) < 1) return;
+      const startT = performance.now();
+
+      const step = (now: number) => {
+        const t = Math.min((now - startT) / duration, 1);
+        const y = startY + diff * easeInOutCubic(t);
+        window.scrollTo({ top: y, behavior: "instant" });
+        if (t < 1) {
+          animRaf = requestAnimationFrame(step);
+        } else {
+          animRaf = null;
+        }
+      };
+      animRaf = requestAnimationFrame(step);
+    };
+
     const goto = (idx: number) => {
       const ss = slidesOf();
       if (idx < 0 || idx >= ss.length) return;
       transitioning = true;
       lastFire = performance.now();
-      ss[idx].scrollIntoView({ behavior: "smooth", block: "start" });
+      animateTo(ss[idx].offsetTop);
       window.setTimeout(() => {
         transitioning = false;
       }, COOLDOWN_MS);
@@ -137,6 +169,7 @@ export function SlideDeck() {
     return () => {
       window.removeEventListener("wheel", onWheel);
       window.removeEventListener("keydown", onKeyDown);
+      if (animRaf !== null) cancelAnimationFrame(animRaf);
     };
   }, []);
 
