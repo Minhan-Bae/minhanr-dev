@@ -41,7 +41,18 @@ const COOLDOWN_MS = DURATION_MS + 80;
 const WHEEL_DEADBAND = 8;
 const SWIPE_THRESHOLD_RATIO = 0.1;
 
-export function SlideDeck({ children }: { children: ReactNode }) {
+export function SlideDeck({
+  children,
+  mode = "fullscreen",
+}: {
+  children: ReactNode;
+  /** "fullscreen" — fixed inset-0, used on public pages where the
+   *  deck IS the page. "inline" — absolute inset-0 inside a
+   *  caller-provided relative parent of fixed height (e.g. dashboard
+   *  inside the private layout's main element, so the sidebar and
+   *  top header stay visible). */
+  mode?: "fullscreen" | "inline";
+}) {
   const kids = Children.toArray(children);
   const count = kids.length;
 
@@ -82,7 +93,18 @@ export function SlideDeck({ children }: { children: ReactNode }) {
       return false;
     };
 
+    const isInsideDeck = (e: Event): boolean => {
+      if (!rootRef.current) return false;
+      const target = e.target as Node | null;
+      return !!target && rootRef.current.contains(target);
+    };
+
     const onWheel = (e: WheelEvent) => {
+      // Inline decks share the page with sidebars, headers, and other
+      // scrollables — only hijack wheel events that targeted the deck
+      // itself. Fullscreen decks own the whole page so any wheel is
+      // fair game.
+      if (mode === "inline" && !isInsideDeck(e)) return;
       if (isInsideNestedScroller(e)) return;
       e.preventDefault();
       if (animating.current) return;
@@ -134,6 +156,9 @@ export function SlideDeck({ children }: { children: ReactNode }) {
       touchStartIdx = idxRef.current;
     };
     const onTouchMove = (e: TouchEvent) => {
+      // Same scoping rule as wheel — inline decks only intercept
+      // touches inside themselves.
+      if (mode === "inline" && !isInsideDeck(e)) return;
       if (isInsideNestedScroller(e)) return;
       // Block body bounce and natural scroll — the deck is the scroller.
       e.preventDefault();
@@ -161,37 +186,54 @@ export function SlideDeck({ children }: { children: ReactNode }) {
       window.removeEventListener("touchmove", onTouchMove);
       window.removeEventListener("touchend", onTouchEnd);
     };
-  }, [count]);
+  }, [count, mode]);
+
+  // Fullscreen fills the viewport; inline fills its parent (which
+  // must supply the height + `position: relative`). The per-slide
+  // wrapper uses `100%` so inline decks adapt to whatever the parent
+  // gives them, while fullscreen decks get 100svh directly via the
+  // root's `inset-0`.
+  const rootClass =
+    mode === "fullscreen"
+      ? "fixed inset-0 z-0 overflow-hidden"
+      : "absolute inset-0 overflow-hidden";
+  const slideClass =
+    mode === "fullscreen"
+      ? "relative h-[100svh] w-full overflow-hidden"
+      : "relative h-full w-full overflow-hidden";
+  const translateUnit = mode === "fullscreen" ? "100svh" : "100%";
 
   return (
     <div
       ref={rootRef}
       data-slide-deck="root"
-      className="fixed inset-0 z-0 overflow-hidden"
+      data-slide-deck-mode={mode}
+      className={rootClass}
     >
       <div
-        className="will-change-transform"
+        className="h-full will-change-transform"
         style={{
-          transform: `translate3d(0, calc(${-idx} * 100svh), 0)`,
+          transform: `translate3d(0, calc(${-idx} * ${translateUnit}), 0)`,
           transition: `transform ${DURATION_MS}ms ${CURVE}`,
         }}
       >
         {kids.map((child, i) => (
-          <div
-            key={i}
-            className="relative h-[100svh] w-full overflow-hidden"
-          >
+          <div key={i} className={slideClass}>
             {child}
           </div>
         ))}
       </div>
 
       {/* Position indicator — small dots on the right, current slide
-          highlighted in primary. Lets the visitor see where they are
-          in the deck. */}
+          highlighted in primary. In inline mode the dots float inside
+          the deck's own bounds (absolute) rather than viewport-fixed. */}
       <nav
         aria-label="Slide position"
-        className="pointer-events-auto fixed right-4 top-1/2 z-40 flex -translate-y-1/2 flex-col gap-3 sm:right-6"
+        className={
+          mode === "fullscreen"
+            ? "pointer-events-auto fixed right-4 top-1/2 z-40 flex -translate-y-1/2 flex-col gap-3 sm:right-6"
+            : "pointer-events-auto absolute right-3 top-1/2 z-40 flex -translate-y-1/2 flex-col gap-2.5"
+        }
       >
         {kids.map((_, i) => (
           <button
