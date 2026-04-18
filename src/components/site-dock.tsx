@@ -7,9 +7,14 @@ import { AmbientToggle } from "@/components/ambient-audio";
 
 type NavLink = { href: string; label: string };
 
+// The "Work" destination is intentionally not in the dock — the home
+// deck already devotes a WorkZigzag slide to every selected case, and
+// each row's "Read case" link deep-links into the individual case
+// study (/work/[slug]). The /work index page still exists for direct
+// URL access + sitemap inclusion, just without a nav pill pointing at
+// it. Keeps the dock itself tighter.
 const NAV: NavLink[] = [
   { href: "/", label: "Home" },
-  { href: "/work", label: "Work" },
   { href: "/blog", label: "Writing" },
   { href: "/about", label: "About" },
   { href: "/dashboard", label: "Studio" },
