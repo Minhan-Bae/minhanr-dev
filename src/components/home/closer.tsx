@@ -11,7 +11,7 @@ export function Closer() {
   return (
     <section
       data-slide
-      className="slide relative mx-auto flex w-full max-w-[1440px] items-center px-6 py-12 sm:px-10 sm:py-20"
+      className="slide relative mx-auto flex w-full max-w-[1440px] items-center px-6 pt-[clamp(40px,6vh,80px)] pb-[clamp(140px,18vh,200px)] sm:px-10"
     >
       <div className="relative">
         <span

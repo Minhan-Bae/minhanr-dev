@@ -31,7 +31,7 @@ export function Hero(_props: HeroProps) {
   return (
     <section
       data-slide
-      className="slide relative flex w-full flex-col overflow-hidden"
+      className="slide relative flex w-full flex-col overflow-hidden pb-[clamp(140px,18vh,200px)]"
     >
       {/* ─── Centerpiece wordmark ───────────────────────────────────── */}
       <div className="relative z-0 flex flex-1 items-center justify-center px-6 sm:px-10">

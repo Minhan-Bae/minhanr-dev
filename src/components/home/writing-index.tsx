@@ -20,7 +20,7 @@ export function WritingIndex({ posts, total }: WritingIndexProps) {
   return (
     <section
       data-slide
-      className="slide hairline-t relative mx-auto flex w-full max-w-[1440px] flex-col justify-center px-6 py-10 sm:px-10"
+      className="slide hairline-t relative mx-auto flex w-full max-w-[1440px] flex-col justify-center px-6 pt-[clamp(32px,6vh,72px)] pb-[clamp(140px,18vh,200px)] sm:px-10"
     >
       <header className="mb-8 flex flex-col gap-3 sm:mb-12 sm:flex-row sm:items-baseline sm:justify-between">
         <div>

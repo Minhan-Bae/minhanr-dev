@@ -21,7 +21,7 @@ export function SectionKicker({ kicker, headline, note }: SectionKickerProps) {
   return (
     <section
       data-slide
-      className="slide hairline-t relative mx-auto flex w-full max-w-[1440px] items-center px-6 sm:px-10"
+      className="slide hairline-t relative mx-auto flex w-full max-w-[1440px] items-center px-6 pb-[clamp(140px,18vh,200px)] sm:px-10"
     >
       <div className="w-full max-w-5xl">
         <p className="kicker mb-6">{kicker}</p>

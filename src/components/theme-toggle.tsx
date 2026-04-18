@@ -50,7 +50,7 @@ export function ThemeToggle() {
     return (
       <span
         aria-hidden
-        className="fixed left-5 bottom-14 z-40 block h-4 w-4 sm:left-8 sm:bottom-16"
+        className="fixed left-[clamp(16px,2vw,32px)] bottom-[clamp(44px,5.5vh,72px)] z-40 block h-4 w-4"
       />
     );
   }
@@ -64,7 +64,7 @@ export function ThemeToggle() {
       onClick={toggle}
       aria-label={`Switch to ${next} theme`}
       title={`Theme: ${theme === "dark" ? "Dark" : "Light"}`}
-      className="pointer-events-auto fixed left-5 bottom-14 z-40 inline-flex h-6 w-6 items-center justify-center text-muted-foreground transition-colors hover:text-foreground sm:left-8 sm:bottom-16"
+      className="pointer-events-auto fixed left-[clamp(16px,2vw,32px)] bottom-[clamp(44px,5.5vh,72px)] z-40 inline-flex h-6 w-6 items-center justify-center text-muted-foreground transition-colors hover:text-foreground"
     >
       <Icon className="h-4 w-4" strokeWidth={1.4} />
     </button>

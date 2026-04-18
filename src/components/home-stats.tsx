@@ -18,7 +18,7 @@ export function HomeStats({ workCount, writingCount, lastUpdated }: HomeStatsPro
   return (
     <div
       aria-label="Site stats"
-      className="pointer-events-none fixed left-5 bottom-6 z-40 font-technical text-[10px] uppercase tracking-[0.22em] text-muted-foreground sm:left-8 sm:bottom-8 sm:text-[11px]"
+      className="pointer-events-none fixed left-[clamp(16px,2vw,32px)] bottom-[clamp(12px,1.8vh,24px)] z-40 font-technical text-[10px] uppercase tracking-[0.22em] text-muted-foreground sm:text-[11px]"
     >
       <span className="text-foreground">Selected</span>
       <span className="ml-1.5 tabular-nums text-foreground/80">

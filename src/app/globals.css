@@ -241,7 +241,13 @@
      layout. The wrapper itself is 100svh in fullscreen mode and 100%
      of parent in inline mode; either way `height: 100%` on the slide
      resolves to the correct full-slide extent without asserting a
-     viewport-sized minimum that would overflow an inline deck. */
+     viewport-sized minimum that would overflow an inline deck.
+
+     Bottom chrome clearance lives on each slide component directly
+     (pb-40 sm:pb-44) rather than as a shared base rule, because
+     Tailwind utility classes sit in a later layer and always beat a
+     base-layer `.slide` declaration — the base rule was silently
+     overridden on every slide that also used `py-X`. */
   .slide {
     height: 100%;
   }

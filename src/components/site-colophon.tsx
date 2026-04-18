@@ -16,7 +16,7 @@ export function SiteColophon() {
   return (
     <div
       aria-label="Colophon"
-      className="pointer-events-none fixed right-5 bottom-6 z-40 flex flex-col items-end gap-0.5 font-technical text-[10px] uppercase tracking-[0.2em] text-muted-foreground/80 sm:right-8 sm:bottom-8 sm:text-[11px]"
+      className="pointer-events-none fixed right-[clamp(16px,2vw,32px)] bottom-[clamp(12px,1.8vh,24px)] z-40 flex flex-col items-end gap-0.5 font-technical text-[10px] uppercase tracking-[0.2em] text-muted-foreground/80 sm:text-[11px]"
     >
       <div className="text-foreground/85">
         <span className="text-foreground">Studio № 01</span>

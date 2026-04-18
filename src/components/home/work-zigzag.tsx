@@ -35,7 +35,7 @@ export function WorkZigzag({ items }: WorkZigzagProps) {
   return (
     <section
       data-slide
-      className="slide hairline-t relative mx-auto flex w-full max-w-[1440px] flex-col justify-center px-6 pt-6 pb-40 sm:px-10 sm:pt-10 sm:pb-44"
+      className="slide hairline-t relative mx-auto flex w-full max-w-[1440px] flex-col justify-center px-6 pt-[clamp(24px,4vh,60px)] pb-[clamp(140px,18vh,200px)] sm:px-10"
     >
       {/* Asymmetric padding — extra bottom clearance (pb-40/44) keeps
           the three rows above the four-corner chrome (HomeStats +
