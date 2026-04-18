@@ -1,5 +1,5 @@
 /**
- * Time-grid helpers for the /calendar/blocks timebox planner.
+ * Time-grid helpers for the /calendar timebox planner.
  *
  * All public-facing times are Asia/Seoul wall-clock (UTC+9, no DST).
  * Storage in Supabase is UTC (timestamptz); conversion happens at the

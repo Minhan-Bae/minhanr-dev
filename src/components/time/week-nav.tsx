@@ -23,7 +23,7 @@ export function WeekNav({ weekStartIso, prevIso, nextIso, thisWeekIso }: WeekNav
   return (
     <div className="flex items-center gap-1 rounded-full border border-border bg-card/60 px-1 py-1 backdrop-blur-sm">
       <Link
-        href={`/calendar/blocks?week=${encodeURIComponent(prevIso)}`}
+        href={`/calendar?week=${encodeURIComponent(prevIso)}`}
         aria-label="Previous week"
         className="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
       >
@@ -33,7 +33,7 @@ export function WeekNav({ weekStartIso, prevIso, nextIso, thisWeekIso }: WeekNav
         {label}
       </div>
       <Link
-        href={`/calendar/blocks?week=${encodeURIComponent(nextIso)}`}
+        href={`/calendar?week=${encodeURIComponent(nextIso)}`}
         aria-label="Next week"
         className="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
       >
@@ -41,7 +41,7 @@ export function WeekNav({ weekStartIso, prevIso, nextIso, thisWeekIso }: WeekNav
       </Link>
       {!isThisWeek && (
         <Link
-          href="/calendar/blocks"
+          href="/calendar"
           aria-label="Jump to this week"
           className="ml-1 flex h-8 items-center gap-1 rounded-full bg-primary/15 px-2.5 text-[11px] uppercase tracking-[0.12em] text-primary hover:bg-primary/25"
         >

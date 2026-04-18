@@ -55,7 +55,6 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
       { title: "Calendar", href: "/calendar", icon: Calendar },
-      { title: "Time Blocks", href: "/calendar/blocks", icon: Clock },
       { title: "Deadlines", href: "/deadlines", icon: Clock },
       { title: "Weekly", href: "/review/weekly", icon: CalendarCheck },
     ],
@@ -85,7 +84,6 @@ const NAV_GROUPS: NavGroup[] = [
   {
     label: "System",
     items: [
-      { title: "Command", href: "/command", icon: Activity },
       { title: "Review", href: "/review", icon: CheckCircle2 },
       { title: "Admin", href: "/admin", icon: Shield },
     ],

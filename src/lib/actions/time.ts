@@ -18,7 +18,7 @@ import { SLOT_MINUTES } from "@/lib/time/week";
  *      route, but actions can be triggered from stale clients).
  *   2. Scopes to the current user via RLS — we never pass user_id in
  *      from the client.
- *   3. Revalidates /calendar/blocks so the grid re-fetches.
+ *   3. Revalidates /calendar so the grid re-fetches.
  */
 
 async function requireUser() {
@@ -31,7 +31,7 @@ async function requireUser() {
 }
 
 function invalidate() {
-  revalidatePath("/calendar/blocks");
+  revalidatePath("/calendar");
   revalidatePath("/calendar");
   revalidatePath("/dashboard");
 }
