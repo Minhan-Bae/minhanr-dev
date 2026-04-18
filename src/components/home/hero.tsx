@@ -5,6 +5,11 @@ interface HeroProps {
   writingCount: number;
 }
 
+/** Per-letter drop-in delay for the typewriter hero. */
+const LETTER_STAGGER_MS = 140;
+/** Extra pause before the cursor appears, after the last letter lands. */
+const POST_WORD_MS = 180;
+
 /**
  * Hero — 100svh cinematic masthead.
  *
@@ -20,8 +25,12 @@ interface HeroProps {
  * hands off to the first content section below.
  */
 export function Hero({ workCount, writingCount }: HeroProps) {
+  const word = BRAND_IDENTITY.studio;
+  const letters = [...word];
+  const cursorDelayMs = letters.length * LETTER_STAGGER_MS + POST_WORD_MS;
+
   return (
-    <section className="relative flex h-[100svh] min-h-[640px] w-full flex-col overflow-hidden">
+    <section className="relative flex h-[100svh] min-h-[640px] w-full flex-col overflow-hidden snap-start">
       {/* ─── Top rail ───────────────────────────────────────────────── */}
       <div className="relative z-10 flex items-start justify-between px-6 pt-20 font-technical text-[10px] uppercase tracking-[0.22em] text-muted-foreground sm:px-10 sm:pt-24 sm:text-[11px]">
         <div>
@@ -39,9 +48,28 @@ export function Hero({ workCount, writingCount }: HeroProps) {
         <div className="relative">
           <h1
             lang="en"
+            aria-label={word}
             className="display-hero font-display italic text-foreground"
           >
-            {BRAND_IDENTITY.studio}
+            {/* Typewriter letters — each drops in on its own delay. */}
+            {letters.map((char, i) => (
+              <span
+                key={`${char}-${i}`}
+                aria-hidden
+                className="tw-letter"
+                style={{ animationDelay: `${i * LETTER_STAGGER_MS}ms` }}
+              >
+                {char}
+              </span>
+            ))}
+            {/* Blinking cursor — appears after the last letter lands. */}
+            <span
+              aria-hidden
+              className="tw-cursor"
+              style={{ animationDelay: `${cursorDelayMs}ms` }}
+            >
+              |
+            </span>
           </h1>
 
           {/* Suffix badge — picks up the teal keyline brand signature */}

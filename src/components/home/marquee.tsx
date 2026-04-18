@@ -58,28 +58,39 @@ function MarqueeRail({
   reverse?: boolean;
   variant: "latin" | "hangul";
 }) {
+  // Latin row: wide-tracked uppercase sans — scans horizontally,
+  // no tall italic glyphs. Feels like modern Swiss kiosk signage.
+  // Hangul row: display face at a confident size — Pretendard heavy
+  // carries the visual weight since Instrument Serif has no Hangul.
   const latinCls =
-    "font-display italic text-[clamp(1.5rem,3.2vw,2.5rem)] leading-none";
+    "font-technical uppercase font-medium tracking-[0.22em] text-[clamp(0.8rem,1.35vw,1.1rem)] leading-none";
   const hangulCls =
-    "font-technical uppercase tracking-[0.24em] text-[clamp(0.75rem,1.1vw,0.9rem)]";
+    "font-display font-bold tracking-[-0.015em] text-[clamp(1.25rem,2.6vw,2rem)] leading-none";
 
   const chipCls = variant === "latin" ? latinCls : hangulCls;
   const dotCls =
     variant === "latin"
-      ? "text-primary text-[clamp(1.5rem,3.2vw,2.5rem)] leading-none"
-      : "text-primary text-[clamp(0.75rem,1.1vw,0.9rem)]";
+      ? "text-primary text-[0.5em] leading-none opacity-70"
+      : "text-primary text-[0.4em] leading-none opacity-70";
 
-  const loop = [...items, ...items];
+  // Triple the content so the -50% wrap boundary is never the first
+  // thing a visitor sees, and the loop looks continuous from any scroll
+  // position. `display: flex` + width:max-content keeps the track on
+  // one horizontal row regardless.
+  const loop = [...items, ...items, ...items];
 
   return (
     <div className="marquee-host relative">
       <div
-        className={`marquee-track ${
-          reverse ? "marquee-track-reverse" : ""
-        } items-center gap-10 whitespace-nowrap text-foreground sm:gap-14`}
+        className={`marquee-track ${reverse ? "marquee-track-reverse" : ""} whitespace-nowrap text-foreground`}
+        style={{ alignItems: "center" }}
       >
         {loop.map((chip, i) => (
-          <span key={`${chip}-${i}`} className="flex items-center gap-10 sm:gap-14">
+          <span
+            key={`${chip}-${i}`}
+            className="inline-flex shrink-0 items-center whitespace-nowrap"
+            style={{ columnGap: "clamp(1.75rem, 3vw, 2.75rem)", paddingRight: "clamp(1.75rem, 3vw, 2.75rem)" }}
+          >
             <span className={chipCls}>{chip}</span>
             <span aria-hidden className={dotCls}>
               ●

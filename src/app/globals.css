@@ -273,6 +273,15 @@
     text-rendering: optimizeLegibility;
     /* Contextual feature-set tweak for Pretendard. */
     font-feature-settings: "ss06", "cv11";
+    /* "슉-탁" — lerp-smoothed wheel (SmoothScroll component) handles the
+       슉 glide; proximity snap handles the 탁 rest. Only engages when
+       the user stops scrolling near a snap point, so free scrolling
+       mid-page is undisturbed. */
+    scroll-snap-type: y proximity;
+    scroll-behavior: smooth;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-snap-type: none; scroll-behavior: auto; }
   }
   body {
     @apply bg-background text-foreground;
@@ -545,32 +554,69 @@
 /* ══════════════════════════════════════════════════════════════════
    Marquee — seamless horizontal scroll ticker
    Content is duplicated inline (see home/marquee.tsx) so the -50%
-   translate loops without a visible jump.
+   translate loops without a visible jump. Speeds are tuned so motion
+   is obvious at a glance but not distracting while reading below it.
+   No hover-pause — the band is decorative, not informational.
    ────────────────────────────────────────────────────────────────── */
 @keyframes marquee-x {
   from { transform: translate3d(0, 0, 0); }
   to   { transform: translate3d(-50%, 0, 0); }
 }
-@keyframes scroll-hint {
-  0%, 100% { opacity: 0.3; transform: scaleX(0.7); }
-  50%      { opacity: 1;   transform: scaleX(1); }
-}
 @keyframes marquee-x-reverse {
   from { transform: translate3d(-50%, 0, 0); }
   to   { transform: translate3d(0, 0, 0); }
 }
+@keyframes scroll-hint {
+  0%, 100% { opacity: 0.3; transform: scaleX(0.7); }
+  50%      { opacity: 1;   transform: scaleX(1); }
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   Hero typewriter — letter-by-letter drop-in followed by a blinking
+   cursor. The word is split into <span>s in Hero.tsx and each carries
+   its own inline `animation-delay`. `animation-fill-mode: both` holds
+   the start state pre-delay and the end state afterwards.
+   ────────────────────────────────────────────────────────────────── */
+@keyframes tw-letter-in {
+  from { opacity: 0; transform: translate3d(0, 0.18em, 0); }
+  to   { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+.tw-letter {
+  display: inline-block;
+  opacity: 0;
+  animation: tw-letter-in 0.34s var(--ease-out-expo) both;
+}
+
+@keyframes tw-cursor-blink {
+  0%, 50%   { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+.tw-cursor {
+  display: inline-block;
+  margin-left: 0.02em;
+  color: var(--primary);
+  font-style: normal;  /* stays upright even when the hero is italic */
+  font-weight: 300;
+  opacity: 0;
+  animation: tw-cursor-blink 1.05s step-end infinite both;
+  will-change: opacity;
+}
 .marquee-track {
   display: flex;
-  width: max-content;
+  flex-direction: row;
   flex-wrap: nowrap;
-  animation: marquee-x 42s linear infinite;
+  width: max-content;
+  white-space: nowrap;
+  animation-name: marquee-x;
+  animation-duration: 28s;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  animation-play-state: running;
   will-change: transform;
 }
 .marquee-track-reverse {
   animation-name: marquee-x-reverse;
-}
-.marquee-host:hover .marquee-track {
-  animation-play-state: paused;
+  animation-duration: 36s;
 }
 
 /* ══════════════════════════════════════════════════════════════════
@@ -617,6 +663,8 @@
 /* Reduced motion opts everything out. */
 @media (prefers-reduced-motion: reduce) {
   .marquee-track { animation: none; transform: none; }
+  .tw-letter     { animation: none; opacity: 1; transform: none; }
+  .tw-cursor     { animation: none; opacity: 1; }
   @supports (animation-timeline: view()) {
     .reveal-up, .reveal-in {
       animation: none;
