@@ -24,12 +24,13 @@ const PRIMARY_CHIPS = [
 ];
 
 const SECONDARY_CHIPS = [
-  "선별된 작업",
-  "장인의 연장",
-  "연구에서 도구로",
-  "조용한 매거진",
-  "시스템으로서의 스튜디오",
-  "공개 가능한 것만",
+  "Selected, not streamed",
+  "Tools, not toys",
+  "Research becomes craft",
+  "A quiet magazine",
+  "Studio as system",
+  "Only the shippable",
+  "Made in Seoul",
 ];
 
 export function Marquee() {
@@ -60,24 +61,23 @@ function MarqueeRail({
 }) {
   // Latin row: wide-tracked uppercase sans — scans horizontally,
   // no tall italic glyphs. Feels like modern Swiss kiosk signage.
-  // Hangul row: display face at a confident size — Pretendard heavy
-  // carries the visual weight since Instrument Serif has no Hangul.
+  // Display row: editorial italic serif — pairs the rail visually.
   const latinCls =
     "font-technical uppercase font-medium tracking-[0.22em] text-[clamp(0.8rem,1.35vw,1.1rem)] leading-none";
-  const hangulCls =
-    "font-display font-bold tracking-[-0.015em] text-[clamp(1.25rem,2.6vw,2rem)] leading-none";
+  const displayCls =
+    "font-display italic tracking-[-0.015em] text-[clamp(1.25rem,2.6vw,2rem)] leading-none";
 
-  const chipCls = variant === "latin" ? latinCls : hangulCls;
+  const chipCls = variant === "latin" ? latinCls : displayCls;
   const dotCls =
     variant === "latin"
       ? "text-primary text-[0.5em] leading-none opacity-70"
       : "text-primary text-[0.4em] leading-none opacity-70";
 
-  // Triple the content so the -50% wrap boundary is never the first
-  // thing a visitor sees, and the loop looks continuous from any scroll
-  // position. `display: flex` + width:max-content keeps the track on
-  // one horizontal row regardless.
-  const loop = [...items, ...items, ...items];
+  // EXACTLY two copies so the -50% translate wraps to a pixel-identical
+  // frame. More copies break the seamless loop because the translate
+  // math assumes 2 × content width. Changing duplication without
+  // updating @keyframes causes the visible stall we had previously.
+  const loop = [...items, ...items];
 
   return (
     <div className="marquee-host relative">

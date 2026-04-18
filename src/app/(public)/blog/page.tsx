@@ -53,18 +53,18 @@ export default function WritingIndex() {
       <section className="hairline-t mx-auto w-full max-w-[1440px] px-6 py-12 sm:px-10 sm:py-16">
         <header className="mb-6 flex flex-col gap-3 sm:mb-10 sm:flex-row sm:items-baseline sm:justify-between">
           <div>
-            <p className="kicker mb-3">노트 지도 · Notes map</p>
+            <p className="kicker mb-3">Notes map</p>
             <h2
-              className="font-display tracking-[-0.02em]"
+              className="font-display italic tracking-[-0.02em]"
               style={{ fontSize: "var(--font-size-h2)" }}
             >
-              이 글들이 서로를 어떻게 부르는지.
+              How these pieces call each other.
             </h2>
           </div>
           <p className="font-technical max-w-md text-[12px] leading-relaxed text-muted-foreground sm:text-right">
-            각 점은 하나의 글, 색은 작업 영역(AREA)을 뜻합니다.
-            드래그하면 주변이 스프링처럼 따라오고, 커서를 올리면
-            같은 태그를 공유하는 글들이 선으로 이어집니다. 클릭하면 글이 열립니다.
+            Each node is one piece; colour marks the practice area.
+            Drag a node and its neighbours follow on springs.
+            Hover to reveal shared-tag edges. Click to open.
           </p>
         </header>
         <NotesGraph posts={posts} />

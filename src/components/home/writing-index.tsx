@@ -20,20 +20,20 @@ export function WritingIndex({ posts, total }: WritingIndexProps) {
     <section className="mx-auto w-full max-w-[1440px] px-6 py-20 sm:px-10 sm:py-32">
       <header className="mb-14 flex flex-col gap-3 sm:mb-20 sm:flex-row sm:items-baseline sm:justify-between">
         <div>
-          <p className="kicker mb-3">글 · Writing</p>
+          <p className="kicker mb-3">Writing · 02</p>
           <h2 className="display-lg font-display italic text-foreground">
-            스튜디오의 메모.
+            Notes from the studio.
           </h2>
         </div>
         <div className="flex items-baseline gap-6 font-technical text-[12px] uppercase tracking-[0.2em] text-muted-foreground">
           <span>
-            총 <span className="tabular-nums text-foreground">{total}</span>편
+            <span className="tabular-nums text-foreground">{total}</span> pieces
           </span>
           <Link
             href="/blog"
             className="link-underline hover:text-foreground"
           >
-            전체 보기 →
+            Index →
           </Link>
         </div>
       </header>

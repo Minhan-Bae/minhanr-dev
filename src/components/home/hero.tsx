@@ -34,12 +34,12 @@ export function Hero({ workCount, writingCount }: HeroProps) {
       {/* ─── Top rail ───────────────────────────────────────────────── */}
       <div className="relative z-10 flex items-start justify-between px-6 pt-20 font-technical text-[10px] uppercase tracking-[0.22em] text-muted-foreground sm:px-10 sm:pt-24 sm:text-[11px]">
         <div>
-          <div className="text-foreground">00 / 作</div>
-          <div className="mt-1">Seoul · 2026</div>
+          <div className="text-foreground">Studio № 01</div>
+          <div className="mt-1 tabular-nums">Seoul · 2026</div>
         </div>
         <div className="text-right">
           <div className="text-foreground">{BRAND_IDENTITY.role}</div>
-          <div className="mt-1">{BRAND_IDENTITY.roleKo}</div>
+          <div className="mt-1 tabular-nums">Est. 2020</div>
         </div>
       </div>
 

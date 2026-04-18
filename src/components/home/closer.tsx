@@ -20,10 +20,10 @@ export function Closer() {
           &ldquo;
         </span>
 
-        <blockquote className="reveal-up relative max-w-[18ch] font-display italic tracking-[-0.025em] text-foreground sm:max-w-[20ch]"
+        <blockquote className="reveal-up relative max-w-[18ch] font-display italic tracking-[-0.025em] text-foreground sm:max-w-[22ch]"
           style={{ fontSize: "clamp(2.5rem, 7.5vw, 6rem)", lineHeight: "1.05" }}
         >
-          {BRAND_IDENTITY.manifesto}
+          {BRAND_IDENTITY.manifestoEn}
         </blockquote>
 
         <p className="reveal-up mt-12 font-technical text-[11px] uppercase tracking-[0.22em] text-muted-foreground sm:mt-16">
@@ -33,13 +33,13 @@ export function Closer() {
 
       <div className="reveal-up mt-16 flex flex-wrap gap-x-10 gap-y-4 border-t border-[var(--hairline)] pt-10 font-technical text-[13px] uppercase tracking-[0.2em] sm:mt-24">
         <Link href="/work" className="link-underline text-foreground hover:text-primary">
-          작업 →
+          Work →
         </Link>
         <Link href="/blog" className="link-underline text-foreground hover:text-primary">
-          글 →
+          Writing →
         </Link>
         <Link href="/about" className="link-underline text-foreground hover:text-primary">
-          소개 →
+          About →
         </Link>
       </div>
     </section>

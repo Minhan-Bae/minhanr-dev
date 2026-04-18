@@ -28,16 +28,16 @@ export function WorkShowcase({ items }: WorkShowcaseProps) {
       {/* Section kicker band */}
       <div className="mx-auto flex max-w-[1440px] items-baseline justify-between px-6 py-10 sm:px-10 sm:py-14">
         <div>
-          <p className="kicker mb-3">선별 작업 · Selected Work</p>
+          <p className="kicker mb-3">Selected Work · 01</p>
           <h2 className="display-lg font-display italic text-foreground">
-            실제로 출시된 것들.
+            Made, shipped, running.
           </h2>
         </div>
         <Link
           href="/work"
           className="font-technical link-underline hidden text-[13px] uppercase tracking-[0.16em] text-muted-foreground hover:text-foreground md:inline-block"
         >
-          전체 보기
+          Index →
         </Link>
       </div>
 
@@ -58,7 +58,7 @@ export function WorkShowcase({ items }: WorkShowcaseProps) {
           href="/work"
           className="font-technical link-underline text-[13px] uppercase tracking-[0.16em] text-muted-foreground"
         >
-          작업 전체 보기
+          View all work →
         </Link>
       </div>
     </section>
@@ -150,7 +150,7 @@ function WorkStage({
               href={`/work/${item.slug}`}
               className="reveal-up inline-flex items-center gap-2 pt-2 font-technical text-[13px] uppercase tracking-[0.18em] text-foreground hover:text-primary"
             >
-              <span className="link-underline">케이스 스터디 읽기</span>
+              <span className="link-underline">Read case</span>
               <ArrowUpRight className="h-4 w-4" strokeWidth={1.5} />
             </Link>
           </div>
