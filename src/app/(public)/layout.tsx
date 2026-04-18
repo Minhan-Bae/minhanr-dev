@@ -1,5 +1,6 @@
 import { SiteBackground } from "@/components/site-background";
 import { RainEffect } from "@/components/rain-effect";
+import { MouseSpotlight } from "@/components/mouse-spotlight";
 import { SiteWordmark } from "@/components/site-wordmark";
 import { SiteDock } from "@/components/site-dock";
 import { SeoulDatum } from "@/components/seoul-datum";
@@ -11,6 +12,7 @@ import { SiteColophon } from "@/components/site-colophon";
  * Four-corner magazine frame sitting over every public page:
  *   • z-[-10] SiteBackground — ken-burns scene for the active theme
  *   • z-[-5]  RainEffect — WebGL rain-on-glass
+ *   • z-[15]  MouseSpotlight — soft torch on hover (dark theme only)
  *   • z-40    SiteWordmark — tiny top-left `MinhanR.dev` return anchor
  *   • z-40    SeoulDatum — top-right KST date / time / weather
  *   • z-40    SiteColophon — bottom-right consolidated copyright
@@ -36,6 +38,7 @@ export default async function PublicLayout({
 
       <SiteColophon />
       <SiteDock />
+      <MouseSpotlight />
     </div>
   );
 }

@@ -638,6 +638,40 @@ html:has(.dashboard-snap-root) {
   will-change: opacity;
 }
 
+/* ── Mouse spotlight — soft torch following the pointer ──────────
+   A page-wide fixed overlay that adds a small amount of cool-white
+   light at the cursor position via `mix-blend-mode: plus-lighter`.
+   Content underneath the torch reads as gently illuminated without
+   any visible tint — the effect is "lamp in a dark room", not a
+   yellow vignette. Client component at src/components/mouse-spotlight.tsx
+   owns the (--mx, --my) custom properties via a rAF lerp.
+
+   Z-stack: above ambient background + rain + main content; below the
+   four-corner chrome (wordmark / datum / colophon / dock), so the
+   torch never obscures navigation. `pointer-events: none` means it
+   never steals clicks. */
+.mouse-spotlight {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 15;
+  mix-blend-mode: plus-lighter;
+  opacity: 0;
+  transition: opacity 500ms var(--ease-out);
+  background: radial-gradient(
+    560px circle at var(--mx, -999px) var(--my, -999px),
+    rgba(210, 230, 255, 0.10) 0%,
+    rgba(210, 230, 255, 0.06) 18%,
+    rgba(210, 230, 255, 0.025) 36%,
+    transparent 62%
+  );
+  will-change: background;
+}
+/* Light theme opts out — sunny scenes don't need a spotlight. */
+:root.light .mouse-spotlight {
+  display: none;
+}
+
 /* ── Typewriter-loop — boomerang (type → hold → erase → loop) ──────
    Partner to `src/components/typewriter-loop.tsx`. Letters are mounted
    into the DOM one at a time by the JS state machine, so the word's
