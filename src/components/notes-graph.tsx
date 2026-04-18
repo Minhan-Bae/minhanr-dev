@@ -40,63 +40,123 @@ const CX = VB_W / 2;
 const CY = VB_H / 2;
 
 // Physics — tuned against ~116 public nodes + 5 shadows
-const REPEL_STRENGTH = 620;  // Coulomb constant (higher = more spread)
-const REPEL_CUTOFF   = 420;  // ignore pairs beyond this distance
-const SPRING_REST    = 170;
-const SPRING_K       = 0.016;
-const GRAVITY        = 0.0025; // pull toward (CX, CY) — weakened so the
-                               // graph fills ~0.75 of the viewBox
+const REPEL_STRENGTH = 1000; // Coulomb constant (higher = more spread)
+const REPEL_CUTOFF   = 560;  // ignore pairs beyond this distance
+const SPRING_REST    = 230;
+const SPRING_K       = 0.014;
+const GRAVITY        = 0.0008; // very weak pull toward (CX, CY)
 const DAMPING        = 0.82;
-const MAX_STEP       = 14;     // clamp per-tick displacement per axis
+const MAX_STEP       = 16;     // clamp per-tick displacement per axis
 
-// Soft boundary: nodes outside the inner 75% of the viewBox get pushed
-// back in proportional to how far they've strayed. Gives the graph a
-// natural frame without hard walls.
-const BOUND_MARGIN_X = VB_W * 0.125;   // 12.5% on each side
-const BOUND_MARGIN_Y = VB_H * 0.125;
-const BOUND_STRENGTH = 0.06;
-
-const CATEGORY_ORDER = [
-  "AI",
-  "VFX",
-  "Research",
-  "Creative Technology",
-  "General",
-] as const;
-
-type CategoryKey = (typeof CATEGORY_ORDER)[number];
+// Soft boundary: margin on each edge of the viewBox. Nodes outside
+// get pushed back in proportional to how far they've strayed. Small
+// margin (~6%) because the vivid node colours need room to breathe
+// — the graph should fill almost the entire frame.
+const BOUND_MARGIN_X = VB_W * 0.06;
+const BOUND_MARGIN_Y = VB_H * 0.06;
+const BOUND_STRENGTH = 0.04;
 
 /**
- * Category → display label, plus a base hue for colour generation.
- * Each public node pulls its actual colour from its category band
- * (base hue ± half-range) using its slug seed, so posts within the
- * same category read as a family instead of identical dots.
+ * AREAs — the studio's practice split, not the blog's legacy
+ * `categories` field. These are the buckets a knowledge-worker
+ * reading this site actually cares about; classification lives in
+ * `classifyArea()` and reads the whole meta (title + tags + summary)
+ * with keyword heuristics in priority order.
+ *
+ * Each AREA owns a vivid OKLCH hue (chroma 0.20 — primary-colour
+ * territory) plus a ±range for per-node variation. Result: six clearly
+ * distinguishable families on screen, each one still a family (not a
+ * flat block colour).
  */
-const CATEGORY_STYLE: Record<
-  CategoryKey,
-  { label: string; baseHue: number; hueRange: number }
+const AREA_ORDER = [
+  "research",
+  "systems",
+  "visual",
+  "studio",
+  "industry",
+  "journal",
+] as const;
+type AreaKey = (typeof AREA_ORDER)[number];
+
+const AREA_STYLE: Record<
+  AreaKey,
+  { label: string; kr: string; baseHue: number; hueRange: number }
 > = {
-  AI:                    { label: "AI",       baseHue: 205, hueRange: 36 },
-  VFX:                   { label: "VFX",      baseHue: 355, hueRange: 30 },
-  Research:              { label: "Research", baseHue: 160, hueRange: 30 },
-  "Creative Technology": { label: "Creative", baseHue: 75,  hueRange: 28 },
-  General:               { label: "General",  baseHue: 235, hueRange: 40 },
+  research: { label: "Research", kr: "리서치",  baseHue: 220, hueRange: 24 }, // 파랑
+  systems:  { label: "Systems",  kr: "시스템",  baseHue: 165, hueRange: 22 }, // 청록
+  visual:   { label: "Visual",   kr: "비주얼",  baseHue: 340, hueRange: 22 }, // 마젠타
+  studio:   { label: "Studio",   kr: "스튜디오", baseHue: 40,  hueRange: 20 }, // 앰버
+  industry: { label: "Industry", kr: "산업",    baseHue: 285, hueRange: 22 }, // 바이올렛
+  journal:  { label: "Journal",  kr: "저널",    baseHue: 105, hueRange: 22 }, // 옐로우그린
 };
 
-/**
- * OKLCH string tuned for legible nodes on both dark and light surfaces.
- * Lightness 0.68 + chroma 0.14 is a "neon-avoiding" mid-band that keeps
- * contrast without the 2026 palette leaking into candy colours.
- */
-function nodeColor(cat: CategoryKey, seed: number): string {
-  const { baseHue, hueRange } = CATEGORY_STYLE[cat];
+/** Primary-colour OKLCH: higher chroma than the previous band. */
+function nodeColor(area: AreaKey, seed: number): string {
+  const { baseHue, hueRange } = AREA_STYLE[area];
   const hue = baseHue + (seed - 0.5) * hueRange;
-  return `oklch(0.68 0.14 ${hue.toFixed(1)})`;
+  return `oklch(0.68 0.20 ${hue.toFixed(1)})`;
+}
+function legendColor(area: AreaKey): string {
+  return `oklch(0.68 0.20 ${AREA_STYLE[area].baseHue})`;
 }
 
-/** Legend swatch — representative colour per category (mid-hue). */
-function legendColor(cat: CategoryKey): string {
-  return `oklch(0.68 0.14 ${CATEGORY_STYLE[cat].baseHue})`;
+/**
+ * Classify a post into an AREA from its free-text metadata.
+ *
+ * Priority order matters: VFX / visual tokens beat "research" when both
+ * appear; journaling beats everything because daily notes often mention
+ * research topics in passing. This is a studio-opinionated taxonomy,
+ * deliberately narrower than the blog's public `categories` list.
+ */
+function classifyArea(post: BlogPostMeta): AreaKey {
+  const blob = [
+    post.title,
+    post.summary ?? "",
+    ...(post.tags ?? []),
+    ...(post.categories ?? []),
+  ]
+    .join(" ")
+    .toLowerCase();
+
+  // Journal-first: daily / weekly retrospectives take precedence.
+  if (/일지|다이어리|diary|daily note|weekly review|주간회고|회고|journal/i.test(blob))
+    return "journal";
+
+  // Visual computing: VFX pipelines, generative imagery, video.
+  if (
+    /vfx|render|nuke|houdini|diffusion|generative|visual|image|video|3d|animation|frame|pixel|holotron|runway|ltx|stable diffusion|midjourney|pika|luma|sora|veo/i.test(
+      blob
+    )
+  )
+    return "visual";
+
+  // Systems: agents, orchestration, pipelines, PKM.
+  if (
+    /agent|orchestr|workflow|mcp\b|claude code|pipeline|pkm|obsidian|vault|oikbas|automation|scraper|webhook|cron|sync|에이전트|자동화|파이프라인/i.test(
+      blob
+    )
+  )
+    return "systems";
+
+  // Studio self-ops: the site, tooling, brand.
+  if (
+    /minhanr|portfolio|editorial|design system|brand|typography|ui\/ux|figma|shadcn|tailwind|next\.js|vercel|스튜디오 운영|포트폴리오/i.test(
+      blob
+    )
+  )
+    return "studio";
+
+  // Industry: companies, deals, layoffs, macro signals.
+  if (
+    /morgan stanley|meta ai|apple|google|market|industry|layoff|acquisition|경영|전략|감원|파트너|deal|funding|ipo|인수|발표|출시/i.test(
+      blob
+    )
+  )
+    return "industry";
+
+  // Default: research — this is an AI research-leaning blog, so the
+  // unclassified majority ends up here.
+  return "research";
 }
 
 const PRIVATE_CATEGORIES = [
@@ -128,7 +188,7 @@ interface PublicNodeData extends BaseNode {
   kind: "public";
   slug: string;
   tags: string[];
-  category: CategoryKey;
+  area: AreaKey;
 }
 interface PrivateNodeData extends BaseNode {
   kind: "private";
@@ -157,15 +217,6 @@ function hashString(s: string): number {
   return (h >>> 0) / 0xffffffff;
 }
 
-function resolveCategory(post: BlogPostMeta): CategoryKey {
-  for (const cat of post.categories) {
-    if ((CATEGORY_ORDER as readonly string[]).includes(cat)) {
-      return cat as CategoryKey;
-    }
-  }
-  return "General";
-}
-
 /**
  * Build nodes and edges.
  *   - Edges exist when two public posts share ≥ 1 tag; weight = count.
@@ -178,22 +229,23 @@ function buildGraph(posts: BlogPostMeta[]): {
   const MAX_EDGES_PER_NODE = 4;
   const nodes: NodeData[] = [];
 
-  // Public nodes — scatter on an initial circle so repulsion has room
-  // to start pushing immediately.
+  // Public nodes — scatter on an initial ring so repulsion has room
+  // to start pushing immediately. Wider ring than before so the graph
+  // doesn't open from a tight cluster.
   posts.forEach((post, i) => {
     const seed = hashString(post.slug);
     const angle = seed * Math.PI * 2;
     const r0 =
-      Math.min(VB_W, VB_H) * 0.28 + (i % 5) * 14; // mild jitter band
-    const cat = resolveCategory(post);
+      Math.min(VB_W, VB_H) * 0.4 + (i % 5) * 14;
+    const area = classifyArea(post);
     nodes.push({
       kind: "public",
       id: post.slug,
       label: post.title,
       slug: post.slug,
       tags: post.tags,
-      category: cat,
-      color: nodeColor(cat, seed),
+      area,
+      color: nodeColor(area, seed),
       r: 6,
       x: CX + Math.cos(angle) * r0,
       y: CY + Math.sin(angle) * r0,
@@ -674,7 +726,7 @@ export function NotesGraph({ posts }: NotesGraphProps) {
               >
                 <title>
                   {n.kind === "public"
-                    ? `${n.label} · ${CATEGORY_STYLE[n.category].label}`
+                    ? `${n.label} · ${AREA_STYLE[n.area].label}`
                     : `비공개 · ${n.label}`}
                 </title>
                 {isHovered && n.kind === "public" && (
@@ -733,7 +785,7 @@ export function NotesGraph({ posts }: NotesGraphProps) {
                 style={{ background: hovered.color }}
               />
               <span className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
-                {CATEGORY_STYLE[hovered.category].label}
+                {AREA_STYLE[hovered.area].kr} · {AREA_STYLE[hovered.area].label}
               </span>
             </div>
             <div className="line-clamp-2 text-foreground">
@@ -756,13 +808,13 @@ export function NotesGraph({ posts }: NotesGraphProps) {
 
       {/* Legend */}
       <figcaption className="font-technical absolute bottom-3 left-4 flex flex-wrap gap-x-5 gap-y-1.5 text-[10.5px] uppercase tracking-[0.16em] text-muted-foreground sm:bottom-5 sm:left-6 sm:gap-x-7">
-        {CATEGORY_ORDER.map((cat) => (
-          <span key={cat} className="flex items-center gap-1.5">
+        {AREA_ORDER.map((a) => (
+          <span key={a} className="flex items-center gap-1.5">
             <span
               className="inline-block h-[6px] w-[6px] rounded-full"
-              style={{ background: legendColor(cat) }}
+              style={{ background: legendColor(a) }}
             />
-            {CATEGORY_STYLE[cat].label}
+            {AREA_STYLE[a].kr}
           </span>
         ))}
         <span className="flex items-center gap-1.5">
