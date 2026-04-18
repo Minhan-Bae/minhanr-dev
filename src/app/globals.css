@@ -580,6 +580,59 @@
 }
 
 /* ══════════════════════════════════════════════════════════════════
+   Rain-on-glass droplets — see src/components/rain-effect.tsx.
+   Each drop is an absolutely-positioned <span> with a real
+   `backdrop-filter` lens (blur + saturate), an inset rim to sell the
+   glass-bead depth, and a top-left specular glint. A subset of drops
+   is marked `.rain-drop-fall` and slides down the viewport with a
+   CSS transform — no JS per-frame work.
+   ────────────────────────────────────────────────────────────────── */
+@keyframes rain-bead-in {
+  0%   { opacity: 0; transform: translate(-50%, -50%) scale(0); }
+  60%  { opacity: 1; transform: translate(-50%, -50%) scale(1.05); }
+  100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+@keyframes rain-fall {
+  /* The drop beads up, pauses, then slides — ending off-screen. The
+     translate is applied on top of the -50%/-50% centering, so we
+     overshoot `-50% + 120vh` vertically. */
+  0%   { opacity: 0; transform: translate(-50%, -50%) scale(0); }
+  10%  { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  25%  { opacity: 1; transform: translate(-50%, calc(-50% + 0px))   scale(1,  1.02); }
+  55%  { opacity: 1; transform: translate(-50%, calc(-50% + 40vh))  scale(0.95, 1.18); }
+  92%  { opacity: 0.8; transform: translate(-50%, calc(-50% + 110vh)) scale(0.7, 1.25); }
+  100% { opacity: 0;   transform: translate(-50%, calc(-50% + 130vh)) scale(0.5, 1.4); }
+}
+.rain-drop {
+  position: absolute;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  /* The lens — this is what sells the "it's actually glass" read.
+     Without it, even well-shaded circles look like stickers. */
+  backdrop-filter: blur(4px) saturate(1.4);
+  -webkit-backdrop-filter: blur(4px) saturate(1.4);
+  /* Rim + bottom shadow gives the drop a body. The inset shadows
+     work because backdrop-filter paints under the element's own fill. */
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.14),
+    inset 2px 2px 3px rgba(255, 255, 255, 0.22),
+    inset -2px -3px 4px rgba(0, 0, 0, 0.22),
+    0 1px 3px rgba(0, 0, 0, 0.22);
+  background:
+    radial-gradient(circle at 32% 30%,
+      rgba(255, 255, 255, 0.32) 0%,
+      rgba(255, 255, 255, 0.06) 40%,
+      rgba(255, 255, 255, 0) 70%);
+  animation: rain-bead-in 0.9s var(--ease-out) both;
+  will-change: transform, opacity;
+}
+.rain-drop-fall {
+  animation-name: rain-fall;
+  animation-timing-function: cubic-bezier(0.5, 0, 0.75, 0);
+  animation-iteration-count: infinite;
+}
+
+/* ══════════════════════════════════════════════════════════════════
    Hero typewriter — letter-by-letter drop-in followed by a blinking
    cursor. The word is split into <span>s in Hero.tsx and each carries
    its own inline `animation-delay`. `animation-fill-mode: both` holds

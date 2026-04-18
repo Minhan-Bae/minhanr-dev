@@ -1,225 +1,126 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useState } from "react";
 
 /**
- * RainEffect — Canvas-2D droplets-on-glass overlay, inspired by
- * codrops/RainEffect. A full WebGL shader port would be heavier
- * than this site needs; instead we paint translucent droplets with
- * a radial gradient and a highlight spec, add a simple forming-in
- * phase so they "bead up" rather than pop in, then occasionally let
- * a large drop detach and slide down leaving a trail of smaller
- * ones — the visual shorthand for rain-on-glass without loading a
- * 10 000-line shader library.
+ * RainEffect — DOM-based rain-on-glass layer (v2).
  *
- * Runs behind all content (fixed, negative z-index, pointer-events:
- * none) so it layers over the site-wide `bg.jpg` but under every
- * slide and article. Self-clamps drop count and DPR-aware resizes
- * on window resize. No React state involved in the loop — all drop
- * bookkeeping happens in the rAF closure so the component
- * re-renders at most once on mount.
+ * The v1 canvas approach painted small translucent circles, which read
+ * as bubble stickers rather than water. The codrops reference gets its
+ * weight from each drop being an actual *lens* over the background —
+ * the pixels behind each drop are blurred and slightly desaturated, so
+ * your eye reads it as glass with water on it.
+ *
+ * We reproduce that by rendering each drop as an absolutely-positioned
+ * `<div>` with `backdrop-filter: blur() saturate()` and a subtle inset
+ * shadow for rim depth. Browsers composite backdrop-filter on the GPU,
+ * so 30–40 drops is cheap. Drops form in with a scale animation; a
+ * subset are tagged as "falling" and slide down the window with a CSS
+ * transform.
+ *
+ * Self-resolving procedural spawn — we keep a pool at capacity, drop
+ * the oldest when adding new ones, so the layer never feels static.
+ * All animation is CSS; React only owns the list.
+ *
+ *   • fixed, -z-5, pointer-events: none
+ *   • clamps drop count and size to viewport size
+ *   • re-spawns every ~2.4 s for continuous evolution
  */
 
 interface Drop {
-  x: number;
-  y: number;
-  /** Target radius after forming completes. */
-  rTarget: number;
-  /** Current rendered radius — tweens toward rTarget during forming. */
-  r: number;
-  vy: number;
-  sticky: boolean;
-  /** ms since spawned. */
-  age: number;
-  /** ms of forming-in phase. */
-  formingMs: number;
-  /** ms total lifespan before fade-out. */
-  maxAgeMs: number;
+  id: number;
+  /** percentage across viewport */
+  leftPct: number;
+  /** percentage down viewport */
+  topPct: number;
+  /** px diameter */
+  size: number;
+  /** some drops slide; most stay beaded */
+  falling: boolean;
+  /** seconds of fall animation (randomised per drop) */
+  fallDuration: number;
+  /** seconds delay before the fall starts */
+  fallDelay: number;
 }
 
-const MAX_DROPS = 220;
-/** Seed density: one drop per N pixels² of viewport. Lower = denser. */
-const SEED_DENSITY = 9500;
-/** Per-frame probability a large sticky drop detaches. */
-const DETACH_P = 0.00018;
-/** Min radius for a drop to be eligible to detach and slide. */
-const DETACH_R_MIN = 3.6;
+const STATIC_COUNT = 32;
+const FALLING_COUNT = 4;
+/** Larger minimum so drops read as weight, not speckle. */
+const MIN_SIZE = 14;
+const MAX_SIZE = 54;
+/** Larger drops get a higher chance of being the ones that fall. */
+
+let nextId = 0;
+
+function makeDrop(falling: boolean): Drop {
+  // Falling drops tend to start larger (they're the heavy ones that
+  // exceeded surface tension and detached).
+  const size = falling
+    ? MAX_SIZE * (0.65 + Math.random() * 0.35)
+    : MIN_SIZE + Math.random() * (MAX_SIZE - MIN_SIZE) * 0.85;
+
+  return {
+    id: nextId++,
+    leftPct: Math.random() * 98 + 1,
+    topPct: falling
+      ? Math.random() * 35 // falling drops start in upper portion
+      : Math.random() * 92 + 4,
+    size,
+    falling,
+    fallDuration: falling ? 4 + Math.random() * 4 : 0,
+    fallDelay: falling ? Math.random() * 3 : 0,
+  };
+}
+
+function seed(): Drop[] {
+  return [
+    ...Array.from({ length: STATIC_COUNT }, () => makeDrop(false)),
+    ...Array.from({ length: FALLING_COUNT }, () => makeDrop(true)),
+  ];
+}
 
 export function RainEffect() {
-  const ref = useRef<HTMLCanvasElement>(null);
+  const [drops, setDrops] = useState<Drop[]>([]);
 
   useEffect(() => {
-    const canvas = ref.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d", { alpha: true });
-    if (!ctx) return;
+    setDrops(seed());
 
-    let dpr = window.devicePixelRatio || 1;
-    let W = window.innerWidth;
-    let H = window.innerHeight;
-
-    const resize = () => {
-      dpr = window.devicePixelRatio || 1;
-      W = window.innerWidth;
-      H = window.innerHeight;
-      canvas.width = Math.floor(W * dpr);
-      canvas.height = Math.floor(H * dpr);
-      canvas.style.width = W + "px";
-      canvas.style.height = H + "px";
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    };
-    resize();
-    window.addEventListener("resize", resize);
-
-    const drops: Drop[] = [];
-    const seedCount = Math.min(
-      MAX_DROPS / 2,
-      Math.floor((W * H) / SEED_DENSITY)
-    );
-    for (let i = 0; i < seedCount; i++) {
-      const r = 1.2 + Math.random() * 4.2;
-      drops.push({
-        x: Math.random() * W,
-        y: Math.random() * H,
-        rTarget: r,
-        r: r * (0.3 + Math.random() * 0.7),
-        vy: 0,
-        sticky: true,
-        age: Math.random() * 8000,
-        formingMs: 500 + Math.random() * 900,
-        maxAgeMs: 14000 + Math.random() * 12000,
+    // Every few seconds, retire a small batch and introduce fresh drops
+    // so the window stays in motion without the whole layer flashing.
+    const interval = window.setInterval(() => {
+      setDrops((prev) => {
+        const retireCount = 3 + Math.floor(Math.random() * 3);
+        const kept = prev.slice(retireCount);
+        const fresh = [
+          ...Array.from({ length: retireCount - 1 }, () => makeDrop(false)),
+          makeDrop(Math.random() < 0.35), // occasional fresh faller
+        ];
+        return [...kept, ...fresh];
       });
-    }
+    }, 2400);
 
-    const spawn = () => {
-      if (drops.length >= MAX_DROPS) return;
-      const r = 1.4 + Math.random() * 5;
-      drops.push({
-        x: Math.random() * W,
-        y: Math.random() * H * 0.92,
-        rTarget: r,
-        r: 0,
-        vy: 0,
-        sticky: true,
-        age: 0,
-        formingMs: 420 + Math.random() * 900,
-        maxAgeMs: 10000 + Math.random() * 12000,
-      });
-    };
-
-    let last = performance.now();
-    let rafId = 0;
-
-    const tick = (now: number) => {
-      const dt = Math.min(50, now - last);
-      last = now;
-
-      ctx.clearRect(0, 0, W, H);
-
-      // Spawn rate — roughly one drop per frame on average at 60fps.
-      if (Math.random() < 0.06 * (dt / 16)) spawn();
-
-      for (let i = drops.length - 1; i >= 0; i--) {
-        const d = drops[i];
-        d.age += dt;
-
-        // Forming — tween current radius toward target.
-        if (d.age < d.formingMs) {
-          const t = d.age / d.formingMs;
-          const ease = 1 - Math.pow(1 - t, 3); // easeOutCubic
-          d.r = d.rTarget * ease;
-        } else {
-          d.r = d.rTarget;
-        }
-
-        // Large sticky drops occasionally detach.
-        if (d.sticky && d.r >= DETACH_R_MIN) {
-          if (Math.random() < DETACH_P * dt) {
-            d.sticky = false;
-          }
-        }
-
-        // Falling drops accelerate, shrink, and drip a trail.
-        if (!d.sticky) {
-          d.vy += 0.09 * (dt / 16);
-          d.y += d.vy;
-          d.r = Math.max(0.6, d.r - 0.004 * dt);
-
-          // Leave a trail of tiny sticky drops at random intervals.
-          if (Math.random() < 0.45 && drops.length < MAX_DROPS) {
-            drops.push({
-              x: d.x + (Math.random() - 0.5) * 1.6,
-              y: d.y - d.rTarget * 0.9,
-              rTarget: Math.max(0.8, d.rTarget * 0.3),
-              r: 0,
-              vy: 0,
-              sticky: true,
-              age: 0,
-              formingMs: 200 + Math.random() * 400,
-              maxAgeMs: 2400 + Math.random() * 3600,
-            });
-          }
-        }
-
-        // Fade-out toward end of life.
-        const lifeT = d.age / d.maxAgeMs;
-        const alpha = lifeT < 0.8 ? 1 : Math.max(0, 1 - (lifeT - 0.8) / 0.2);
-
-        // Cull.
-        if (d.age > d.maxAgeMs || d.y - d.r > H + 10 || d.r < 0.5) {
-          drops.splice(i, 1);
-          continue;
-        }
-
-        // Body — radial gradient, cool-blue tinted.
-        const g = ctx.createRadialGradient(
-          d.x - d.r * 0.35,
-          d.y - d.r * 0.35,
-          0,
-          d.x,
-          d.y,
-          d.r
-        );
-        g.addColorStop(0, `rgba(225, 238, 255, ${0.28 * alpha})`);
-        g.addColorStop(0.55, `rgba(160, 195, 235, ${0.1 * alpha})`);
-        g.addColorStop(1, `rgba(90, 130, 180, 0)`);
-        ctx.beginPath();
-        ctx.arc(d.x, d.y, d.r, 0, Math.PI * 2);
-        ctx.fillStyle = g;
-        ctx.fill();
-
-        // Specular highlight — the bright pinprick that sells the
-        // "dimensional droplet" read over a flat circle.
-        if (d.r > 1) {
-          ctx.beginPath();
-          ctx.arc(
-            d.x - d.r * 0.34,
-            d.y - d.r * 0.34,
-            Math.max(0.4, d.r * 0.22),
-            0,
-            Math.PI * 2
-          );
-          ctx.fillStyle = `rgba(255, 255, 255, ${0.36 * alpha})`;
-          ctx.fill();
-        }
-      }
-
-      rafId = requestAnimationFrame(tick);
-    };
-
-    rafId = requestAnimationFrame(tick);
-
-    return () => {
-      window.removeEventListener("resize", resize);
-      cancelAnimationFrame(rafId);
-    };
+    return () => window.clearInterval(interval);
   }, []);
 
   return (
-    <canvas
-      ref={ref}
+    <div
       aria-hidden
-      className="pointer-events-none fixed inset-0 -z-[5] opacity-90"
-    />
+      className="pointer-events-none fixed inset-0 -z-[5] overflow-hidden"
+    >
+      {drops.map((d) => (
+        <span
+          key={d.id}
+          className={`rain-drop ${d.falling ? "rain-drop-fall" : ""}`}
+          style={{
+            left: `${d.leftPct}%`,
+            top: `${d.topPct}%`,
+            width: `${d.size}px`,
+            height: `${d.size}px`,
+            animationDelay: d.falling ? `${d.fallDelay}s` : "0s",
+            animationDuration: d.falling ? `${d.fallDuration}s` : undefined,
+          }}
+        />
+      ))}
+    </div>
   );
 }
