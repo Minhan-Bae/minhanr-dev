@@ -35,7 +35,11 @@ interface TypewriterLoopProps {
   lang?: string;
   /** Show a blinking cursor at the current typing head. */
   cursor?: boolean;
-  /** Emit a synthesized key-click on each letter mount / unmount. */
+  /** Emit a synthesized key-click on each letter mount / unmount.
+   *  OFF by default — the typing SFX is a Hero-specific signature;
+   *  adding it to every subsequent slide turns the deck into a
+   *  continuous clicking track, which reads as noise. Explicit
+   *  `sfx={true}` on the hero opts in. */
   sfx?: boolean;
 }
 
@@ -70,7 +74,7 @@ export function TypewriterLoop({
   style,
   lang,
   cursor = true,
-  sfx = true,
+  sfx = false,
 }: TypewriterLoopProps) {
   const Tag = (as ?? "span") as ElementType;
   const letters = [...text];

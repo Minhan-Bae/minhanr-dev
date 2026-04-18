@@ -2,7 +2,6 @@ import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import type { WorkItem } from "@/lib/work";
 import { WorkCover } from "@/components/work-cover";
-import { TypewriterLoop } from "@/components/typewriter-loop";
 
 interface WorkShowcaseProps {
   items: WorkItem[];
@@ -54,10 +53,14 @@ export function WorkSlide({
       data-slide
       className="slide hairline-t relative mx-auto flex w-full max-w-[1440px] items-center px-6 py-10 sm:px-10"
     >
-      <div className="grid w-full gap-6 md:grid-cols-12 md:gap-12">
-        {/* Cover */}
+      <div className="grid w-full gap-6 md:grid-cols-12 md:gap-10">
+        {/* Cover — visual half of the spread. col-span-6 on md gives
+            the copy side equal horizontal room, which long Korean
+            summaries on OIKBAS / VFX Research / minhanr.dev need to
+            avoid wrapping every few characters. At col-span-7 the
+            copy column was 472 px at a 1280 viewport — too tight. */}
         <div
-          className={`md:col-span-7 ${flip ? "md:order-last" : ""}`}
+          className={`md:col-span-6 ${flip ? "md:order-last" : ""}`}
         >
           <Link
             href={`/work/${item.slug}`}
@@ -69,14 +72,14 @@ export function WorkSlide({
               label={item.title}
               sublabel={item.subject}
               aspect={flip ? "frame-4x5" : "frame-16x9"}
-              sizes="(min-width: 768px) 58vw, 100vw"
+              sizes="(min-width: 768px) 48vw, 100vw"
               priority={index === 0}
             />
           </Link>
         </div>
 
-        {/* Copy */}
-        <div className="flex flex-col justify-center md:col-span-5">
+        {/* Copy — equal share of the spread. */}
+        <div className="flex flex-col justify-center md:col-span-6">
           <div className="flex items-baseline justify-between border-b border-[var(--hairline)] pb-3">
             <span
               className="font-display italic tabular-nums text-primary"
@@ -93,19 +96,15 @@ export function WorkSlide({
             {item.discipline} · {item.year}
           </p>
 
-          <TypewriterLoop
-            as="h3"
-            text={item.title}
-            typeDelay={95}
-            eraseDelay={50}
-            holdMs={5600}
-            pauseMs={800}
-            className="mt-3 font-display italic tracking-[-0.02em] text-foreground block"
+          <h3
+            className="mt-3 font-display italic tracking-[-0.02em] text-foreground"
             style={{
               fontSize: "clamp(1.75rem, 3.6vw, 3rem)",
               lineHeight: "1.05",
             }}
-          />
+          >
+            {item.title}
+          </h3>
 
           <p className="mt-5 max-w-prose text-[14px] leading-[1.7] text-muted-foreground sm:text-[15px]">
             {item.summary}

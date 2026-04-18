@@ -42,6 +42,7 @@ export function Hero({ workCount, writingCount }: HeroProps) {
             eraseDelay={ERASE_DELAY_MS}
             holdMs={HOLD_MS}
             pauseMs={PAUSE_MS}
+            sfx
             className="display-hero font-display italic text-foreground"
           />
 
