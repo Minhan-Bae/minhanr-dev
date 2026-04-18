@@ -65,15 +65,21 @@ export function VisitorCounter() {
 
   return (
     <span
-      title={`Today: ${stats.today.toLocaleString()} · Total: ${stats.total.toLocaleString()}`}
+      title={`Today ${stats.today.toLocaleString()} · Total ${stats.total.toLocaleString()}`}
       className="inline-flex items-center gap-1.5 px-2 text-[10px] uppercase tracking-[0.16em] text-muted-foreground"
     >
       <span className="relative inline-block h-1.5 w-1.5 rounded-full bg-emerald-400">
         <span className="absolute inset-0 animate-ping rounded-full bg-emerald-400/70" />
       </span>
-      <span className="tabular-nums">{stats.today.toLocaleString()}</span>
-      <span className="opacity-50">/</span>
-      <span className="tabular-nums opacity-60">{stats.total.toLocaleString()}</span>
+      <span className="opacity-70">Today</span>
+      <span className="tabular-nums text-foreground/90">
+        {stats.today.toLocaleString()}
+      </span>
+      <span className="opacity-40">·</span>
+      <span className="opacity-70">Total</span>
+      <span className="tabular-nums text-foreground/70">
+        {stats.total.toLocaleString()}
+      </span>
     </span>
   );
 }
