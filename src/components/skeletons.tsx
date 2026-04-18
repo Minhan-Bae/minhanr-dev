@@ -12,6 +12,54 @@ export function PageHeaderSkeleton() {
   );
 }
 
+/**
+ * 7-day × N-row timebox grid skeleton — header row + 6 "hour" stripes
+ * so the eye reads the shape (weekly schedule) while data loads.
+ */
+export function CalendarGridSkeleton() {
+  return (
+    <div className="mx-auto max-w-[1400px] px-4 py-5 sm:px-6">
+      <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
+        <PageHeaderSkeleton />
+        <div className="h-8 w-56 skeleton-shimmer rounded-full bg-muted" />
+      </div>
+      <div className="mb-2 flex items-center justify-between">
+        <div className="h-7 w-48 skeleton-shimmer rounded bg-muted" />
+        <div className="h-4 w-40 skeleton-shimmer rounded bg-muted" />
+      </div>
+      <div className="overflow-hidden rounded-md border border-border bg-background">
+        <div
+          className="grid min-w-[760px]"
+          style={{
+            gridTemplateColumns: "64px repeat(7, 1fr)",
+            gridTemplateRows: "44px repeat(12, 36px)",
+          }}
+        >
+          {/* Header row */}
+          <div className="border-b border-r border-border bg-muted/30" />
+          {Array.from({ length: 7 }).map((_, i) => (
+            <div
+              key={`h-${i}`}
+              className="skeleton-shimmer border-b border-r border-border bg-muted/40"
+            />
+          ))}
+          {/* Body rows */}
+          {Array.from({ length: 12 }).flatMap((_, row) =>
+            Array.from({ length: 8 }).map((_, col) => (
+              <div
+                key={`r-${row}-${col}`}
+                className={`skeleton-shimmer border-r border-t border-border/70 ${
+                  col === 0 ? "bg-muted/30" : "bg-muted/20"
+                }`}
+              />
+            ))
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function CardGridSkeleton({ count = 6 }: { count?: number }) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
