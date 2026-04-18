@@ -27,13 +27,17 @@
 
 import fs from "node:fs/promises";
 import path from "node:path";
+import os from "node:os";
+import { spawn } from "node:child_process";
 
 const POSTS_DIR = path.resolve("src/content/posts");
-const IMAGES_DIR = path.resolve("public/images/posts");
+const TMP_DIR = path.join(os.tmpdir(), "enrich-posts-cache");
+const R2_BUCKET = "minhanr-dev-images";
+const R2_PUBLIC_BASE = "https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev";
 const MAX_FIGURES = 2;
 const MIN_IMAGE_BYTES = 10_000;
 const ARXIV_VERSIONS = ["v1", "v2", "v3"];
-const UA = "Mozilla/5.0 (compatible; minhanr.dev-enrich/0.2; +https://minhanr.dev)";
+const UA = "Mozilla/5.0 (compatible; minhanr.dev-enrich/0.3; +https://minhanr.dev)";
 const FETCH_TIMEOUT_MS = 8000;
 
 const BAD_IMAGE_PATTERNS = [
@@ -194,6 +198,32 @@ async function downloadImage(url, outDir, basename) {
   return { file, ext, bytes: buf.length };
 }
 
+function runWrangler(args) {
+  return new Promise((resolve, reject) => {
+    const proc = spawn("npx", ["wrangler", ...args], {
+      stdio: ["ignore", "pipe", "pipe"],
+      shell: true,
+    });
+    let stderr = "";
+    proc.stderr.on("data", (b) => (stderr += b.toString()));
+    proc.on("close", (code) => {
+      if (code === 0) resolve();
+      else reject(new Error(`wrangler exit ${code}: ${stderr.slice(-300)}`));
+    });
+  });
+}
+
+async function uploadToR2(localPath, r2Key) {
+  await runWrangler([
+    "r2",
+    "object",
+    "put",
+    `${R2_BUCKET}/${r2Key}`,
+    `--file=${localPath}`,
+    "--remote",
+  ]);
+}
+
 function findInsertIdx(lines) {
   const firstH1 = lines.findIndex((l) => /^#\s/.test(l));
   if (firstH1 < 0) return 0;
@@ -231,7 +261,11 @@ async function enrichPost(slug, { dry }) {
   const postPath = path.join(POSTS_DIR, `${slug}.md`);
   const raw = await fs.readFile(postPath, "utf8");
   const { fm, body } = splitFrontmatter(raw);
-  if (body.includes("/images/posts/")) return { slug, skip: "already enriched" };
+  // Skip if the body already contains a figure block (either legacy
+  // /images/posts/ path or an already-uploaded R2 URL).
+  if (body.includes("/images/posts/") || body.includes(`${R2_PUBLIC_BASE}/posts/`)) {
+    return { slug, skip: "already enriched" };
+  }
 
   const { arxivIds, otherUrls } = gatherSources(body);
   if (!arxivIds.length && !otherUrls.length) return { slug, skip: "no sources" };
@@ -248,20 +282,28 @@ async function enrichPost(slug, { dry }) {
     return { slug, candidates: cands.map((c) => ({ label: sourceLabel(c), img: c.image })) };
   }
 
-  const outDir = path.join(IMAGES_DIR, slug);
+  // Download to OS temp dir, then push each file to R2. The final URL
+  // written into the post is the R2 public URL — the local copy only
+  // exists long enough to hand off to wrangler, then gets cleaned up.
+  const tmpDir = path.join(TMP_DIR, slug);
   const figures = [];
   for (let i = 0; i < cands.length; i++) {
+    const basename = `fig-${i + 1}`;
     try {
-      const { ext, bytes } = await downloadImage(cands[i].image, outDir, `fig-${i + 1}`);
+      const { file, ext, bytes } = await downloadImage(cands[i].image, tmpDir, basename);
+      const r2Key = `posts/${slug}/${basename}.${ext}`;
+      await uploadToR2(file, r2Key);
       figures.push({
-        publicPath: `/images/posts/${slug}/fig-${i + 1}.${ext}`,
+        publicPath: `${R2_PUBLIC_BASE}/${r2Key}`,
         cand: cands[i],
         bytes,
       });
     } catch (e) {
-      console.error(`  ! ${slug} fig-${i + 1}: ${e.message}`);
+      console.error(`  ! ${slug} fig-${i + 1}: ${e.message.split("\n")[0]}`);
     }
   }
+  // Temp cleanup — best-effort, never fails the run.
+  await fs.rm(tmpDir, { recursive: true, force: true }).catch(() => {});
   if (!figures.length) return { slug, skip: "all downloads failed" };
 
   const lines = body.split("\n");
