@@ -1,0 +1,113 @@
+"use server";
+
+/**
+ * Vault Server Actions — React 19 + Next.js 16 패턴.
+ *
+ * 기존 /api/vault-sync/transition POST와 동일 동작이지만:
+ *   - HTTP 왕복 제거 (서버 함수 직접 호출)
+ *   - useOptimistic / useActionState와 자연스럽게 결합
+ *   - 직렬화/역직렬화 오버헤드 제거
+ *
+ * REST 엔드포인트(/api/vault-sync/transition)는 외부 도구·webhook용으로 유지.
+ */
+
+import { revalidatePath } from "next/cache";
+import { requireUser } from "@/lib/api-auth";
+import { updateFrontmatterField } from "@/lib/vault-write";
+import { nowInKST } from "@/lib/time";
+
+export type VaultAction = "pause" | "complete" | "archive";
+
+const ALLOWED: ReadonlySet<VaultAction> = new Set(["pause", "complete", "archive"]);
+
+const REVALIDATE_PATHS = [
+  "/dashboard",
+  "/projects",
+  "/notes",
+  "/deadlines",
+  "/review",
+  "/tags",
+  "/links",
+  "/trends",
+  "/finance",
+  "/statistics",
+  "/graph",
+  "/papers",
+  "/",
+] as const;
+
+function buildFields(action: VaultAction): Record<string, string> {
+  if (action === "pause") return { status: "paused", workflow: "paused" };
+  if (action === "complete") return { status: "completed", workflow: "completed" };
+  // archive
+  const today = nowInKST().toISOString().slice(0, 10);
+  return {
+    status: "archived",
+    lifecycle_state: "archived",
+    archived_at: today,
+    archived_reason: "manual",
+  };
+}
+
+function buildMessage(action: VaultAction, path: string): string {
+  const basename = (path.split("/").pop() || path).replace(/\.md$/, "");
+  return `chore: dashboard ${action} — ${basename}`;
+}
+
+export interface VaultActionResult {
+  ok: boolean;
+  path: string;
+  action: VaultAction;
+  error?: string;
+}
+
+/**
+ * Note frontmatter transition — useOptimistic / useTransition와 결합 사용.
+ *
+ * @example
+ *   const [pending, startTransition] = useTransition();
+ *   const [optimistic, addHidden] = useOptimistic<Set<string>, string>(
+ *     new Set(),
+ *     (set, path) => new Set([...set, path])
+ *   );
+ *   startTransition(async () => {
+ *     addHidden(path);
+ *     const result = await transitionNoteAction(path, "archive");
+ *     if (!result.ok) toast.error(result.error);
+ *   });
+ */
+export async function transitionNoteAction(
+  path: string,
+  action: VaultAction,
+): Promise<VaultActionResult> {
+  // 인증
+  const { response } = await requireUser();
+  if (response) {
+    return { ok: false, path, action, error: "unauthorized" };
+  }
+
+  // 입력 검증 (REST 엔드포인트와 동일 규칙)
+  if (!path || !path.endsWith(".md")) {
+    return { ok: false, path, action, error: "path must be a .md vault path" };
+  }
+  if (!/^\d{3}_[^/]+\//.test(path)) {
+    return { ok: false, path, action, error: "path must be within vault folders" };
+  }
+  if (!ALLOWED.has(action)) {
+    return { ok: false, path, action, error: `action must be one of ${[...ALLOWED].join(", ")}` };
+  }
+
+  const fields = buildFields(action);
+  const message = buildMessage(action, path);
+
+  const result = await updateFrontmatterField(path, fields, message);
+  if (!result.ok) {
+    return { ok: false, path, action, error: result.error || "update failed" };
+  }
+
+  for (const r of REVALIDATE_PATHS) {
+    revalidatePath(r);
+  }
+
+  return { ok: true, path, action };
+}

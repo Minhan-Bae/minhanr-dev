@@ -7,11 +7,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { StatKpiCard } from "@/components/stat-kpi-card";
 import { DashboardCalendar, type CalendarEvent, type WeekCommitment } from "@/components/dashboard-calendar";
 import { VaultUnreachablePrivate } from "@/components/vault-unreachable";
-import { NoteQuickActions } from "@/components/note-quick-actions";
+import { ActiveProjectsCard } from "@/components/dashboard/active-projects-card";
 import { FileText, Send, Inbox, Layers } from "lucide-react";
 import { aggregate, getCachedVaultIndex, KB_HUB_HIDDEN_STATUSES, listNotes } from "@/lib/vault-index";
 import { vaultPathToHref } from "@/lib/vault-note";
@@ -206,45 +205,16 @@ async function DashboardContent() {
 
       {/* Bento row 1 — asymmetric: featured projects (7/12) + compact recommendation (5/12) */}
       <div className="grid grid-cols-12 gap-4">
-        {/* Active projects — FEATURED: larger typography, priority emphasis */}
-        <Card className="col-span-12 lg:col-span-7 hover-lift relative overflow-hidden">
-          <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary via-accent to-primary opacity-60" />
-          <CardHeader className="pb-2">
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle className="text-base">진행 중 프로젝트</CardTitle>
-                <CardDescription className="text-xs">Active — 최근 편집순</CardDescription>
-              </div>
-              <Link href="/projects" className="text-xs text-muted-foreground hover:text-primary transition-colors">전체 →</Link>
-            </div>
-          </CardHeader>
-          <CardContent>
-            {activeProjects.length === 0 ? (
-              <p className="text-xs text-muted-foreground">없음</p>
-            ) : (
-              <ul className="space-y-3">
-                {activeProjects.map((p) => (
-                  <li key={p.path} className="group space-y-1 p-2 -mx-2 rounded-md transition-colors hover:bg-muted/50">
-                    <div className="flex items-center justify-between gap-2">
-                      <Link
-                        href={vaultPathToHref(p.path)}
-                        className="text-base font-semibold truncate group-hover:text-primary transition-colors flex-1 min-w-0"
-                      >
-                        {p.title}
-                      </Link>
-                      <NoteQuickActions path={p.path} />
-                    </div>
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                      {p.priority && <Badge variant="outline" className="font-mono text-[10px]">{p.priority}</Badge>}
-                      {p.status && <span className="capitalize">{p.status}</span>}
-                      {p.created && <span className="tabular-nums opacity-70">· {p.created}</span>}
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </CardContent>
-        </Card>
+        {/* Active projects — Server Component → Client Component(useOptimistic+ServerAction) */}
+        <ActiveProjectsCard
+          projects={activeProjects.map((p) => ({
+            path: p.path,
+            title: p.title,
+            status: typeof p.status === "string" ? p.status : undefined,
+            priority: typeof p.priority === "string" ? p.priority : undefined,
+            created: typeof p.created === "string" ? p.created : undefined,
+          }))}
+        />
 
         {/* Recommended — compact sidebar style */}
         <Card className="col-span-12 lg:col-span-5 hover-lift">

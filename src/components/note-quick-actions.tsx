@@ -4,16 +4,16 @@ import { useState, useTransition } from "react";
 import { Check, Pause, Archive } from "lucide-react";
 import { apiFetch } from "@/lib/api-fetch";
 
-type Action = "pause" | "complete" | "archive";
+export type Action = "pause" | "complete" | "archive";
 
 interface NoteQuickActionsProps {
   path: string;
   /** hover 시에만 보이는지 / 항상 보이는지 */
   alwaysVisible?: boolean;
-  /** 성공 후 호출 (선택). 기본 거동: 로컬 "done" 상태 진입 → CSS로 fade-out.
-   *  전역 router.refresh()는 일부러 호출하지 않는다 — 서버측 revalidatePath가
-   *  다음 네비게이션에서 캐시를 교체하므로, 현 세션에서 전체 페이지 re-SSR은
-   *  낭비다 (대시보드 한 번 갱신 = vault_index 1600+ 노트 재집계). */
+  /** 호출되면 본 컴포넌트의 자체 fetch 흐름을 건너뛰고 onAction에 위임.
+   *  ActionableVaultList(useOptimistic + Server Action)가 사용. */
+  onAction?: (action: Action) => void;
+  /** legacy: 자체 fetch 흐름의 성공 후 콜백. onAction과 병존 시 onAction 우선. */
   onAfter?: () => void;
 }
 
@@ -23,7 +23,7 @@ const LABEL: Record<Action, string> = {
   archive: "삭제",
 };
 
-export function NoteQuickActions({ path, alwaysVisible, onAfter }: NoteQuickActionsProps) {
+export function NoteQuickActions({ path, alwaysVisible, onAction, onAfter }: NoteQuickActionsProps) {
   const [pending, startTransition] = useTransition();
   const [confirming, setConfirming] = useState<Action | null>(null);
   const [message, setMessage] = useState<string | null>(null);
@@ -31,6 +31,15 @@ export function NoteQuickActions({ path, alwaysVisible, onAfter }: NoteQuickActi
 
   async function run(action: Action) {
     setMessage(null);
+
+    // onAction이 있으면 부모(useOptimistic 컨테이너)에 위임 — 본 컴포넌트는
+    // 더 이상 fetch/transition 책임 없음. 부모가 즉시 row를 숨기므로 done 불필요.
+    if (onAction) {
+      onAction(action);
+      return;
+    }
+
+    // Legacy: 자체 fetch 흐름 (REST 엔드포인트 호출)
     startTransition(async () => {
       try {
         await apiFetch("/api/vault-sync/transition", {
