@@ -94,15 +94,44 @@ export default async function CalendarPage({ searchParams }: PageProps) {
           </div>
         </div>
       ) : (
-        <Suspense
-          fallback={<div className="p-8 text-sm text-muted-foreground">Loading…</div>}
-        >
-          <BlockGrid
-            weekStartIso={safeWeekStart.toISOString()}
-            categories={categories}
-            entries={entries}
-          />
-        </Suspense>
+        <>
+          <Suspense
+            fallback={<div className="p-8 text-sm text-muted-foreground">Loading…</div>}
+          >
+            <BlockGrid
+              weekStartIso={safeWeekStart.toISOString()}
+              categories={categories}
+              entries={entries}
+            />
+          </Suspense>
+
+          {/* Category legend — quick reference for the colours painted
+              on the grid. Mirrors the palette used in the cells. */}
+          <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-md border border-border bg-card/40 px-4 py-2.5">
+            <span className="font-technical text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
+              Legend
+            </span>
+            {categories.map((c) => (
+              <span
+                key={c.id}
+                className="flex items-center gap-1.5 text-[12px] text-foreground/85"
+              >
+                <span
+                  className="inline-block h-2.5 w-2.5 rounded-sm border border-black/10"
+                  style={{ background: c.color_hex }}
+                  aria-hidden
+                />
+                {c.label}
+              </span>
+            ))}
+            <Link
+              href="/calendar/categories"
+              className="font-technical ml-auto text-[10.5px] uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-foreground"
+            >
+              Edit →
+            </Link>
+          </div>
+        </>
       )}
     </div>
   );
