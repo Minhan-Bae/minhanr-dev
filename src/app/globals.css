@@ -512,3 +512,116 @@
 .frame-21x9  { aspect-ratio: 21 / 9; }
 .frame-3x4   { aspect-ratio: 3 / 4; }
 .frame-square { aspect-ratio: 1 / 1; }
+
+/* ══════════════════════════════════════════════════════════════════
+   Display scale — aggressive editorial sizes
+   Used only by the home hero / closer. Outside that, use the editorial
+   scale in the @theme block above. Clamps keep mobile readable while
+   letting the hero fill a 27" display.
+   ────────────────────────────────────────────────────────────────── */
+.display-hero {
+  font-size: clamp(4.5rem, 19vw, 18rem);
+  line-height: 0.82;
+  letter-spacing: -0.045em;
+}
+.display-xl {
+  font-size: clamp(2.75rem, 8vw, 6rem);
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+}
+.display-lg {
+  font-size: clamp(2rem, 5.5vw, 4rem);
+  line-height: 1.02;
+  letter-spacing: -0.025em;
+}
+
+/* Outline/stroked display type — used sparingly for kinetic accent. */
+.display-outline {
+  color: transparent;
+  -webkit-text-stroke: 1px var(--foreground);
+  paint-order: stroke fill;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   Marquee — seamless horizontal scroll ticker
+   Content is duplicated inline (see home/marquee.tsx) so the -50%
+   translate loops without a visible jump.
+   ────────────────────────────────────────────────────────────────── */
+@keyframes marquee-x {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(-50%, 0, 0); }
+}
+@keyframes scroll-hint {
+  0%, 100% { opacity: 0.3; transform: scaleX(0.7); }
+  50%      { opacity: 1;   transform: scaleX(1); }
+}
+@keyframes marquee-x-reverse {
+  from { transform: translate3d(-50%, 0, 0); }
+  to   { transform: translate3d(0, 0, 0); }
+}
+.marquee-track {
+  display: flex;
+  width: max-content;
+  flex-wrap: nowrap;
+  animation: marquee-x 42s linear infinite;
+  will-change: transform;
+}
+.marquee-track-reverse {
+  animation-name: marquee-x-reverse;
+}
+.marquee-host:hover .marquee-track {
+  animation-play-state: paused;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   Scroll-driven reveal — native, zero-JS
+   Uses `animation-timeline: view()` (Baseline 2024, full support in
+   Chrome/Edge/Safari 17.4+). Content stays visible if the feature is
+   unavailable — never hidden forever.
+   ────────────────────────────────────────────────────────────────── */
+@keyframes reveal-up {
+  from { opacity: 0; transform: translate3d(0, 22px, 0); }
+  to   { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+@keyframes reveal-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@supports (animation-timeline: view()) {
+  .reveal-up {
+    animation: reveal-up linear both;
+    animation-timeline: view();
+    animation-range: entry 5% entry 55%;
+  }
+  .reveal-in {
+    animation: reveal-in linear both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 40%;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   Sticky-pin showcase — each slide occupies 160–200vh of scroll so the
+   media can stick while the type slides past. Mobile falls back to a
+   plain stack because 100vh sticky sections on phones + address-bar
+   height jumps are a bad combination.
+   ────────────────────────────────────────────────────────────────── */
+.pin-stage     { position: relative; min-height: 180vh; }
+.pin-media     { position: sticky; top: 0; height: 100svh; overflow: hidden; }
+@media (max-width: 767px) {
+  .pin-stage { min-height: 0; }
+  .pin-media { position: relative; top: auto; height: auto; }
+}
+
+/* Reduced motion opts everything out. */
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track { animation: none; transform: none; }
+  @supports (animation-timeline: view()) {
+    .reveal-up, .reveal-in {
+      animation: none;
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
