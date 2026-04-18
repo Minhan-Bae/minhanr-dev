@@ -78,7 +78,9 @@ export function NoteList({ notes, total, page, pageSize, baseHref, searchParams 
                       {n.title}
                     </Link>
                     {typeof n.excerpt === "string" && n.excerpt && (
-                      <p className={`text-xs text-muted-foreground/80 leading-relaxed ${featured ? "line-clamp-3" : "line-clamp-2 group-hover:line-clamp-4 transition-[line-clamp]"}`}>
+                      // line-clamp는 애니메이터블 속성이 아니라 hover 시 스냅 전환.
+                      // transition-[line-clamp] 제거(CSS spec에 없어 무의미한 리플로우 트리거).
+                      <p className={`text-xs text-muted-foreground/80 leading-relaxed ${featured ? "line-clamp-3" : "line-clamp-2 group-hover:line-clamp-4"}`}>
                         {n.excerpt}
                       </p>
                     )}

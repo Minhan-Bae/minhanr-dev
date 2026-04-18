@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
 import { Check, Pause, Archive } from "lucide-react";
 import { apiFetch } from "@/lib/api-fetch";
 
@@ -11,7 +10,10 @@ interface NoteQuickActionsProps {
   path: string;
   /** hover 시에만 보이는지 / 항상 보이는지 */
   alwaysVisible?: boolean;
-  /** 성공 후 호출. 기본은 router.refresh() — optimistic 미적용 시 단순 리로드 */
+  /** 성공 후 호출 (선택). 기본 거동: 로컬 "done" 상태 진입 → CSS로 fade-out.
+   *  전역 router.refresh()는 일부러 호출하지 않는다 — 서버측 revalidatePath가
+   *  다음 네비게이션에서 캐시를 교체하므로, 현 세션에서 전체 페이지 re-SSR은
+   *  낭비다 (대시보드 한 번 갱신 = vault_index 1600+ 노트 재집계). */
   onAfter?: () => void;
 }
 
@@ -22,10 +24,10 @@ const LABEL: Record<Action, string> = {
 };
 
 export function NoteQuickActions({ path, alwaysVisible, onAfter }: NoteQuickActionsProps) {
-  const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [confirming, setConfirming] = useState<Action | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [done, setDone] = useState(false);
 
   async function run(action: Action) {
     setMessage(null);
@@ -37,12 +39,8 @@ export function NoteQuickActions({ path, alwaysVisible, onAfter }: NoteQuickActi
           body: JSON.stringify({ path, action }),
         });
         setMessage(`✓ ${LABEL[action]}`);
-        if (onAfter) {
-          onAfter();
-        } else {
-          router.refresh();
-        }
-        window.setTimeout(() => setMessage(null), 2000);
+        setDone(true);
+        onAfter?.();
       } catch (e) {
         setMessage(e instanceof Error ? e.message : "실패");
       } finally {
@@ -68,13 +66,23 @@ export function NoteQuickActions({ path, alwaysVisible, onAfter }: NoteQuickActi
     ? "opacity-80 group-hover:opacity-100"
     : "opacity-0 group-hover:opacity-100 focus-within:opacity-100";
 
+  // done 상태: 액션 성공 → 버튼 영역만 fade out + 메시지로 대체.
+  // 전체 row 제거는 parent가 onAfter 콜백에서 담당 (기본 없음 = 행 유지).
+  if (done) {
+    return (
+      <div className="flex items-center gap-1 text-[10px] text-primary" aria-live="polite">
+        {message}
+      </div>
+    );
+  }
+
   return (
     <div
       className={`flex items-center gap-1 transition-opacity duration-[var(--duration-quick)] ${visibilityClass}`}
       onClick={(e) => e.stopPropagation()}
     >
       {message && (
-        <span className="text-[10px] text-primary mr-1" aria-live="polite">
+        <span className="text-[10px] text-destructive mr-1" aria-live="polite">
           {message}
         </span>
       )}

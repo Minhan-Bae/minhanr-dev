@@ -669,13 +669,16 @@
 
 /* ════════════════════════════════════════════════════════════════
    View Transitions (2026 modernization Phase A2)
-   Next.js 16 + React 19 unstable_ViewTransition 래퍼와 함께 사용.
-   라우트 간 자동 cross-fade + 선택적 shared element.
+   Next.js 16 + React 19 ViewTransition 래퍼와 함께 사용.
+   라우트 간 자동 cross-fade.
+
+   ▸ 체감 지연 방지: 240ms(quick)로 단축 (이전 500ms).
+   ▸ opacity만 사용(translate 제거) — 컴포지터 레이어 승격 최소화.
    ──────────────────────────────────────────────────────────────── */
 ::view-transition-old(root),
 ::view-transition-new(root) {
-  animation-duration: var(--duration-page);
-  animation-timing-function: var(--ease-out-expo);
+  animation-duration: var(--duration-quick);
+  animation-timing-function: var(--ease-out);
 }
 
 ::view-transition-old(root) {
@@ -683,16 +686,16 @@
 }
 
 ::view-transition-new(root) {
-  animation-name: vt-fade-up;
+  animation-name: vt-fade-in;
 }
 
 @keyframes vt-fade-out {
   to { opacity: 0; }
 }
 
-@keyframes vt-fade-up {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
+@keyframes vt-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
 @media (prefers-reduced-motion: reduce) {
