@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { SITE_URL } from "@/lib/site";
 
 /**
  * 3-Tier 정책 (src/lib/vault-tiers.ts):
@@ -13,7 +14,6 @@ import type { MetadataRoute } from "next";
  * /notes/{...}는 Tier 2일 수 있는데, robots.txt prefix 매칭으로는 둘을 구분할 수
  * 없다. 인덱스 페이지는 미들웨어 + 페이지 noindex로 충분히 보호된다.
  */
-const SITE_URL = "https://minhanr.dev";
 
 export default function robots(): MetadataRoute.Robots {
   return {

@@ -15,6 +15,9 @@ created: 2026-03-22
 relevance: 3
 related: ["Memesis"]
 source_url: ""
+summary: "NVIDIA Nemotron 3 Super — 하이브리드 Mamba-Transformer MoE 한줄 요약: NVIDIA가 120B 파라미터(12B 활성) 규모의 하이브리드 Mamba-Transformer MoE 모델을 오픈소스로 공개, 기존 대비 5배 이상의 처리량과 100만 토큰…"
+categories:
+  - Industry
 ---
 # NVIDIA Nemotron 3 Super — 하이브리드 Mamba-Transformer MoE
 

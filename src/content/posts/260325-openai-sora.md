@@ -19,6 +19,8 @@ cover:
   image: /images/posts/260325-openai-sora/cover.jpg
   alt: 260325 OpenAI Sora 앱 종료 딥페이크 논란
 date: '2026-03-25'
+categories:
+  - Industry
 ---
 ## 한줄 요약
 

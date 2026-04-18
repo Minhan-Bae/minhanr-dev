@@ -16,6 +16,9 @@ created: 2026-03-25
 relevance: 3
 related: ["3DAgent"]
 source_url: ""
+summary: 한줄 요약 TIGER-Lab이 프로프라이어터리 웹 API 없이 완전 오프라인으로 97K+ 딥리서치 궤적(trajectory)을 합성하는 오픈소스 파이프라인 OpenResearcher를 공개, BrowseComp-Plus에서 +34pt 향상을 달성했다.
+categories:
+  - Research
 ---
 ## 한줄 요약
 

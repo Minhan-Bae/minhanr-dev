@@ -13,6 +13,9 @@ created: 2026-03-26
 relevance: 3
 related: ["Memesis"]
 source_url: ""
+summary: 한줄 요약 OpenAI가 Python 생태계의 핵심 오픈소스 도구(uv, Ruff, ty)를 만든 Astral을 인수하며, 월간 수억 건 다운로드의 개발 인프라를 Codex 팀에 통합한다.
+categories:
+  - Industry
 ---
 ## 한줄 요약
 

@@ -8,6 +8,7 @@ import {
   extractHeadings,
 } from "@/lib/blog";
 import { getBacklinks } from "@/lib/blog-backlinks";
+import { tagSlug } from "@/lib/blog-taxonomy";
 import { ReadingProgress } from "@/components/reading-progress";
 import { RelatedPosts } from "@/components/related-posts";
 import { TableOfContents } from "@/components/toc";
@@ -63,11 +64,11 @@ function estimateReadingTime(html: string): number {
   return Math.max(1, Math.round(words / 200));
 }
 
-/** ISO YYYY-MM-DD → "2026년 3월 22일" — Korean long form */
+/** ISO YYYY-MM-DD → "March 22, 2026" — English long form */
 function formatLongDate(iso: string): string {
   const d = new Date(iso + "T00:00:00Z");
   if (Number.isNaN(d.getTime())) return iso;
-  return d.toLocaleDateString("ko-KR", {
+  return d.toLocaleDateString("en-US", {
     year: "numeric",
     month: "long",
     day: "numeric",
@@ -104,13 +105,13 @@ export default async function BlogPostPage({
           className="font-technical inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] text-muted-foreground transition-colors hover:text-foreground"
         >
           <ArrowLeft className="h-3.5 w-3.5" strokeWidth={1.75} />
-          전체 글
+          All writing
         </Link>
 
         <div className="mx-auto mt-10 max-w-[900px] sm:mt-16">
           <p className="kicker mb-5">
             {primaryCategory ?? "Writing"} · {formatLongDate(post.date)} ·{" "}
-            {readingTime}분
+            {readingTime} min read
           </p>
           <h1
             className="font-display leading-[1.15] tracking-[-0.02em]"
@@ -124,11 +125,17 @@ export default async function BlogPostPage({
             </p>
           )}
           <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2 font-technical text-[12px] uppercase tracking-[0.14em] text-muted-foreground">
-            <span>글 {post.author || "minhanr"}</span>
+            <span>by {post.author || "minhanr"}</span>
             {post.tags.length > 0 && (
-              <span className="flex gap-x-3">
+              <span className="flex flex-wrap gap-x-3 gap-y-1">
                 {post.tags.slice(0, 4).map((t) => (
-                  <span key={t}>#{t}</span>
+                  <Link
+                    key={t}
+                    href={`/blog/tag/${tagSlug(t)}`}
+                    className="transition-colors hover:text-foreground"
+                  >
+                    #{t}
+                  </Link>
                 ))}
               </span>
             )}
@@ -144,6 +151,10 @@ export default async function BlogPostPage({
             <img
               src={post.cover.image}
               alt={post.cover.alt || post.title}
+              width={1260}
+              height={540}
+              loading="eager"
+              decoding="async"
               className="w-full object-cover"
               style={{ aspectRatio: "21 / 9" }}
             />
@@ -199,10 +210,10 @@ export default async function BlogPostPage({
           <div className="mx-auto max-w-[900px]">
             <header className="mb-6 flex items-baseline justify-between hairline-b pb-3">
               <h2
-                className="font-display tracking-[-0.015em]"
+                className="font-display italic tracking-[-0.015em]"
                 style={{ fontSize: "var(--font-size-h3)" }}
               >
-                이 글을 참조하는 글
+                Referenced by
               </h2>
               <span className="font-technical text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
                 Backlinks · {backlinks.length}
@@ -254,13 +265,13 @@ export default async function BlogPostPage({
                 className="h-4 w-4 transition-transform group-hover:-translate-x-0.5"
                 strokeWidth={1.5}
               />
-              전체 글
+              All writing
             </Link>
             <a
               href="/feed.xml"
               className="group font-technical inline-flex items-center gap-2 text-[13px] uppercase tracking-[0.16em] text-muted-foreground transition-colors hover:text-foreground"
             >
-              RSS 구독
+              RSS
               <ArrowUpRight
                 className="h-4 w-4 transition-all duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
                 strokeWidth={1.5}

@@ -19,6 +19,8 @@ cover:
   image: /images/posts/260324-google-gemini-3.1-flash-lite/cover.png
   alt: 260324 Google Gemini 3.1 Flash Lite 출시
 date: '2026-03-24'
+categories:
+  - Industry
 ---
 ## 한줄 요약
 

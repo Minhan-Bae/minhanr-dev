@@ -9,6 +9,9 @@ created: 2026-04-01
 relevance: 5
 related: [ColorDepthExpansion, PathFinder]
 source_type: synthesis
+summary: ColorDepthExpansion 깊이 추정 + HDR 기술 종합 (2026-04 Synthesis) 2026년 3월 수집된 27개 growing notes에서 도출한 depth estimation + HDR reconstruction 기술 랜드스케이프.
+categories:
+  - Research
 ---
 
 # ColorDepthExpansion 깊이 추정 + HDR 기술 종합 (2026-04 Synthesis)

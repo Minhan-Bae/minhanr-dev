@@ -20,6 +20,8 @@ cover:
   image: /images/posts/260326-seoul-world-model/cover.png
   alt: 260326 Seoul World Model 도시규모 월드시뮬레이션
 date: '2026-03-26'
+categories:
+  - Writing
 ---
 ## 한줄 요약
 

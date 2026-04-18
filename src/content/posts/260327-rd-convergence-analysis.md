@@ -1,7 +1,7 @@
 ---
 author: MinHanr
 categories:
-- Trends
+  - Writing
 date: '2026-03-27'
 draft: false
 summary: "62건의 기술 노트와 11개 프로젝트를 스캔하여 Diffusion 범용 백본, Generator-Critic 루프 등 5가지 기술 수렴 패턴과 관심사 간 교차점을 도출한 R&D 전략 분석."

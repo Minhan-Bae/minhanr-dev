@@ -11,6 +11,9 @@ created: 2026-03-22
 relevance: 3
 related: ["Memesis"]
 source_url: ""
+summary: "Anthropic Claude Marketplace — AI 엔터프라이즈 생태계의 새 모델 한줄 요약: Anthropic이 수수료 0%의 Claude Marketplace를 출시, 기업 고객이 기존 API 예산으로 서드파티 AI 앱을 구매할 수 있게 하여 SaaS 유통 구조에 도전장을…"
+categories:
+  - Industry
 ---
 # Anthropic Claude Marketplace — AI 엔터프라이즈 생태계의 새 모델
 

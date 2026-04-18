@@ -1,7 +1,7 @@
 ---
 author: MinHanr
 categories:
-- Research
+  - Visual
 date: '2026-03-28'
 draft: false
 slug: 260328-shotstream-streaming-multi-shot-video-generation-for-interac

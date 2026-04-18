@@ -19,6 +19,8 @@ cover:
   image: /images/posts/260326-openai-astral-python/cover.jpg
   alt: 260326 OpenAI Astral 인수 Python 개발도구
 date: '2026-03-26'
+categories:
+  - Industry
 ---
 ## 한줄 요약
 

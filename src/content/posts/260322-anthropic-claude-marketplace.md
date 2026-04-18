@@ -17,6 +17,8 @@ cover:
   image: /images/posts/260322-anthropic-claude-marketplace/cover.png
   alt: 260322 Anthropic Claude Marketplace 출시
 date: '2026-03-22'
+categories:
+  - Industry
 ---
 # Anthropic Claude Marketplace — AI 엔터프라이즈 생태계의 새 모델
 

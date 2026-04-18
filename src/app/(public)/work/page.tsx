@@ -6,8 +6,8 @@ import { WorkCover } from "@/components/work-cover";
 import { Typewriter } from "@/components/typewriter";
 
 export const metadata: Metadata = {
-  title: "작업",
-  description: "스튜디오의 선별 작업 — AI 시스템, VFX R&D, 에디토리얼 엔지니어링.",
+  title: "Work",
+  description: "Selected case studies — AI systems, VFX R&D, editorial engineering.",
   openGraph: {
     title: "Work — minhanr.dev",
     description: "Selected case studies — AI systems, VFX R&D, editorial engineering.",
@@ -31,7 +31,7 @@ export default function WorkIndex() {
             className="kicker mb-5 animate-fade-up"
             style={{ animationDelay: "0ms" }}
           >
-            Work · 작업
+            Work
           </p>
           <Typewriter
             as="h1"

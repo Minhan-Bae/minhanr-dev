@@ -12,6 +12,9 @@ created: 2026-03-26
 relevance: 3
 related: ["TaylorDub"]
 source_url: ""
+summary: 한줄 요약 Encyclopedia Britannica와 Merriam-Webster가 OpenAI를 상대로 ~10만 건 저작물 무단 사용, RAG 기반 콘텐츠 복제, 할루시네이션 허위 귀속에 대한 저작권·상표법 소송을 제기했다.
+categories:
+  - Industry
 ---
 ## 한줄 요약
 

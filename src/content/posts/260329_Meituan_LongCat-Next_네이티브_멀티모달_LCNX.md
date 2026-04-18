@@ -18,6 +18,9 @@ relevance: 4
 related:
   - "Memesis"
   - "CharacterShift"
+summary: Meituan LongCat-Next — 네이티브 디스크리트 Any-to-Any 멀티모달 모델 Meituan이 LongCat-Next를 오픈소스 공개 (March 25, 2026).
+categories:
+  - Visual
 ---
 
 # Meituan LongCat-Next — 네이티브 디스크리트 Any-to-Any 멀티모달 모델

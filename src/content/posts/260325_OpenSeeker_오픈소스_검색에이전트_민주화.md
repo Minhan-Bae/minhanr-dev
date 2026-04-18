@@ -14,6 +14,9 @@ created: 2026-03-25
 relevance: 3
 related: ["3DAgent"]
 source_url: ""
+summary: 한줄 요약 순수 학술팀이 11,700개 학습 샘플만으로 프론티어 검색 에이전트 성능을 달성한 최초의 완전 오픈소스 검색 에이전트 OpenSeeker가 공개되었다.
+categories:
+  - Research
 ---
 ## 한줄 요약
 

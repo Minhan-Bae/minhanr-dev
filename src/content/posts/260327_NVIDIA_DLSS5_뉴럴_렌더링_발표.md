@@ -13,6 +13,9 @@ thumbnail: "[[260327_DLSS5_thumb.jpg]]"
 related:
   - "PathFinder"
   - "PathFinder_Master"
+summary: "NVIDIA DLSS 5 — 실시간 뉴럴 렌더링의 \"GPT 모먼트\" NVIDIA가 DLSS 5를 발표. 게임의 컬러 출력과 모션 벡터를 AI 모델이 실시간으로 처리하여 포토리얼 라이팅·머티리얼을 픽셀 단위로 주입. 2018년 실시간 레이트레이싱 이후 최대 그래픽스 돌파구.…"
+categories:
+  - VFX
 ---
 
 # NVIDIA DLSS 5 — 실시간 뉴럴 렌더링의 "GPT 모먼트"

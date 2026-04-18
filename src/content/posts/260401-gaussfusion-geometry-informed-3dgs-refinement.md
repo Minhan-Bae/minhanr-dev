@@ -11,6 +11,9 @@ slug: 260401-gaussfusion-geometry-informed-3dgs-refinement
 created: 2026-03-30
 relevance: 5
 related: [PathFinder]
+summary: "GaussFusion: Geometry-Informed Video Generator로 Wild 3DGS 복원 품질 혁신 Stanford + Zillow 공동 연구."
+categories:
+  - Research
 ---
 
 # GaussFusion: Geometry-Informed Video Generator로 Wild 3DGS 복원 품질 혁신

@@ -16,6 +16,9 @@ related:
   - "PathFinder"
   - "260323_AMI_Labs_World_Model_10억달러_시드"
 source_url: ""
+summary: 한줄 요약 NAVER AI Lab x KAIST 공동 연구팀이 서울 실제 스트리트뷰 데이터를 기반으로, 수 킬로미터 궤적에 걸친 시공간적으로 일관된 도시 비디오를 생성하는 도시 규모 월드 모델(Seoul World Model)을 발표했다.
+categories:
+  - Research
 ---
 ## 한줄 요약
 

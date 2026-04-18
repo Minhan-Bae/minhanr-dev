@@ -26,6 +26,8 @@ cover:
   image: /api/og?title=260328-openai-sora-sora&category=Trends
   alt: 260328 OpenAI Sora 서비스종료 SORA
 date: '2026-03-28'
+categories:
+  - Industry
 ---
 # OpenAI Sora 서비스 완전 종료 — 영상 생성 AI 시장 재편
 

@@ -1,7 +1,7 @@
 ---
 author: MinHanr
 categories:
-- Research
+  - Writing
 date: '2026-03-28'
 draft: false
 slug: 260328-megaflow-zero-shot-large-displacement-optical-flow

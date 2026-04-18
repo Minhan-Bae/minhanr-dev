@@ -10,6 +10,9 @@ status: mature
 created: 2026-03-31
 relevance: 3
 related: [Memesis]
+summary: "Mistral Voxtral 4B TTS: 프론티어급 오픈웨이트 음성 생성 개요 Mistral AI가 2026년 3월 26일 공개한 4B 파라미터 text-to-speech 모델."
+categories:
+  - Writing
 ---
 
 # Mistral Voxtral 4B TTS: 프론티어급 오픈웨이트 음성 생성

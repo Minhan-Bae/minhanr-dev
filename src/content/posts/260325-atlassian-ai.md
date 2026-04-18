@@ -17,6 +17,8 @@ cover:
   image: /images/posts/260325-atlassian-ai/cover.jpg
   alt: 260325 Atlassian 1600명 감원 AI 올인 전략
 date: '2026-03-25'
+categories:
+  - Writing
 ---
 ## 한줄 요약
 

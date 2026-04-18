@@ -14,6 +14,9 @@ created: 2026-03-25
 relevance: 3
 related: ["Memesis"]
 source_url: ""
+summary: 한줄 요약 Moonshot AI(Kimi) 팀이 10년간 고정되어 온 Transformer의 잔차 연결(Residual Connection)을 깊이 방향 어텐션으로 대체하는 Attention Residuals를 발표, GPQA-Diamond에서 +7.5pt 향상을 달성했다.
+categories:
+  - Research
 ---
 ## 한줄 요약
 

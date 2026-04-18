@@ -20,6 +20,8 @@ cover:
   image: /images/posts/260331-world-labs-spark2-renderer/cover.png
   alt: 260331 World Labs Spark2 GS Renderer
 date: '2026-03-31'
+categories:
+  - VFX
 ---
 
 # World Labs Spark 2.0 — 오픈소스 3DGS 웹 렌더러 메이저 업데이트

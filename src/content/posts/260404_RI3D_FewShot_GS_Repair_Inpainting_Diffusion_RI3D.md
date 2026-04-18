@@ -18,6 +18,9 @@ related:
   - "[[260402_GaussVideoDreamer_VideoD_InconsistencyAware_3DGS_GVDR]]"
   - "[[260401_Lyra_NVIDIA_Video_Diffusion_3DGS_Self_Distillation]]"
   - "[[260403_InverFill_OneStep_Inversion_FewStep_Diffusion_Inpainting_IVFL]]"
+summary: "RI3D: Few-Shot Gaussian Splatting With Repair and Inpainting Diffusion Priors ICCV 2025 | Avinash Paliwal et al."
+categories:
+  - Visual
 ---
 
 # RI3D: Few-Shot Gaussian Splatting With Repair and Inpainting Diffusion Priors

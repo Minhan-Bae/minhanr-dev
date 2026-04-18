@@ -12,6 +12,9 @@ relevance: 5
 related: [OIKBAS, TrinityX, TimeBrick]
 collection_method: Claude_in_Chrome + WebSearch
 platforms: [X, Threads, Web, StockTitan]
+summary: "AI 에이전트 생태계 소셜 트렌드 종합 — 2026-04-01 메타 트렌드: 엔지니어링 패러다임의 세 번째 전환 2026년 4월 현재, AI 에이전트 분야의 가장 큰 구조적 변화는 엔지니어링 패러다임의 전환이다: | 시기 | 패러다임 | 핵심 질문 | |---|---|---| |…"
+categories:
+  - Systems
 ---
 
 # AI 에이전트 생태계 소셜 트렌드 종합 — 2026-04-01

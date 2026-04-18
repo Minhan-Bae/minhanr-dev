@@ -14,6 +14,9 @@ created: 2026-03-23
 relevance: 3
 related: ["Memesis"]
 source_url: ""
+summary: 한줄 요약 DeepSeek이 1조 파라미터 규모의 멀티모달 모델 V4를 공개하며, 토큰당 ~37B만 활성화하는 초효율 아키텍처로 GPT-5 대비 최대 50배 저렴한 추론 비용을 실현했다.
+categories:
+  - Industry
 ---
 ## 한줄 요약
 

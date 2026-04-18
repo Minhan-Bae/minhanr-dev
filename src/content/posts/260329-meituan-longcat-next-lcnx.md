@@ -21,6 +21,8 @@ cover:
   image: /images/posts/260329-meituan-longcat-next-lcnx/cover.png
   alt: 260329 Meituan LongCat-Next 네이티브 멀티모달 LCNX
 date: '2026-03-29'
+categories:
+  - Writing
 ---
 
 # Meituan LongCat-Next — 네이티브 디스크리트 Any-to-Any 멀티모달 모델

@@ -1,7 +1,7 @@
 ---
 author: MinHanr
 categories:
-- Research
+  - Visual
 date: '2026-03-29'
 summary: "비디오 디퓨전 모델의 암묵적 3D 프라이어를 활용해 명시적 3D 감독 없이 장면 이해를 수행하는 VEGA-3D 프레임워크를 분석한다. Latent World Simulator 접근법으로 MLLM의 공간 추론 능력을 획기적으로 향상시키며, Apache-2.0 라이선스로 코드와 모델이 모두 공개되었다."
 draft: false

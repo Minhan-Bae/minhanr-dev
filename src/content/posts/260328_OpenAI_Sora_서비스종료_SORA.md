@@ -23,6 +23,9 @@ novelty: breakthrough
 impact_to:
   - Memesis
 judgment: "Sora 서비스 종료로 영상 생성 AI 시장 재편. Memesis의 멀티 API 통합 아키텍처가 단일 서비스 의존 리스크를 회피하는 올바른 설계임을 실증."
+summary: OpenAI Sora 서비스 완전 종료 — 영상 생성 AI 시장 재편 OpenAI가 2026년 3월 25일 Sora 앱과 API를 완전 종료. 출시 6개월 만에 높은 컴퓨트 비용과 사용자 감소로 서비스 중단 결정. 핵심 내용 OpenAI는 2026년 3월 25일 텍스트-투-비디오 플랫폼…
+categories:
+  - Visual
 ---
 # OpenAI Sora 서비스 완전 종료 — 영상 생성 AI 시장 재편
 

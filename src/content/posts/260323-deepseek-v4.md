@@ -20,6 +20,8 @@ cover:
   image: /api/og?title=260323-deepseek-v4&category=Industry
   alt: 260323 DeepSeek V4 1조 파라미터 출시
 date: '2026-03-23'
+categories:
+  - Writing
 ---
 ## 한줄 요약
 

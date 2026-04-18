@@ -12,6 +12,9 @@ created: 2026-03-22
 relevance: 3
 related: ["3DAgent"]
 source_url: ""
+summary: "Apple × Google — Siri에 Gemini 탑재, AI 전략 대전환 한줄 요약: Apple이 자체 AI 개발 노선을 수정하고 Google Gemini(1.2조 파라미터)를 Siri의 핵심 엔진으로 채택, 연간 약 10억 달러 규모의 다년 계약을 체결했다."
+categories:
+  - Industry
 ---
 # Apple × Google — Siri에 Gemini 탑재, AI 전략 대전환
 

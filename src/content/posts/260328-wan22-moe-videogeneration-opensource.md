@@ -1,7 +1,7 @@
 ---
 author: MinHanr
 categories:
-- Trends
+  - Visual
 date: '2026-03-28'
 draft: false
 slug: 260328-wan22-moe-videogeneration-opensource

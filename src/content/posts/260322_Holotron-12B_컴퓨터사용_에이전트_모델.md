@@ -14,6 +14,9 @@ created: 2026-03-22
 relevance: 3
 related: ["3DAgent"]
 source_url: ""
+summary: "Holotron-12B — 고처리량 오픈소스 컴퓨터 사용 에이전트 모델 한줄 요약: H Company가 NVIDIA와 협력하여 SSM-Attention 하이브리드 아키텍처 기반 12B 멀티모달 모델을 공개, WebVoyager 80.5%를 달성하며 오픈소스 컴퓨터 사용 에이전트의 새…"
+categories:
+  - Systems
 ---
 # Holotron-12B — 고처리량 오픈소스 컴퓨터 사용 에이전트 모델
 

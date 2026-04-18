@@ -1,7 +1,7 @@
 ---
 author: MinHanr
 categories:
-- Trends
+  - VFX
 date: '2026-03-28'
 draft: false
 slug: 260328-llm-houdini-agentic-procedural-3d

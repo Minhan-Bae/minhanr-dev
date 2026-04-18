@@ -91,6 +91,10 @@ function FeaturedCard({
             <img
               src={post.cover!.image}
               alt={post.cover?.alt || post.title}
+              width={800}
+              height={500}
+              loading="lazy"
+              decoding="async"
               className="aspect-[16/10] w-full object-cover"
             />
           ) : (
@@ -168,7 +172,10 @@ function CoverCard({
           <img
             src={post.cover!.image}
             alt={post.cover?.alt || post.title}
+            width={800}
+            height={500}
             loading="lazy"
+            decoding="async"
             className="aspect-[16/10] w-full object-cover"
           />
         </div>

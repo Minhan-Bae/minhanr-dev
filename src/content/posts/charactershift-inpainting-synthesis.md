@@ -9,6 +9,9 @@ created: 2026-04-01
 relevance: 5
 related: [CharacterShift]
 source_type: synthesis
+summary: CharacterShift 인페인팅 + 세그멘테이션 기술 종합 (2026-04 Synthesis) 2026년 3월 수집된 16개 growing notes에서 도출한 인페인팅/세그멘테이션/편집 기술 랜드스케이프.
+categories:
+  - VFX
 ---
 
 # CharacterShift 인페인팅 + 세그멘테이션 기술 종합 (2026-04 Synthesis)

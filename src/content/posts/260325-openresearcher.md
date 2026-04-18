@@ -22,6 +22,8 @@ cover:
   image: /images/posts/260325-openresearcher/cover.png
   alt: 260325 OpenResearcher 오픈소스 딥리서치 파이프라인
 date: '2026-03-25'
+categories:
+  - Research
 ---
 ## 한줄 요약
 

@@ -1,7 +1,7 @@
 ---
 author: MinHanr
 categories:
-- Trends
+  - Writing
 date: '2026-03-28'
 draft: false
 slug: 260328-ai-dubbing-lipsync-multilingual-2026

@@ -22,6 +22,8 @@ cover:
   image: /images/posts/260331-houdini-mcp-llm-procedural/cover.jpg
   alt: 260331 houdini mcp llm procedural
 date: '2026-03-31'
+categories:
+  - VFX
 ---
 
 # HoudiniMCP: LLM이 Houdini를 직접 제어하는 MCP 서버

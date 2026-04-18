@@ -14,6 +14,9 @@ created: 2026-03-23
 relevance: 3
 related: ["3DAgent"]
 source_url: ""
+summary: 한줄 요약 EvoScientist는 지속적 메모리와 자기진화 메커니즘을 갖춘 멀티에이전트 AI 과학자 프레임워크로, 생성한 6편의 논문이 전부 ICAIS 2025에 채택되며 그중 2편이 수상했다.
+categories:
+  - Research
 ---
 ## 한줄 요약
 

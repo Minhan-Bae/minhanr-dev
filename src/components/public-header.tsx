@@ -39,7 +39,7 @@ export function PublicHeader(_props: PublicHeaderProps) {
             The personal name is intentionally absent from public surfaces. */}
         <Link
           href="/"
-          aria-label="홈"
+          aria-label="Home"
           className="group flex items-baseline gap-2 tap-scale"
         >
           <span className="font-display text-2xl tracking-[-0.02em] leading-none transition-colors group-hover:text-primary">

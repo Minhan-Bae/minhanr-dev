@@ -20,6 +20,8 @@ cover:
   image: /images/posts/260323-evoscientist-ai/cover.png
   alt: 260323 EvoScientist 자기진화 AI 과학자
 date: '2026-03-23'
+categories:
+  - Writing
 ---
 ## 한줄 요약
 

@@ -14,6 +14,9 @@ created: 2026-03-24
 relevance: 3
 related: ["3DAgent"]
 source_url: ""
+summary: 한줄 요약 중국 AI 스타트업 MiniMax가 공개한 M2.5 모델이 SWE-Bench Verified 80.2%를 달성하며 GPT-5.2 및 Claude Opus 4.6에 근접한 코딩 성능을 입력 토큰당 $0.20이라는 파격적 가격으로 제공한다.
+categories:
+  - Systems
 ---
 ## 한줄 요약
 

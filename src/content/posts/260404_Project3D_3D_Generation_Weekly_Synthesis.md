@@ -15,6 +15,9 @@ related:
   - "260404_RI3D_FewShot_GS_Repair_Inpainting_Diffusion_RI3D"
   - "260401_3DAgent_Agentic_3D_Synthesis"
   - "260402_Project3D_Houdini_MCP_Convergence"
+summary: 260404 Project-3D 3D Generation Weekly Synthesis W14(2026-04-03~04) 신규 논문 3건 통합.
+categories:
+  - Writing
 ---
 
 # 260404 Project-3D 3D Generation Weekly Synthesis

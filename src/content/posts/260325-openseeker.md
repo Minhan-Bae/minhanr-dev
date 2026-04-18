@@ -20,6 +20,8 @@ cover:
   image: /images/posts/260325-openseeker/cover.png
   alt: 260325 OpenSeeker 오픈소스 검색에이전트 민주화
 date: '2026-03-25'
+categories:
+  - Writing
 ---
 ## 한줄 요약
 

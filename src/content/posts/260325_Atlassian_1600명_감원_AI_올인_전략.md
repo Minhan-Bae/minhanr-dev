@@ -11,6 +11,9 @@ created: 2026-03-25
 relevance: 3
 related: ["Memesis"]
 source_url: ""
+summary: 한줄 요약 Atlassian이 전체 인력의 10%인 1,600명을 감원하고 CTO를 교체하며, AI와 엔터프라이즈 사업에 자원을 재배치하는 대규모 구조조정을 단행했다.
+categories:
+  - Writing
 ---
 ## 한줄 요약
 

@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { getAllPosts } from "@/lib/blog";
 import { BlogList } from "@/components/blog-list";
 import { NotesGraph } from "@/components/notes-graph";
 import { Typewriter } from "@/components/typewriter";
 
 export const metadata: Metadata = {
-  title: "글",
+  title: "Writing",
   description:
-    "스튜디오의 메모 — AI · VFX · 크리에이티브 테크놀로지 에세이.",
+    "Notes from the studio — AI, VFX, and creative-technology essays.",
   openGraph: {
     title: "Writing — minhanr.dev",
     description:
@@ -40,7 +41,7 @@ export default function WritingIndex() {
             className="kicker mb-5 animate-fade-up"
             style={{ animationDelay: "0ms" }}
           >
-            Writing · 글
+            Writing
           </p>
           <Typewriter
             as="h1"
@@ -62,6 +63,17 @@ export default function WritingIndex() {
             </span>{" "}
             pieces.
           </p>
+          <nav
+            className="mt-8 flex flex-wrap gap-x-6 gap-y-2 font-technical text-[12px] uppercase tracking-[0.18em] text-muted-foreground animate-fade-up"
+            style={{ animationDelay: "360ms" }}
+          >
+            <Link href="/blog/tags" className="link-underline hover:text-foreground">
+              Browse tags →
+            </Link>
+            <Link href={`/blog/archive/${new Date().getFullYear()}`} className="link-underline hover:text-foreground">
+              Archive →
+            </Link>
+          </nav>
         </div>
       </section>
 

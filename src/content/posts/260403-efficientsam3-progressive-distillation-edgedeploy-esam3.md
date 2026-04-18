@@ -23,6 +23,8 @@ cover:
   image: /images/posts/260403-efficientsam3-progressive-distillation-edgedeploy-esam3/cover.png
   alt: 260403 EfficientSAM3 Progressive Distillation EdgeDeploy ESA
 date: '2026-04-03'
+categories:
+  - Writing
 ---
 
 # EfficientSAM3: Progressive Hierarchical Distillation for Video Concept Segmentation

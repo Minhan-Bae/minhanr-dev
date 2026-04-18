@@ -13,6 +13,9 @@ created: 2026-03-22
 relevance: 3
 related: ["3DAgent"]
 source_url: ""
+summary: "OpenClaw-RL: 범용 에이전트 훈련 프레임워크 한줄 요약: \"말로 설명하면 어떤 에이전트든 훈련 가능\" — 다양한 환경 신호를 동시에 활용하는 범용 에이전트 학습 프레임워크."
+categories:
+  - Research
 ---
 # OpenClaw-RL: 범용 에이전트 훈련 프레임워크
 

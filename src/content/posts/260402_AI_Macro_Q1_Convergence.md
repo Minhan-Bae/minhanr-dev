@@ -16,6 +16,9 @@ related:
   - "[[260330_Block_AI_Workforce_Halving]]"
   - "[[260329_AI_Layoff_9x_Surge_2026]]"
   - "[[260329_Developer_Portfolio_Strategy_2026]]"
+summary: "AI 매크로 Q1 수렴 분석 Macro 6건 + Career 4건 growing 노트 통합. 핵심 테제 AI 섹터가 \"잠재력\" → \"증명\" 전환기에 진입했다. 하이퍼스케일러 CapEx $527B 컨센서스에도 Mag 7은 YTD -7%. 시장은 칩 → 장비/전력/냉각 인프라로 셀렉티브…"
+categories:
+  - Writing
 ---
 
 # AI 매크로 Q1 수렴 분석

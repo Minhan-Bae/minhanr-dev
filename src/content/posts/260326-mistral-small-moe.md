@@ -20,6 +20,8 @@ cover:
   image: /images/posts/260326-mistral-small-moe/cover.png
   alt: 260326 Mistral Small 4 통합 MoE 오픈소스
 date: '2026-03-26'
+categories:
+  - Writing
 ---
 ## 한줄 요약
 

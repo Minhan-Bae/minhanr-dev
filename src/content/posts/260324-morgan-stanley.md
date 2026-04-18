@@ -21,6 +21,8 @@ cover:
   image: /api/og?title=260324-morgan-stanley&category=Trends
   alt: 260324 Morgan Stanley AI 도약 임박 경고
 date: '2026-03-24'
+categories:
+  - Writing
 ---
 ## 한줄 요약
 

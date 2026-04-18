@@ -15,10 +15,9 @@
 
 import { getAllPosts } from "@/lib/blog";
 import { BRAND_IDENTITY } from "@/lib/brand/tokens";
+import { SITE_URL, SITE_LANG } from "@/lib/site";
 
 export const revalidate = 300; // 5 min ISR — same cadence as vault
-
-const SITE_URL = "https://minhanr.dev";
 
 /** RSS-safe escape for XML special characters in text content. */
 function xmlEscape(input: string): string {
@@ -65,10 +64,10 @@ export async function GET(): Promise<Response> {
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>${xmlEscape(BRAND_IDENTITY.domain)} — ${xmlEscape(BRAND_IDENTITY.roleKo)}</title>
+    <title>${xmlEscape(BRAND_IDENTITY.domain)} — ${xmlEscape(BRAND_IDENTITY.role)}</title>
     <link>${SITE_URL}</link>
-    <description>${xmlEscape(BRAND_IDENTITY.manifesto)}</description>
-    <language>ko</language>
+    <description>${xmlEscape(BRAND_IDENTITY.manifestoEn)}</description>
+    <language>${SITE_LANG}</language>
     <lastBuildDate>${lastBuildDate}</lastBuildDate>
     <pubDate>${latestPostDate}</pubDate>
     <atom:link href="${SITE_URL}/feed.xml" rel="self" type="application/rss+xml" />

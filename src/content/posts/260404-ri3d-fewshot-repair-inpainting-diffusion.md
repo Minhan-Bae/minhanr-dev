@@ -20,6 +20,8 @@ cover:
   image: /images/posts/260404-ri3d-fewshot-repair-inpainting-diffusion/cover.png
   alt: 260404 RI3D FewShot GS Repair Inpainting Diffusion RI3D
 date: '2026-04-04'
+categories:
+  - Visual
 ---
 
 # RI3D: Few-Shot Gaussian Splatting With Repair and Inpainting Diffusion Priors

@@ -16,6 +16,8 @@ cover:
   image: /images/posts/260327-nvidia-dlss5/cover.jpg
   alt: 260327 NVIDIA DLSS5 뉴럴 렌더링 발표
 date: '2026-03-27'
+categories:
+  - Industry
 ---
 
 # NVIDIA DLSS 5 — 실시간 뉴럴 렌더링의 "GPT 모먼트"

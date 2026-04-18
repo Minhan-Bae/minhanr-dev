@@ -1,4 +1,5 @@
 import { BRAND_IDENTITY } from "@/lib/brand/tokens";
+import { Typewriter } from "@/components/typewriter";
 
 interface HeroProps {
   workCount: number;
@@ -26,8 +27,6 @@ const POST_WORD_MS = 180;
  */
 export function Hero({ workCount, writingCount }: HeroProps) {
   const word = BRAND_IDENTITY.studio;
-  const letters = [...word];
-  const cursorDelayMs = letters.length * LETTER_STAGGER_MS + POST_WORD_MS;
 
   return (
     <section
@@ -49,31 +48,14 @@ export function Hero({ workCount, writingCount }: HeroProps) {
       {/* ─── Centerpiece wordmark ───────────────────────────────────── */}
       <div className="relative z-0 flex flex-1 items-center justify-center px-6 sm:px-10">
         <div className="relative">
-          <h1
+          <Typewriter
+            as="h1"
             lang="en"
-            aria-label={word}
+            text={word}
+            stagger={LETTER_STAGGER_MS}
+            cursorBuffer={POST_WORD_MS}
             className="display-hero font-display italic text-foreground"
-          >
-            {/* Typewriter letters — each drops in on its own delay. */}
-            {letters.map((char, i) => (
-              <span
-                key={`${char}-${i}`}
-                aria-hidden
-                className="tw-letter"
-                style={{ animationDelay: `${i * LETTER_STAGGER_MS}ms` }}
-              >
-                {char}
-              </span>
-            ))}
-            {/* Blinking cursor — appears after the last letter lands. */}
-            <span
-              aria-hidden
-              className="tw-cursor"
-              style={{ animationDelay: `${cursorDelayMs}ms` }}
-            >
-              |
-            </span>
-          </h1>
+          />
 
           {/* Suffix badge — picks up the teal keyline brand signature */}
           <span

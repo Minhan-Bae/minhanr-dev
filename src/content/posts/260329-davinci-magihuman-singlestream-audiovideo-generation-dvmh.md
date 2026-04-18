@@ -1,7 +1,7 @@
 ---
 author: MinHanr
 categories:
-- Research
+  - Visual
 date: '2026-03-29'
 summary: "단일 스트림 Transformer로 오디오와 비디오를 동시에 생성하는 15B 파라미터 오픈소스 파운데이션 모델 daVinci-MagiHuman을 분석한다. Apache-2.0 라이선스로 6개 언어 음성 생성과 1080p 비디오를 지원하며, 기존 상용 모델 대비 80% 승률을 기록했다."
 draft: false

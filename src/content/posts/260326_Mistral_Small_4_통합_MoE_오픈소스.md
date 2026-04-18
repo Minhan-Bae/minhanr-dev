@@ -14,6 +14,9 @@ created: 2026-03-26
 relevance: 3
 related: ["Memesis"]
 source_url: ""
+summary: 한줄 요약 Mistral AI가 128개 전문가 중 4개만 활성화하는 119B MoE 아키텍처로, 기존 Magistral(추론)·Pixtral(멀티모달)·Devstral(코딩) 3개 모델을 하나로 통합한 Mistral Small 4를 Apache 2.0으로 공개했다.
+categories:
+  - Writing
 ---
 ## 한줄 요약
 

@@ -4,8 +4,8 @@ import { BRAND_IDENTITY } from "@/lib/brand/tokens";
 import { Typewriter } from "@/components/typewriter";
 
 export const metadata: Metadata = {
-  title: "소개",
-  description: `${BRAND_IDENTITY.domain} — ${BRAND_IDENTITY.roleKo}.`,
+  title: "About",
+  description: `${BRAND_IDENTITY.domain} — ${BRAND_IDENTITY.role}.`,
   openGraph: {
     title: `About — ${BRAND_IDENTITY.studio}`,
     description: BRAND_IDENTITY.manifestoEn,
@@ -28,7 +28,7 @@ export default function AboutPage() {
             className="kicker mb-5 animate-fade-up"
             style={{ animationDelay: "0ms" }}
           >
-            About · 소개
+            About
           </p>
           <Typewriter
             as="h1"

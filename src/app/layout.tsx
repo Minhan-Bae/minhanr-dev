@@ -5,6 +5,7 @@ import "./globals.css";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { BRAND_IDENTITY } from "@/lib/brand/tokens";
+import { SITE_URL } from "@/lib/site";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
@@ -38,15 +39,15 @@ export const metadata: Metadata = {
     template: `%s — ${BRAND_IDENTITY.domain}`,
     default: `${BRAND_IDENTITY.domain} — ${BRAND_IDENTITY.role}`,
   },
-  description: BRAND_IDENTITY.manifesto,
-  metadataBase: new URL("https://minhanr.dev"),
+  description: BRAND_IDENTITY.manifestoEn,
+  metadataBase: new URL(SITE_URL),
   authors: [{ name: BRAND_IDENTITY.studio }],
   openGraph: {
     // OG card text renders through @vercel/og with Latin-only fonts, so
     // we keep English copy here. The image itself is also Latin.
     title: `${BRAND_IDENTITY.studio} — ${BRAND_IDENTITY.domain}`,
     description: BRAND_IDENTITY.manifestoEn,
-    url: "https://minhanr.dev",
+    url: SITE_URL,
     siteName: BRAND_IDENTITY.domain,
     type: "website",
     images: [{ url: "/api/og", width: 1200, height: 630 }],

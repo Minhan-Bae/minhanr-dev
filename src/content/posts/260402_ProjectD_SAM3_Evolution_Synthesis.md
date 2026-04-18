@@ -13,6 +13,9 @@ related:
   - "[[260330_SAM3_Segment_Anything_Concept]]"
   - "[[260331_asyncmde_async_depth_estimation]]"
   - "[[260327_PureCLIP_Depth_CLIP_Embedding_Depth]]"
+summary: "Project-D: SAM 3 Evolution Synthesis 9건 growing 노트 통합. AX지원사업 SAM 3 PoC + 제안서 직결. 핵심 테제 SAM 3 패밀리가 3개월 만에 Concept Segmentation → Instruction-Guided →…"
+categories:
+  - Writing
 ---
 
 # Project-D: SAM 3 Evolution Synthesis

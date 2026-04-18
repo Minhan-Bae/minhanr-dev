@@ -10,6 +10,9 @@ status: mature
 created: 2026-03-31
 relevance: 5
 related: [3DAgent]
+summary: "HoudiniMCP: LLM이 Houdini를 직접 제어하는 MCP 서버 개요 HoudiniMCP는 Capoom이 개발한 오픈소스 MCP(Model Context Protocol) 서버로, Claude 등 LLM 에이전트가 SideFX Houdini를 자연어로 직접 제어할 수 있게…"
+categories:
+  - VFX
 ---
 
 # HoudiniMCP: LLM이 Houdini를 직접 제어하는 MCP 서버

@@ -18,6 +18,8 @@ cover:
   image: /images/posts/260322-openclaw-rl/cover.png
   alt: 260322 OpenClaw-RL 범용 에이전트 훈련
 date: '2026-03-22'
+categories:
+  - Writing
 ---
 # OpenClaw-RL: 범용 에이전트 훈련 프레임워크
 

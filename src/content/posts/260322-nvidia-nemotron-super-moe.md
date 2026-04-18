@@ -21,6 +21,8 @@ cover:
   image: /images/posts/260322-nvidia-nemotron-super-moe/cover.png
   alt: 260322 NVIDIA Nemotron 3 Super 하이브리드 MoE
 date: '2026-03-22'
+categories:
+  - Industry
 ---
 # NVIDIA Nemotron 3 Super — 하이브리드 Mamba-Transformer MoE
 

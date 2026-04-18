@@ -20,6 +20,8 @@ cover:
   image: /api/og?title=260322-holotron-12b&category=Industry
   alt: 260322 Holotron-12B 컴퓨터사용 에이전트 모델
 date: '2026-03-22'
+categories:
+  - Writing
 ---
 # Holotron-12B — 고처리량 오픈소스 컴퓨터 사용 에이전트 모델
 

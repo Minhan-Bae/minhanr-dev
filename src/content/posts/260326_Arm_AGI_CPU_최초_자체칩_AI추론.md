@@ -12,6 +12,9 @@ created: 2026-03-26
 relevance: 3
 related: ["Memesis"]
 source_url: ""
+summary: 한줄 요약 Arm이 35년 역사 최초로 자체 설계·제조 칩 AGI CPU를 출시하며, 라이선스 전용 기업에서 실리콘 공급자로의 역사적 전환을 선언했다.
+categories:
+  - Systems
 ---
 ## 한줄 요약
 

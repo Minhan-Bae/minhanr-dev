@@ -18,6 +18,8 @@ cover:
   image: /images/posts/260326-britannica-merriam-webster-openai/cover.jpg
   alt: 260326 Britannica Merriam Webster OpenAI 저작권소송
 date: '2026-03-26'
+categories:
+  - Industry
 ---
 ## 한줄 요약
 

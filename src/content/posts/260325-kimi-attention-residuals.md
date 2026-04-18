@@ -20,6 +20,8 @@ cover:
   image: /images/posts/260325-kimi-attention-residuals/cover.png
   alt: 260325 Kimi Attention Residuals 트랜스포머 잔차연결 혁신
 date: '2026-03-25'
+categories:
+  - Writing
 ---
 ## 한줄 요약
 

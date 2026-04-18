@@ -10,6 +10,9 @@ status: mature
 created: 2026-03-31
 relevance: 5
 related: [PathFinder, 3DAgent]
+summary: World Labs Spark 2.0 — 오픈소스 3DGS 웹 렌더러 메이저 업데이트 개요 Fei-Fei Li가 이끄는 World Labs가 Spark 2.0 Developer Preview를 공개했다.
+categories:
+  - VFX
 ---
 
 # World Labs Spark 2.0 — 오픈소스 3DGS 웹 렌더러 메이저 업데이트

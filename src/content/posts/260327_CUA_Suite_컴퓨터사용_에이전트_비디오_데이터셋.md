@@ -12,6 +12,9 @@ created: 2026-03-27
 relevance: 3
 related: ["3DAgent"]
 source_url: ""
+summary: 한줄 요약 ServiceNow가 87개 데스크톱 앱에서 55시간·600만 프레임의 인간 전문가 비디오 시연을 수집한 CUA-Suite를 공개하며, 컴퓨터 사용 에이전트의 훈련 데이터 병목을 해결했다.
+categories:
+  - Research
 ---
 ## 한줄 요약
 

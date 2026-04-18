@@ -19,6 +19,9 @@ related:
   - "[[260403_GenCompositor_Generative_Video_Compositing_DiT_GCMP]]"
   - "[[260402_VideoWorldModels_Efficient_Paradigms_Architectures_VWME]]"
   - "[[260401_Lyra_NVIDIA_Video_Diffusion_3DGS_Self_Distillation]]"
+summary: "Diffusion as Shader (DaS): 3D-aware Video Diffusion for Versatile Video Generation Control Ye et al."
+categories:
+  - VFX
 ---
 
 # Diffusion as Shader (DaS): 3D-aware Video Diffusion for Versatile Video Generation Control

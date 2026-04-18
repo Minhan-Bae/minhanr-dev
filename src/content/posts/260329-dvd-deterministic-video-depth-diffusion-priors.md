@@ -1,7 +1,7 @@
 ---
 author: MinHanr
 categories:
-- Research
+  - Visual
 date: '2026-03-29'
 summary: "사전학습된 비디오 디퓨전 모델을 결정론적 깊이 추정기로 변환하는 DVD 프레임워크를 분석한다. 기존 SOTA 대비 163배 적은 데이터로 zero-shot 비디오 깊이 추정 최고 성능을 달성하며, Latent Manifold Rectification으로 기하학적 hallucination 문제를 근본적으로 해결했다."
 draft: false

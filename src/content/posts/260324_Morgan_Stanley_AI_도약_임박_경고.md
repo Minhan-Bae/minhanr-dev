@@ -14,6 +14,9 @@ created: 2026-03-24
 relevance: 3
 related: ["Memesis"]
 source_url: ""
+summary: "한줄 요약 Morgan Stanley가 2026년 상반기 내 \"변혁적 AI 도약(Transformative AI Leap)\"이 임박했다고 경고하며, 10배 컴퓨팅 투입 시 모델 지능이 2배로 향상되는 스케일링 법칙이 여전히 유효하고 GPT-5.4가 인간 전문가 수준(GDPVal…"
+categories:
+  - Systems
 ---
 ## 한줄 요약
 

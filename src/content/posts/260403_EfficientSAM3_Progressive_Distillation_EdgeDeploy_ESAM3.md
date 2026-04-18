@@ -19,6 +19,9 @@ related:
   - "[[260330_SAM3_Segment_Anything_Concepts]]"
   - "[[260401_SAM3-I_Segment_Anything_Instructions]]"
   - "[[260402_SAM31_Object_Multiplex_SharedMemory_MultiObject_Tracking]]"
+summary: "EfficientSAM3: Progressive Hierarchical Distillation for Video Concept Segmentation 저자: Simon Zeng 외 발표: arXiv 2511.15833 코드:…"
+categories:
+  - Research
 ---
 
 # EfficientSAM3: Progressive Hierarchical Distillation for Video Concept Segmentation

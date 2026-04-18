@@ -23,6 +23,8 @@ cover:
   image: /images/posts/260404-diffusionasshader-3daware-video-diffusion-control/cover.png
   alt: 260404 DiffusionAsShader 3DAware Video Diffusion Control DaS
 date: '2026-04-04'
+categories:
+  - VFX
 ---
 
 # Diffusion as Shader (DaS): 3D-aware Video Diffusion for Versatile Video Generation Control

@@ -13,6 +13,9 @@ related:
   - "[[260327_SAGE_NVIDIA_Scalable_Agentic_3D_Scene_Generation]]"
   - "[[260401_Lyra_NVIDIA_Video_Diffusion_3DGS_Self_Distillation]]"
   - "[[260401_EvoGS_4D_GS_Dynamical_System]]"
+summary: "Project-3D: Houdini MCP + Agentic 3D 수렴 분석 81건 growing 노트 클러스터 통합. SBA 과제 Houdini MCP 프로토타입 직결. 핵심 테제 LLM + MCP + Visual Feedback Loop이 에이전틱 3D 생성의 지배적 아키텍처…"
+categories:
+  - VFX
 ---
 
 # Project-3D: Houdini MCP + Agentic 3D 수렴 분석

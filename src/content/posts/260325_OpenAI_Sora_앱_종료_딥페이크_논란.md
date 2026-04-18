@@ -15,6 +15,9 @@ related:
   - "Memesis"
   - "260324_LTX_2.3_Helios_비디오_생성_모델"
 source_url: ""
+summary: 한줄 요약 OpenAI가 딥페이크 논란과 사용자 이탈 속에 AI 비디오 생성 앱 Sora의 서비스 종료를 발표하며, 비디오 AI의 소비자 시장 진입 한계를 드러냈다.
+categories:
+  - Visual
 ---
 ## 한줄 요약
 

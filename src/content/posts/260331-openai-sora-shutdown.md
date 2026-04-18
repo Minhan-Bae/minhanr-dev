@@ -18,6 +18,8 @@ cover:
   image: /images/posts/260331-openai-sora-shutdown/cover.jpg
   alt: 260331 OpenAI Sora Shutdown
 date: '2026-03-31'
+categories:
+  - Industry
 ---
 
 # OpenAI Sora 서비스 종료 — 영상생성 시장 전환점

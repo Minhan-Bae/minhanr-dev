@@ -1,7 +1,7 @@
 ---
 author: MinHanr
 categories:
-- Research
+  - Visual
 date: '2026-03-28'
 draft: false
 summary: "CausVid는 Diagonal Forcing 기법으로 bidirectional DiT를 causal autoregressive 모델로 distill하여, 실시간 스트리밍 비디오 생성과 장시간 시퀀스 안정성을 동시에 달성한 ICLR 2026 논문 분석."

@@ -15,6 +15,9 @@ related:
   - "260403_ViFeEdit_VideoFree_Tuner_Video_DiT_VFED"
   - "260404_DiffusionAsShader_3DAware_Video_Diffusion_Control_DaS"
   - "260401_Memesis_Video_Generation_Synthesis"
+summary: 260404 Project-V Video Generation Weekly Synthesis 2026-W14 (4/1–4/4) 수집된 비디오 생성 논문 4건의 크로스 분석.
+categories:
+  - Visual
 ---
 
 # 260404 Project-V Video Generation Weekly Synthesis

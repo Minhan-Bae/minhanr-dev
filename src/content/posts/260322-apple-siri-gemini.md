@@ -18,6 +18,8 @@ cover:
   image: /images/posts/260322-apple-siri-gemini/cover.jpg
   alt: 260322 Apple Siri Gemini 파트너십
 date: '2026-03-22'
+categories:
+  - Industry
 ---
 # Apple × Google — Siri에 Gemini 탑재, AI 전략 대전환
 

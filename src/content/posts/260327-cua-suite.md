@@ -18,6 +18,8 @@ cover:
   image: /images/posts/260327-cua-suite/cover.png
   alt: 260327 CUA Suite 컴퓨터사용 에이전트 비디오 데이터셋
 date: '2026-03-27'
+categories:
+  - Writing
 ---
 ## 한줄 요약
 

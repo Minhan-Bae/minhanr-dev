@@ -13,6 +13,9 @@ created: 2026-03-24
 relevance: 3
 related: ["Memesis"]
 source_url: ""
+summary: 한줄 요약 Google이 Gemini 3.1 Flash-Lite를 공개하며, 입력 백만 토큰당 $0.25의 초저가에 GPQA Diamond 86.9%, 출력 속도 382 tok/s를 달성해 고빈도 추론 태스크의 경제성 기준을 새로 세웠다.
+categories:
+  - Industry
 ---
 ## 한줄 요약
 

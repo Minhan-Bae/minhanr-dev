@@ -18,6 +18,8 @@ cover:
   image: /images/posts/260326-arm-agi-cpu/cover.jpg
   alt: 260326 Arm AGI CPU 최초 자체칩 AI추론
 date: '2026-03-26'
+categories:
+  - Writing
 ---
 ## 한줄 요약
 

@@ -11,6 +11,9 @@ slug: 260401-gswap-head-swapping-neural-gaussian-field
 created: 2026-03-29
 relevance: 5
 related: [CharacterShift, PathFinder]
+summary: "GSwap: 동적 뉴럴 가우시안 필드를 활용한 리얼리스틱 헤드 스와핑 논문 정보 제목: GSwap: Realistic Head Swapping with Dynamic Neural Gaussian Field 저자: Jingtao Zhou, Xuan Gao, Dongyu Liu,…"
+categories:
+  - Research
 ---
 
 # GSwap: 동적 뉴럴 가우시안 필드를 활용한 리얼리스틱 헤드 스와핑

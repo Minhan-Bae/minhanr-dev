@@ -10,6 +10,9 @@ status: mature
 created: 2026-03-31
 relevance: 4
 related: [Memesis]
+summary: OpenAI Sora 서비스 종료 — 영상생성 시장 전환점 개요 2026년 3월 24일, OpenAI가 Sora 앱 및 API 서비스 종료를 공식 발표했다.
+categories:
+  - Visual
 ---
 
 # OpenAI Sora 서비스 종료 — 영상생성 시장 전환점

@@ -1,7 +1,7 @@
 ---
 author: MinHanr
 categories:
-- Research
+  - Visual
 cover:
   alt: 260328 DCARL overview
   caption: ''

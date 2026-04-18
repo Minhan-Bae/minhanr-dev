@@ -20,6 +20,8 @@ cover:
   image: /images/posts/260324-minimax-m2.5/cover.jpg
   alt: 260324 MiniMax M2.5 에이전틱 코딩 모델
 date: '2026-03-24'
+categories:
+  - Writing
 ---
 ## 한줄 요약
 
