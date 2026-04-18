@@ -5,7 +5,7 @@ import { getAllPosts } from "@/lib/blog";
 import type { BlogPostMeta } from "@/lib/blog";
 import { getAllTags, getAllYears } from "@/lib/blog-taxonomy";
 import { NotesGraph } from "@/components/notes-graph";
-import { Typewriter } from "@/components/typewriter";
+import { TypewriterLoop } from "@/components/typewriter-loop";
 import { SlideDeck } from "@/components/slide-deck";
 
 export const metadata: Metadata = {
@@ -31,16 +31,16 @@ export const metadata: Metadata = {
 /**
  * /blog — landing deck, three slides.
  *
- *   1. Masthead    — typewriter hero, brand framing
+ *   1. Masthead    — boomerang typewriter hero + framing
  *   2. Notes map   — force-directed NotesGraph on a dark glass panel
- *   3. Explore     — jump points into the browsable archive
+ *   3. Explore     — tag cloud · year jumps · latest 3 · archive CTA
  *
- * This page is intentionally cinematic, not browsable. The full
- * scrollable 119-post list moved to `/blog/archive` where it can be
- * searched and filtered without fighting a wheel-locked deck. Tag
- * drill-downs live at `/blog/tag/*`; year archives at
- * `/blog/archive/[year]`.
+ * Every slide reserves `pb-[clamp(140px,18vh,200px)]` so the four-
+ * corner chrome (dock + colophon + theme toggle + wordmark) never
+ * covers content, matching the home deck's vocabulary exactly.
  */
+const SLIDE_PB = "pb-[clamp(140px,18vh,200px)]";
+
 export default function WritingIndex() {
   const posts = getAllPosts();
   const tags = getAllTags().slice(0, 18);
@@ -65,7 +65,7 @@ function MastheadSlide({ postCount }: { postCount: number }) {
   return (
     <section
       data-slide
-      className="slide relative mx-auto flex w-full max-w-[1440px] flex-col justify-center px-6 sm:px-10"
+      className={`slide relative mx-auto flex w-full max-w-[1440px] flex-col justify-center px-6 sm:px-10 ${SLIDE_PB}`}
     >
       <div
         aria-hidden
@@ -79,12 +79,14 @@ function MastheadSlide({ postCount }: { postCount: number }) {
         >
           Writing · {postCount} pieces
         </p>
-        <Typewriter
+        <TypewriterLoop
           as="h1"
           lang="en"
           text="Notes from the studio."
-          stagger={55}
-          delay={120}
+          typeDelay={60}
+          eraseDelay={28}
+          holdMs={5000}
+          pauseMs={900}
           className="font-display italic leading-[1.1] tracking-[-0.02em] block"
           style={{ fontSize: "var(--font-size-h1)" }}
         />
@@ -99,12 +101,6 @@ function MastheadSlide({ postCount }: { postCount: number }) {
           </span>{" "}
           pieces.
         </p>
-        <p
-          className="font-technical mt-10 text-[11px] uppercase tracking-[0.2em] text-muted-foreground/70 animate-fade-up"
-          style={{ animationDelay: "480ms" }}
-        >
-          Wheel · swipe · space — advance
-        </p>
       </div>
     </section>
   );
@@ -114,7 +110,7 @@ function NotesMapSlide({ posts }: { posts: BlogPostMeta[] }) {
   return (
     <section
       data-slide
-      className="slide hairline-t relative mx-auto flex w-full max-w-[1440px] flex-col justify-center px-6 py-8 sm:px-10 sm:py-12"
+      className={`slide hairline-t relative mx-auto flex w-full max-w-[1440px] flex-col justify-center px-6 pt-[clamp(24px,4vh,48px)] sm:px-10 ${SLIDE_PB}`}
     >
       <header className="mb-5 flex flex-col gap-2 sm:mb-8 sm:flex-row sm:items-baseline sm:justify-between">
         <div>
@@ -149,7 +145,7 @@ function ExploreSlide({ postCount, tags, years, latest }: ExploreSlideProps) {
   return (
     <section
       data-slide
-      className="slide hairline-t relative mx-auto flex w-full max-w-[1440px] flex-col justify-center px-6 py-10 sm:px-10 sm:py-14"
+      className={`slide hairline-t relative mx-auto flex w-full max-w-[1440px] flex-col justify-center px-6 pt-[clamp(24px,4vh,48px)] sm:px-10 ${SLIDE_PB}`}
     >
       <header className="mb-8 flex flex-col gap-3 sm:mb-12 sm:flex-row sm:items-baseline sm:justify-between">
         <div>

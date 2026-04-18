@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
-import { ArrowUpRight } from "lucide-react";
 import { BRAND_IDENTITY } from "@/lib/brand/tokens";
-import { Typewriter } from "@/components/typewriter";
+import { TypewriterLoop } from "@/components/typewriter-loop";
 import { SlideDeck } from "@/components/slide-deck";
 
 export const metadata: Metadata = {
@@ -15,25 +14,29 @@ export const metadata: Metadata = {
 };
 
 /**
- * /about — PowerPoint-style deck, five slides.
+ * /about — four-slide PowerPoint deck.
  *
- *   1. Masthead      — studio wordmark + role
- *   2. Bio           — 3 paragraphs with drop-cap
- *   3. Practice      — three areas of work
- *   4. Colophon      — how the site is built
- *   5. Elsewhere     — nav links + a sign-off
+ *   1. Masthead   — wordmark + role (boomerang typewriter, same hero
+ *                   vocabulary as the home)
+ *   2. Bio        — three drop-cap paragraphs
+ *   3. Practice   — three areas of work (kicker + dl grid)
+ *   4. Closer     — one-line manifesto over colophon footnote; the
+ *                   SiteDock + SiteColophon already cover nav+©, so
+ *                   the old "Elsewhere" nav rail is gone.
  *
- * Each section is its own 100svh slide; SlideDeck handles the
- * transition and keyboard/wheel/touch advance.
+ * Each slide reserves `pb-[clamp(140px,18vh,200px)]` so the bottom-
+ * anchored chrome (dock, colophon, theme toggle) never overlaps
+ * content, matching the home vocabulary.
  */
+const SLIDE_PB = "pb-[clamp(140px,18vh,200px)]";
+
 export default function AboutPage() {
   return (
     <SlideDeck>
       <MastheadSlide />
       <BioSlide />
       <PracticeSlide />
-      <ColophonSlide />
-      <ContactSlide />
+      <CloserSlide />
     </SlideDeck>
   );
 }
@@ -42,7 +45,7 @@ function MastheadSlide() {
   return (
     <section
       data-slide
-      className="slide relative mx-auto flex w-full max-w-[1440px] flex-col justify-center px-6 sm:px-10"
+      className={`slide relative mx-auto flex w-full max-w-[1440px] flex-col justify-center px-6 sm:px-10 ${SLIDE_PB}`}
     >
       <div
         aria-hidden
@@ -53,34 +56,23 @@ function MastheadSlide() {
         <p className="kicker mb-5 animate-fade-up" style={{ animationDelay: "0ms" }}>
           About
         </p>
-        <Typewriter
+        <TypewriterLoop
           as="h1"
           lang="en"
           text={BRAND_IDENTITY.studio}
-          stagger={140}
-          delay={120}
-          cursor={false}
+          typeDelay={140}
+          eraseDelay={70}
+          holdMs={5000}
+          pauseMs={900}
+          sfx
           className="font-display italic leading-[1.05] tracking-[-0.03em] block"
           style={{ fontSize: "var(--font-size-display)" }}
-        >
-          <span
-            className="text-muted-foreground animate-fade-up"
-            style={{ animationDelay: `${120 + BRAND_IDENTITY.studio.length * 140 + 120}ms` }}
-          >
-            .dev
-          </span>
-        </Typewriter>
+        />
         <p
           className="mt-6 font-technical text-[15px] text-muted-foreground sm:text-base animate-fade-up"
           style={{ animationDelay: "240ms" }}
         >
           {BRAND_IDENTITY.role}
-        </p>
-        <p
-          className="mt-10 font-technical text-[11px] uppercase tracking-[0.2em] text-muted-foreground/70 animate-fade-up"
-          style={{ animationDelay: "480ms" }}
-        >
-          Wheel · swipe · space — advance
         </p>
       </div>
     </section>
@@ -91,7 +83,7 @@ function BioSlide() {
   return (
     <section
       data-slide
-      className="slide hairline-t relative mx-auto flex w-full max-w-[900px] flex-col justify-center px-6 sm:px-10"
+      className={`slide hairline-t relative mx-auto flex w-full max-w-[900px] flex-col justify-center px-6 sm:px-10 ${SLIDE_PB}`}
     >
       <p className="kicker mb-6">Bio</p>
       <div className="space-y-6 text-[15px] leading-[1.8] text-foreground/90 sm:text-[17px] sm:leading-[1.85]">
@@ -99,17 +91,17 @@ function BioSlide() {
           {BRAND_IDENTITY.studio}.dev is a one-person studio designing
           and building the tools that sit between people and machines.
           AI research systems, production pipelines, and editorial
-          surfaces like the one you're reading — a single practice,
+          surfaces like the one you&apos;re reading — a single practice,
           not a discipline list.
         </p>
         <p>
           Most projects fold two problems into one. A good research
           tool is a good production tool; a good production tool shapes
           taste; and taste, eventually, ships. I work where those three
-          don't fight each other.
+          don&apos;t fight each other.
         </p>
         <p>
-          Writing goes up only when there's something specific that's
+          Writing goes up only when there&apos;s something specific that&apos;s
           useful to someone else. A finished perspective saves more
           time than a running commentary on process.
         </p>
@@ -122,7 +114,7 @@ function PracticeSlide() {
   return (
     <section
       data-slide
-      className="slide hairline-t relative mx-auto flex w-full max-w-[1440px] flex-col justify-center px-6 sm:px-10"
+      className={`slide hairline-t relative mx-auto flex w-full max-w-[1440px] flex-col justify-center px-6 sm:px-10 ${SLIDE_PB}`}
     >
       <div className="grid gap-10 sm:grid-cols-12 sm:gap-16">
         <div className="sm:col-span-4">
@@ -133,6 +125,11 @@ function PracticeSlide() {
           >
             Three areas.
           </h2>
+          <p className="mt-6 max-w-sm text-[13px] leading-[1.7] text-muted-foreground">
+            Next.js + React on Vercel&apos;s edge; Instrument Serif for
+            Latin, Pretendard for Hangul, Geist Mono for labels. Palette
+            mapped in OKLCH across the rain-glass quartet.
+          </p>
         </div>
         <div className="sm:col-span-8">
           <dl className="divide-y divide-[var(--hairline)] hairline-t hairline-b">
@@ -156,86 +153,28 @@ function PracticeSlide() {
   );
 }
 
-function ColophonSlide() {
+function CloserSlide() {
   return (
     <section
       data-slide
-      className="slide hairline-t relative mx-auto flex w-full max-w-[1440px] flex-col justify-center px-6 sm:px-10"
+      className={`slide hairline-t relative mx-auto flex w-full max-w-[1440px] items-center px-6 sm:px-10 ${SLIDE_PB}`}
     >
-      <div className="grid gap-10 sm:grid-cols-12 sm:gap-16">
-        <div className="sm:col-span-4">
-          <p className="kicker mb-3">Colophon</p>
-          <h2
-            className="font-display italic tracking-[-0.025em] text-foreground"
-            style={{ fontSize: "clamp(2rem, 5vw, 3.5rem)", lineHeight: "1.02" }}
-          >
-            How this site was built.
-          </h2>
-        </div>
-        <div className="sm:col-span-8 space-y-5 text-[14px] leading-[1.7] text-foreground/90 sm:text-[15px] sm:leading-[1.75]">
-          <p>
-            Next.js and React on Vercel's edge. Display Latin is
-            Instrument Serif, Hangul is Pretendard Variable via
-            glyph-level fallback. Geist Mono carries labels and
-            timestamps.
-          </p>
-          <p>
-            The palette is a rain-glass quartet — Overcast Mist as the
-            ground, Prussian Night for the dark face, Signal Cobalt on
-            the keyline, Amethyst Shadow as the cooled accent. Mapped
-            in OKLCH so all three theme surfaces keep their contrast
-            promises. A WebGL droplet layer paints weather on top.
-          </p>
-          <p>
-            The content model is deliberately conservative. Every work
-            piece and post is hand-committed to version control — no
-            live database faces the public. What's shown is shown; the
-            rest stays in the studio.
-          </p>
-        </div>
+      <div className="w-full">
+        <p className="kicker mb-5">Closer</p>
+        <p
+          className="font-display italic leading-[1.08] tracking-[-0.02em] text-foreground"
+          style={{ fontSize: "clamp(2.25rem, 6vw, 5rem)" }}
+        >
+          Read the writing if you like —<br />
+          but please look at the work.
+        </p>
+        <p className="mt-8 max-w-xl text-[14px] leading-[1.7] text-muted-foreground sm:text-[15px]">
+          The content model is deliberately conservative — every work
+          piece and post is hand-committed to version control, no live
+          database faces the public. What&apos;s shown is shown; the rest
+          stays in the studio.
+        </p>
       </div>
-    </section>
-  );
-}
-
-function ContactSlide() {
-  return (
-    <section
-      data-slide
-      className="slide hairline-t relative mx-auto flex w-full max-w-[1440px] flex-col justify-between px-6 py-16 sm:px-10 sm:py-24"
-    >
-      <div className="flex flex-1 items-center">
-        <div className="w-full">
-          <p className="kicker mb-5">Elsewhere</p>
-          <p
-            className="font-display italic leading-[1.08] tracking-[-0.02em] text-foreground"
-            style={{ fontSize: "clamp(2.25rem, 6vw, 5rem)" }}
-          >
-            Read the writing if you like —<br />
-            but please look at the work.
-          </p>
-        </div>
-      </div>
-      <ul className="font-technical flex flex-wrap gap-x-8 gap-y-3 border-t border-[var(--hairline)] pt-6 text-[13px] uppercase tracking-[0.18em] text-muted-foreground">
-        {LINKS.map((link) => (
-          <li key={link.label}>
-            <a
-              href={link.href}
-              target={link.external ? "_blank" : undefined}
-              rel={link.external ? "noreferrer" : undefined}
-              className="group inline-flex items-center gap-2 transition-colors hover:text-foreground"
-            >
-              {link.label}
-              {link.external && (
-                <ArrowUpRight
-                  className="h-3.5 w-3.5 transition-all duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
-                  strokeWidth={1.5}
-                />
-              )}
-            </a>
-          </li>
-        ))}
-      </ul>
     </section>
   );
 }
@@ -256,11 +195,4 @@ const PRACTICE = [
     body:
       "Websites, design systems, and publications built for practitioners. The site you're reading is one of them.",
   },
-];
-
-const LINKS = [
-  { label: "Writing", href: "/blog", external: false },
-  { label: "Work", href: "/work", external: false },
-  { label: "GitHub", href: "https://github.com/Minhan-Bae", external: true },
-  { label: "RSS", href: "/feed.xml", external: false },
 ];
