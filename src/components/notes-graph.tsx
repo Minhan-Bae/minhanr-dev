@@ -39,22 +39,21 @@ const VB_H = 760;
 const CX = VB_W / 2;
 const CY = VB_H / 2;
 
-// Physics — tuned against ~116 public nodes + 5 shadows
-const REPEL_STRENGTH = 1000; // Coulomb constant (higher = more spread)
-const REPEL_CUTOFF   = 560;  // ignore pairs beyond this distance
-const SPRING_REST    = 230;
-const SPRING_K       = 0.014;
-const GRAVITY        = 0.0008; // very weak pull toward (CX, CY)
+// Physics — tuned for ~116 nodes. Goal: clusters tight enough that
+// structure reads, loose enough that individual nodes are grabbable.
+const REPEL_STRENGTH = 520;  // Coulomb constant
+const REPEL_CUTOFF   = 340;
+const SPRING_REST    = 130;  // tighter than before — pulls clusters in
+const SPRING_K       = 0.026;// stronger spring = shorter edges
+const GRAVITY        = 0.0016; // gentle centering
 const DAMPING        = 0.82;
-const MAX_STEP       = 16;     // clamp per-tick displacement per axis
+const MAX_STEP       = 14;
 
-// Soft boundary: margin on each edge of the viewBox. Nodes outside
-// get pushed back in proportional to how far they've strayed. Small
-// margin (~6%) because the vivid node colours need room to breathe
-// — the graph should fill almost the entire frame.
-const BOUND_MARGIN_X = VB_W * 0.06;
-const BOUND_MARGIN_Y = VB_H * 0.06;
-const BOUND_STRENGTH = 0.04;
+// Soft boundary — keeps drifting nodes inside the frame but doesn't
+// clamp hard. Margin ~8%.
+const BOUND_MARGIN_X = VB_W * 0.08;
+const BOUND_MARGIN_Y = VB_H * 0.08;
+const BOUND_STRENGTH = 0.05;
 
 /**
  * AREAs — the studio's practice split, not the blog's legacy
@@ -159,19 +158,14 @@ function classifyArea(post: BlogPostMeta): AreaKey {
   return "research";
 }
 
-const PRIVATE_CATEGORIES = [
-  { id: "priv-daily",   label: "일지" },
-  { id: "priv-archive", label: "아카이브" },
-  { id: "priv-wip",     label: "작업 중" },
-  { id: "priv-finance", label: "재무" },
-  { id: "priv-raw",     label: "리서치 원본" },
-];
-
 // ── Types ───────────────────────────────────────────────────────────
 
-interface BaseNode {
+interface NodeData {
   id: string;
   label: string;
+  slug: string;
+  tags: string[];
+  area: AreaKey;
   color: string;
   r: number;
   /** physics state */
@@ -181,19 +175,7 @@ interface BaseNode {
   vy: number;
   /** pinned by drag */
   fixed: boolean;
-  /** extra gravity anchor (for shadow/private nodes) */
-  anchor?: { x: number; y: number; k: number };
 }
-interface PublicNodeData extends BaseNode {
-  kind: "public";
-  slug: string;
-  tags: string[];
-  area: AreaKey;
-}
-interface PrivateNodeData extends BaseNode {
-  kind: "private";
-}
-type NodeData = PublicNodeData | PrivateNodeData;
 
 interface EdgeData {
   from: string;
@@ -239,7 +221,6 @@ function buildGraph(posts: BlogPostMeta[]): {
       Math.min(VB_W, VB_H) * 0.4 + (i % 5) * 14;
     const area = classifyArea(post);
     nodes.push({
-      kind: "public",
       id: post.slug,
       label: post.title,
       slug: post.slug,
@@ -255,36 +236,14 @@ function buildGraph(posts: BlogPostMeta[]): {
     });
   });
 
-  // Private shadow nodes — clamped near the centre via an anchor.
-  PRIVATE_CATEGORIES.forEach((p, i) => {
-    const angle = (i / PRIVATE_CATEGORIES.length) * Math.PI * 2 - Math.PI / 2;
-    const r0 = 60;
-    const ax = CX + Math.cos(angle) * r0;
-    const ay = CY + Math.sin(angle) * r0;
-    nodes.push({
-      kind: "private",
-      id: p.id,
-      label: p.label,
-      color: "var(--muted-foreground)",
-      r: 8,
-      x: ax,
-      y: ay,
-      vx: 0,
-      vy: 0,
-      fixed: false,
-      anchor: { x: ax, y: ay, k: 0.08 },
-    });
-  });
-
-  // Build edges from tag overlap among public nodes.
-  const pub = nodes.filter((n): n is PublicNodeData => n.kind === "public");
+  // Build edges from tag overlap.
   const pairs: Array<{ from: string; to: string; weight: number }> = [];
-  for (let i = 0; i < pub.length; i++) {
-    const a = pub[i];
+  for (let i = 0; i < nodes.length; i++) {
+    const a = nodes[i];
     if (a.tags.length === 0) continue;
     const aTags = new Set(a.tags);
-    for (let j = i + 1; j < pub.length; j++) {
-      const b = pub[j];
+    for (let j = i + 1; j < nodes.length; j++) {
+      const b = nodes[j];
       if (b.tags.length === 0) continue;
       let shared = 0;
       for (const t of b.tags) if (aTags.has(t)) shared++;
@@ -294,7 +253,7 @@ function buildGraph(posts: BlogPostMeta[]): {
 
   // Keep only the top-K edges per node (by weight).
   const perNode = new Map<string, Array<{ to: string; weight: number }>>();
-  for (const n of pub) perNode.set(n.id, []);
+  for (const n of nodes) perNode.set(n.id, []);
   // Sort pairs by weight desc to prefer high-overlap edges.
   pairs.sort((a, b) => b.weight - a.weight);
   const accepted = new Set<string>();
@@ -374,7 +333,6 @@ export function NotesGraph({ posts }: NotesGraphProps) {
   const tagIndex = useMemo(() => {
     const m = new Map<string, Set<string>>();
     for (const n of nodes) {
-      if (n.kind !== "public") continue;
       for (const t of n.tags) {
         if (!m.has(t)) m.set(t, new Set());
         m.get(t)!.add(n.id);
@@ -386,7 +344,7 @@ export function NotesGraph({ posts }: NotesGraphProps) {
   const neighbours = useMemo(() => {
     if (!hoveredId) return null;
     const node = nodeById.get(hoveredId);
-    if (!node || node.kind !== "public") return null;
+    if (!node) return null;
     const set = new Set<string>();
     for (const t of node.tags) {
       const tagSet = tagIndex.get(t);
@@ -476,17 +434,12 @@ export function NotesGraph({ posts }: NotesGraphProps) {
       b.vy -= fy;
     }
 
-    // 3. Gravity + per-node anchor + soft boundary
+    // 3. Gravity + soft boundary
     for (const node of nodes) {
       // Weak pull toward centre so the graph doesn't drift off screen.
       node.vx += (CX - node.x) * GRAVITY;
       node.vy += (CY - node.y) * GRAVITY;
-      // Shadow nodes (private) have an extra anchor at their slot.
-      if (node.anchor) {
-        node.vx += (node.anchor.x - node.x) * node.anchor.k;
-        node.vy += (node.anchor.y - node.y) * node.anchor.k;
-      }
-      // Soft boundary: push back into the inner 75% of the viewBox
+      // Soft boundary: push back into the inner area of the viewBox
       // when a node drifts past the margin. Proportional force so
       // nearby nodes feel a gentle nudge and far-out ones get yanked.
       if (node.x < BOUND_MARGIN_X) {
@@ -631,7 +584,7 @@ export function NotesGraph({ posts }: NotesGraphProps) {
       node.vy = dv.vy * 1.15;
     }
     // Treat a no-movement pointerup as a click.
-    if (!dragMovedRef.current && node.kind === "public") {
+    if (!dragMovedRef.current) {
       router.push(`/blog/${node.slug}`);
     }
     dragMovedRef.current = false;
@@ -677,11 +630,7 @@ export function NotesGraph({ posts }: NotesGraphProps) {
                 y1={0}
                 x2={0}
                 y2={0}
-                stroke={
-                  isHot && hovered?.kind === "public"
-                    ? hovered.color
-                    : "var(--muted-foreground)"
-                }
+                stroke={isHot ? hovered!.color : "var(--muted-foreground)"}
                 strokeOpacity={isHot ? 0.55 : 0.12}
                 strokeWidth={isHot ? 1.6 : 1}
                 style={{
@@ -698,15 +647,12 @@ export function NotesGraph({ posts }: NotesGraphProps) {
           {nodes.map((n) => {
             const isHovered = n.id === hoveredId;
             const isNeighbour = neighbours?.has(n.id) ?? false;
-            const dim = hoveredId
-              ? !isHovered && !isNeighbour && n.kind === "public"
-              : false;
+            const dim = hoveredId && !isHovered && !isNeighbour;
             const rEff = isHovered
               ? n.r * 1.9
               : isNeighbour
               ? n.r * 1.3
               : n.r;
-            const isPrivate = n.kind === "private";
 
             return (
               <g
@@ -719,39 +665,25 @@ export function NotesGraph({ posts }: NotesGraphProps) {
                 onPointerDown={(ev) => onNodePointerDown(ev, n)}
                 onPointerUp={(ev) => onNodePointerUp(ev, n)}
                 style={{
-                  cursor: isPrivate ? "grab" : "pointer",
+                  cursor: "pointer",
                   opacity: dim ? 0.22 : 1,
                   transition: "opacity 280ms ease",
                 }}
               >
                 <title>
-                  {n.kind === "public"
-                    ? `${n.label} · ${AREA_STYLE[n.area].label}`
-                    : `비공개 · ${n.label}`}
+                  {n.label} · {AREA_STYLE[n.area].label}
                 </title>
-                {isHovered && n.kind === "public" && (
+                {isHovered && (
                   <circle
                     r={rEff + 10}
                     fill={n.color}
                     fillOpacity={0.18}
                   />
                 )}
-                {isPrivate && (
-                  <circle
-                    r={rEff + 3}
-                    fill="none"
-                    stroke={n.color}
-                    strokeOpacity={0.4}
-                    strokeWidth={0.8}
-                    strokeDasharray="2 2"
-                  />
-                )}
                 <circle
                   r={rEff}
                   fill={n.color}
-                  fillOpacity={
-                    isPrivate ? 0.35 : isHovered ? 1 : 0.78
-                  }
+                  fillOpacity={isHovered ? 1 : 0.82}
                   style={{
                     transition:
                       "r 240ms cubic-bezier(0.34,1.56,0.64,1), fill-opacity 240ms ease",
@@ -777,7 +709,7 @@ export function NotesGraph({ posts }: NotesGraphProps) {
           boxShadow: "0 6px 24px oklch(0 0 0 / 0.25)",
         }}
       >
-        {hovered?.kind === "public" && (
+        {hovered && (
           <div className="flex flex-col gap-1">
             <div className="flex items-center gap-2">
               <span
@@ -796,14 +728,6 @@ export function NotesGraph({ posts }: NotesGraphProps) {
             </div>
           </div>
         )}
-        {hovered?.kind === "private" && (
-          <div className="flex flex-col gap-1">
-            <span className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
-              비공개 카테고리
-            </span>
-            <span className="text-foreground">{hovered.label}</span>
-          </div>
-        )}
       </div>
 
       {/* Legend */}
@@ -817,10 +741,6 @@ export function NotesGraph({ posts }: NotesGraphProps) {
             {AREA_STYLE[a].kr}
           </span>
         ))}
-        <span className="flex items-center gap-1.5">
-          <span className="inline-block h-[6px] w-[6px] rounded-full border border-dashed border-muted-foreground/60" />
-          비공개
-        </span>
       </figcaption>
     </figure>
   );
