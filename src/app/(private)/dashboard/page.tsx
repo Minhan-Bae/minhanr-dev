@@ -181,154 +181,163 @@ async function DashboardContent() {
   });
 
   return (
-    <div className="space-y-4">
-      {/* KPI Strip */}
+    <div className="space-y-6">
+      {/* KPI Bento — 4 cards with hover lift */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatKpiCard label="Notes (7d)" value={notesThisWeek} icon={<FileText className="h-8 w-8" />} accentColor="border-l-chart-1" href="/notes" />
-        <StatKpiCard label="Published" value={publishedThisWeek} icon={<Send className="h-8 w-8" />} accentColor="border-l-chart-2" href="/blog" />
-        <StatKpiCard label="Inbox" value={inboxThisWeek} icon={<Inbox className="h-8 w-8" />} accentColor="border-l-chart-3" href="/notes" />
-        <StatKpiCard label="Total Notes" value={totalNotes} icon={<Layers className="h-8 w-8" />} accentColor="border-l-chart-4" href="/notes" />
+        <div className="hover-lift"><StatKpiCard label="Notes (7d)" value={notesThisWeek} icon={<FileText className="h-8 w-8" />} accentColor="border-l-chart-1" href="/notes" /></div>
+        <div className="hover-lift"><StatKpiCard label="Published" value={publishedThisWeek} icon={<Send className="h-8 w-8" />} accentColor="border-l-chart-2" href="/blog" /></div>
+        <div className="hover-lift"><StatKpiCard label="Inbox" value={inboxThisWeek} icon={<Inbox className="h-8 w-8" />} accentColor="border-l-chart-3" href="/notes" /></div>
+        <div className="hover-lift"><StatKpiCard label="Total Notes" value={totalNotes} icon={<Layers className="h-8 w-8" />} accentColor="border-l-chart-4" href="/notes" /></div>
       </div>
 
-      {/* Main Grid */}
-      <div className="grid grid-cols-12 gap-4 auto-rows-min">
-      <DashboardCalendar
-        monthLabel={now.toLocaleDateString("ko-KR", { year: "numeric", month: "long" })}
-        grid={grid.map((c) => (c ? { iso: c.iso, day: c.date.getDate() } : null))}
-        todayIso={todayIso}
-        monthStart={monthStart}
-        events={events}
-        weekCommitments={weekCommitments}
-        showWeeklyReviewBanner={showWeeklyReviewBanner}
-      />
+      {/* Calendar hero — full-width, keeps internal month grid */}
+      <div className="grid grid-cols-12 gap-4">
+        <DashboardCalendar
+          monthLabel={now.toLocaleDateString("ko-KR", { year: "numeric", month: "long" })}
+          grid={grid.map((c) => (c ? { iso: c.iso, day: c.date.getDate() } : null))}
+          todayIso={todayIso}
+          monthStart={monthStart}
+          events={events}
+          weekCommitments={weekCommitments}
+          showWeeklyReviewBanner={showWeeklyReviewBanner}
+        />
+      </div>
 
-      {/* Active projects */}
-      <Card className="col-span-12 lg:col-span-6">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm">진행 중 프로젝트</CardTitle>
-          <CardDescription className="text-xs">
-            <Link href="/projects" className="underline">
-              전체 보기 →
-            </Link>
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {activeProjects.length === 0 ? (
-            <p className="text-xs text-muted-foreground">없음</p>
-          ) : (
-            <ul className="space-y-2">
-              {activeProjects.map((p) => (
-                <li key={p.path} className="space-y-0.5">
-                  <Link
-                    href={vaultPathToHref(p.path)}
-                    className="text-sm font-medium hover:text-primary truncate block transition-colors"
-                  >
-                    {p.title}
-                  </Link>
-                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                    {p.priority && <Badge variant="outline" className="font-normal">{p.priority}</Badge>}
-                    {p.status && <span>{p.status}</span>}
-                    {p.created && <span className="tabular-nums">· {p.created}</span>}
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </CardContent>
-      </Card>
+      {/* Bento row 1 — asymmetric: featured projects (7/12) + compact recommendation (5/12) */}
+      <div className="grid grid-cols-12 gap-4">
+        {/* Active projects — FEATURED: larger typography, priority emphasis */}
+        <Card className="col-span-12 lg:col-span-7 hover-lift relative overflow-hidden">
+          <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary via-accent to-primary opacity-60" />
+          <CardHeader className="pb-2">
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-base">진행 중 프로젝트</CardTitle>
+                <CardDescription className="text-xs">Active — 최근 편집순</CardDescription>
+              </div>
+              <Link href="/projects" className="text-xs text-muted-foreground hover:text-primary transition-colors">전체 →</Link>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {activeProjects.length === 0 ? (
+              <p className="text-xs text-muted-foreground">없음</p>
+            ) : (
+              <ul className="space-y-3">
+                {activeProjects.map((p) => (
+                  <li key={p.path} className="group space-y-1 p-2 -mx-2 rounded-md transition-colors hover:bg-muted/50">
+                    <Link
+                      href={vaultPathToHref(p.path)}
+                      className="text-base font-semibold truncate block group-hover:text-primary transition-colors"
+                    >
+                      {p.title}
+                    </Link>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      {p.priority && <Badge variant="outline" className="font-mono text-[10px]">{p.priority}</Badge>}
+                      {p.status && <span className="capitalize">{p.status}</span>}
+                      {p.created && <span className="tabular-nums opacity-70">· {p.created}</span>}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </CardContent>
+        </Card>
 
-      {/* Recommended */}
-      <Card className="col-span-12 lg:col-span-6">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm">읽을 콘텐츠 (growing)</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {recommended.length === 0 ? (
-            <p className="text-xs text-muted-foreground">growing 노트 없음</p>
-          ) : (
-            <ul className="space-y-2">
-              {recommended.map((n) => (
-                <li key={n.path} className="space-y-0.5">
+        {/* Recommended — compact sidebar style */}
+        <Card className="col-span-12 lg:col-span-5 hover-lift">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm flex items-center gap-2">
+              <span className="inline-block size-1.5 rounded-full bg-state-growing animate-pulse" />
+              읽을 콘텐츠
+            </CardTitle>
+            <CardDescription className="text-xs">growing 상태</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {recommended.length === 0 ? (
+              <p className="text-xs text-muted-foreground">growing 노트 없음</p>
+            ) : (
+              <ul className="space-y-2.5">
+                {recommended.map((n) => (
+                  <li key={n.path} className="space-y-0.5">
+                    <Link
+                      href={vaultPathToHref(n.path)}
+                      className="text-sm font-medium hover:text-primary truncate block transition-colors"
+                    >
+                      {n.title}
+                    </Link>
+                    <p className="text-[10px] text-muted-foreground/70 truncate font-mono">{n.path}</p>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Bento row 2 — asymmetric flipped: recent notes (5/12) + links timeline (7/12) */}
+      <div className="grid grid-cols-12 gap-4">
+        {/* Recent notes — compact dense list */}
+        <Card className="col-span-12 lg:col-span-5 hover-lift">
+          <CardHeader className="pb-2">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-sm">최근 노트</CardTitle>
+              <Link href="/notes" className="text-xs text-muted-foreground hover:text-primary transition-colors">전체 →</Link>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <ul className="space-y-1.5 text-sm">
+              {recentNotes.map((n) => (
+                <li key={n.path} className="flex items-center justify-between gap-2 py-1 px-2 -mx-2 rounded transition-colors hover:bg-muted/50">
                   <Link
                     href={vaultPathToHref(n.path)}
-                    className="text-sm font-medium hover:text-primary truncate block transition-colors"
-                  >
-                    {n.title}
-                  </Link>
-                  <p className="text-xs text-muted-foreground truncate">{n.path}</p>
-                </li>
-              ))}
-            </ul>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Recent notes */}
-      <Card className="col-span-12 lg:col-span-6">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm">최근 노트</CardTitle>
-          <CardDescription className="text-xs">
-            <Link href="/notes" className="underline">
-              전체 보기 →
-            </Link>
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ul className="space-y-1.5 text-sm">
-            {recentNotes.map((n) => (
-              <li key={n.path} className="flex items-center justify-between gap-2">
-                <Link
-                  href={vaultPathToHref(n.path)}
-                  className="truncate hover:text-primary transition-colors"
-                >
-                  {n.title}
-                </Link>
-                <span className="text-xs text-muted-foreground tabular-nums shrink-0">
-                  {n.created || ""}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </CardContent>
-      </Card>
-
-      {/* Recent links */}
-      <Card className="col-span-12 lg:col-span-6">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm">최근 링크</CardTitle>
-          <CardDescription className="text-xs">
-            <Link href="/links" className="underline">
-              전체 보기 →
-            </Link>
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {recentLinks.length === 0 ? (
-            <p className="text-xs text-muted-foreground">source_url 노트 없음</p>
-          ) : (
-            <ul className="space-y-1.5 text-sm">
-              {recentLinks.map((n) => (
-                <li key={n.path} className="flex items-center justify-between gap-2">
-                  <a
-                    href={typeof n.source_url === "string" ? n.source_url : "#"}
-                    target="_blank"
-                    rel="noreferrer"
                     className="truncate hover:text-primary transition-colors"
                   >
                     {n.title}
-                  </a>
+                  </Link>
+                  <span className="text-xs text-muted-foreground tabular-nums shrink-0">
+                    {n.created || ""}
+                  </span>
                 </li>
               ))}
             </ul>
-          )}
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
 
-      <p className="col-span-12 text-xs text-muted-foreground text-right">
+        {/* Recent links — wider timeline with external arrow */}
+        <Card className="col-span-12 lg:col-span-7 hover-lift">
+          <CardHeader className="pb-2">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-sm">최근 링크</CardTitle>
+              <Link href="/links" className="text-xs text-muted-foreground hover:text-primary transition-colors">전체 →</Link>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {recentLinks.length === 0 ? (
+              <p className="text-xs text-muted-foreground">source_url 노트 없음</p>
+            ) : (
+              <ul className="space-y-1.5 text-sm">
+                {recentLinks.map((n) => (
+                  <li key={n.path} className="flex items-center justify-between gap-2 py-1 px-2 -mx-2 rounded transition-colors hover:bg-muted/50">
+                    <a
+                      href={typeof n.source_url === "string" ? n.source_url : "#"}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="truncate hover:text-primary transition-colors inline-flex items-center gap-1.5"
+                    >
+                      <span className="truncate">{n.title}</span>
+                      <span aria-hidden className="text-muted-foreground/50 shrink-0">↗</span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      <p className="text-xs text-muted-foreground text-right font-mono">
         Index: {agg.last_commit_hash} ·{" "}
         {agg.last_full_scan ? new Date(agg.last_full_scan).toLocaleString() : ""}
       </p>
-      </div>
     </div>
   );
 }
