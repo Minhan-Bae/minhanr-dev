@@ -98,15 +98,25 @@ export function RainEffect() {
         textureFg.width = TEXTURE_FG_W;
         textureFg.height = TEXTURE_FG_H;
         const fgCtx = textureFg.getContext("2d")!;
+        // Drops show a slightly-darker version of the scene. Matches
+        // real rain-on-glass where a drop acts as both lens AND tint.
+        fgCtx.filter = "brightness(0.6) saturate(1.1)";
         fgCtx.drawImage(bgImage, 0, 0, TEXTURE_FG_W, TEXTURE_FG_H);
+        fgCtx.filter = "none";
 
         const textureBg = document.createElement("canvas");
         textureBg.width = TEXTURE_BG_W;
         textureBg.height = TEXTURE_BG_H;
         const bgCtx = textureBg.getContext("2d")!;
-        bgCtx.filter = "blur(3px)";
+        // Aggressive darken on the background so white body text stays
+        // AAA readable on top. Blur matches codrops' foggy-window look.
+        bgCtx.filter = "blur(3px) brightness(0.4) saturate(0.95)";
         bgCtx.drawImage(bgImage, 0, 0, TEXTURE_BG_W, TEXTURE_BG_H);
         bgCtx.filter = "none";
+        // A subtle Prussian-night wash — ties the rain scene into the
+        // brand palette regardless of the source image's colour cast.
+        bgCtx.fillStyle = "rgba(14, 26, 46, 0.35)";
+        bgCtx.fillRect(0, 0, TEXTURE_BG_W, TEXTURE_BG_H);
 
         renderer = new RainRenderer(
           canvas,

@@ -6,11 +6,14 @@ import { ThemeSwitcher } from "@/components/theme-switcher";
 
 type NavLink = { href: string; label: string };
 
-// URLs stay stable, labels are Korean-first.
+// Short English labels — editorial, matches the uppercase tracking of
+// the rest of the header. The previous Korean labels (작업 / 글 / 소개)
+// read as dated translation-style UI next to the rest of the site
+// which has moved to English-first copy.
 const STATIC_NAV: NavLink[] = [
-  { href: "/work", label: "작업" },
-  { href: "/blog", label: "글" },
-  { href: "/about", label: "소개" },
+  { href: "/work", label: "Work" },
+  { href: "/blog", label: "Writing" },
+  { href: "/about", label: "About" },
 ];
 
 interface PublicHeaderProps {
@@ -26,7 +29,7 @@ export function PublicHeader(_props: PublicHeaderProps) {
   // Single, consistent endpoint. Auth is enforced downstream by
   // supabase-middleware, which bounces to /login when needed and
   // carries the user back to /dashboard on success.
-  const studio: NavLink = { href: "/dashboard", label: "스튜디오" };
+  const studio: NavLink = { href: "/dashboard", label: "Studio" };
   const navLinks: NavLink[] = [...STATIC_NAV, studio];
 
   return (
