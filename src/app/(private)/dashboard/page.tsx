@@ -358,7 +358,7 @@ export default function DashboardPage() {
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 space-y-6">
       <div className="space-y-1">
         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
-          {getGreeting()} <span className="text-gradient">Minhan</span>
+          {getGreeting()} <span className="font-display italic text-primary">Minhan</span>
         </h1>
         <p className="text-sm text-muted-foreground">
           {dateStr} — 종합 대시보드
