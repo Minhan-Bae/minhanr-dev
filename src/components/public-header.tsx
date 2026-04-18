@@ -14,28 +14,19 @@ const STATIC_NAV: NavLink[] = [
 ];
 
 interface PublicHeaderProps {
-  /**
-   * Server-resolved auth state. Drives how the "스튜디오" link is wired:
-   *   - authenticated     → /dashboard directly
-   *   - not authenticated → /login?next=/dashboard (middleware redirects
-   *     on the way back, so the label stays constant and the path is
-   *     always reachable).
-   */
+  /** Reserved — `/dashboard` is always the visible target; the supabase
+   *  middleware redirects to `/login` when a session is missing, so we
+   *  don't need to branch on auth state in the UI. */
   isAuthenticated: boolean;
 }
 
-export function PublicHeader({ isAuthenticated }: PublicHeaderProps) {
+export function PublicHeader(_props: PublicHeaderProps) {
   const pathname = usePathname() ?? "/";
 
-  // The label never changes — "스튜디오" — so the owner always sees a
-  // single door. What changes is only the target URL.
-  const studio: NavLink = {
-    href: isAuthenticated
-      ? "/dashboard"
-      : "/login?next=%2Fdashboard",
-    label: "스튜디오",
-  };
-
+  // Single, consistent endpoint. Auth is enforced downstream by
+  // supabase-middleware, which bounces to /login when needed and
+  // carries the user back to /dashboard on success.
+  const studio: NavLink = { href: "/dashboard", label: "스튜디오" };
   const navLinks: NavLink[] = [...STATIC_NAV, studio];
 
   return (

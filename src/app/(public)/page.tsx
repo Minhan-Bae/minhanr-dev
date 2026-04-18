@@ -4,7 +4,7 @@ import { getAllPosts } from "@/lib/blog";
 import { getSelectedWork } from "@/lib/work";
 import { BRAND_IDENTITY } from "@/lib/brand/tokens";
 import { WorkCover } from "@/components/work-cover";
-import { NetworkGraph } from "@/components/network-graph";
+import { NotesGraph } from "@/components/notes-graph";
 
 /**
  * Home — editorial portfolio index, per brand-tenets v2.
@@ -18,7 +18,8 @@ import { NetworkGraph } from "@/components/network-graph";
  */
 export default function Home() {
   const selected = getSelectedWork();
-  const recentPosts = getAllPosts().slice(0, 3);
+  const allPosts = getAllPosts();
+  const recentPosts = allPosts.slice(0, 3);
 
   return (
     <>
@@ -47,24 +48,25 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ─── 2. System — interactive 7-node network ─────────────────── */}
+      {/* ─── 2. Notes constellation — interactive vault map ─────────── */}
       <section className="hairline-t mx-auto w-full max-w-[1440px] px-6 py-12 sm:px-10 sm:py-16">
-        <header className="mb-8 flex items-baseline justify-between sm:mb-10">
+        <header className="mb-6 flex flex-col gap-3 sm:mb-10 sm:flex-row sm:items-baseline sm:justify-between">
           <div>
-            <p className="kicker mb-3">시스템 · System</p>
+            <p className="kicker mb-3">노트 지도 · Notes</p>
             <h2
               className="font-display tracking-[-0.02em]"
               style={{ fontSize: "var(--font-size-h2)" }}
             >
-              일곱 개의 에이전트, 세 개의 축.
+              스튜디오의 노트들.
             </h2>
           </div>
-          <p className="font-technical hidden max-w-xs text-right text-[12px] leading-relaxed text-muted-foreground sm:block">
-            매일 이 네트워크가 작업과 글을 수집하고,<br />
-            수렴하고, 선별해 바깥에 둡니다.
+          <p className="font-technical max-w-md text-[12px] leading-relaxed text-muted-foreground sm:text-right">
+            색은 카테고리, 거리는 시간입니다. 점 위에 커서를 올리면
+            같은 태그끼리 연결되고, 클릭하면 그 글이 열립니다.
+            중앙의 다섯 점은 공개되지 않은 카테고리입니다.
           </p>
         </header>
-        <NetworkGraph />
+        <NotesGraph posts={allPosts} />
       </section>
 
       {/* ─── 3. Selected Work ────────────────────────────────────────── */}
@@ -217,30 +219,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ─── 4. Contact ─────────────────────────────────────────────── */}
-      <section className="hairline-t mx-auto w-full max-w-[1440px] px-6 py-20 sm:px-10 sm:py-28">
-        <div className="flex flex-col gap-8 sm:flex-row sm:items-end sm:justify-between">
-          <div className="max-w-xl">
-            <p className="kicker mb-3">연락 · Contact</p>
-            <p
-              className="font-display leading-[1.2] tracking-[-0.02em]"
-              style={{ fontSize: "var(--font-size-h2)" }}
-            >
-              흥미로운 작업을 만들고 계신가요?{" "}
-              <Link
-                href="/about"
-                className="text-primary underline decoration-primary/40 underline-offset-[6px] transition hover:decoration-primary"
-              >
-                대화해요.
-              </Link>
-            </p>
-          </div>
-          <div className="font-technical text-sm leading-relaxed text-muted-foreground">
-            <p>서울에서 작업합니다.</p>
-            <p>선별된 협업을 환영합니다.</p>
-          </div>
-        </div>
-      </section>
     </>
   );
 }
