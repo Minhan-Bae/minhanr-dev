@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { BlogCard, isPublicCategory } from "@/components/blog-card";
+import { BlogCard, isPublicCategory, pickVariant } from "@/components/blog-card";
 import type { BlogPostMeta } from "@/lib/blog";
 
 type Group = { key: string; label: string; posts: BlogPostMeta[] };
@@ -188,7 +188,7 @@ export function BlogList({ posts }: { posts: BlogPostMeta[] }) {
       {hasFilters ? (
         <div className="space-y-3">
           {filtered.map((post) => (
-            <BlogCard key={post.slug} post={post} variant="default" />
+            <BlogCard key={post.slug} post={post} variant={pickVariant(post)} />
           ))}
           {filtered.length === 0 && (
             <Card className="border-border">
@@ -212,7 +212,7 @@ export function BlogList({ posts }: { posts: BlogPostMeta[] }) {
               </h2>
               <div className="grid gap-3 sm:grid-cols-2">
                 {group.posts.map((post) => (
-                  <BlogCard key={post.slug} post={post} variant="default" />
+                  <BlogCard key={post.slug} post={post} variant={pickVariant(post)} />
                 ))}
               </div>
             </section>

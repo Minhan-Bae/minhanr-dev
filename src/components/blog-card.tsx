@@ -45,7 +45,7 @@ export function getCategoryColors(categories: string[]): { border: string; bg: s
   return FALLBACK_COLORS;
 }
 
-type Variant = "featured" | "default";
+type Variant = "featured" | "default" | "cover-hero" | "quote";
 
 interface BlogCardProps {
   post: BlogPostMeta;
@@ -53,10 +53,22 @@ interface BlogCardProps {
   className?: string;
 }
 
+/**
+ * variant 자동 선택:
+ *   - cover 이미지 있으면 cover-hero
+ *   - summary가 길고 의미 있으면 (≥120자) quote
+ *   - 그 외 default
+ */
+export function pickVariant(post: BlogPostMeta): Exclude<Variant, "featured"> {
+  if (post.cover?.image) return "cover-hero";
+  if (post.summary && post.summary.length >= 120) return "quote";
+  return "default";
+}
+
 export function BlogCard({ post, variant = "default", className = "" }: BlogCardProps) {
-  if (variant === "featured") {
-    return <FeaturedCard post={post} className={className} />;
-  }
+  if (variant === "featured") return <FeaturedCard post={post} className={className} />;
+  if (variant === "cover-hero") return <CoverHeroCard post={post} className={className} />;
+  if (variant === "quote") return <QuoteCard post={post} className={className} />;
   return <DefaultCard post={post} className={className} />;
 }
 
@@ -134,6 +146,91 @@ function FeaturedCard({ post, className }: { post: BlogPostMeta; className: stri
             )}
           </div>
         </div>
+        <HoverGauge color={colors.bg} align="edge" />
+      </Card>
+    </Link>
+  );
+}
+
+function CoverHeroCard({ post, className }: { post: BlogPostMeta; className: string }) {
+  const colors = getCategoryColors(post.categories);
+  return (
+    <Link href={`/blog/${post.slug}`} className={`block group ${className}`}>
+      <Card
+        className={`relative overflow-hidden hover-lift border-border hover:border-primary/30 transition-[border-color] duration-[var(--duration-quick)] border-l-4 ${colors.border}`}
+      >
+        {/* Cover dominant — 16:9 상단 */}
+        <div className="relative aspect-[16/9] bg-[var(--surface-1)] overflow-hidden">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={post.cover!.image}
+            alt={post.cover?.alt || post.title}
+            loading="lazy"
+            className="absolute inset-0 w-full h-full object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-[1.04]"
+          />
+          {/* Gradient scrim for legibility */}
+          <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-transparent" />
+          {/* Date/category chip overlayed */}
+          <div className="absolute bottom-3 left-3 flex items-center gap-1.5">
+            {post.categories.slice(0, 1).map((cat) => (
+              <Badge key={cat} variant="secondary" className="text-[10px] px-1.5 py-0 bg-background/80 backdrop-blur-sm">
+                {cat}
+              </Badge>
+            ))}
+            <span className="text-[10px] text-white/80 tabular-nums bg-black/30 backdrop-blur-sm rounded px-1.5 py-0.5">
+              {post.date}
+            </span>
+          </div>
+        </div>
+        <CardContent className="p-4 space-y-2">
+          <CardTitle className="text-sm font-semibold leading-tight group-hover:text-primary transition-colors line-clamp-2">
+            {post.title}
+          </CardTitle>
+          {post.summary && (
+            <p className="text-xs text-muted-foreground line-clamp-2">{post.summary}</p>
+          )}
+        </CardContent>
+        <HoverGauge color={colors.bg} align="edge" />
+      </Card>
+    </Link>
+  );
+}
+
+function QuoteCard({ post, className }: { post: BlogPostMeta; className: string }) {
+  const colors = getCategoryColors(post.categories);
+  return (
+    <Link href={`/blog/${post.slug}`} className={`block group ${className}`}>
+      <Card
+        className={`relative hover-lift border-border hover:border-primary/20 transition-[border-color] duration-[var(--duration-quick)] border-l-4 ${colors.border}`}
+      >
+        <CardContent className="p-5 space-y-3">
+          {/* Pull quote — summary를 시각 중심으로 */}
+          <div className="relative pl-6">
+            <span
+              aria-hidden
+              className="absolute left-0 top-0 text-3xl leading-none font-serif text-primary/30 select-none"
+            >
+              &ldquo;
+            </span>
+            <p className="text-sm font-medium text-foreground/90 leading-relaxed line-clamp-3 italic">
+              {post.summary}
+            </p>
+          </div>
+          {/* Footer: title as small caption + meta */}
+          <div className="pt-2 border-t border-hairline space-y-1">
+            <CardTitle className="text-xs font-medium text-muted-foreground group-hover:text-primary transition-colors line-clamp-1 not-italic">
+              — {post.title}
+            </CardTitle>
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-[10px] text-muted-foreground/70 tabular-nums">{post.date}</span>
+              {post.categories.slice(0, 1).map((cat) => (
+                <Badge key={cat} variant="secondary" className="text-[10px] px-1.5 py-0">
+                  {cat}
+                </Badge>
+              ))}
+            </div>
+          </div>
+        </CardContent>
         <HoverGauge color={colors.bg} align="edge" />
       </Card>
     </Link>
