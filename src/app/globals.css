@@ -86,173 +86,175 @@
 }
 
 /* ══════════════════════════════════════════════════════════════════
-   2026 Palette anchors (reference only — resolved values live in the
-   :root / .dark / .gray blocks below).
+   Rain-glass palette (v2 — all three themes swing into cool blues).
 
-     Cloud Dancer      #F0EFEB   Pantone 11-4201  — soft off-white ground
-     Phthalo Green     #123524                    — deep botanic dark
-     Transformative Teal #2F6364 WGSN/Coloro 2026 — primary accent
-     Divine Damson     #4A2D3C   Graham & Brown   — secondary warm accent
+     Overcast Mist     #E8EEF7   — cool cloud off-white ground
+     Prussian Night    #0E1A2E   — deep stormy dark
+     Signal Cobalt     #3D7AB3   — primary accent, rain-lit blue
+     Amethyst Shadow   #5B5F99   — secondary accent, cooled violet
 
-   Intent: editorial, natural, grounded. No neon. No ocean blue. Accents
-   appear sparingly — keyline / active nav / single CTA. Body content is
-   carried by the near-neutral Cloud Dancer / Phthalo Green surfaces.
+   Intent: "raindrops on a dark window." Accents appear sparingly —
+   keyline / active nav / single CTA. The quartet is the anchor; the
+   OKLCH values in the theme blocks below tune each surface for AAA
+   body contrast and for the subtle specular highlights the rain
+   canvas paints on top.
    ────────────────────────────────────────────────────────────────── */
 
 /* ══════════════════════════════════════════════════════════════════
-   Light — Cloud Dancer (#F0EFEB ground)
-   Calibrated for AAA body contrast, subtle warm undertone.
+   Light — Overcast Mist
+   Cool off-white ground; deep signal blue ink for AAA contrast.
    ────────────────────────────────────────────────────────────────── */
 :root {
-  --background:          oklch(0.946 0.004 90);            /* #F0EFEB */
-  --foreground:          oklch(0.20 0.032 170);            /* phthalo ink */
-  --card:                oklch(0.985 0.003 90);
-  --card-foreground:     oklch(0.20 0.032 170);
-  --popover:             oklch(0.985 0.003 90);
-  --popover-foreground:  oklch(0.20 0.032 170);
+  --background:          oklch(0.958 0.008 235);           /* Overcast */
+  --foreground:          oklch(0.22 0.038 248);            /* Prussian ink */
+  --card:                oklch(0.985 0.006 235);
+  --card-foreground:     oklch(0.22 0.038 248);
+  --popover:             oklch(0.985 0.006 235);
+  --popover-foreground:  oklch(0.22 0.038 248);
 
-  --primary:             oklch(0.40 0.042 205);            /* #2F6364 Teal */
-  --primary-foreground:  oklch(0.946 0.004 90);
+  --primary:             oklch(0.44 0.112 240);            /* Signal, grounded */
+  --primary-foreground:  oklch(0.958 0.008 235);
 
-  --secondary:           oklch(0.905 0.007 95);
-  --secondary-foreground: oklch(0.26 0.030 170);
+  --secondary:           oklch(0.912 0.012 235);
+  --secondary-foreground: oklch(0.28 0.036 248);
 
-  --muted:               oklch(0.905 0.007 95);
-  --muted-foreground:    oklch(0.44 0.016 155);
+  --muted:               oklch(0.912 0.012 235);
+  --muted-foreground:    oklch(0.46 0.022 240);
 
-  --accent:              oklch(0.34 0.060 355);            /* Damson */
-  --accent-foreground:   oklch(0.946 0.004 90);
+  --accent:              oklch(0.40 0.075 275);            /* Amethyst */
+  --accent-foreground:   oklch(0.958 0.008 235);
 
   --destructive:         oklch(0.52 0.20 25);
 
-  --border:              oklch(0.20 0.032 170 / 12%);
-  --input:               oklch(0.20 0.032 170 / 12%);
-  --ring:                oklch(0.40 0.042 205 / 45%);
+  --border:              oklch(0.22 0.038 248 / 12%);
+  --input:               oklch(0.22 0.038 248 / 12%);
+  --ring:                oklch(0.44 0.112 240 / 45%);
 
-  --chart-1: oklch(0.40 0.042 205);   /* Teal */
-  --chart-2: oklch(0.34 0.060 355);   /* Damson */
-  --chart-3: oklch(0.28 0.048 170);   /* Phthalo deep */
-  --chart-4: oklch(0.60 0.035 90);    /* Warm stone */
-  --chart-5: oklch(0.50 0.050 230);   /* Overcast */
+  --chart-1: oklch(0.44 0.112 240);   /* Signal */
+  --chart-2: oklch(0.40 0.075 275);   /* Amethyst */
+  --chart-3: oklch(0.30 0.042 250);   /* Prussian mid */
+  --chart-4: oklch(0.60 0.035 230);   /* Steel */
+  --chart-5: oklch(0.52 0.090 215);   /* Cooled cobalt */
 
   --radius: 0.5rem;
 
-  --sidebar:                    oklch(0.925 0.006 95);
-  --sidebar-foreground:         oklch(0.20 0.032 170);
-  --sidebar-primary:            oklch(0.40 0.042 205);
-  --sidebar-primary-foreground: oklch(0.946 0.004 90);
-  --sidebar-accent:             oklch(0.905 0.007 95);
-  --sidebar-accent-foreground:  oklch(0.26 0.030 170);
-  --sidebar-border:             oklch(0.20 0.032 170 / 10%);
-  --sidebar-ring:               oklch(0.40 0.042 205 / 45%);
+  --sidebar:                    oklch(0.928 0.010 235);
+  --sidebar-foreground:         oklch(0.22 0.038 248);
+  --sidebar-primary:            oklch(0.44 0.112 240);
+  --sidebar-primary-foreground: oklch(0.958 0.008 235);
+  --sidebar-accent:             oklch(0.912 0.012 235);
+  --sidebar-accent-foreground:  oklch(0.28 0.036 248);
+  --sidebar-border:             oklch(0.22 0.038 248 / 10%);
+  --sidebar-ring:               oklch(0.44 0.112 240 / 45%);
 
-  --surface-1: oklch(0.925 0.006 95);
-  --surface-2: oklch(0.905 0.007 95);
-  --surface-3: oklch(0.875 0.009 100);
+  --surface-1: oklch(0.928 0.010 235);
+  --surface-2: oklch(0.912 0.012 235);
+  --surface-3: oklch(0.882 0.014 235);
 
-  --hairline:       oklch(0.20 0.032 170 / 10%);
-  --header-bg:      oklch(0.946 0.004 90 / 88%);
-  --header-border:  oklch(0.20 0.032 170 / 10%);
+  --hairline:       oklch(0.22 0.038 248 / 10%);
+  --header-bg:      oklch(0.958 0.008 235 / 88%);
+  --header-border:  oklch(0.22 0.038 248 / 10%);
 }
 
 /* ══════════════════════════════════════════════════════════════════
-   Dark — Phthalo Green ground (canonical brand face)
-   Deep botanic background, Cloud Dancer text, lifted teal, lifted damson.
+   Dark — Prussian Night (canonical brand face)
+   Deep stormy-sky background, Overcast Mist text, lifted Signal,
+   cooled Amethyst accent — matches the rain canvas on top.
    ────────────────────────────────────────────────────────────────── */
 .dark {
-  --background:          oklch(0.17 0.028 170);            /* deep Phthalo for UI depth */
-  --foreground:          oklch(0.955 0.004 90);            /* Cloud Dancer */
-  --card:                oklch(0.21 0.032 170);            /* Phthalo card layer */
-  --card-foreground:     oklch(0.955 0.004 90);
-  --popover:             oklch(0.19 0.030 170);
-  --popover-foreground:  oklch(0.955 0.004 90);
+  --background:          oklch(0.17 0.034 248);            /* Prussian Night */
+  --foreground:          oklch(0.955 0.010 235);           /* Overcast */
+  --card:                oklch(0.21 0.040 248);
+  --card-foreground:     oklch(0.955 0.010 235);
+  --popover:             oklch(0.19 0.037 248);
+  --popover-foreground:  oklch(0.955 0.010 235);
 
-  --primary:             oklch(0.62 0.055 205);            /* Teal, lifted */
-  --primary-foreground:  oklch(0.15 0.026 168);
+  --primary:             oklch(0.64 0.125 235);            /* Signal, lifted */
+  --primary-foreground:  oklch(0.14 0.030 248);
 
-  --secondary:           oklch(0.27 0.034 170);
-  --secondary-foreground: oklch(0.955 0.004 90);
+  --secondary:           oklch(0.27 0.040 248);
+  --secondary-foreground: oklch(0.955 0.010 235);
 
-  --muted:               oklch(0.24 0.032 170);
-  --muted-foreground:    oklch(0.74 0.012 95);
+  --muted:               oklch(0.24 0.038 248);
+  --muted-foreground:    oklch(0.74 0.018 235);
 
-  --accent:              oklch(0.52 0.075 355);            /* Damson, lifted */
-  --accent-foreground:   oklch(0.955 0.004 90);
+  --accent:              oklch(0.56 0.082 275);            /* Amethyst, lifted */
+  --accent-foreground:   oklch(0.955 0.010 235);
 
   --destructive:         oklch(0.62 0.20 25);
 
   --border:              oklch(1 0 0 / 10%);
   --input:               oklch(1 0 0 / 14%);
-  --ring:                oklch(0.62 0.055 205 / 55%);
+  --ring:                oklch(0.64 0.125 235 / 55%);
 
-  --chart-1: oklch(0.62 0.055 205);
-  --chart-2: oklch(0.52 0.075 355);
-  --chart-3: oklch(0.74 0.055 165);
-  --chart-4: oklch(0.80 0.032 95);
-  --chart-5: oklch(0.62 0.048 230);
+  --chart-1: oklch(0.64 0.125 235);
+  --chart-2: oklch(0.56 0.082 275);
+  --chart-3: oklch(0.74 0.060 225);
+  --chart-4: oklch(0.80 0.040 230);
+  --chart-5: oklch(0.66 0.095 215);
 
-  --sidebar:                    oklch(0.13 0.024 170);
-  --sidebar-foreground:         oklch(0.955 0.004 90);
-  --sidebar-primary:            oklch(0.62 0.055 205);
-  --sidebar-primary-foreground: oklch(0.15 0.026 168);
-  --sidebar-accent:             oklch(0.24 0.032 170);
-  --sidebar-accent-foreground:  oklch(0.955 0.004 90);
+  --sidebar:                    oklch(0.13 0.028 248);
+  --sidebar-foreground:         oklch(0.955 0.010 235);
+  --sidebar-primary:            oklch(0.64 0.125 235);
+  --sidebar-primary-foreground: oklch(0.14 0.030 248);
+  --sidebar-accent:             oklch(0.24 0.038 248);
+  --sidebar-accent-foreground:  oklch(0.955 0.010 235);
   --sidebar-border:             oklch(1 0 0 / 7%);
-  --sidebar-ring:               oklch(0.62 0.055 205 / 55%);
+  --sidebar-ring:               oklch(0.64 0.125 235 / 55%);
 
-  --surface-1: oklch(0.21 0.032 170);
-  --surface-2: oklch(0.27 0.034 170);
-  --surface-3: oklch(0.33 0.036 170);
+  --surface-1: oklch(0.21 0.040 248);
+  --surface-2: oklch(0.27 0.040 248);
+  --surface-3: oklch(0.33 0.044 248);
 
   --hairline:       oklch(1 0 0 / 8%);
-  --header-bg:      oklch(0.17 0.028 170 / 78%);
+  --header-bg:      oklch(0.17 0.034 248 / 78%);
   --header-border:  oklch(1 0 0 / 6%);
 }
 
 /* ══════════════════════════════════════════════════════════════════
-   Gray — Warm Stone
-   Mid-tone warm-neutral for bright rooms / anti-glare. 2026 leans
-   organic, so the gray here carries a faint earthy warmth rather than
-   a cold neutral.
+   Gray — Steel Fog
+   Mid-tone cool-neutral for bright rooms / anti-glare. Still firmly
+   on the blue axis so it reads as "overcast afternoon" rather than
+   a neutral gray.
    ────────────────────────────────────────────────────────────────── */
 .gray {
-  --background:          oklch(0.40 0.012 95);             /* warm stone */
-  --foreground:          oklch(0.955 0.004 90);
-  --card:                oklch(0.44 0.013 95);
-  --card-foreground:     oklch(0.955 0.004 90);
-  --popover:             oklch(0.42 0.012 95);
-  --popover-foreground:  oklch(0.955 0.004 90);
+  --background:          oklch(0.40 0.024 240);            /* steel fog */
+  --foreground:          oklch(0.955 0.010 235);
+  --card:                oklch(0.44 0.026 240);
+  --card-foreground:     oklch(0.955 0.010 235);
+  --popover:             oklch(0.42 0.024 240);
+  --popover-foreground:  oklch(0.955 0.010 235);
 
-  --primary:             oklch(0.64 0.055 205);
-  --primary-foreground:  oklch(0.22 0.014 95);
+  --primary:             oklch(0.66 0.120 235);
+  --primary-foreground:  oklch(0.22 0.026 240);
 
-  --secondary:           oklch(0.48 0.014 95);
-  --secondary-foreground: oklch(0.955 0.004 90);
+  --secondary:           oklch(0.48 0.027 240);
+  --secondary-foreground: oklch(0.955 0.010 235);
 
-  --muted:               oklch(0.46 0.013 95);
-  --muted-foreground:    oklch(0.80 0.010 90);
+  --muted:               oklch(0.46 0.026 240);
+  --muted-foreground:    oklch(0.80 0.014 235);
 
-  --accent:              oklch(0.56 0.075 355);
-  --accent-foreground:   oklch(0.955 0.004 90);
+  --accent:              oklch(0.58 0.080 275);
+  --accent-foreground:   oklch(0.955 0.010 235);
 
   --destructive:         oklch(0.62 0.20 25);
 
   --border:              oklch(1 0 0 / 13%);
   --input:               oklch(1 0 0 / 16%);
-  --ring:                oklch(0.64 0.055 205 / 55%);
+  --ring:                oklch(0.66 0.120 235 / 55%);
 
-  --chart-1: oklch(0.64 0.055 205);
-  --chart-2: oklch(0.56 0.075 355);
-  --chart-3: oklch(0.74 0.055 165);
-  --chart-4: oklch(0.80 0.032 95);
-  --chart-5: oklch(0.66 0.048 230);
+  --chart-1: oklch(0.66 0.120 235);
+  --chart-2: oklch(0.58 0.080 275);
+  --chart-3: oklch(0.74 0.060 225);
+  --chart-4: oklch(0.80 0.040 230);
+  --chart-5: oklch(0.68 0.095 215);
 
-  --surface-1: oklch(0.44 0.013 95);
-  --surface-2: oklch(0.48 0.014 95);
-  --surface-3: oklch(0.54 0.016 95);
+  --surface-1: oklch(0.44 0.026 240);
+  --surface-2: oklch(0.48 0.027 240);
+  --surface-3: oklch(0.54 0.030 240);
 
   --hairline:      oklch(1 0 0 / 10%);
-  --header-bg:     oklch(0.38 0.012 95 / 82%);
+  --header-bg:     oklch(0.38 0.024 240 / 82%);
   --header-border: oklch(1 0 0 / 10%);
 }
 

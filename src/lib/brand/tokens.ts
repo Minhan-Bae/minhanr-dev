@@ -4,32 +4,32 @@
  * evaluated. `globals.css` is the master for in-site styling; this file
  * mirrors the dark theme as approximate sRGB hex for off-site consumers.
  *
- * Palette: 2026 colour-of-the-year quartet.
- *   Cloud Dancer (Pantone 11-4201) #F0EFEB      — soft off-white
- *   Phthalo Green                  #123524      — deep botanic
- *   Transformative Teal (WGSN)     #2F6364      — primary accent
- *   Divine Damson (Graham & Brown) #4A2D3C      — secondary accent
+ * Palette: rain-glass quartet (v2).
+ *   Overcast Mist     #E8EEF7  — cool off-white ground
+ *   Prussian Night    #0E1A2E  — deep stormy dark
+ *   Signal Cobalt     #3D7AB3  — primary accent, rain-lit blue
+ *   Amethyst Shadow   #5B5F99  — secondary accent, cooled violet
  */
 
 export const BRAND_TOKENS = {
   // ── Surface (dark theme — the canonical brand face) ──
-  background: "#0f2619",
-  card:       "#123524",
-  popover:    "#102c1e",
+  background: "#0e1a2e",
+  card:       "#15243b",
+  popover:    "#112039",
 
   // ── Text ──
-  foreground:       "#f0efeb",
-  mutedForeground:  "#a8b0a5",
-  muted:            "#173a28",
+  foreground:       "#e8eef7",
+  mutedForeground:  "#a5b2c6",
+  muted:            "#1b2a43",
 
   // ── Brand accent ──
-  primary:            "#2f6364",
-  primaryForeground:  "#f0efeb",
-  accent:             "#4a2d3c",
-  accentForeground:   "#f0efeb",
+  primary:            "#3d7ab3",
+  primaryForeground:  "#0a1425",
+  accent:             "#5b5f99",
+  accentForeground:   "#e8eef7",
 
   // ── Hairline ──
-  hairline: "rgba(240, 239, 235, 0.10)",
+  hairline: "rgba(232, 238, 247, 0.10)",
 } as const;
 
 /**

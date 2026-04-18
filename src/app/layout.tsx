@@ -74,7 +74,7 @@ export default function RootLayout({
       <head>
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-        <meta name="theme-color" content="#0f2619" />
+        <meta name="theme-color" content="#0e1a2e" />
         {/* Pretendard Variable — Korean body + display face. Loaded via
             CDN because next/font/google does not carry Pretendard, and
             subsetting the full file on-device gives us a single variable

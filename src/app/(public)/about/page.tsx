@@ -121,11 +121,12 @@ export default function AboutPage() {
               timestamps.
             </p>
             <p>
-              The palette is the 2026 colour quartet — Cloud Dancer
-              as the ground, Phthalo Green for the dark face,
-              Transformative Teal on the keyline, Divine Damson as
-              the warm accent. Mapped in OKLCH so all three theme
-              surfaces keep their contrast promises.
+              The palette is a rain-glass quartet — Overcast Mist as
+              the ground, Prussian Night for the dark face, Signal
+              Cobalt on the keyline, Amethyst Shadow as the cooled
+              accent. Mapped in OKLCH so all three theme surfaces
+              keep their contrast promises. A Canvas-2D droplet
+              layer paints weather on top of the whole site.
             </p>
             <p>
               The content model is deliberately conservative. Every
