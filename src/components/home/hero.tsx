@@ -30,7 +30,10 @@ export function Hero({ workCount, writingCount }: HeroProps) {
   const cursorDelayMs = letters.length * LETTER_STAGGER_MS + POST_WORD_MS;
 
   return (
-    <section className="relative flex h-[100svh] min-h-[640px] w-full flex-col overflow-hidden snap-start">
+    <section
+      data-slide
+      className="slide relative flex w-full flex-col overflow-hidden"
+    >
       {/* ─── Top rail ───────────────────────────────────────────────── */}
       <div className="relative z-10 flex items-start justify-between px-6 pt-20 font-technical text-[10px] uppercase tracking-[0.22em] text-muted-foreground sm:px-10 sm:pt-24 sm:text-[11px]">
         <div>

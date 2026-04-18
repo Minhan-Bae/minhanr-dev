@@ -273,15 +273,26 @@
     text-rendering: optimizeLegibility;
     /* Contextual feature-set tweak for Pretendard. */
     font-feature-settings: "ss06", "cv11";
-    /* "슉-탁" — lerp-smoothed wheel (SmoothScroll component) handles the
-       슉 glide; proximity snap handles the 탁 rest. Only engages when
-       the user stops scrolling near a snap point, so free scrolling
-       mid-page is undisturbed. */
-    scroll-snap-type: y proximity;
+    /* Slide-deck navigation — any page with `.slide` children (e.g.
+       the home) acts as a PowerPoint-style deck. `mandatory` + `stop:
+       always` (set on `.slide`) ensures one gesture = one slide. On
+       pages without `.slide` the snap is a no-op because there are no
+       snap targets. Smooth programmatic scroll powers the transition
+       triggered by the SlideDeck client component. */
+    scroll-snap-type: y mandatory;
     scroll-behavior: smooth;
   }
+  /* The slide class — marks 100svh full-bleed acts. */
+  .slide {
+    min-height: 100svh;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+  }
+  /* Under reduce-motion we still navigate slides (one per gesture is
+     the mitigation), but we drop the smooth transition curve so it
+     feels instant — matches the rest of the reduce-motion policy. */
   @media (prefers-reduced-motion: reduce) {
-    html { scroll-snap-type: none; scroll-behavior: auto; }
+    html { scroll-behavior: auto; }
   }
   body {
     @apply bg-background text-foreground;
@@ -660,16 +671,16 @@
   .pin-media { position: relative; top: auto; height: auto; }
 }
 
-/* Reduced motion opts everything out. */
-@media (prefers-reduced-motion: reduce) {
-  .marquee-track { animation: none; transform: none; }
-  .tw-letter     { animation: none; opacity: 1; transform: none; }
-  .tw-cursor     { animation: none; opacity: 1; }
-  @supports (animation-timeline: view()) {
-    .reveal-up, .reveal-in {
-      animation: none;
-      opacity: 1;
-      transform: none;
-    }
-  }
-}
+/* Reduced motion — editorial site policy.
+   ─────────────────────────────────────────────────────────────────
+   Windows 11 ships with "Animation effects" off by default, which
+   Chrome reports as `prefers-reduced-motion: reduce`. A strict
+   opt-out would make the whole home read as a static poster on
+   half of our visitors' machines.
+   So we keep the SUBTLE animations running unconditionally —
+   horizontal text scroll (marquee), letter-level fade (typewriter),
+   opacity blink (cursor), opacity/22px lift (reveal-up). None of
+   these are vestibular triggers, and they ARE the design.
+   We still opt-out of the one genuinely large motion: the Ken-Burns
+   background drift, which zooms a full-viewport image 4–9%. That
+   stays disabled under reduce-motion (see earlier block). */

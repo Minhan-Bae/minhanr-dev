@@ -1,34 +1,39 @@
 import { getAllPosts } from "@/lib/blog";
 import { getSelectedWork } from "@/lib/work";
 import { Hero } from "@/components/home/hero";
-import { Marquee } from "@/components/home/marquee";
 import { WorkShowcase } from "@/components/home/work-showcase";
 import { WritingIndex } from "@/components/home/writing-index";
 import { Closer } from "@/components/home/closer";
+import { SectionKicker } from "@/components/home/section-kicker";
+import { SlideDeck } from "@/components/slide-deck";
 
 /**
- * Home — editorial cinematic (v3, aggressive).
+ * Home — slide deck (v4).
  *
- *   1. Hero         — 100svh cinematic masthead, giant italic wordmark
- *                     over the Ken-Burns background, corner metadata.
- *   2. Marquee      — two counter-scrolling ticker rails.
- *   3. Work         — sticky-pin case studies, one per viewport on
- *                     desktop, stacked on mobile.
- *   4. Writing      — numbered editorial list, reveal on scroll.
- *   5. Closer       — oversized italic manifesto, nav links.
+ * Seven 100svh slides, navigated one-per-gesture by the SlideDeck
+ * client component. Wheel, arrow keys, PageUp/Down, Space, Home/End.
+ * Touch devices use native CSS scroll-snap (mandatory + stop:always).
  *
- * The notes graph has moved to `/blog` (it's an index over the writing,
- * not a self-introduction). The home page now lives for the work.
+ *   0. Hero — giant typewriter wordmark + corner meta
+ *   1. Work chapter title ("Selected Work")
+ *   2. Work 01  ─ 3. Work 02  ─ 4. Work 03
+ *   5. Writing — compact numbered list, top 5 posts
+ *   6. Closer — manifesto quote + nav rail
  */
 export default function Home() {
   const selected = getSelectedWork();
   const allPosts = getAllPosts();
-  const recentPosts = allPosts.slice(0, 6);
+  const recentPosts = allPosts.slice(0, 5);
 
   return (
     <>
+      <SlideDeck />
       <Hero workCount={selected.length} writingCount={allPosts.length} />
-      <Marquee />
+      <SectionKicker
+        kicker="Selected Work · 01"
+        headline="Made, shipped, running."
+        note="Hand-picked case studies — one slide per project. Wheel, swipe, or press space to advance."
+      />
       <WorkShowcase items={selected} />
       <WritingIndex posts={recentPosts} total={allPosts.length} />
       <Closer />

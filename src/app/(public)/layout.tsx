@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { PublicHeader } from "@/components/public-header";
 import { SiteBackground } from "@/components/site-background";
-import { SmoothScroll } from "@/components/smooth-scroll";
 import { createSupabaseServer } from "@/lib/supabase-server";
 import { BRAND_IDENTITY } from "@/lib/brand/tokens";
 
@@ -20,7 +19,6 @@ export default async function PublicLayout({
 
   return (
     <div className="flex min-h-svh flex-col">
-      <SmoothScroll />
       <SiteBackground />
       <PublicHeader isAuthenticated={isAuthenticated} />
       <main className="flex-1">{children}</main>
