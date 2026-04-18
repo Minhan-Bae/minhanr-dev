@@ -16,7 +16,6 @@ import { FileText, Send, Inbox, Layers } from "lucide-react";
 import { aggregate, getCachedVaultIndex, KB_HUB_HIDDEN_STATUSES, listNotes } from "@/lib/vault-index";
 import { vaultPathToHref } from "@/lib/vault-note";
 import { isoWeek, isoWeekMonday } from "@/lib/time";
-import { SlideDeck } from "@/components/slide-deck";
 
 export const metadata = {
   title: "Dashboard | minhanr.dev",
@@ -358,61 +357,32 @@ export default function DashboardPage() {
     weekday: "short",
   });
 
+  // Intentionally NOT a SlideDeck. The dashboard is a workspace with
+  // live forms (QuickCapture), an interactive calendar, and a long
+  // scrolling list of projects / notes / links — wheel-locked slide
+  // navigation would fight every one of those primary actions.
+  // Instead we keep a natural vertical flow with entry motion (fade-up
+  // stagger on the greeting + KPI row, reveal-up on the bento rows).
   return (
-    // Outer container gives the inline SlideDeck a height — 100svh minus
-    // the private layout's sticky header (h-12 / 3rem) so the deck fits
-    // exactly between the top nav and the bottom edge. The layout's
-    // footer gets pushed below the fold; since the deck owns the scroll,
-    // the visitor never needs to see it.
-    <div className="relative h-[calc(100svh-3rem)]">
-      <SlideDeck mode="inline">
-        <GreetingSlide dateStr={dateStr} />
-        <ContentSlide />
-      </SlideDeck>
-    </div>
-  );
-}
-
-function GreetingSlide({ dateStr }: { dateStr: string }) {
-  return (
-    <section
-      data-slide
-      className="slide relative mx-auto flex w-full max-w-6xl flex-col justify-center px-4 sm:px-6"
-    >
-      <div className="space-y-2">
-        <p className="kicker">Dashboard</p>
-        <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
+    <div className="mx-auto max-w-6xl space-y-6 px-4 py-6 sm:px-6">
+      <div className="space-y-1">
+        <h1
+          className="text-2xl sm:text-3xl font-bold tracking-tight animate-fade-up"
+          style={{ animationDelay: "0ms" }}
+        >
           {getGreeting()}{" "}
           <span className="font-display italic text-primary">Minhan</span>
         </h1>
-        <p className="text-sm text-muted-foreground">
+        <p
+          className="text-sm text-muted-foreground animate-fade-up"
+          style={{ animationDelay: "120ms" }}
+        >
           {dateStr} — 종합 대시보드
         </p>
-        <p className="font-technical pt-6 text-[11px] uppercase tracking-[0.2em] text-muted-foreground/70">
-          Wheel · Space · Arrow — advance
-        </p>
       </div>
-    </section>
-  );
-}
-
-function ContentSlide() {
-  return (
-    <section
-      data-slide
-      className="slide relative flex h-full w-full flex-col"
-    >
-      {/* Internal scroll — SlideDeck's wheel handler defers to this
-          overflow-y-auto child so scrolling the dashboard content
-          doesn't advance the deck. Right-side indicator dots or
-          keyboard return to the greeting. */}
-      <div className="h-full overflow-y-auto">
-        <div className="mx-auto max-w-6xl space-y-6 px-4 py-6 sm:px-6">
-          <Suspense fallback={<DashboardSkeleton />}>
-            <DashboardContent />
-          </Suspense>
-        </div>
-      </div>
-    </section>
+      <Suspense fallback={<DashboardSkeleton />}>
+        <DashboardContent />
+      </Suspense>
+    </div>
   );
 }
