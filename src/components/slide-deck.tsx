@@ -1,138 +1,96 @@
 "use client";
 
-import { useEffect } from "react";
+import {
+  Children,
+  type ReactNode,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 
 /**
- * SlideDeck — PowerPoint-style navigation for any page whose top-level
- * sections are marked with `data-slide`.
+ * SlideDeck — transform-driven PowerPoint-style deck.
+ *
+ * Architecture: the deck is a fixed-position viewport covering the
+ * full window. Inside it, a single `.slide-track` div stacks every
+ * child at 100svh each and is moved by `transform: translate3d(0,
+ * -idx * 100svh, 0)`. A CSS transition on the transform does the
+ * animation — the browser composites it on the GPU as a single
+ * layer, so the motion is silky regardless of how heavy the slide
+ * contents are. rAF-scrolled `window.scrollTo` cannot match this
+ * because the browser re-paints scroll-dependent layers each frame.
+ *
+ * Because the deck is fixed, the document itself doesn't scroll,
+ * which also eliminates any fight with CSS scroll-snap, sticky
+ * positioning in child slides, or the browser's own smooth-scroll
+ * degradation under reduce-motion.
  *
  * Input:
- *   • Wheel        — one tick = one slide (cooldown prevents multi-advance
- *                    from a single trackpad flick firing 30+ wheel events)
+ *   • Wheel        — one tick = one slide (cooldown stops a trackpad
+ *                    flick from burning through multiple slides)
  *   • Keyboard     — ↑↓, PgUp/PgDn, Space / Shift+Space, Home, End
- *   • Touch        — swipe ±10% of viewport height advances ±1 slide;
- *                    anything smaller snaps back to the current slide
- *   • Nested scroll — any child with its own overflow auto/scroll
+ *   • Touch        — swipe ±10% of viewport height advances ±1 slide
+ *   • Nested scroll — any descendant with its own overflow auto/scroll
  *                    passes through untouched (modals, code blocks)
- *
- * Transitions run on an own rAF loop with `easeOutExpo` (fast start,
- * long graceful deceleration — reads as physical momentum). We drive
- * the scroll position ourselves via `scrollTo({ behavior: "instant" })`
- * each frame, bypassing the browser's CSS scroll-behavior cascade
- * entirely. That matters because Chrome degrades the CSS smooth
- * curve to `auto` (instant) when the OS reports reduce-motion —
- * Windows 11's default — which would make our slides pop instead of
- * slide. Our rAF loop is unaffected.
- *
- * No CSS `scroll-snap-type` is set on html. We tried `y mandatory`
- * but it fought the rAF by snapping every intermediate frame to the
- * nearest snap point, which read as "딱딱" stuttering.
  */
 
-const TRANSITION_MS = 950;
-/** Cooldown > transition duration so a new gesture can't start mid-glide. */
-const COOLDOWN_MS = TRANSITION_MS + 120;
-/** Wheel deltas below this are treated as trackpad noise and ignored. */
+const DURATION_MS = 900;
+/** Mirrors CSS ease-out-expo (fast start → long graceful deceleration). */
+const CURVE = "cubic-bezier(0.16, 1, 0.3, 1)";
+const COOLDOWN_MS = DURATION_MS + 80;
 const WHEEL_DEADBAND = 8;
+const SWIPE_THRESHOLD_RATIO = 0.1;
 
-/** Ease-out expo — fast start, long graceful deceleration. Reads as
- *  physical momentum rather than the symmetric "hesitate-rush-hesitate"
- *  of a cubic in-out curve. */
-function easeOutExpo(t: number): number {
-  return t >= 1 ? 1 : 1 - Math.pow(2, -10 * t);
-}
+export function SlideDeck({ children }: { children: ReactNode }) {
+  const kids = Children.toArray(children);
+  const count = kids.length;
 
-export function SlideDeck() {
+  const [idx, setIdx] = useState(0);
+  // Mirror of `idx` for event handlers registered once on mount —
+  // using state directly would mean re-registering every change.
+  const idxRef = useRef(0);
+  const animating = useRef(false);
+  const rootRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    const slidesOf = () =>
-      Array.from(document.querySelectorAll<HTMLElement>("[data-slide]"));
-
-    let transitioning = false;
-    let lastFire = 0;
-    let animRaf: number | null = null;
-    let touchStartY: number | null = null;
-    let touchStartIdx = 0;
-
-    const currentIdx = () => {
-      const ss = slidesOf();
-      if (ss.length === 0) return 0;
-      const centre = window.scrollY + window.innerHeight / 2;
-      for (let i = 0; i < ss.length; i++) {
-        const top = ss[i].offsetTop;
-        const bot = top + ss[i].offsetHeight;
-        if (centre >= top && centre < bot) return i;
-      }
-      // Past the last slide → treat as last.
-      return ss.length - 1;
-    };
-
-    /** Own-rAF smooth scroll — does not depend on CSS scroll-behavior. */
-    const animateTo = (targetY: number, duration = TRANSITION_MS) => {
-      if (animRaf !== null) cancelAnimationFrame(animRaf);
-      const startY = window.scrollY;
-      const diff = targetY - startY;
-      if (Math.abs(diff) < 1) return;
-      const startT = performance.now();
-
-      const step = (now: number) => {
-        const t = Math.min((now - startT) / duration, 1);
-        const y = startY + diff * easeOutExpo(t);
-        window.scrollTo({ top: y, behavior: "instant" });
-        if (t < 1) {
-          animRaf = requestAnimationFrame(step);
-        } else {
-          animRaf = null;
-        }
-      };
-      animRaf = requestAnimationFrame(step);
-    };
-
-    const goto = (idx: number) => {
-      const ss = slidesOf();
-      if (idx < 0 || idx >= ss.length) return;
-      transitioning = true;
-      lastFire = performance.now();
-      animateTo(ss[idx].offsetTop);
+    const goto = (next: number) => {
+      if (animating.current) return;
+      if (next < 0 || next >= count) return;
+      animating.current = true;
+      idxRef.current = next;
+      setIdx(next);
       window.setTimeout(() => {
-        transitioning = false;
+        animating.current = false;
       }, COOLDOWN_MS);
     };
 
     const isInsideNestedScroller = (e: Event): boolean => {
       const path = e.composedPath();
-      for (const node of path) {
-        if (!(node instanceof HTMLElement)) continue;
-        if (node === document.body || node === document.documentElement) break;
-        const s = getComputedStyle(node);
-        const scrollsY =
+      for (const n of path) {
+        if (!(n instanceof HTMLElement)) continue;
+        if (n === rootRef.current) break;
+        const s = getComputedStyle(n);
+        if (
           (s.overflowY === "auto" || s.overflowY === "scroll") &&
-          node.scrollHeight > node.clientHeight;
-        if (scrollsY) return true;
+          n.scrollHeight > n.clientHeight
+        ) {
+          return true;
+        }
       }
       return false;
     };
 
     const onWheel = (e: WheelEvent) => {
-      if (slidesOf().length === 0) return;
       if (isInsideNestedScroller(e)) return;
-
-      // A single two-finger "flick" on a trackpad can fire 30+ wheel
-      // events rapidly — we only react to the first one per cooldown.
       e.preventDefault();
-      if (transitioning) return;
-      if (performance.now() - lastFire < COOLDOWN_MS) return;
+      if (animating.current) return;
       if (Math.abs(e.deltaY) < WHEEL_DEADBAND) return;
-
-      const idx = currentIdx();
-      if (e.deltaY > 0) goto(idx + 1);
-      else goto(idx - 1);
+      goto(idxRef.current + (e.deltaY > 0 ? 1 : -1));
     };
 
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (slidesOf().length === 0) return;
-      // Ignore keypresses inside form fields so ⌘+arrow etc. still work.
+    const onKey = (e: KeyboardEvent) => {
       const t = e.target as HTMLElement | null;
       if (
         t &&
@@ -142,75 +100,122 @@ export function SlideDeck() {
       ) {
         return;
       }
-
-      const idx = currentIdx();
-      const ss = slidesOf();
-      let next = idx;
+      let next = idxRef.current;
       switch (e.key) {
         case "ArrowDown":
         case "PageDown":
-          next = idx + 1;
-          break;
-        case " ":
-          next = e.shiftKey ? idx - 1 : idx + 1;
+          next = idxRef.current + 1;
           break;
         case "ArrowUp":
         case "PageUp":
-          next = idx - 1;
+          next = idxRef.current - 1;
+          break;
+        case " ":
+          next = e.shiftKey ? idxRef.current - 1 : idxRef.current + 1;
           break;
         case "Home":
           next = 0;
           break;
         case "End":
-          next = ss.length - 1;
+          next = count - 1;
           break;
         default:
           return;
       }
       e.preventDefault();
-      goto(Math.max(0, Math.min(ss.length - 1, next)));
+      goto(Math.max(0, Math.min(count - 1, next)));
     };
 
-    // ── Touch (mobile swipe) ──────────────────────────────────────
-    // We don't preventDefault during touchmove — natural scroll
-    // provides tactile feedback as the finger drags. On touchend we
-    // read the total gesture delta and navigate ±1 slide if it crossed
-    // the threshold; otherwise we snap back to the starting slide.
-    const SWIPE_THRESHOLD_RATIO = 0.1;
-
+    let touchStartY: number | null = null;
+    let touchStartIdx = 0;
     const onTouchStart = (e: TouchEvent) => {
-      if (transitioning) return;
-      if (e.touches.length !== 1) return;
+      if (animating.current || e.touches.length !== 1) return;
       touchStartY = e.touches[0].clientY;
-      touchStartIdx = currentIdx();
+      touchStartIdx = idxRef.current;
     };
-
+    const onTouchMove = (e: TouchEvent) => {
+      if (isInsideNestedScroller(e)) return;
+      // Block body bounce and natural scroll — the deck is the scroller.
+      e.preventDefault();
+    };
     const onTouchEnd = (e: TouchEvent) => {
-      if (touchStartY === null || transitioning) return;
-      const endY = e.changedTouches[0].clientY;
-      const delta = touchStartY - endY;
+      if (touchStartY === null || animating.current) return;
+      const delta = touchStartY - e.changedTouches[0].clientY;
       const threshold = window.innerHeight * SWIPE_THRESHOLD_RATIO;
-
       let next = touchStartIdx;
       if (delta > threshold) next = touchStartIdx + 1;
       else if (delta < -threshold) next = touchStartIdx - 1;
-
-      goto(Math.max(0, Math.min(slidesOf().length - 1, next)));
+      goto(Math.max(0, Math.min(count - 1, next)));
       touchStartY = null;
     };
 
     window.addEventListener("wheel", onWheel, { passive: false });
-    window.addEventListener("keydown", onKeyDown);
+    window.addEventListener("keydown", onKey);
     window.addEventListener("touchstart", onTouchStart, { passive: true });
+    window.addEventListener("touchmove", onTouchMove, { passive: false });
     window.addEventListener("touchend", onTouchEnd, { passive: true });
     return () => {
       window.removeEventListener("wheel", onWheel);
-      window.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener("keydown", onKey);
       window.removeEventListener("touchstart", onTouchStart);
+      window.removeEventListener("touchmove", onTouchMove);
       window.removeEventListener("touchend", onTouchEnd);
-      if (animRaf !== null) cancelAnimationFrame(animRaf);
     };
-  }, []);
+  }, [count]);
 
-  return null;
+  return (
+    <div
+      ref={rootRef}
+      data-slide-deck="root"
+      className="fixed inset-0 z-0 overflow-hidden"
+    >
+      <div
+        className="will-change-transform"
+        style={{
+          transform: `translate3d(0, calc(${-idx} * 100svh), 0)`,
+          transition: `transform ${DURATION_MS}ms ${CURVE}`,
+        }}
+      >
+        {kids.map((child, i) => (
+          <div
+            key={i}
+            className="relative h-[100svh] w-full overflow-hidden"
+          >
+            {child}
+          </div>
+        ))}
+      </div>
+
+      {/* Position indicator — small dots on the right, current slide
+          highlighted in primary. Lets the visitor see where they are
+          in the deck. */}
+      <nav
+        aria-label="Slide position"
+        className="pointer-events-auto fixed right-4 top-1/2 z-40 flex -translate-y-1/2 flex-col gap-3 sm:right-6"
+      >
+        {kids.map((_, i) => (
+          <button
+            key={i}
+            type="button"
+            aria-label={`Slide ${i + 1}`}
+            aria-current={i === idx}
+            onClick={() => {
+              if (animating.current || i === idx) return;
+              animating.current = true;
+              idxRef.current = i;
+              setIdx(i);
+              window.setTimeout(() => {
+                animating.current = false;
+              }, COOLDOWN_MS);
+            }}
+            className={`block h-2 w-2 rounded-full transition-all ${
+              i === idx
+                ? "scale-125 bg-primary"
+                : "bg-foreground/30 hover:bg-foreground/60"
+            }`}
+          />
+        ))}
+      </nav>
+    </div>
+  );
 }

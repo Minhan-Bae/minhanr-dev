@@ -34,7 +34,7 @@ export function WorkShowcase({ items }: WorkShowcaseProps) {
   );
 }
 
-function WorkSlide({
+export function WorkSlide({
   item,
   index,
   total,
