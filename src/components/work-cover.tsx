@@ -74,14 +74,14 @@ function Placeholder({
           "linear-gradient(135deg, color-mix(in oklch, var(--primary) 18%, var(--surface-2)) 0%, var(--surface-1) 55%, var(--background) 100%)",
       }}
     >
-      {/* Vermilion accent bar — brand signature */}
+      {/* Teal keyline — brand signature */}
       <div
         aria-hidden
         className="absolute left-6 top-0 h-16 w-[3px] bg-primary"
       />
 
       <div className="font-technical text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-        Minhan Bae
+        minhanr.dev
       </div>
 
       <div className="font-display leading-[0.95] tracking-tight text-foreground">

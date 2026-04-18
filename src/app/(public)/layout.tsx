@@ -24,11 +24,9 @@ export default async function PublicLayout({
       <footer className="hairline-t mt-24 font-technical">
         <div className="mx-auto grid max-w-[1440px] gap-10 px-6 py-16 sm:grid-cols-[1fr_auto] sm:items-end sm:px-10">
           <div className="space-y-4">
-            <div className="font-display text-3xl leading-[1.15] tracking-tight">
-              {BRAND_IDENTITY.person}
-              <span className="ml-2 text-base text-muted-foreground">
-                {BRAND_IDENTITY.personLatin}
-              </span>
+            <div className="font-display text-3xl leading-[1.15] tracking-[-0.02em]">
+              {BRAND_IDENTITY.studio}
+              <span className="ml-1 text-muted-foreground">.dev</span>
             </div>
             <p className="max-w-sm text-sm leading-relaxed text-muted-foreground">
               {BRAND_IDENTITY.manifesto}
@@ -75,7 +73,7 @@ export default async function PublicLayout({
 
         <div className="hairline-t">
           <div className="mx-auto flex max-w-[1440px] items-center justify-between px-6 py-5 text-[11px] uppercase tracking-[0.2em] text-muted-foreground sm:px-10">
-            <span>© {year} {BRAND_IDENTITY.personLatin}</span>
+            <span>© {year} {BRAND_IDENTITY.domain}</span>
             <span>{BRAND_IDENTITY.domain}</span>
           </div>
         </div>

@@ -5,11 +5,11 @@ import { BlogList } from "@/components/blog-list";
 export const metadata: Metadata = {
   title: "글",
   description:
-    "스튜디오의 메모 — 배민한이 쓰는 AI · VFX · 크리에이티브 테크놀로지 에세이.",
+    "스튜디오의 메모 — AI · VFX · 크리에이티브 테크놀로지 에세이.",
   openGraph: {
     title: "Writing — minhanr.dev",
     description:
-      "Notes from the studio — AI, VFX, and creative-technology essays by Minhan Bae.",
+      "Notes from the studio — AI, VFX, and creative-technology essays.",
     type: "website",
     images: [{ url: "/api/og", width: 1200, height: 630 }],
   },
@@ -17,7 +17,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Writing — minhanr.dev",
     description:
-      "Notes from the studio — AI, VFX, and creative-technology essays by Minhan Bae.",
+      "Notes from the studio — AI, VFX, and creative-technology essays.",
     images: ["/api/og"],
   },
 };

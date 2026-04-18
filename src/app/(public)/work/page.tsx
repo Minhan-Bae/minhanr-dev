@@ -6,7 +6,7 @@ import { WorkCover } from "@/components/work-cover";
 
 export const metadata: Metadata = {
   title: "작업",
-  description: "배민한의 선별 작업 — AI 시스템, VFX R&D, 에디토리얼 엔지니어링.",
+  description: "스튜디오의 선별 작업 — AI 시스템, VFX R&D, 에디토리얼 엔지니어링.",
   openGraph: {
     title: "Work — minhanr.dev",
     description: "Selected case studies — AI systems, VFX R&D, editorial engineering.",

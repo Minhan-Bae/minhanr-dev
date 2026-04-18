@@ -4,9 +4,9 @@ import { BRAND_IDENTITY } from "@/lib/brand/tokens";
 
 export const metadata: Metadata = {
   title: "소개",
-  description: `${BRAND_IDENTITY.person} — ${BRAND_IDENTITY.roleKo}.`,
+  description: `${BRAND_IDENTITY.domain} — ${BRAND_IDENTITY.roleKo}.`,
   openGraph: {
-    title: `About — ${BRAND_IDENTITY.personLatin}`,
+    title: `About — ${BRAND_IDENTITY.studio}`,
     description: BRAND_IDENTITY.manifestoEn,
     images: [{ url: "/api/og", width: 1200, height: 630 }],
   },
@@ -24,13 +24,11 @@ export default function AboutPage() {
         <div className="ml-8 sm:ml-12">
           <p className="kicker mb-5">소개 · About</p>
           <h1
-            className="font-display leading-[1.1] tracking-[-0.02em]"
+            className="font-display leading-[1.05] tracking-[-0.03em]"
             style={{ fontSize: "var(--font-size-display)" }}
           >
-            {BRAND_IDENTITY.person}
-            <span className="ml-3 align-baseline font-technical text-base font-normal text-muted-foreground sm:ml-4 sm:text-lg">
-              {BRAND_IDENTITY.personLatin}
-            </span>
+            {BRAND_IDENTITY.studio}
+            <span className="text-muted-foreground">.dev</span>
           </h1>
           <p className="mt-6 font-technical text-[15px] text-muted-foreground sm:text-base">
             {BRAND_IDENTITY.roleKo}
@@ -42,21 +40,22 @@ export default function AboutPage() {
       <section className="mx-auto w-full max-w-[900px] px-6 py-16 sm:px-10 sm:py-20">
         <div className="space-y-8 text-[16px] leading-[1.85] text-foreground/90 sm:text-[17px]">
           <p className="drop-cap">
-            AI와 기계 사이에 앉는 도구를 설계하고 만듭니다.
-            인공지능 연구 시스템, VFX 파이프라인, 그리고 지금 읽고 계신
-            이것과 같은 작은 에디토리얼 서페이스 — 역할 목록이 아니라
-            한 명이 운영하는 단일 스튜디오입니다.
+            {BRAND_IDENTITY.studio}.dev는 AI와 기계 사이에 앉는 도구를
+            설계하고 만드는 작은 스튜디오입니다. 인공지능 연구 시스템,
+            VFX 파이프라인, 그리고 지금 읽고 계신 이것과 같은 에디토리얼
+            서페이스 — 역할 목록이 아니라 한 사람이 운영하는 단일 스튜디오로
+            묶여 있습니다.
           </p>
           <p>
-            제 작업은 보통 두 개의 문제를 하나로 접어 놓습니다.
-            좋은 연구 도구는 동시에 프로덕션 도구이고, 좋은 프로덕션 도구는
-            취향을 만들고, 좋은 취향은 출시까지 갑니다. 그 세 가지가
-            서로 싸우지 않는 지점에서 일합니다.
+            작업은 보통 두 개의 문제를 하나로 접어 놓습니다. 좋은 연구 도구는
+            동시에 프로덕션 도구이고, 좋은 프로덕션 도구는 취향을 만들고,
+            좋은 취향은 결국 출시까지 갑니다. 그 세 가지가 서로 싸우지 않는
+            지점에서 일합니다.
           </p>
           <p>
             글은 다른 누군가에게 구체적으로 쓸 만한 발견이 생겼을 때에만
-            올립니다. 익명으로는 쓰지 않습니다 — 이 업계에서 익명은
-            되돌려주는 것이 없더군요.
+            올립니다. 과정의 잡음보다 완성된 관점을 고르는 편이
+            서로의 시간을 절약한다고 믿습니다.
           </p>
         </div>
       </section>

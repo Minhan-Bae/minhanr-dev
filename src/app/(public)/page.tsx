@@ -30,20 +30,18 @@ export default function Home() {
         />
 
         <div className="ml-8 sm:ml-12">
-          <p className="kicker mb-6">{BRAND_IDENTITY.domain}</p>
+          <p className="kicker mb-6">2026 · {BRAND_IDENTITY.role}</p>
           <h1
-            className="font-display leading-[1.1] tracking-[-0.02em]"
+            className="font-display leading-[1.05] tracking-[-0.03em]"
             style={{ fontSize: "var(--font-size-display)" }}
           >
-            {BRAND_IDENTITY.person}
-            <span className="ml-3 align-baseline font-technical text-base font-normal text-muted-foreground sm:ml-4 sm:text-lg">
-              {BRAND_IDENTITY.personLatin}
-            </span>
+            {BRAND_IDENTITY.studio}
+            <span className="text-muted-foreground">.dev</span>
           </h1>
           <p className="mt-6 max-w-xl font-technical text-[15px] leading-[1.7] text-muted-foreground sm:mt-8 sm:text-base">
-            <span className="text-foreground">{BRAND_IDENTITY.role}.</span>{" "}
-            인공지능과 시각 시스템 사이에서 일합니다. 장인이 쓰는 연장처럼
-            읽히는 도구, 완성된 상태로 공개할 수 있는 작업만 여기에 둡니다.
+            인공지능과 시각 시스템 사이에서 일하는 작은 스튜디오입니다.
+            장인이 쓰는 연장처럼 읽히는 도구를 만들고, 완성된 상태로
+            공개할 수 있는 작업만 이곳에 둡니다.
           </p>
         </div>
       </section>

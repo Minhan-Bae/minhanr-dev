@@ -1,12 +1,6 @@
 import type { Metadata } from "next";
 import { ViewTransition } from "react";
-import {
-  Geist,
-  Geist_Mono,
-  Instrument_Serif,
-  Noto_Serif_KR,
-  Noto_Sans_KR,
-} from "next/font/google";
+import { Geist, Geist_Mono, Instrument_Serif } from "next/font/google";
 import "./globals.css";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -26,7 +20,11 @@ const geistMono = Geist_Mono({
   display: "swap",
 });
 
-// English editorial display face. Paired with Noto Serif KR for Korean.
+// English editorial display face. Korean display is handled by Pretendard
+// Variable (heavy weights) — see the <link> tag in <head>. Using the KR
+// serif (Noto Serif KR) turned out to read as dated in the Korean market,
+// so the site now leans sans-forward for Hangul while keeping Instrument
+// Serif as the Latin accent voice.
 const instrumentSerif = Instrument_Serif({
   variable: "--font-instrument-serif",
   subsets: ["latin"],
@@ -35,44 +33,18 @@ const instrumentSerif = Instrument_Serif({
   display: "swap",
 });
 
-// Korean display serif. Matches Instrument Serif's weight and feeling; the
-// browser picks it automatically for Hangul glyphs when both families are
-// listed on the same `font-family` declaration (glyph-level fallback).
-const notoSerifKr = Noto_Serif_KR({
-  variable: "--font-noto-serif-kr",
-  subsets: ["latin"],           // Hangul glyphs come from the CJK subset
-                                // auto-included by next/font for this face
-  weight: ["400", "500"],
-  display: "swap",
-  preload: false,                // don't block on the KR face; Instrument
-                                 // Serif already preloads for Latin
-});
-
-// Korean body sans. Sits in front of Geist in `--font-sans` so Hangul
-// renders in Noto Sans KR and Latin falls through to Geist via the glyph
-// fallback chain.
-const notoSansKr = Noto_Sans_KR({
-  variable: "--font-noto-sans-kr",
-  subsets: ["latin"],
-  weight: ["400", "500", "700"],
-  display: "swap",
-  preload: false,
-});
-
 export const metadata: Metadata = {
   title: {
-    // Korean primary in browser tabs/search cards for the domestic audience.
     template: `%s — ${BRAND_IDENTITY.domain}`,
-    default: `${BRAND_IDENTITY.person} · ${BRAND_IDENTITY.personLatin} — ${BRAND_IDENTITY.domain}`,
+    default: `${BRAND_IDENTITY.domain} — ${BRAND_IDENTITY.role}`,
   },
   description: BRAND_IDENTITY.manifesto,
   metadataBase: new URL("https://minhanr.dev"),
-  authors: [{ name: BRAND_IDENTITY.personLatin }],
+  authors: [{ name: BRAND_IDENTITY.studio }],
   openGraph: {
-    // OG card text is rendered by @vercel/og with Latin-only fonts — we
-    // keep the English form here so Twitter/Slack/etc. previews read
-    // cleanly alongside the image (which is also Latin).
-    title: `${BRAND_IDENTITY.personLatin} — ${BRAND_IDENTITY.domain}`,
+    // OG card text renders through @vercel/og with Latin-only fonts, so
+    // we keep English copy here. The image itself is also Latin.
+    title: `${BRAND_IDENTITY.studio} — ${BRAND_IDENTITY.domain}`,
     description: BRAND_IDENTITY.manifestoEn,
     url: "https://minhanr.dev",
     siteName: BRAND_IDENTITY.domain,
@@ -81,7 +53,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: `${BRAND_IDENTITY.personLatin} — ${BRAND_IDENTITY.domain}`,
+    title: `${BRAND_IDENTITY.studio} — ${BRAND_IDENTITY.domain}`,
     description: BRAND_IDENTITY.manifestoEn,
   },
   icons: { icon: "/favicon.ico", apple: "/icon-192.png" },
@@ -97,12 +69,26 @@ export default function RootLayout({
     <html
       lang="ko"
       suppressHydrationWarning
-      className={`${geistSans.variable} ${geistMono.variable} ${instrumentSerif.variable} ${notoSerifKr.variable} ${notoSansKr.variable} dark h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${instrumentSerif.variable} dark h-full antialiased`}
     >
       <head>
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="theme-color" content="#0f2619" />
+        {/* Pretendard Variable — Korean body + display face. Loaded via
+            CDN because next/font/google does not carry Pretendard, and
+            subsetting the full file on-device gives us a single variable
+            weight axis that covers Regular through ExtraBold. */}
+        <link
+          rel="preconnect"
+          href="https://cdn.jsdelivr.net"
+          crossOrigin=""
+        />
+        <link
+          rel="stylesheet"
+          href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css"
+        />
+
         {/* Performance: pre-establish connections to external hosts */}
         <link rel="preconnect" href="https://images.unsplash.com" crossOrigin="" />
         <link rel="dns-prefetch" href="https://images.unsplash.com" />

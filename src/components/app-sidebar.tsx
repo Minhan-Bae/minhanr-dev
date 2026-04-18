@@ -110,9 +110,9 @@ export function AppSidebar() {
             M
           </div>
           <div className="flex flex-col group-data-[collapsible=icon]:hidden">
-            <span className="text-sm font-bold leading-tight">Minhan Bae</span>
+            <span className="text-sm font-bold leading-tight">minhanr.dev</span>
             <span className="text-xs text-sidebar-foreground/60 leading-tight">
-              Workspace
+              Studio
             </span>
           </div>
         </Link>

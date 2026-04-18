@@ -17,15 +17,19 @@
   --color-foreground: var(--foreground);
 
   /* ── Font families ─────────────────────────────────────────────── */
-  /* Hangul KR faces are stacked BEFORE the Latin faces on the same
-     font-family declaration. Browsers resolve glyphs left-to-right, so
-     Hangul code-points render in Noto Sans/Serif KR while Latin code-
-     points fall through to Geist / Instrument Serif. Result: proper
-     Korean typography without forcing lang-scoped CSS. */
-  --font-sans: var(--font-noto-sans-kr), var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-  --font-display: var(--font-instrument-serif), var(--font-noto-serif-kr);
-  --font-heading: var(--font-instrument-serif), var(--font-noto-serif-kr);
+  /* Pretendard Variable is loaded via <link> in app/layout.tsx and
+     listed here by CSS family name. It carries both Latin and Hangul
+     glyphs with a single variable weight axis, so the fallback chain
+     stays short: Pretendard → Geist → system sans.
+     For the display face we keep Instrument Serif for Latin and let
+     Pretendard (heavier weights) carry Hangul via glyph-level fallback. */
+  --font-sans:    "Pretendard Variable", Pretendard, var(--font-geist-sans),
+                  -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --font-mono:    var(--font-geist-mono);
+  --font-display: var(--font-instrument-serif), "Pretendard Variable",
+                  Pretendard, ui-serif, Georgia, serif;
+  --font-heading: var(--font-instrument-serif), "Pretendard Variable",
+                  Pretendard, ui-serif, Georgia, serif;
 
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
@@ -96,158 +100,159 @@
    ────────────────────────────────────────────────────────────────── */
 
 /* ══════════════════════════════════════════════════════════════════
-   Light — Cloud Dancer
-   Soft warm-white ground, deep phthalo ink, teal accent, damson warm.
+   Light — Cloud Dancer (#F0EFEB ground)
+   Calibrated for AAA body contrast, subtle warm undertone.
    ────────────────────────────────────────────────────────────────── */
 :root {
-  --background:          oklch(0.958 0.003 90);            /* #F0EFEB Cloud Dancer */
-  --foreground:          oklch(0.23 0.035 170);            /* #123524 Phthalo ink */
+  --background:          oklch(0.946 0.004 90);            /* #F0EFEB */
+  --foreground:          oklch(0.20 0.032 170);            /* phthalo ink */
   --card:                oklch(0.985 0.003 90);
-  --card-foreground:     oklch(0.23 0.035 170);
+  --card-foreground:     oklch(0.20 0.032 170);
   --popover:             oklch(0.985 0.003 90);
-  --popover-foreground:  oklch(0.23 0.035 170);
+  --popover-foreground:  oklch(0.20 0.032 170);
 
-  --primary:             oklch(0.41 0.040 205);            /* #2F6364 Transformative Teal */
-  --primary-foreground:  oklch(0.958 0.003 90);
+  --primary:             oklch(0.40 0.042 205);            /* #2F6364 Teal */
+  --primary-foreground:  oklch(0.946 0.004 90);
 
-  --secondary:           oklch(0.915 0.006 100);
-  --secondary-foreground: oklch(0.27 0.030 170);
+  --secondary:           oklch(0.905 0.007 95);
+  --secondary-foreground: oklch(0.26 0.030 170);
 
-  --muted:               oklch(0.915 0.006 100);
-  --muted-foreground:    oklch(0.48 0.015 150);
+  --muted:               oklch(0.905 0.007 95);
+  --muted-foreground:    oklch(0.44 0.016 155);
 
-  --accent:              oklch(0.35 0.055 355);            /* #4A2D3C Divine Damson */
-  --accent-foreground:   oklch(0.958 0.003 90);
+  --accent:              oklch(0.34 0.060 355);            /* Damson */
+  --accent-foreground:   oklch(0.946 0.004 90);
 
   --destructive:         oklch(0.52 0.20 25);
 
-  --border:              oklch(0.23 0.035 170 / 12%);
-  --input:               oklch(0.23 0.035 170 / 12%);
-  --ring:                oklch(0.41 0.040 205 / 45%);
+  --border:              oklch(0.20 0.032 170 / 12%);
+  --input:               oklch(0.20 0.032 170 / 12%);
+  --ring:                oklch(0.40 0.042 205 / 45%);
 
-  /* Chart palette keyed to the 2026 quartet */
-  --chart-1: oklch(0.41 0.040 205);   /* Teal */
-  --chart-2: oklch(0.35 0.055 355);   /* Damson */
-  --chart-3: oklch(0.30 0.050 170);   /* Phthalo deep */
-  --chart-4: oklch(0.65 0.030 100);   /* Warm stone */
-  --chart-5: oklch(0.55 0.045 230);   /* Overcast */
+  --chart-1: oklch(0.40 0.042 205);   /* Teal */
+  --chart-2: oklch(0.34 0.060 355);   /* Damson */
+  --chart-3: oklch(0.28 0.048 170);   /* Phthalo deep */
+  --chart-4: oklch(0.60 0.035 90);    /* Warm stone */
+  --chart-5: oklch(0.50 0.050 230);   /* Overcast */
 
   --radius: 0.5rem;
 
-  --sidebar:                    oklch(0.94 0.005 95);
-  --sidebar-foreground:         oklch(0.23 0.035 170);
-  --sidebar-primary:            oklch(0.41 0.040 205);
-  --sidebar-primary-foreground: oklch(0.958 0.003 90);
-  --sidebar-accent:             oklch(0.915 0.006 100);
-  --sidebar-accent-foreground:  oklch(0.27 0.030 170);
-  --sidebar-border:             oklch(0.23 0.035 170 / 10%);
-  --sidebar-ring:               oklch(0.41 0.040 205 / 45%);
+  --sidebar:                    oklch(0.925 0.006 95);
+  --sidebar-foreground:         oklch(0.20 0.032 170);
+  --sidebar-primary:            oklch(0.40 0.042 205);
+  --sidebar-primary-foreground: oklch(0.946 0.004 90);
+  --sidebar-accent:             oklch(0.905 0.007 95);
+  --sidebar-accent-foreground:  oklch(0.26 0.030 170);
+  --sidebar-border:             oklch(0.20 0.032 170 / 10%);
+  --sidebar-ring:               oklch(0.40 0.042 205 / 45%);
 
-  --surface-1: oklch(0.94 0.005 95);
-  --surface-2: oklch(0.915 0.006 100);
-  --surface-3: oklch(0.88 0.008 105);
+  --surface-1: oklch(0.925 0.006 95);
+  --surface-2: oklch(0.905 0.007 95);
+  --surface-3: oklch(0.875 0.009 100);
 
-  --hairline:       oklch(0.23 0.035 170 / 10%);
-  --header-bg:      oklch(0.958 0.003 90 / 85%);
-  --header-border:  oklch(0.23 0.035 170 / 10%);
+  --hairline:       oklch(0.20 0.032 170 / 10%);
+  --header-bg:      oklch(0.946 0.004 90 / 88%);
+  --header-border:  oklch(0.20 0.032 170 / 10%);
 }
 
 /* ══════════════════════════════════════════════════════════════════
-   Dark — Phthalo (default)
-   Deep botanic green ground, Cloud Dancer text, teal primary + damson.
+   Dark — Phthalo Green ground (canonical brand face)
+   Deep botanic background, Cloud Dancer text, lifted teal, lifted damson.
    ────────────────────────────────────────────────────────────────── */
 .dark {
-  --background:          oklch(0.19 0.030 168);            /* ~#0E2A1D, deeper than raw Phthalo for UI */
-  --foreground:          oklch(0.955 0.003 90);            /* Cloud Dancer */
-  --card:                oklch(0.23 0.035 170);            /* #123524 Phthalo */
-  --card-foreground:     oklch(0.955 0.003 90);
-  --popover:             oklch(0.21 0.032 169);
-  --popover-foreground:  oklch(0.955 0.003 90);
+  --background:          oklch(0.17 0.028 170);            /* deep Phthalo for UI depth */
+  --foreground:          oklch(0.955 0.004 90);            /* Cloud Dancer */
+  --card:                oklch(0.21 0.032 170);            /* Phthalo card layer */
+  --card-foreground:     oklch(0.955 0.004 90);
+  --popover:             oklch(0.19 0.030 170);
+  --popover-foreground:  oklch(0.955 0.004 90);
 
-  --primary:             oklch(0.58 0.055 205);            /* Teal, lifted for dark */
-  --primary-foreground:  oklch(0.17 0.028 168);
+  --primary:             oklch(0.62 0.055 205);            /* Teal, lifted */
+  --primary-foreground:  oklch(0.15 0.026 168);
 
-  --secondary:           oklch(0.28 0.035 171);
-  --secondary-foreground: oklch(0.955 0.003 90);
+  --secondary:           oklch(0.27 0.034 170);
+  --secondary-foreground: oklch(0.955 0.004 90);
 
-  --muted:               oklch(0.26 0.032 170);
-  --muted-foreground:    oklch(0.72 0.012 95);
+  --muted:               oklch(0.24 0.032 170);
+  --muted-foreground:    oklch(0.74 0.012 95);
 
-  --accent:              oklch(0.50 0.075 355);            /* Damson, lifted for dark */
-  --accent-foreground:   oklch(0.955 0.003 90);
+  --accent:              oklch(0.52 0.075 355);            /* Damson, lifted */
+  --accent-foreground:   oklch(0.955 0.004 90);
 
   --destructive:         oklch(0.62 0.20 25);
 
-  --border:              oklch(1 0 0 / 9%);
-  --input:               oklch(1 0 0 / 13%);
-  --ring:                oklch(0.58 0.055 205 / 50%);
+  --border:              oklch(1 0 0 / 10%);
+  --input:               oklch(1 0 0 / 14%);
+  --ring:                oklch(0.62 0.055 205 / 55%);
 
-  --chart-1: oklch(0.58 0.055 205);
-  --chart-2: oklch(0.50 0.075 355);
-  --chart-3: oklch(0.72 0.055 165);
-  --chart-4: oklch(0.78 0.030 100);
-  --chart-5: oklch(0.62 0.045 230);
+  --chart-1: oklch(0.62 0.055 205);
+  --chart-2: oklch(0.52 0.075 355);
+  --chart-3: oklch(0.74 0.055 165);
+  --chart-4: oklch(0.80 0.032 95);
+  --chart-5: oklch(0.62 0.048 230);
 
-  --sidebar:                    oklch(0.15 0.025 168);
-  --sidebar-foreground:         oklch(0.955 0.003 90);
-  --sidebar-primary:            oklch(0.58 0.055 205);
-  --sidebar-primary-foreground: oklch(0.17 0.028 168);
-  --sidebar-accent:             oklch(0.26 0.032 170);
-  --sidebar-accent-foreground:  oklch(0.955 0.003 90);
+  --sidebar:                    oklch(0.13 0.024 170);
+  --sidebar-foreground:         oklch(0.955 0.004 90);
+  --sidebar-primary:            oklch(0.62 0.055 205);
+  --sidebar-primary-foreground: oklch(0.15 0.026 168);
+  --sidebar-accent:             oklch(0.24 0.032 170);
+  --sidebar-accent-foreground:  oklch(0.955 0.004 90);
   --sidebar-border:             oklch(1 0 0 / 7%);
-  --sidebar-ring:               oklch(0.58 0.055 205 / 50%);
+  --sidebar-ring:               oklch(0.62 0.055 205 / 55%);
 
-  --surface-1: oklch(0.23 0.035 170);
-  --surface-2: oklch(0.28 0.035 171);
-  --surface-3: oklch(0.34 0.035 171);
+  --surface-1: oklch(0.21 0.032 170);
+  --surface-2: oklch(0.27 0.034 170);
+  --surface-3: oklch(0.33 0.036 170);
 
   --hairline:       oklch(1 0 0 / 8%);
-  --header-bg:      oklch(0.19 0.030 168 / 78%);
+  --header-bg:      oklch(0.17 0.028 170 / 78%);
   --header-border:  oklch(1 0 0 / 6%);
 }
 
 /* ══════════════════════════════════════════════════════════════════
-   Gray — Stone
-   Warm neutral for bright rooms / anti-glare. Same 2026 accents.
+   Gray — Warm Stone
+   Mid-tone warm-neutral for bright rooms / anti-glare. 2026 leans
+   organic, so the gray here carries a faint earthy warmth rather than
+   a cold neutral.
    ────────────────────────────────────────────────────────────────── */
 .gray {
-  --background:          oklch(0.36 0.012 150);
-  --foreground:          oklch(0.955 0.003 90);
-  --card:                oklch(0.40 0.014 155);
-  --card-foreground:     oklch(0.955 0.003 90);
-  --popover:             oklch(0.38 0.013 153);
-  --popover-foreground:  oklch(0.955 0.003 90);
+  --background:          oklch(0.40 0.012 95);             /* warm stone */
+  --foreground:          oklch(0.955 0.004 90);
+  --card:                oklch(0.44 0.013 95);
+  --card-foreground:     oklch(0.955 0.004 90);
+  --popover:             oklch(0.42 0.012 95);
+  --popover-foreground:  oklch(0.955 0.004 90);
 
-  --primary:             oklch(0.62 0.055 205);
-  --primary-foreground:  oklch(0.20 0.015 150);
+  --primary:             oklch(0.64 0.055 205);
+  --primary-foreground:  oklch(0.22 0.014 95);
 
-  --secondary:           oklch(0.44 0.015 155);
-  --secondary-foreground: oklch(0.955 0.003 90);
+  --secondary:           oklch(0.48 0.014 95);
+  --secondary-foreground: oklch(0.955 0.004 90);
 
-  --muted:               oklch(0.42 0.014 154);
-  --muted-foreground:    oklch(0.78 0.010 95);
+  --muted:               oklch(0.46 0.013 95);
+  --muted-foreground:    oklch(0.80 0.010 90);
 
-  --accent:              oklch(0.55 0.075 355);
-  --accent-foreground:   oklch(0.955 0.003 90);
+  --accent:              oklch(0.56 0.075 355);
+  --accent-foreground:   oklch(0.955 0.004 90);
 
   --destructive:         oklch(0.62 0.20 25);
 
-  --border:              oklch(1 0 0 / 12%);
-  --input:               oklch(1 0 0 / 15%);
-  --ring:                oklch(0.62 0.055 205 / 50%);
+  --border:              oklch(1 0 0 / 13%);
+  --input:               oklch(1 0 0 / 16%);
+  --ring:                oklch(0.64 0.055 205 / 55%);
 
-  --chart-1: oklch(0.62 0.055 205);
-  --chart-2: oklch(0.55 0.075 355);
+  --chart-1: oklch(0.64 0.055 205);
+  --chart-2: oklch(0.56 0.075 355);
   --chart-3: oklch(0.74 0.055 165);
-  --chart-4: oklch(0.80 0.030 100);
-  --chart-5: oklch(0.66 0.045 230);
+  --chart-4: oklch(0.80 0.032 95);
+  --chart-5: oklch(0.66 0.048 230);
 
-  --surface-1: oklch(0.40 0.014 155);
-  --surface-2: oklch(0.44 0.015 155);
-  --surface-3: oklch(0.50 0.016 155);
+  --surface-1: oklch(0.44 0.013 95);
+  --surface-2: oklch(0.48 0.014 95);
+  --surface-3: oklch(0.54 0.016 95);
 
-  --hairline:      oklch(1 0 0 / 9%);
-  --header-bg:     oklch(0.32 0.011 150 / 82%);
+  --hairline:      oklch(1 0 0 / 10%);
+  --header-bg:     oklch(0.38 0.012 95 / 82%);
   --header-border: oklch(1 0 0 / 10%);
 }
 
@@ -259,43 +264,45 @@
     @apply border-border outline-ring/50;
   }
   html {
-    /* Body default: Noto Sans KR for Hangul → Geist for Latin. */
-    font-family: var(--font-noto-sans-kr), var(--font-geist-sans),
-                 ui-sans-serif, system-ui, sans-serif;
+    /* Body default: Pretendard for both scripts, Geist as Latin backup. */
+    font-family: "Pretendard Variable", Pretendard,
+                 var(--font-geist-sans), -apple-system, BlinkMacSystemFont,
+                 system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
+    /* Contextual feature-set tweak for Pretendard. */
+    font-feature-settings: "ss06", "cv11";
   }
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "ss01", "cv02", "cv11";
   }
-  /* Headings default to the editorial serif. Latin renders in
-     Instrument Serif, Hangul in Noto Serif KR (glyph fallback). */
+  /* Headings: Latin in Instrument Serif (elegant, editorial), Hangul in
+     Pretendard ExtraBold (modern, trendy in Korean design in 2026).
+     Pretendard's heavier weights read as a display face at large sizes. */
   h1, h2, h3, h4 {
-    font-family: var(--font-instrument-serif), var(--font-noto-serif-kr),
-                 ui-serif, Georgia, serif;
-    font-weight: 400;
-    letter-spacing: -0.015em;
-    /* 1.05 is correct for Latin display type but too tight for Hangul
-       which has taller glyphs. 1.15 gives Korean headings breathing room
-       while still feeling editorial in English. */
-    line-height: 1.15;
-    /* Hangul has no native word-break opportunities at spaces the same
-       way Latin does; `keep-all` prevents awkward mid-word breaks. */
+    font-family: var(--font-instrument-serif), "Pretendard Variable",
+                 Pretendard, ui-serif, Georgia, serif;
+    font-weight: 700;              /* drives Pretendard display weight */
+    letter-spacing: -0.02em;
+    line-height: 1.2;
     word-break: keep-all;
     text-wrap: balance;
   }
+  /* Instrument Serif looks best at weight 400 for Latin; override when
+     the heading is purely Latin. */
+  h1:lang(en), h2:lang(en), h3:lang(en), h4:lang(en) {
+    font-weight: 400;
+  }
   p {
-    /* Same rationale for Korean body paragraphs. */
     word-break: keep-all;
     text-wrap: pretty;
   }
   /* Opt-out: any node inside `.font-technical` flips to the sans stack
-     so technical copy (metadata, code, CTAs) doesn't read as an essay.
-     Korean fallback kept in the chain. */
+     so technical copy (metadata, code, CTAs) doesn't read as an essay. */
   .font-technical, .font-technical * {
-    font-family: var(--font-noto-sans-kr), var(--font-geist-sans),
+    font-family: "Pretendard Variable", Pretendard, var(--font-geist-sans),
                  ui-sans-serif, system-ui, sans-serif;
     letter-spacing: normal;
     word-break: keep-all;
@@ -309,15 +316,19 @@
 /* ══════════════════════════════════════════════════════════════════
    Typographic utilities
    ────────────────────────────────────────────────────────────────── */
-.font-display { font-family: var(--font-instrument-serif), var(--font-noto-serif-kr), ui-serif, Georgia, serif; }
-.font-sans    { font-family: var(--font-noto-sans-kr), var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif; }
+.font-display { font-family: var(--font-instrument-serif), "Pretendard Variable", Pretendard, ui-serif, Georgia, serif; }
+.font-sans    { font-family: "Pretendard Variable", Pretendard, var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif; }
 .font-mono    { font-family: var(--font-geist-mono), ui-monospace, SFMono-Regular, monospace; }
 
-/* Small caps label — editorial section kicker */
+/* Small-caps label — editorial section kicker. Pretendard medium gives
+   us a confident horizontal rhythm for Hangul while uppercase + tracking
+   takes care of Latin. */
 .kicker {
-  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-family: "Pretendard Variable", Pretendard, var(--font-geist-mono),
+               ui-monospace, monospace;
   font-size: 0.75rem;
-  letter-spacing: 0.2em;
+  font-weight: 500;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--muted-foreground);
 }

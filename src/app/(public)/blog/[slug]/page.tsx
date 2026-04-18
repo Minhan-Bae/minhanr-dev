@@ -43,7 +43,7 @@ export async function generateMetadata({
       description,
       type: "article",
       publishedTime: post.date,
-      authors: [post.author || "Minhan Bae"],
+      authors: [post.author || "minhanr"],
       images: [{ url: `/api/og?${ogSearch}`, width: 1200, height: 630 }],
     },
     twitter: {
@@ -121,7 +121,7 @@ export default async function BlogPostPage({
             </p>
           )}
           <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2 font-technical text-[12px] uppercase tracking-[0.14em] text-muted-foreground">
-            <span>글 {post.author || "배민한"}</span>
+            <span>글 {post.author || "minhanr"}</span>
             {post.tags.length > 0 && (
               <span className="flex gap-x-3">
                 {post.tags.slice(0, 4).map((t) => (

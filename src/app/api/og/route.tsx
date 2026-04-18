@@ -95,7 +95,7 @@ function renderSiteOG() {
               color: BRAND_TOKENS.foreground,
             }}
           >
-            {BRAND_IDENTITY.personLatin}
+            {BRAND_IDENTITY.studio}
           </div>
           <div
             style={{
@@ -216,7 +216,7 @@ function renderNoteOG({
             color: BRAND_TOKENS.mutedForeground,
           }}
         >
-          <span>{BRAND_IDENTITY.personLatin}</span>
+          <span>{BRAND_IDENTITY.studio}</span>
           {date && (
             <span style={{ fontFamily: "monospace", letterSpacing: "0.04em" }}>
               {date}
