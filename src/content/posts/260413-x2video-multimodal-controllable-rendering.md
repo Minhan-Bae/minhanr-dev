@@ -21,8 +21,6 @@ cover:
   image: /api/og?title=260413-x2video-multimodal-controllable-rendering&category=AI_R%26D_Paper
   alt: X2Video Multimodal Controllable Video Rendering
 date: '2026-04-13'
-categories:
-  - VFX
 ---
 
 # X2Video: Adapting Diffusion Models for Multimodal Controllable Neural Video Rendering

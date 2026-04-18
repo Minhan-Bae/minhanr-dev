@@ -20,8 +20,6 @@ cover:
   image: /api/og?title=260413-frame-interpolation-survey-2026&category=AI_R%26D_Paper
   alt: Frame Interpolation Survey
 date: '2026-04-13'
-categories:
-  - Writing
 ---
 
 # AceVFI: A Comprehensive Survey of Advances in Video Frame Interpolation

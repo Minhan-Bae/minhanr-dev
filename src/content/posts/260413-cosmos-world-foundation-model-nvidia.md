@@ -21,8 +21,6 @@ cover:
   image: /api/og?title=260413-cosmos-world-foundation-model-nvidia&category=AI_R%26D_Paper
   alt: Cosmos World Foundation Model
 date: '2026-04-13'
-categories:
-  - Industry
 ---
 
 # Cosmos World Foundation Model Platform for Physical AI
