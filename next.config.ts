@@ -5,6 +5,9 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       { protocol: "https", hostname: "images.unsplash.com" },
     ],
+    localPatterns: [
+      { pathname: "/api/og/**" },
+    ],
   },
   // React Compiler: 자동 메모이제이션 + 불필요한 리렌더 제거 (Next.js 16에서 stable).
   reactCompiler: true,
