@@ -14,13 +14,15 @@ export const metadata: Metadata = {
 };
 
 /**
- * /about — four-slide PowerPoint deck.
+ * /about — five-slide PowerPoint deck.
  *
  *   1. Masthead   — wordmark + role (boomerang typewriter, same hero
  *                   vocabulary as the home)
  *   2. Bio        — three drop-cap paragraphs
- *   3. Practice   — three areas of work (kicker + dl grid)
- *   4. Closer     — one-line manifesto over colophon footnote; the
+ *   3. Now        — what the studio is working on in 2026 — the
+ *                   single-line-per-topic current-focus panel
+ *   4. Practice   — three areas of work (kicker + dl grid)
+ *   5. Closer     — one-line manifesto over colophon footnote; the
  *                   SiteDock + SiteColophon already cover nav+©, so
  *                   the old "Elsewhere" nav rail is gone.
  *
@@ -35,6 +37,7 @@ export default function AboutPage() {
     <SlideDeck>
       <MastheadSlide />
       <BioSlide />
+      <NowSlide />
       <PracticeSlide />
       <CloserSlide />
     </SlideDeck>
@@ -110,6 +113,51 @@ function BioSlide() {
   );
 }
 
+function NowSlide() {
+  return (
+    <section
+      data-slide
+      className={`slide hairline-t relative mx-auto flex w-full max-w-[1440px] flex-col justify-center px-6 sm:px-10 ${SLIDE_PB}`}
+    >
+      <div className="grid gap-10 sm:grid-cols-12 sm:gap-16">
+        <div className="sm:col-span-4">
+          <p className="kicker mb-3">Now</p>
+          <h2
+            className="font-display italic tracking-[-0.025em] text-foreground"
+            style={{ fontSize: "clamp(2rem, 5vw, 3.5rem)", lineHeight: "1.02" }}
+          >
+            What&apos;s running, spring 2026.
+          </h2>
+          <p className="mt-6 max-w-sm text-[13px] leading-[1.7] text-muted-foreground">
+            A live snapshot — not a press release. What&apos;s actually
+            consuming studio hours this season, in order of share.
+          </p>
+        </div>
+        <div className="sm:col-span-8">
+          <dl className="divide-y divide-[var(--hairline)] hairline-t hairline-b">
+            {NOW.map((item) => (
+              <div
+                key={item.label}
+                className="grid gap-3 py-5 sm:grid-cols-[200px_1fr] sm:gap-10 sm:py-6"
+              >
+                <dt className="flex items-baseline gap-3 font-technical text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+                  <span className="tabular-nums text-primary">
+                    {item.share}
+                  </span>
+                  <span>{item.label}</span>
+                </dt>
+                <dd className="text-[14px] leading-[1.7] text-foreground/90 sm:text-[15px]">
+                  {item.body}
+                </dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function PracticeSlide() {
   return (
     <section
@@ -178,6 +226,33 @@ function CloserSlide() {
     </section>
   );
 }
+
+const NOW = [
+  {
+    share: "40%",
+    label: "OIKBAS ecosystem",
+    body:
+      "Seven-agent knowledge automation stack — acquisition, convergence, amplification. Keeping the vault honest, current, and always publishable.",
+  },
+  {
+    share: "25%",
+    label: "Editorial tooling",
+    body:
+      "minhanr.dev and the publishing pipeline behind it. Rewriting Obsidian's role as an input/output surface straight into this site.",
+  },
+  {
+    share: "20%",
+    label: "AI research (reading)",
+    body:
+      "Papers, repos, weekly releases — read and annotated through the acquisition layer. What merits a finished writeup ships to /blog.",
+  },
+  {
+    share: "15%",
+    label: "Creative R&D",
+    body:
+      "Pipeline shaders and generative-model integration for studio-grade repeatability. Long runway; shorter cadence than the other three.",
+  },
+];
 
 const PRACTICE = [
   {

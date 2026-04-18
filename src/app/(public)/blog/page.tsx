@@ -7,6 +7,7 @@ import { getAllTags, getAllYears } from "@/lib/blog-taxonomy";
 import { NotesGraph } from "@/components/notes-graph";
 import { TypewriterLoop } from "@/components/typewriter-loop";
 import { SlideDeck } from "@/components/slide-deck";
+import { WritingFeatured } from "@/components/home/writing-featured";
 
 export const metadata: Metadata = {
   title: "Writing",
@@ -29,11 +30,13 @@ export const metadata: Metadata = {
 };
 
 /**
- * /blog — landing deck, three slides.
+ * /blog — landing deck, four slides.
  *
- *   1. Masthead    — boomerang typewriter hero + framing
- *   2. Notes map   — force-directed NotesGraph on a dark glass panel
- *   3. Explore     — tag cloud · year jumps · latest 3 · archive CTA
+ *   1. Masthead    — boomerang typewriter hero + stats row
+ *   2. Featured    — zigzag of the three most recent posts, linking
+ *                    into individual /blog/[slug] pages
+ *   3. Notes map   — force-directed NotesGraph on a dark glass panel
+ *   4. Explore     — tag cloud · year jumps · latest 3 · archive CTA
  *
  * Every slide reserves `pb-[clamp(140px,18vh,200px)]` so the four-
  * corner chrome (dock + colophon + theme toggle + wordmark) never
@@ -46,10 +49,19 @@ export default function WritingIndex() {
   const tags = getAllTags().slice(0, 18);
   const years = getAllYears();
   const latest = posts.slice(0, 3);
+  const lastUpdatedISO = posts[0]?.date ?? "";
+  const lastUpdated = lastUpdatedISO
+    ? `${lastUpdatedISO.slice(0, 4)}.${lastUpdatedISO.slice(5, 7)}`
+    : "";
 
   return (
     <SlideDeck>
-      <MastheadSlide postCount={posts.length} />
+      <MastheadSlide
+        postCount={posts.length}
+        tagCount={tags.length}
+        lastUpdated={lastUpdated}
+      />
+      <WritingFeatured posts={latest} />
       <NotesMapSlide posts={posts} />
       <ExploreSlide
         postCount={posts.length}
@@ -61,7 +73,13 @@ export default function WritingIndex() {
   );
 }
 
-function MastheadSlide({ postCount }: { postCount: number }) {
+interface MastheadSlideProps {
+  postCount: number;
+  tagCount: number;
+  lastUpdated: string;
+}
+
+function MastheadSlide({ postCount, tagCount, lastUpdated }: MastheadSlideProps) {
   return (
     <section
       data-slide
@@ -95,12 +113,42 @@ function MastheadSlide({ postCount }: { postCount: number }) {
           style={{ animationDelay: "240ms" }}
         >
           Essays on AI systems, production pipelines, and the tools
-          that sit between them —{" "}
-          <span className="font-technical tabular-nums text-foreground">
-            {postCount}
-          </span>{" "}
-          pieces.
+          that sit between them. Each piece is a finished perspective,
+          not a running commentary.
         </p>
+
+        {/* Stats rail — tabular-nums density row below the lede so
+            visitors scan scope in a glance. Mirrors the home's
+            `Selected (NN) · Writing (NN) · Updated YYYY.MM` strip. */}
+        <div
+          className="mt-8 flex flex-wrap items-baseline gap-x-5 gap-y-2 font-technical text-[10px] uppercase tracking-[0.22em] text-muted-foreground animate-fade-up sm:text-[11px]"
+          style={{ animationDelay: "360ms" }}
+        >
+          <span>
+            <span className="text-foreground">Pieces</span>
+            <span className="ml-1.5 tabular-nums text-foreground/80">
+              ({String(postCount).padStart(3, "0")})
+            </span>
+          </span>
+          <span className="opacity-40">·</span>
+          <span>
+            <span className="text-foreground">Tags</span>
+            <span className="ml-1.5 tabular-nums text-foreground/80">
+              ({String(tagCount).padStart(2, "0")})
+            </span>
+          </span>
+          {lastUpdated && (
+            <>
+              <span className="opacity-40">·</span>
+              <span>
+                <span>Updated</span>
+                <span className="ml-1.5 tabular-nums text-foreground/80">
+                  {lastUpdated}
+                </span>
+              </span>
+            </>
+          )}
+        </div>
       </div>
     </section>
   );
