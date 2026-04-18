@@ -164,7 +164,7 @@ function buildGraph(posts: BlogPostMeta[]): {
       tags: post.tags,
       category: cat,
       color: CATEGORY_STYLE[cat].color,
-      r: 3.5,
+      r: 6,
       x: CX + Math.cos(angle) * r0,
       y: CY + Math.sin(angle) * r0,
       vx: (seed - 0.5) * 2,
@@ -184,7 +184,7 @@ function buildGraph(posts: BlogPostMeta[]): {
       id: p.id,
       label: p.label,
       color: "var(--muted-foreground)",
-      r: 4.5,
+      r: 8,
       x: ax,
       y: ay,
       vx: 0,
@@ -240,6 +240,10 @@ export function NotesGraph({ posts }: NotesGraphProps) {
   const svgRef = useRef<SVGSVGElement | null>(null);
   const nodeRefs = useRef<Map<string, SVGGElement>>(new Map());
   const edgeRefs = useRef<Map<string, SVGLineElement>>(new Map());
+  // Cursor-following tooltip. We position it by directly setting
+  // left/top on the DOM element instead of state, so the mouse can
+  // drag it around without re-rendering the graph on every frame.
+  const tooltipRef = useRef<HTMLDivElement | null>(null);
 
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const draggingRef = useRef<string | null>(null);
@@ -457,13 +461,20 @@ export function NotesGraph({ posts }: NotesGraphProps) {
   }
 
   function onSvgPointerMove(ev: React.PointerEvent<SVGSVGElement>) {
+    // Tooltip tracks the cursor regardless of drag state. Writing
+    // directly to the DOM (not state) keeps re-render cost at zero.
+    const tt = tooltipRef.current;
+    if (tt) {
+      tt.style.left = `${ev.clientX + 14}px`;
+      tt.style.top = `${ev.clientY + 14}px`;
+    }
+
     const drag = draggingRef.current;
     if (!drag) return;
     const p = pointerToSvg(ev);
     if (!p) return;
     const node = nodeById.get(drag);
     if (!node) return;
-    // Mark that we actually moved, so the pointerup doesn't register a click.
     const dx = p.x - node.x;
     const dy = p.y - node.y;
     if (Math.hypot(dx, dy) > 3) dragMovedRef.current = true;
@@ -611,30 +622,46 @@ export function NotesGraph({ posts }: NotesGraphProps) {
         </g>
       </svg>
 
-      {/* Floating tooltip / caption */}
+      {/* Cursor-following tooltip. Position is set imperatively on
+          pointer-move; only the hovered-id state drives the content. */}
       <div
-        className="font-technical pointer-events-none absolute left-1/2 top-3 w-max max-w-[86%] -translate-x-1/2 rounded-sm bg-[var(--card)]/85 px-3 py-1.5 text-[12px] text-foreground backdrop-blur-sm transition-opacity duration-200"
+        ref={tooltipRef}
+        className="font-technical pointer-events-none fixed z-50 w-max max-w-[360px] rounded-sm bg-[var(--card)]/92 px-3 py-1.5 text-[12px] leading-snug text-foreground backdrop-blur-sm transition-opacity duration-150"
         style={{
+          left: 0,
+          top: 0,
           opacity: hovered ? 1 : 0,
+          visibility: hovered ? "visible" : "hidden",
           border: "1px solid var(--hairline)",
+          boxShadow: "0 6px 24px oklch(0 0 0 / 0.25)",
         }}
       >
         {hovered?.kind === "public" && (
-          <span>
-            <span
-              className="mr-2 inline-block h-[6px] w-[6px] rounded-full align-middle"
-              style={{ background: hovered.color }}
-            />
-            {hovered.label}
-            <span className="ml-2 text-muted-foreground">
-              · {CATEGORY_STYLE[hovered.category].label} · 클릭 열기 · 드래그
-            </span>
-          </span>
+          <div className="flex flex-col gap-1">
+            <div className="flex items-center gap-2">
+              <span
+                className="inline-block h-[6px] w-[6px] rounded-full"
+                style={{ background: hovered.color }}
+              />
+              <span className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
+                {CATEGORY_STYLE[hovered.category].label}
+              </span>
+            </div>
+            <div className="line-clamp-2 text-foreground">
+              {hovered.label}
+            </div>
+            <div className="text-[10.5px] text-muted-foreground">
+              클릭 열기 · 드래그 이동
+            </div>
+          </div>
         )}
         {hovered?.kind === "private" && (
-          <span className="text-muted-foreground">
-            비공개 · {hovered.label} · 드래그
-          </span>
+          <div className="flex flex-col gap-1">
+            <span className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
+              비공개 카테고리
+            </span>
+            <span className="text-foreground">{hovered.label}</span>
+          </div>
         )}
       </div>
 
