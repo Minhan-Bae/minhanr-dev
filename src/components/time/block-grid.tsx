@@ -344,21 +344,24 @@ export function BlockGrid({ weekStartIso, categories, entries }: BlockGridProps)
             gridTemplateRows,
           }}
         >
-          {/* Header corner */}
+          {/* Header corner — sticky both directions so it survives
+              horizontal scroll on mobile + vertical scroll on a long
+              grid */}
           <div
-            className="border-b border-r border-border bg-muted/30"
+            className="sticky top-0 left-0 z-30 border-b border-r border-border bg-muted/80 backdrop-blur"
             style={{ gridColumn: "1 / span 1", gridRow: "1 / span 1" }}
           />
-          {/* Day headers */}
+          {/* Day headers — sticky top so day labels stay visible as
+              the user scrolls deep into the grid */}
           {Array.from({ length: DAY_COUNT }).map((_, dayIdx) => {
             const isToday = dayIdx === todayDayIdx;
             return (
               <div
                 key={`hdr-${dayIdx}`}
-                className={`flex flex-col items-center justify-center border-b border-r border-border text-[11px] ${
+                className={`sticky top-0 z-20 flex flex-col items-center justify-center border-b border-r border-border text-[11px] backdrop-blur ${
                   isToday
-                    ? "bg-primary/10 text-foreground"
-                    : "bg-muted/30 text-muted-foreground"
+                    ? "bg-primary/20 text-foreground"
+                    : "bg-muted/80 text-muted-foreground"
                 }`}
                 style={{
                   gridColumn: `${dayIdx + 2} / span 1`,
@@ -378,11 +381,12 @@ export function BlockGrid({ weekStartIso, categories, entries }: BlockGridProps)
             const gridRowNum = rIdx + 2; // +2: row 1 is header
 
             if (row.kind === "sleep") {
-              // Time gutter cell for the compressed sleep row
+              // Time gutter cell for the compressed sleep row — sticky
+              // left so it stays pinned while scrolling horizontally.
               const cells: React.ReactNode[] = [
                 <div
                   key="gutter-sleep"
-                  className="font-technical flex items-center justify-end border-r border-t border-border bg-muted/30 px-2 text-right text-[10px] text-muted-foreground"
+                  className="sticky left-0 z-10 flex items-center justify-end border-r border-t border-border bg-muted/80 px-2 text-right text-[10px] font-technical text-muted-foreground backdrop-blur"
                   style={{
                     gridColumn: "1 / span 1",
                     gridRow: `${gridRowNum} / span 1`,
@@ -447,7 +451,7 @@ export function BlockGrid({ weekStartIso, categories, entries }: BlockGridProps)
             const cells: React.ReactNode[] = [
               <div
                 key={`gutter-${slotIdx}`}
-                className={`font-technical border-r bg-muted/20 pr-2 pt-0 text-right text-[10px] tabular-nums text-muted-foreground ${
+                className={`font-technical sticky left-0 z-10 border-r bg-muted/60 pr-2 pt-0 text-right text-[10px] tabular-nums text-muted-foreground backdrop-blur ${
                   onHour ? "border-t border-border" : "border-t-0 border-transparent"
                 }`}
                 style={{
