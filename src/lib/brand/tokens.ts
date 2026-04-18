@@ -61,7 +61,7 @@ export const BRAND_IDENTITY = {
  * gated in the UI so unset channels just don't render — no dead links.
  */
 export const BRAND_CONTACT = {
-  email: "hi@minhanr.dev",
+  email: "miinh.anr@gmail.com",
   github: "https://github.com/Minhan-Bae",
   location: "Seoul, South Korea",
   /** ISO year the studio's been operating as a named practice. */
