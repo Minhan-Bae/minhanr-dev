@@ -20,10 +20,21 @@ export default function Home() {
   const selected = getSelectedWork();
   const allPosts = getAllPosts();
   const recentPosts = allPosts.slice(0, 5);
+  // Most recent publish date on the site — posts are date-sorted desc,
+  // so the first one is our practical "last update" signal. Formatted
+  // `YYYY.MM` so the hero counter row stays compact.
+  const lastUpdatedISO = allPosts[0]?.date ?? "";
+  const lastUpdated = lastUpdatedISO
+    ? `${lastUpdatedISO.slice(0, 4)}.${lastUpdatedISO.slice(5, 7)}`
+    : "";
 
   return (
     <SlideDeck>
-      <Hero workCount={selected.length} writingCount={allPosts.length} />
+      <Hero
+        workCount={selected.length}
+        writingCount={allPosts.length}
+        lastUpdated={lastUpdated}
+      />
       <SectionKicker
         kicker="Selected Work · 01"
         headline="Made, shipped, running."

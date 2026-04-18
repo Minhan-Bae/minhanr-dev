@@ -33,7 +33,7 @@ export function SiteDock() {
   const pathname = usePathname() ?? "/";
 
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-3 z-40 flex justify-center px-3 sm:bottom-5 sm:px-6">
+    <div className="pointer-events-none fixed inset-x-0 bottom-8 z-40 flex justify-center px-3 sm:bottom-12 sm:px-6">
       <nav
         aria-label="Primary"
         className="pointer-events-auto glass font-technical flex w-full max-w-[720px] items-center gap-1 rounded-full border border-[var(--hairline)] px-1.5 py-1 shadow-[0_16px_42px_-20px_rgba(0,0,0,0.55)] sm:gap-2 sm:px-2 sm:py-1.5"

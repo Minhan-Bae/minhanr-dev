@@ -638,6 +638,60 @@ html:has(.dashboard-snap-root) {
   will-change: opacity;
 }
 
+/* ── Ocean waves — light-theme ambient bottom strip ──────────────
+   Three stacked SVG wave layers drifting at different speeds. Pinned
+   to the bottom ~28vh of the viewport, scoped to the light theme
+   (the dark theme has the WebGL rain canvas filling this visual
+   role). The viewBox width is 2× one wave cycle so a -50 % translate
+   animates seamlessly with no visible wrap.
+
+   Z-stack: above the ken-burns scene (-10) and rain canvas (-5) but
+   below the four-corner chrome (wordmark / datum / colophon / dock at
+   z-40) and below page content (default z). Points are
+   pointer-events-none and `overflow: hidden` clips the translated
+   path so it never escapes the strip. */
+.ocean-waves {
+  position: fixed;
+  inset: auto 0 0 0;
+  height: 32vh;
+  pointer-events: none;
+  z-index: -3;
+  overflow: hidden;
+  color: var(--primary);
+  display: none; /* hidden by default; light theme opts in */
+}
+:root.light .ocean-waves {
+  display: block;
+}
+.ocean-waves__layer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 200%;
+  height: 100%;
+  will-change: transform;
+}
+.ocean-waves__layer--a {
+  opacity: 0.18;
+  animation: ocean-drift-a 22s linear infinite;
+}
+.ocean-waves__layer--b {
+  opacity: 0.12;
+  animation: ocean-drift-b 32s linear infinite;
+}
+.ocean-waves__layer--c {
+  opacity: 0.08;
+  animation: ocean-drift-a 48s linear infinite;
+}
+@keyframes ocean-drift-a {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(-50%, 0, 0); }
+}
+@keyframes ocean-drift-b {
+  from { transform: translate3d(-25%, 0, 0); }
+  to   { transform: translate3d(-75%, 0, 0); }
+}
+
 /* ── Mouse spotlight — soft torch following the pointer ──────────
    A page-wide fixed overlay that adds a small amount of cool-white
    light at the cursor position via `mix-blend-mode: plus-lighter`.

@@ -10,16 +10,16 @@ missing, so the site works fine even without these files.
 
 ```
 public/ambient/
-├── rain.mp3   — Dark theme (gentle storm rain)
-└── wind.mp3   — Light theme (blustery wind loop)
+├── rain.mp3    — Dark theme (gentle storm rain)
+└── waves.mp3   — Light theme (gentle ocean waves)
 ```
 
 ## Sources (all CC0 1.0 Universal)
 
-| File      | Source                                                                                                                           |
-| --------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| rain.mp3  | [Internet Archive — relaxingrainsounds](https://archive.org/details/relaxingrainsounds) → `Rain Sounds.mp3`                       |
-| wind.mp3  | [Internet Archive — Red_Library_Nature_Wind](https://archive.org/details/Red_Library_Nature_Wind) → `R22-11-Blustery Wind Loop.mp3` |
+| File       | Source                                                                                              |
+| ---------- | --------------------------------------------------------------------------------------------------- |
+| rain.mp3   | [Internet Archive — relaxingrainsounds](https://archive.org/details/relaxingrainsounds) → `Rain Sounds.mp3` |
+| waves.mp3  | [Internet Archive — ocean-sea-sounds](https://archive.org/details/ocean-sea-sounds) → `Gentle Ocean.mp3`   |
 
 The CC0 1.0 Universal public-domain dedication permits unrestricted
 commercial use with no attribution requirement, so the site can ship

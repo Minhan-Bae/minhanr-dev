@@ -36,14 +36,14 @@ const TRACKS = {
       "https://archive.org/download/relaxingrainsounds/Light%20Gentle%20Rain%20Part%201.mp3",
     ],
   },
-  wind: {
-    label: "Blustery wind loop (light theme)",
+  waves: {
+    label: "Gentle ocean waves (light theme)",
     license:
-      "CC0 1.0 Universal — Internet Archive, Red_Library_Nature_Wind (USC Cinema collection)",
+      "CC0 1.0 Universal — Internet Archive, ocean-sea-sounds collection",
     candidates: [
-      "https://archive.org/download/Red_Library_Nature_Wind/R22-11-Blustery%20Wind%20Loop.mp3",
-      "https://archive.org/download/Red_Library_Nature_Wind/R21-38-Good%20Mechanical%20Wind.mp3",
-      "https://archive.org/download/Red_Library_Nature_Wind/R22-15-Noisy%20Dull%20Wind.mp3",
+      "https://archive.org/download/ocean-sea-sounds/Gentle%20Ocean.mp3",
+      "https://archive.org/download/ocean-sea-sounds/Ocean%20Sound%20Nature%20Sounds.mp3",
+      "https://archive.org/download/ocean-sea-sounds/Those_Relaxing_Sounds_of_Waves_-_Ocean_Sounds_1080p_HD_Video_with_Tropical_Beaches%20Part%201.mp3",
     ],
   },
 };
