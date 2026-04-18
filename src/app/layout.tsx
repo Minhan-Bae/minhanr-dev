@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { ViewTransition } from "react";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
@@ -74,7 +75,7 @@ export default function RootLayout({
       <body className="min-h-full bg-background text-foreground">
         <NuqsAdapter>
           <TooltipProvider>
-            {children}
+            <ViewTransition>{children}</ViewTransition>
           </TooltipProvider>
         </NuqsAdapter>
         <Analytics />

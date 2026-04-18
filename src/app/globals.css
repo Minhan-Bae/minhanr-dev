@@ -643,3 +643,92 @@
   }
 }
 
+/* ════════════════════════════════════════════════════════════════
+   Motion Tokens (2026 modernization Phase A3)
+   표준 easing curve + duration scale.
+   사용 예:
+     transition: transform var(--duration-snap) var(--ease-out-back);
+   ──────────────────────────────────────────────────────────────── */
+:root {
+  /* Easing curves */
+  --ease-linear:    linear;
+  --ease-out:       cubic-bezier(0.16, 1, 0.3, 1);          /* smooth decel */
+  --ease-in-out:    cubic-bezier(0.65, 0, 0.35, 1);         /* balanced */
+  --ease-out-back:  cubic-bezier(0.34, 1.56, 0.64, 1);      /* subtle overshoot — cards */
+  --ease-out-expo:  cubic-bezier(0.19, 1, 0.22, 1);         /* fast → stop — reveals */
+  --ease-spring:    cubic-bezier(0.5, 1.6, 0.4, 0.8);       /* bouncy — tap feedback */
+
+  /* Duration scale — 8 step geometric */
+  --duration-instant: 80ms;    /* tap feedback */
+  --duration-snap:    160ms;   /* micro-interaction */
+  --duration-quick:   240ms;   /* hover/focus */
+  --duration-smooth:  360ms;   /* panel reveal */
+  --duration-page:    500ms;   /* route transition */
+  --duration-long:    800ms;   /* hero/splash */
+}
+
+/* ════════════════════════════════════════════════════════════════
+   View Transitions (2026 modernization Phase A2)
+   Next.js 16 + React 19 unstable_ViewTransition 래퍼와 함께 사용.
+   라우트 간 자동 cross-fade + 선택적 shared element.
+   ──────────────────────────────────────────────────────────────── */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: var(--duration-page);
+  animation-timing-function: var(--ease-out-expo);
+}
+
+::view-transition-old(root) {
+  animation-name: vt-fade-out;
+}
+
+::view-transition-new(root) {
+  animation-name: vt-fade-up;
+}
+
+@keyframes vt-fade-out {
+  to { opacity: 0; }
+}
+
+@keyframes vt-fade-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
+  }
+}
+
+/* ════════════════════════════════════════════════════════════════
+   Interaction primitives (Phase A3 helpers)
+   전역 재사용 — Bento/Active Grid에서 호출.
+   ──────────────────────────────────────────────────────────────── */
+.hover-lift {
+  transition: transform var(--duration-quick) var(--ease-out-back),
+              box-shadow var(--duration-quick) var(--ease-out);
+}
+.hover-lift:hover {
+  transform: translateY(-2px);
+}
+
+.tap-scale {
+  transition: transform var(--duration-instant) var(--ease-spring);
+}
+.tap-scale:active {
+  transform: scale(0.97);
+}
+
+.reveal-expand {
+  overflow: hidden;
+  transition: max-height var(--duration-smooth) var(--ease-out-expo),
+              opacity var(--duration-quick) var(--ease-out);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hover-lift, .tap-scale, .reveal-expand {
+    transition: none;
+  }
+}
