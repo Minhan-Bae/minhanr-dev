@@ -1,21 +1,24 @@
 import Link from "next/link";
-import { FileQuestion } from "lucide-react";
 
 export default function NotFound() {
   return (
-    <div className="flex min-h-[60vh] flex-col items-center justify-center text-center px-4">
-      <FileQuestion className="h-12 w-12 text-muted-foreground/30 mb-4" />
-      <h1 className="text-5xl font-bold tracking-tight text-gradient">
-        404
+    <div className="flex min-h-[70vh] flex-col items-center justify-center px-6 text-center">
+      <p className="kicker mb-6">404</p>
+      <h1
+        className="font-display leading-[0.95] tracking-[-0.03em]"
+        style={{ fontSize: "var(--font-size-h1)" }}
+      >
+        Nothing here.
       </h1>
-      <p className="mt-4 text-sm text-muted-foreground">
-        페이지를 찾을 수 없습니다.
+      <p className="mt-6 max-w-sm text-sm text-muted-foreground">
+        The page you asked for does not exist — it may have been moved, or
+        it never did.
       </p>
       <Link
         href="/"
-        className="mt-6 rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+        className="font-technical mt-10 inline-flex items-center gap-2 border-b border-primary pb-1 text-[13px] uppercase tracking-[0.16em] text-foreground transition-colors hover:text-primary"
       >
-        홈으로 돌아가기
+        Back to home
       </Link>
     </div>
   );

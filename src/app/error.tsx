@@ -1,7 +1,5 @@
 "use client";
 
-import { AlertTriangle } from "lucide-react";
-
 export default function Error({
   error,
   reset,
@@ -10,22 +8,27 @@ export default function Error({
   reset: () => void;
 }) {
   return (
-    <div className="flex min-h-[60vh] flex-col items-center justify-center text-center px-4">
-      <AlertTriangle className="h-12 w-12 text-destructive/50 mb-4" />
-      <h1 className="text-4xl font-bold tracking-tight text-gradient">
-        Error
+    <div className="flex min-h-[70vh] flex-col items-center justify-center px-6 text-center">
+      <p className="kicker mb-6 text-destructive">Error</p>
+      <h1
+        className="font-display leading-[0.95] tracking-[-0.03em]"
+        style={{ fontSize: "var(--font-size-h1)" }}
+      >
+        Something broke.
       </h1>
-      <p className="mt-4 text-sm text-muted-foreground">
-        문제가 발생했습니다.
+      <p className="mt-6 max-w-md text-sm text-muted-foreground">
+        An unexpected error occurred while rendering this page.
       </p>
-      <p className="mt-1 text-xs text-muted-foreground/60 max-w-md">
-        {error.message}
-      </p>
+      {error.message && (
+        <p className="font-technical mt-3 max-w-lg text-[12px] uppercase tracking-[0.14em] text-muted-foreground/70">
+          {error.message}
+        </p>
+      )}
       <button
         onClick={reset}
-        className="mt-6 rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+        className="font-technical mt-10 inline-flex items-center gap-2 border-b border-primary pb-1 text-[13px] uppercase tracking-[0.16em] text-foreground transition-colors hover:text-primary"
       >
-        다시 시도
+        Try again
       </button>
     </div>
   );

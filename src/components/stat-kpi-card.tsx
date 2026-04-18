@@ -23,7 +23,7 @@ export function StatKpiCard({ label, value, hint, icon, trend, accentColor, href
     <Card
       className={`relative overflow-hidden transition-all duration-200 ${
         accentColor ? `border-l-2 ${accentColor}` : ""
-      } ${href ? "card-lift cursor-pointer hover:border-primary/40 hover:shadow-lg hover:shadow-primary/10" : ""}`}
+      } ${href ? "hover-lift cursor-pointer hover:border-primary/40" : ""}`}
     >
       <CardContent className="py-4">
         {icon && (
