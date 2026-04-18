@@ -55,6 +55,7 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
       { title: "Calendar", href: "/calendar", icon: Calendar },
+      { title: "Time Blocks", href: "/calendar/blocks", icon: Clock },
       { title: "Deadlines", href: "/deadlines", icon: Clock },
       { title: "Weekly", href: "/review/weekly", icon: CalendarCheck },
     ],
