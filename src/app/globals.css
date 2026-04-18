@@ -684,6 +684,36 @@ html:has(.dashboard-snap-root) {
   animation: tw-cursor-blink 1.05s step-end infinite both;
   will-change: opacity;
 }
+
+/* ── Typewriter-loop — boomerang (type → hold → erase → loop) ──────
+   Partner to `src/components/typewriter-loop.tsx`. The JS state
+   machine adds/removes `.is-visible` one letter at a time; CSS just
+   cross-fades each letter in a way that sits convincingly under the
+   hero serif italic without any layout shift (opacity + y-axis nudge
+   only). The cursor blinks continuously so it reads as alive even
+   during pause phases. */
+.tw-letter-loop {
+  display: inline-block;
+  opacity: 0;
+  transform: translate3d(0, 0.14em, 0);
+  transition:
+    opacity 240ms var(--ease-out-expo),
+    transform 240ms var(--ease-out-expo);
+  will-change: opacity, transform;
+}
+.tw-letter-loop.is-visible {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+.tw-cursor-loop {
+  display: inline-block;
+  margin-left: 0.02em;
+  color: var(--primary);
+  font-style: normal;
+  font-weight: 300;
+  animation: tw-cursor-blink 1.05s step-end infinite both;
+  will-change: opacity;
+}
 .marquee-track {
   display: flex;
   flex-direction: row;

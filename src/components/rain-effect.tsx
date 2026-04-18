@@ -3,28 +3,21 @@
 import { useEffect, useRef } from "react";
 import { Raindrops } from "@/lib/rain/raindrops";
 import { RainRenderer } from "@/lib/rain/rain-renderer";
-import { getCurrentScene } from "@/lib/scenes";
+import {
+  getActiveTheme,
+  getCurrentScene,
+  observeTheme,
+  RAIN_PRESETS,
+  type SceneTheme,
+} from "@/lib/scenes";
 
 /**
  * RainEffect — WebGL rain-on-glass, ported from codrops/RainEffect.
  *
- * A 2D canvas (Raindrops) simulates water beading, collision/merging,
- * and drips. That canvas is then handed to a WebGL fragment shader
- * (RainRenderer / water.frag) that refracts a sharp "foreground"
- * texture through the drops while a blurred "background" texture
- * fills everywhere else — the hallmark codrops lens-through-fog look.
- *
- * Our foreground and background are both the same site bg.jpg:
- *   • textureFg — drawn into a small canvas at full sharpness
- *   • textureBg — drawn into a small canvas pre-blurred
- *
- * Both are rendered into their own small HTMLCanvasElement at startup
- * so we don't need any additional weather texture files from the
- * upstream demo. The drop-alpha / drop-color PNGs ship in public/rain/
- * — those are genuinely hand-designed textures that can't be
- * reproduced procedurally without quality loss.
- *
- * Sits behind all content (fixed, -z-5, pointer-events: none).
+ * Theme-aware: dark → heavy rain; gray → drizzle; light → clear (no
+ * rain, just refraction of the sunny scene). Rebuilds the engine when
+ * the `<html>` class changes so the theme switcher swaps weather in
+ * real time.
  */
 
 const TEXTURE_BG_W = 512;
@@ -42,6 +35,7 @@ export function RainEffect() {
     let raindrops: Raindrops | null = null;
     let renderer: RainRenderer | null = null;
     let cancelled = false;
+    let currentTheme: SceneTheme = getActiveTheme();
 
     const resize = () => {
       if (!canvas) return;
@@ -62,139 +56,95 @@ export function RainEffect() {
         img.src = src;
       });
 
-    Promise.all([
-      loadImage("/rain/drop-alpha.png"),
-      loadImage("/rain/drop-color.png"),
-      loadImage(getCurrentScene().file),
-    ])
-      .then(([dropAlpha, dropColor, bgImage]) => {
-        if (cancelled) return;
+    const build = async (theme: SceneTheme) => {
+      const preset = RAIN_PRESETS[theme];
+      const scene = getCurrentScene(theme);
 
-        const dpi = Math.min(window.devicePixelRatio || 1, 2);
-        raindrops = new Raindrops(
-          canvas.width,
-          canvas.height,
-          dpi,
-          dropAlpha,
-          dropColor,
-          {
-            trailRate: 1,
-            trailScaleRange: [0.2, 0.45],
-            collisionRadius: 0.45,
-            dropletsCleaningRadiusMultiplier: 0.28,
-            raining: true,
-            rainChance: 0.3,
-            rainLimit: 3,
-            dropletsRate: 50,
-            dropletsSize: [2, 4],
-            minR: 10,
-            maxR: 40,
-          }
-        );
+      const [dropAlpha, dropColor, bgImage] = await Promise.all([
+        loadImage("/rain/drop-alpha.png"),
+        loadImage("/rain/drop-color.png"),
+        loadImage(scene.file),
+      ]);
+      if (cancelled) return;
 
-        // Foreground (sharp) and background (blurred) textures — both
-        // are painted from bg.jpg into small offscreen canvases so we
-        // don't need a CDN trip for anything else.
-        const textureFg = document.createElement("canvas");
-        textureFg.width = TEXTURE_FG_W;
-        textureFg.height = TEXTURE_FG_H;
-        const fgCtx = textureFg.getContext("2d")!;
-        // Drops show a slightly-darker version of the scene. Matches
-        // real rain-on-glass where a drop acts as both lens AND tint.
-        fgCtx.filter = "brightness(0.6) saturate(1.1)";
-        fgCtx.drawImage(bgImage, 0, 0, TEXTURE_FG_W, TEXTURE_FG_H);
-        fgCtx.filter = "none";
+      const dpi = Math.min(window.devicePixelRatio || 1, 2);
+      raindrops?.destroy();
+      renderer?.destroy();
 
-        const textureBg = document.createElement("canvas");
-        textureBg.width = TEXTURE_BG_W;
-        textureBg.height = TEXTURE_BG_H;
-        const bgCtx = textureBg.getContext("2d")!;
-        // Aggressive darken on the background so white body text stays
-        // AAA readable on top. Blur matches codrops' foggy-window look.
-        bgCtx.filter = "blur(3px) brightness(0.4) saturate(0.95)";
-        bgCtx.drawImage(bgImage, 0, 0, TEXTURE_BG_W, TEXTURE_BG_H);
-        bgCtx.filter = "none";
-        // A subtle Prussian-night wash — ties the rain scene into the
-        // brand palette regardless of the source image's colour cast.
-        bgCtx.fillStyle = "rgba(14, 26, 46, 0.35)";
+      raindrops = new Raindrops(
+        canvas.width,
+        canvas.height,
+        dpi,
+        dropAlpha,
+        dropColor,
+        {
+          trailRate: preset.trailRate,
+          trailScaleRange: [0.2, 0.45],
+          collisionRadius: 0.45,
+          dropletsCleaningRadiusMultiplier: 0.28,
+          raining: preset.raining,
+          rainChance: preset.rainChance,
+          rainLimit: preset.rainLimit,
+          dropletsRate: preset.dropletsRate,
+          dropletsSize: [2, 4],
+          minR: preset.minR,
+          maxR: preset.maxR,
+        }
+      );
+
+      // Foreground (sharp) and background (blurred) textures.
+      const textureFg = document.createElement("canvas");
+      textureFg.width = TEXTURE_FG_W;
+      textureFg.height = TEXTURE_FG_H;
+      const fgCtx = textureFg.getContext("2d")!;
+      // Sunny scenes want the drops to read as clear glass, not tinted.
+      // Stormy scenes want drops acting as lens+tint for codrops feel.
+      fgCtx.filter =
+        theme === "light"
+          ? "brightness(1.0) saturate(1.05)"
+          : "brightness(0.6) saturate(1.1)";
+      fgCtx.drawImage(bgImage, 0, 0, TEXTURE_FG_W, TEXTURE_FG_H);
+      fgCtx.filter = "none";
+
+      const textureBg = document.createElement("canvas");
+      textureBg.width = TEXTURE_BG_W;
+      textureBg.height = TEXTURE_BG_H;
+      const bgCtx = textureBg.getContext("2d")!;
+      bgCtx.filter = `blur(${preset.bgBlurPx}px) brightness(${preset.bgBrightness}) saturate(0.95)`;
+      bgCtx.drawImage(bgImage, 0, 0, TEXTURE_BG_W, TEXTURE_BG_H);
+      bgCtx.filter = "none";
+      if (preset.bgWashRgba && preset.bgWashRgba !== "rgba(255, 255, 255, 0)") {
+        bgCtx.fillStyle = preset.bgWashRgba;
         bgCtx.fillRect(0, 0, TEXTURE_BG_W, TEXTURE_BG_H);
+      }
 
-        renderer = new RainRenderer(
-          canvas,
-          raindrops.canvas,
-          textureFg,
-          textureBg,
-          null,
-          {
-            brightness: 1.04,
-            alphaMultiply: 6,
-            alphaSubtract: 3,
-          }
-        );
-      })
-      .catch((err) => {
-        console.warn("Rain effect failed to load textures:", err);
-      });
+      renderer = new RainRenderer(
+        canvas,
+        raindrops.canvas,
+        textureFg,
+        textureBg,
+        null,
+        {
+          brightness: theme === "light" ? 1.1 : 1.04,
+          alphaMultiply: 6,
+          alphaSubtract: 3,
+        }
+      );
+    };
+
+    build(currentTheme).catch((err) => {
+      console.warn("Rain effect failed to load textures:", err);
+    });
 
     const onResize = () => {
-      // A full resize tears and rebuilds both engines — the underlying
-      // Raindrops owns its canvas internally, so rather than trying to
-      // re-wire textures we just rebuild when the viewport changes.
       raindrops?.destroy();
       renderer?.destroy();
       raindrops = null;
       renderer = null;
       resize();
-      // Re-run the setup (same code path).
-      Promise.all([
-        loadImage("/rain/drop-alpha.png"),
-        loadImage("/rain/drop-color.png"),
-        loadImage(getCurrentScene().file),
-      ])
-        .then(([dropAlpha, dropColor, bgImage]) => {
-          if (cancelled || !canvas) return;
-          const dpi = Math.min(window.devicePixelRatio || 1, 2);
-          raindrops = new Raindrops(
-            canvas.width,
-            canvas.height,
-            dpi,
-            dropAlpha,
-            dropColor,
-            {
-              trailRate: 1,
-              trailScaleRange: [0.2, 0.45],
-              collisionRadius: 0.45,
-              dropletsCleaningRadiusMultiplier: 0.28,
-              raining: true,
-            }
-          );
-          const textureFg = document.createElement("canvas");
-          textureFg.width = TEXTURE_FG_W;
-          textureFg.height = TEXTURE_FG_H;
-          textureFg.getContext("2d")!.drawImage(bgImage, 0, 0, TEXTURE_FG_W, TEXTURE_FG_H);
-
-          const textureBg = document.createElement("canvas");
-          textureBg.width = TEXTURE_BG_W;
-          textureBg.height = TEXTURE_BG_H;
-          const bgCtx = textureBg.getContext("2d")!;
-          bgCtx.filter = "blur(3px)";
-          bgCtx.drawImage(bgImage, 0, 0, TEXTURE_BG_W, TEXTURE_BG_H);
-          bgCtx.filter = "none";
-
-          renderer = new RainRenderer(
-            canvas,
-            raindrops.canvas,
-            textureFg,
-            textureBg,
-            null,
-            { brightness: 1.04, alphaMultiply: 6, alphaSubtract: 3 }
-          );
-        })
-        .catch(() => {});
+      build(currentTheme).catch(() => {});
     };
 
-    // Debounce the resize handler — plenty of environments fire many
-    // events per gesture (address-bar show/hide, devtools toggle).
     let resizeTimer: number | null = null;
     const debouncedResize = () => {
       if (resizeTimer != null) window.clearTimeout(resizeTimer);
@@ -202,8 +152,15 @@ export function RainEffect() {
     };
     window.addEventListener("resize", debouncedResize);
 
+    const unsubscribeTheme = observeTheme((next) => {
+      if (next === currentTheme) return;
+      currentTheme = next;
+      build(next).catch(() => {});
+    });
+
     return () => {
       cancelled = true;
+      unsubscribeTheme();
       window.removeEventListener("resize", debouncedResize);
       if (resizeTimer != null) window.clearTimeout(resizeTimer);
       raindrops?.destroy();

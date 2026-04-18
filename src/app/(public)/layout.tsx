@@ -1,66 +1,44 @@
-import Link from "next/link";
-import { PublicHeader } from "@/components/public-header";
 import { SiteBackground } from "@/components/site-background";
 import { RainEffect } from "@/components/rain-effect";
-import { createSupabaseServer } from "@/lib/supabase-server";
+import { SiteWordmark } from "@/components/site-wordmark";
+import { SiteDock } from "@/components/site-dock";
 import { BRAND_IDENTITY } from "@/lib/brand/tokens";
 
+/**
+ * Public layout — minimal chrome, heavy atmosphere.
+ *
+ * Chrome order (stacking):
+ *   • z-[-10] SiteBackground — ken-burns scene for the active theme
+ *   • z-[-5]  RainEffect — WebGL rain-on-glass
+ *   • z-40    SiteWordmark — tiny top-left `MinhanR.dev` return anchor
+ *   • z-40    SiteDock — floating bottom-center nav pill
+ *
+ * Auth state no longer branches the UI — the supabase middleware takes
+ * care of bouncing unauthenticated visitors from `/dashboard` to
+ * `/login`, so the layout stays purely presentational.
+ */
 export default async function PublicLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const supabase = await createSupabaseServer();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  const isAuthenticated = !!user;
-
   const year = new Date().getFullYear();
 
   return (
-    <div className="flex min-h-svh flex-col">
+    <div className="relative flex min-h-svh flex-col">
       <SiteBackground />
       <RainEffect />
-      <PublicHeader isAuthenticated={isAuthenticated} />
-      <main className="flex-1">{children}</main>
+      <SiteWordmark />
 
-      <footer className="hairline-t mt-16 font-technical">
-        <div className="mx-auto flex max-w-[1440px] flex-wrap items-center justify-between gap-x-8 gap-y-4 px-6 py-6 text-[11px] uppercase tracking-[0.2em] text-muted-foreground sm:px-10">
-          <span className="font-display text-base normal-case tracking-[-0.015em] text-foreground">
-            {BRAND_IDENTITY.studio}
-            <span className="text-muted-foreground">.dev</span>
-          </span>
+      <main className="flex-1 pb-24 sm:pb-28">{children}</main>
 
-          <nav className="flex flex-wrap gap-x-5 gap-y-2">
-            <Link href="/work" className="transition-colors hover:text-foreground">
-              Work
-            </Link>
-            <Link href="/blog" className="transition-colors hover:text-foreground">
-              Writing
-            </Link>
-            <Link href="/about" className="transition-colors hover:text-foreground">
-              About
-            </Link>
-            <a
-              href="/feed.xml"
-              className="transition-colors hover:text-foreground"
-              aria-label="RSS"
-            >
-              RSS
-            </a>
-            <a
-              href="https://github.com/Minhan-Bae"
-              target="_blank"
-              rel="noreferrer"
-              className="transition-colors hover:text-foreground"
-            >
-              GitHub
-            </a>
-          </nav>
+      <SiteDock />
 
-          <span className="tabular-nums">© {year} {BRAND_IDENTITY.domain}</span>
-        </div>
+      {/* Minimal footer — most wayfinding lives in the dock. A single
+          baseline copyright line keeps the legal surface clean without
+          stealing attention from the dock above it. */}
+      <footer className="font-technical relative z-0 px-6 pb-6 pt-2 text-center text-[10px] uppercase tracking-[0.2em] text-muted-foreground/70 sm:px-10 sm:pb-8">
+        © {year} {BRAND_IDENTITY.domain} · Studio № 01 · Seoul
       </footer>
     </div>
   );

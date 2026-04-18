@@ -37,8 +37,8 @@ export const BRAND_TOKENS = {
  * Everything the public sees refers to the domain / studio.
  */
 export const BRAND_IDENTITY = {
-  /** Studio wordmark — lowercase, the thing on the header */
-  studio: "minhanr",
+  /** Studio wordmark — camelcased signature, the thing on the header */
+  studio: "MinhanR",
   /** Domain — used in meta, OG, footer */
   domain: "minhanr.dev",
   /** Practice descriptor, short */

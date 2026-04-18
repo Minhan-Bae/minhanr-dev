@@ -1,15 +1,19 @@
 import { BRAND_IDENTITY } from "@/lib/brand/tokens";
-import { Typewriter } from "@/components/typewriter";
+import { TypewriterLoop } from "@/components/typewriter-loop";
 
 interface HeroProps {
   workCount: number;
   writingCount: number;
 }
 
-/** Per-letter drop-in delay for the typewriter hero. */
-const LETTER_STAGGER_MS = 140;
-/** Extra pause before the cursor appears, after the last letter lands. */
-const POST_WORD_MS = 180;
+/** Per-letter delay for the boomerang typewriter hero. */
+const TYPE_DELAY_MS = 170;
+/** Erase is snappier than typing so the word reads as being rewound. */
+const ERASE_DELAY_MS = 80;
+/** ms the fully-typed wordmark sits on-screen before erasing. */
+const HOLD_MS = 3200;
+/** ms the hero sits empty between cycles. */
+const PAUSE_MS = 900;
 
 /**
  * Hero — 100svh cinematic masthead.
@@ -48,12 +52,14 @@ export function Hero({ workCount, writingCount }: HeroProps) {
       {/* ─── Centerpiece wordmark ───────────────────────────────────── */}
       <div className="relative z-0 flex flex-1 items-center justify-center px-6 sm:px-10">
         <div className="relative">
-          <Typewriter
+          <TypewriterLoop
             as="h1"
             lang="en"
             text={word}
-            stagger={LETTER_STAGGER_MS}
-            cursorBuffer={POST_WORD_MS}
+            typeDelay={TYPE_DELAY_MS}
+            eraseDelay={ERASE_DELAY_MS}
+            holdMs={HOLD_MS}
+            pauseMs={PAUSE_MS}
             className="display-hero font-display italic text-foreground"
           />
 

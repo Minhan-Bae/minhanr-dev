@@ -2,31 +2,56 @@
 
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { FALLBACK_SCENE, getCurrentScene, type Scene } from "@/lib/scenes";
+import {
+  FALLBACK_SCENE,
+  getActiveTheme,
+  getCurrentScene,
+  observeTheme,
+  RAIN_PRESETS,
+  type Scene,
+  type SceneTheme,
+} from "@/lib/scenes";
 
 /**
- * SiteBackground — full-bleed time-of-day backdrop sitting behind every
+ * SiteBackground — theme × time-of-day backdrop sitting behind every
  * public page.
  *
- * Picks one of six scenes from src/lib/scenes.ts based on the
- * visitor's local hour (pre-dawn harbour, misty forest, cloud peaks,
- * overcast shore, dusk skyline, late-night downtown). Acts as the
- * WebGL-fallback layer for RainEffect — when the rain renderer's
- * WebGL context initializes it paints an opaque canvas over this,
- * but if WebGL fails or hasn't loaded yet, this is what the visitor
- * sees.
+ * Resolves the scene set from the active theme (dark → storm-blue,
+ * gray → overcast, light → sunny beach) and the hour. Acts as the
+ * WebGL fallback for RainEffect.
  *
- * Scene selection runs inside `useEffect` so the server and client
- * renders agree on the fallback image (the hour on the server is
- * unknowable), then the client upgrades to the time-correct scene
- * once mounted.
+ * SSR renders the fallback (dark / harbour); the client useEffect
+ * upgrades to the theme + hour-correct scene once mounted and
+ * listens for class mutations on `<html>` to follow the theme
+ * switcher live.
  */
 export function SiteBackground() {
   const [scene, setScene] = useState<Scene>(FALLBACK_SCENE);
+  const [theme, setTheme] = useState<SceneTheme>("dark");
 
   useEffect(() => {
-    setScene(getCurrentScene());
+    const t = getActiveTheme();
+    setTheme(t);
+    setScene(getCurrentScene(t));
+
+    const unsub = observeTheme((next) => {
+      setTheme(next);
+      setScene(getCurrentScene(next));
+    });
+
+    // Re-evaluate every minute so a scene change at the hour boundary
+    // doesn't require a full page reload. Cheap — one state set.
+    const iv = window.setInterval(() => {
+      setScene(getCurrentScene(getActiveTheme()));
+    }, 60_000);
+
+    return () => {
+      unsub();
+      window.clearInterval(iv);
+    };
   }, []);
+
+  const preset = RAIN_PRESETS[theme];
 
   return (
     <div
@@ -41,12 +66,16 @@ export function SiteBackground() {
           fill
           priority
           sizes="100vw"
-          className="object-cover opacity-[0.22]"
+          className="object-cover"
+          style={{ opacity: preset.backdropOpacity }}
         />
       </div>
-      {/* Legibility gradient — stronger at the fold so fallback text
-          stays crisp if the rain canvas never initializes. */}
-      <div className="absolute inset-0 bg-gradient-to-b from-background/30 via-background/65 to-background" />
+      {/* Legibility gradient — stronger on dark so the fallback still
+          reads AAA, softer on light so the sunny scene can breathe. */}
+      <div
+        className="absolute inset-0"
+        style={{ background: preset.overlayGradient }}
+      />
     </div>
   );
 }

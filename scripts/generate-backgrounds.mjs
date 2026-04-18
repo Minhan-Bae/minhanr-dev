@@ -50,9 +50,11 @@ const COMMON = [
   "edges fade to near-black for readable overlay text.",
 ].join(" ");
 
-const SCENES = [
+/** Dark-theme scenes share the `COMMON` stormy-blue suffix. */
+const DARK_SCENES = [
   {
     name: "harbour",
+    theme: "dark",
     label: "Pre-dawn harbour",
     prompt: [
       "Rainy harbour viewed from a dock at 4am,",
@@ -63,6 +65,7 @@ const SCENES = [
   },
   {
     name: "forest",
+    theme: "dark",
     label: "Misty forest morning",
     prompt: [
       "Deep pine forest at blue-hour morning,",
@@ -73,6 +76,7 @@ const SCENES = [
   },
   {
     name: "peaks",
+    theme: "dark",
     label: "Cloud peaks",
     prompt: [
       "High mountain peaks rising above a dense cloud sea at midday,",
@@ -83,6 +87,7 @@ const SCENES = [
   },
   {
     name: "shore",
+    theme: "dark",
     label: "Overcast shore",
     prompt: [
       "Stormy coastline seen through a sheet of drifting sea mist,",
@@ -93,6 +98,7 @@ const SCENES = [
   },
   {
     name: "skyline",
+    theme: "dark",
     label: "Dusk city skyline",
     prompt: [
       "City skyline at rain-heavy dusk,",
@@ -104,6 +110,7 @@ const SCENES = [
   },
   {
     name: "night-city",
+    theme: "dark",
     label: "Late-night downtown",
     prompt: [
       "Downtown intersection seen from above at 3am,",
@@ -113,6 +120,81 @@ const SCENES = [
     ].join(" "),
   },
 ];
+
+/** Bright, clear-weather scenes for the Light theme. Compositionally
+ *  the sunny counterpart to the rainy DARK set — same medium-format
+ *  cinematic treatment, but the palette swings to warm golden +
+ *  signal-blue sky instead of prussian-night. */
+const LIGHT_SCENES = [
+  {
+    name: "sunrise-beach",
+    theme: "light",
+    label: "Sunrise beach",
+    prompt: [
+      "Wide empty beach at golden sunrise,",
+      "soft pastel peach and signal-cobalt sky, low sun behind thin cirrus,",
+      "lines of retreating foam on wet sand,",
+      "a single distant fishing boat silhouette,",
+      "warm-white highlights scattered across calm water,",
+    ].join(" "),
+  },
+  {
+    name: "noon-beach",
+    theme: "light",
+    label: "Bright noon beach",
+    prompt: [
+      "Tropical lagoon at midday in brilliant sun,",
+      "turquoise signal-cobalt water against white sand,",
+      "sharp specular highlights on every wavelet,",
+      "a scatter of pale wildflowers in the sand dunes at frame edges,",
+      "high sun, clear sky, no clouds except a single distant contrail,",
+    ].join(" "),
+  },
+  {
+    name: "sunset-beach",
+    theme: "light",
+    label: "Golden hour shore",
+    prompt: [
+      "Quiet shoreline at golden hour,",
+      "sun just off-frame low-right, warm amber washing over wet sand,",
+      "long-shadow dunes reading as soft amethyst-shadow silhouettes,",
+      "gentle surf leaves glassy reflective sheets,",
+      "a lone driftwood form anchors the foreground,",
+    ].join(" "),
+  },
+];
+
+/** Fog-leaning scenes for the Gray theme — compositionally calm, lots
+ *  of grey diffuse light, a mid-tone neutral cast for the daytime
+ *  interior-lit working mode. */
+const GRAY_SCENES = [
+  {
+    name: "morning-fog",
+    theme: "gray",
+    label: "Morning fog bank",
+    prompt: [
+      "Rolling pasture drowned in morning fog,",
+      "desaturated cool-grey tonality throughout,",
+      "a line of barely-visible tree silhouettes recedes into white-out,",
+      "glistening dew catches what little light there is as tiny specular points,",
+      "quiet, contemplative, evenly-lit from above,",
+    ].join(" "),
+  },
+  {
+    name: "overcast-harbour",
+    theme: "gray",
+    label: "Overcast harbour",
+    prompt: [
+      "Working harbour under solid grey overcast sky,",
+      "cold signal-cobalt water, restrained greys dominate the frame,",
+      "a moored ferry silhouette mid-distance,",
+      "warm pinpoint dock lights already on despite daylight,",
+      "weather flat and diffuse with no shadow direction,",
+    ].join(" "),
+  },
+];
+
+const SCENES = [...DARK_SCENES, ...LIGHT_SCENES, ...GRAY_SCENES];
 
 // ── Env loader ───────────────────────────────────────────────────
 
