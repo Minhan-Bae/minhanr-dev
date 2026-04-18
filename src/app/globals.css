@@ -273,25 +273,18 @@
     text-rendering: optimizeLegibility;
     /* Contextual feature-set tweak for Pretendard. */
     font-feature-settings: "ss06", "cv11";
-    /* Slide-deck navigation — any page with `.slide` children (e.g.
-       the home) acts as a PowerPoint-style deck. `mandatory` + `stop:
-       always` (set on `.slide`) ensures one gesture = one slide. On
-       pages without `.slide` the snap is a no-op because there are no
-       snap targets. Smooth programmatic scroll powers the transition
-       triggered by the SlideDeck client component. */
-    scroll-snap-type: y mandatory;
-    scroll-behavior: smooth;
+    /* Slide transitions are driven entirely by the SlideDeck client
+       component's rAF loop — no CSS scroll-snap involved. We tried
+       `scroll-snap-type: y mandatory` as a mobile fallback earlier,
+       but it fought the rAF by snapping every intermediate frame to
+       the nearest snap point, which read as "딱딱" stuttering. Touch
+       handling now lives in SlideDeck directly (touchstart/move/end). */
+    scroll-behavior: smooth; /* Kept for anchor-link jumps on non-home pages. */
   }
-  /* The slide class — marks 100svh full-bleed acts. */
+  /* The slide class — marks 100svh full-bleed acts. No snap here. */
   .slide {
     min-height: 100svh;
-    scroll-snap-align: start;
-    scroll-snap-stop: always;
   }
-  /* Editorial site policy: animations are unconditionally on. The
-     slide deck's own rAF loop drives the transition curve, so we
-     don't need CSS `scroll-behavior: smooth` to be honoured by the
-     browser under reduce-motion. See src/components/slide-deck.tsx. */
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "ss01", "cv02", "cv11";

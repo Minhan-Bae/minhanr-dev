@@ -6,35 +6,40 @@ import { useEffect } from "react";
  * SlideDeck — PowerPoint-style navigation for any page whose top-level
  * sections are marked with `data-slide`.
  *
- * One wheel tick = one slide. One arrow press = one slide. Space / PgDn
- * forward, Shift+Space / PgUp backward. Home / End jump to the ends.
- * Trackpad: small-delta wheel events are ignored so two-finger scroll
- * still works for nested scrollers, and we defer to CSS scroll-snap
- * for touch devices (browsers handle swipe snap natively).
+ * Input:
+ *   • Wheel        — one tick = one slide (cooldown prevents multi-advance
+ *                    from a single trackpad flick firing 30+ wheel events)
+ *   • Keyboard     — ↑↓, PgUp/PgDn, Space / Shift+Space, Home, End
+ *   • Touch        — swipe ±10% of viewport height advances ±1 slide;
+ *                    anything smaller snaps back to the current slide
+ *   • Nested scroll — any child with its own overflow auto/scroll
+ *                    passes through untouched (modals, code blocks)
  *
- * Transitions are driven by a rAF loop with an ease-in-out cubic
- * curve (`animateTo`). We deliberately do NOT rely on
- * `scrollIntoView({ behavior: "smooth" })` here: Chrome degrades that
- * smooth curve to `auto` (instant) when Windows has "Animation
- * effects" off (prefers-reduced-motion: reduce), so the transition
- * would pop instead of slide. Driving the scroll position ourselves
- * via `scrollTo({ behavior: "instant" })` each frame bypasses the
- * CSS scroll-behavior cascade entirely.
+ * Transitions run on an own rAF loop with `easeOutExpo` (fast start,
+ * long graceful deceleration — reads as physical momentum). We drive
+ * the scroll position ourselves via `scrollTo({ behavior: "instant" })`
+ * each frame, bypassing the browser's CSS scroll-behavior cascade
+ * entirely. That matters because Chrome degrades the CSS smooth
+ * curve to `auto` (instant) when the OS reports reduce-motion —
+ * Windows 11's default — which would make our slides pop instead of
+ * slide. Our rAF loop is unaffected.
  *
- * This site is a portfolio; the animations ARE the design, so we
- * render them unconditionally. If a visitor's OS-level preference
- * conflicts, the one-slide-per-gesture pacing is already a strong
- * mitigation on its own.
+ * No CSS `scroll-snap-type` is set on html. We tried `y mandatory`
+ * but it fought the rAF by snapping every intermediate frame to the
+ * nearest snap point, which read as "딱딱" stuttering.
  */
 
-const COOLDOWN_MS = 820;
-const TRANSITION_MS = 700;
+const TRANSITION_MS = 950;
+/** Cooldown > transition duration so a new gesture can't start mid-glide. */
+const COOLDOWN_MS = TRANSITION_MS + 120;
 /** Wheel deltas below this are treated as trackpad noise and ignored. */
 const WHEEL_DEADBAND = 8;
 
-/** Ease-in-out cubic — matches `cubic-bezier(0.65, 0, 0.35, 1)` */
-function easeInOutCubic(t: number): number {
-  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+/** Ease-out expo — fast start, long graceful deceleration. Reads as
+ *  physical momentum rather than the symmetric "hesitate-rush-hesitate"
+ *  of a cubic in-out curve. */
+function easeOutExpo(t: number): number {
+  return t >= 1 ? 1 : 1 - Math.pow(2, -10 * t);
 }
 
 export function SlideDeck() {
@@ -47,6 +52,8 @@ export function SlideDeck() {
     let transitioning = false;
     let lastFire = 0;
     let animRaf: number | null = null;
+    let touchStartY: number | null = null;
+    let touchStartIdx = 0;
 
     const currentIdx = () => {
       const ss = slidesOf();
@@ -71,7 +78,7 @@ export function SlideDeck() {
 
       const step = (now: number) => {
         const t = Math.min((now - startT) / duration, 1);
-        const y = startY + diff * easeInOutCubic(t);
+        const y = startY + diff * easeOutExpo(t);
         window.scrollTo({ top: y, behavior: "instant" });
         if (t < 1) {
           animRaf = requestAnimationFrame(step);
@@ -164,11 +171,43 @@ export function SlideDeck() {
       goto(Math.max(0, Math.min(ss.length - 1, next)));
     };
 
+    // ── Touch (mobile swipe) ──────────────────────────────────────
+    // We don't preventDefault during touchmove — natural scroll
+    // provides tactile feedback as the finger drags. On touchend we
+    // read the total gesture delta and navigate ±1 slide if it crossed
+    // the threshold; otherwise we snap back to the starting slide.
+    const SWIPE_THRESHOLD_RATIO = 0.1;
+
+    const onTouchStart = (e: TouchEvent) => {
+      if (transitioning) return;
+      if (e.touches.length !== 1) return;
+      touchStartY = e.touches[0].clientY;
+      touchStartIdx = currentIdx();
+    };
+
+    const onTouchEnd = (e: TouchEvent) => {
+      if (touchStartY === null || transitioning) return;
+      const endY = e.changedTouches[0].clientY;
+      const delta = touchStartY - endY;
+      const threshold = window.innerHeight * SWIPE_THRESHOLD_RATIO;
+
+      let next = touchStartIdx;
+      if (delta > threshold) next = touchStartIdx + 1;
+      else if (delta < -threshold) next = touchStartIdx - 1;
+
+      goto(Math.max(0, Math.min(slidesOf().length - 1, next)));
+      touchStartY = null;
+    };
+
     window.addEventListener("wheel", onWheel, { passive: false });
     window.addEventListener("keydown", onKeyDown);
+    window.addEventListener("touchstart", onTouchStart, { passive: true });
+    window.addEventListener("touchend", onTouchEnd, { passive: true });
     return () => {
       window.removeEventListener("wheel", onWheel);
       window.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener("touchstart", onTouchStart);
+      window.removeEventListener("touchend", onTouchEnd);
       if (animRaf !== null) cancelAnimationFrame(animRaf);
     };
   }, []);
