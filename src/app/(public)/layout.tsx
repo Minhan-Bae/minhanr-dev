@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { PublicHeader } from "@/components/public-header";
+import { SiteBackground } from "@/components/site-background";
 import { createSupabaseServer } from "@/lib/supabase-server";
 import { BRAND_IDENTITY } from "@/lib/brand/tokens";
 
@@ -18,6 +19,7 @@ export default async function PublicLayout({
 
   return (
     <div className="flex min-h-svh flex-col">
+      <SiteBackground />
       <PublicHeader isAuthenticated={isAuthenticated} />
       <main className="flex-1">{children}</main>
 

@@ -10,7 +10,9 @@
     "typecheck": "tsc --noEmit",
     "images:work": "node scripts/generate-work-images.mjs",
     "images:work:force": "node scripts/generate-work-images.mjs --force",
-    "images:work:dry": "node scripts/generate-work-images.mjs --dry"
+    "images:work:dry": "node scripts/generate-work-images.mjs --dry",
+    "images:bg": "node scripts/generate-backgrounds.mjs",
+    "images:bg:force": "node scripts/generate-backgrounds.mjs --force"
   },
   "dependencies": {
     "@base-ui/react": "^1.3.0",

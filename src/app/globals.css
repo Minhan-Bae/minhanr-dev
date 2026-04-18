@@ -380,6 +380,24 @@
   animation: fade-in 0.8s var(--ease-out) forwards;
 }
 
+/* ─── Ken-Burns drift ──────────────────────────────────────────────
+   Slow, asymmetric pan+zoom on a still image to give the full-page
+   background its "gentle video" feel without the weight of a real
+   video element. 40-second cycle so the motion never accelerates
+   past "barely perceptible"; the `inset-[-4%]` wrapper around the
+   image hides the cropped edges produced by the scale transform. */
+@keyframes ken-burns-drift {
+  0%   { transform: translate3d(0%, 0%, 0)    scale(1.04); }
+  25%  { transform: translate3d(-1.5%, -1%, 0) scale(1.08); }
+  50%  { transform: translate3d(-2%, 1%, 0)   scale(1.06); }
+  75%  { transform: translate3d(1%, 1.5%, 0)  scale(1.09); }
+  100% { transform: translate3d(0%, 0%, 0)    scale(1.04); }
+}
+.ken-burns-drift {
+  animation: ken-burns-drift 40s ease-in-out infinite;
+  will-change: transform;
+}
+
 .hover-lift {
   transition: transform var(--duration-quick) var(--ease-out);
 }
@@ -451,6 +469,7 @@
   .hover-lift:hover,
   .media-zoom:hover > :first-child { transform: none; }
   .skeleton-shimmer { animation: none; }
+  .ken-burns-drift { animation: none; transform: scale(1.04); }
   ::view-transition-old(root),
   ::view-transition-new(root) { animation: none; }
 }

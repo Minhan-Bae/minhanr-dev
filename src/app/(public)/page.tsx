@@ -61,9 +61,9 @@ export default function Home() {
             </h2>
           </div>
           <p className="font-technical max-w-md text-[12px] leading-relaxed text-muted-foreground sm:text-right">
-            색은 카테고리, 거리는 시간입니다. 점 위에 커서를 올리면
-            같은 태그끼리 연결되고, 클릭하면 그 글이 열립니다.
-            중앙의 다섯 점은 공개되지 않은 카테고리입니다.
+            각 점은 하나의 글, 색은 작업 영역(AREA)을 뜻합니다.
+            드래그하면 주변이 스프링처럼 따라오고, 커서를 올리면
+            같은 태그를 공유하는 글들이 선으로 이어집니다. 클릭하면 글이 열립니다.
           </p>
         </header>
         <NotesGraph posts={allPosts} />
