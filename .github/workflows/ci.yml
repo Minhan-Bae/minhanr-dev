@@ -1,0 +1,40 @@
+# minhanr.dev CI — Vercel 배포 이전에 tsc/eslint/build 검증.
+# Vercel도 동일 단계를 실행하지만, GitHub Actions로 먼저 걸러 배포 실패를 예방하고
+# PR에서 피드백을 빠르게 얻는다.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: minhanr-dev-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type check
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        env:
+          # Vercel 실제 env 없이도 빌드는 되는지 확인. 런타임 값은 Vercel에서 주입.
+          NEXT_TELEMETRY_DISABLED: '1'
+        run: npm run build
