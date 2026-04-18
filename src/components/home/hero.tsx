@@ -1,5 +1,6 @@
 import { BRAND_IDENTITY } from "@/lib/brand/tokens";
 import { TypewriterLoop } from "@/components/typewriter-loop";
+import { HeroSearch } from "@/components/home/hero-search";
 
 interface HeroProps {
   // The Selected / Writing / Updated stats used to live on the hero's
@@ -33,8 +34,8 @@ export function Hero(_props: HeroProps) {
       data-slide
       className="slide relative flex w-full flex-col overflow-hidden pb-[clamp(140px,18vh,200px)]"
     >
-      {/* ─── Centerpiece wordmark ───────────────────────────────────── */}
-      <div className="relative z-0 flex flex-1 items-center justify-center px-6 sm:px-10">
+      {/* ─── Centerpiece wordmark + search ──────────────────────────── */}
+      <div className="relative z-0 flex flex-1 flex-col items-center justify-center px-6 sm:px-10">
         <div className="relative">
           <TypewriterLoop
             as="h1"
@@ -62,6 +63,12 @@ export function Hero(_props: HeroProps) {
             className="absolute -bottom-4 left-0 block h-px w-full bg-foreground/20"
           />
         </div>
+
+        {/* Chrome-new-tab-style search pill beneath the wordmark.
+            Clicking opens the shared SiteSearch overlay so there's a
+            single search surface across keyboard (⌘K), dock icon, and
+            this landing pill. */}
+        <HeroSearch />
       </div>
 
     </section>
