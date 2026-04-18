@@ -138,11 +138,15 @@ export function deriveNoteSurface(path: string): {
   label: string;
   backHref: string;
 } {
+  // /papers and /projects were retired as private surfaces in the
+  // editorial redesign. Research and Projects notes now fall back to
+  // /notes (the unified vault browser), so no back-link ever lands on
+  // a redirect stub.
   if (path.startsWith("040_Resources/041_Tech/Research/")) {
-    return { surface: "papers", label: "Papers", backHref: "/papers" };
+    return { surface: "papers", label: "Research", backHref: "/notes" };
   }
   if (path.startsWith("020_Projects/")) {
-    return { surface: "projects", label: "Projects", backHref: "/projects" };
+    return { surface: "projects", label: "Projects", backHref: "/notes" };
   }
   if (path.startsWith("010_Daily/")) {
     return { surface: "daily", label: "Daily", backHref: "/notes" };

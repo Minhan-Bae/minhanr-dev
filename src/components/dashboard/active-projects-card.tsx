@@ -69,7 +69,7 @@ export function ActiveProjectsCard({ projects }: ActiveProjectsCardProps) {
             <CardTitle className="text-base">진행 중 프로젝트</CardTitle>
             <CardDescription className="text-xs">Active — 최근 편집순</CardDescription>
           </div>
-          <Link href="/projects" className="text-xs text-muted-foreground hover:text-primary transition-colors">
+          <Link href="/notes" className="text-xs text-muted-foreground hover:text-primary transition-colors">
             전체 →
           </Link>
         </div>

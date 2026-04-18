@@ -8,8 +8,6 @@ import {
   Activity,
   FileText,
   FilePlus,
-  BookOpen,
-  FolderKanban,
   Tag,
   Link2,
   Network,
@@ -66,8 +64,9 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { title: "Notes", href: "/notes", icon: FileText },
       { title: "New note", href: "/notes/new", icon: FilePlus },
-      { title: "Papers", href: "/papers", icon: BookOpen },
-      { title: "Projects", href: "/projects", icon: FolderKanban },
+      // /papers and /projects were retired as private surfaces in the
+      // editorial redesign; the note browser + tags + graph cover their
+      // use cases now.
       { title: "Graph", href: "/graph", icon: Network },
       { title: "Tags", href: "/tags", icon: Tag },
       { title: "Links", href: "/links", icon: Link2 },

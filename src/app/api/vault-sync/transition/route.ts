@@ -92,9 +92,10 @@ export async function POST(request: NextRequest) {
   // vault-index 의존 Knowledge Hub 라우트 전체 재검증 — status/lifecycle 변경 시
   // tag count, link list, trend, finance note 등도 같이 갱신되어야 정합성 유지.
   // (revalidateTag는 Next.js 16에서 2번째 인자 필수 — revalidatePath가 더 간결)
+  // /projects, /papers, /now, /colophon are redirect stubs now
+  // (editorial redesign retired them) — dropped from the invalidate list.
   for (const r of [
     "/dashboard",
-    "/projects",
     "/notes",
     "/deadlines",
     "/review",
@@ -104,7 +105,6 @@ export async function POST(request: NextRequest) {
     "/finance",
     "/statistics",
     "/graph",
-    "/papers",
     "/",  // 홈(vault aggregate)
   ]) {
     revalidatePath(r);

@@ -21,9 +21,11 @@ export type VaultAction = "pause" | "complete" | "archive";
 
 const ALLOWED: ReadonlySet<VaultAction> = new Set(["pause", "complete", "archive"]);
 
+// Retired routes (/papers /projects /now /colophon) are redirect stubs
+// now, so there's nothing to revalidate on those paths. Dropped from
+// the list to avoid noise.
 const REVALIDATE_PATHS = [
   "/dashboard",
-  "/projects",
   "/notes",
   "/deadlines",
   "/review",
@@ -33,7 +35,6 @@ const REVALIDATE_PATHS = [
   "/finance",
   "/statistics",
   "/graph",
-  "/papers",
   "/",
 ] as const;
 
