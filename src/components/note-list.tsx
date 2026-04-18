@@ -31,6 +31,15 @@ const STATUS_COLORS: Record<string, string> = {
   _default: "bg-muted/15 text-muted-foreground border-border/30",
 };
 
+// Active Grid (2026 Bento 진화형): 상태별 좌측 accent stripe + hover 시 excerpt 줄 확장.
+const STATUS_ACCENT: Record<string, string> = {
+  seed: "before:bg-chart-4",
+  growing: "before:bg-chart-1",
+  mature: "before:bg-primary",
+  active: "before:bg-chart-3",
+  _default: "before:bg-border",
+};
+
 export function NoteList({ notes, total, page, pageSize, baseHref, searchParams }: NoteListProps) {
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
   const prevHref = page > 1 ? buildHref(baseHref, { ...searchParams, page: page - 1 }) : null;
@@ -48,27 +57,33 @@ export function NoteList({ notes, total, page, pageSize, baseHref, searchParams 
           </CardContent>
         </Card>
       ) : (
-        <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          {notes.map((n) => {
+        <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 auto-rows-fr">
+          {notes.map((n, idx) => {
             const href = vaultPathToHref(n.path);
-            const statusClass = n.status ? (STATUS_COLORS[n.status] || STATUS_COLORS._default) : "";
+            const statusKey = n.status || "_default";
+            const statusClass = STATUS_COLORS[statusKey] || STATUS_COLORS._default;
+            const accentClass = STATUS_ACCENT[statusKey] || STATUS_ACCENT._default;
+            // 첫 번째 카드 = featured: 2-span on lg, 더 큰 타이포, excerpt 항상 표시
+            const featured = idx === 0 && page === 1;
             return (
-              <li key={n.path}>
-                <Card className="h-full transition-all duration-200 hover:border-primary/40 hover:bg-[var(--surface-1)] card-lift">
-                  <CardContent className="py-3 space-y-2">
+              <li key={n.path} className={featured ? "sm:col-span-2 lg:col-span-2" : ""}>
+                <Card
+                  className={`group h-full relative overflow-hidden hover-lift transition-[border-color,background-color] duration-[var(--duration-quick)] hover:border-primary/50 hover:bg-[var(--surface-1)] before:absolute before:left-0 before:top-0 before:h-full before:w-[3px] before:transition-opacity before:duration-[var(--duration-quick)] before:opacity-60 group-hover:before:opacity-100 ${accentClass}`}
+                >
+                  <CardContent className={`${featured ? "py-5" : "py-3"} pl-4 space-y-2`}>
                     <Link
                       href={href}
-                      className="block font-medium text-sm leading-tight line-clamp-2 hover:text-primary transition-colors"
+                      className={`block font-semibold leading-tight line-clamp-2 group-hover:text-primary transition-colors ${featured ? "text-base" : "text-sm"}`}
                     >
                       {n.title}
                     </Link>
                     {typeof n.excerpt === "string" && n.excerpt && (
-                      <p className="text-xs text-muted-foreground/80 line-clamp-2 leading-relaxed">
+                      <p className={`text-xs text-muted-foreground/80 leading-relaxed ${featured ? "line-clamp-3" : "line-clamp-2 group-hover:line-clamp-4 transition-[line-clamp]"}`}>
                         {n.excerpt}
                       </p>
                     )}
-                    <p className="text-xs text-muted-foreground/60 truncate">{n.path}</p>
-                    <div className="flex flex-wrap items-center gap-1.5 text-xs">
+                    <p className="text-[10px] text-muted-foreground/60 truncate font-mono">{n.path}</p>
+                    <div className="flex flex-wrap items-center gap-1.5 text-xs pt-1">
                       {n.status && (
                         <Badge
                           variant="outline"
@@ -83,7 +98,7 @@ export function NoteList({ notes, total, page, pageSize, baseHref, searchParams 
                         </span>
                       )}
                       {Array.isArray(n.tags) &&
-                        n.tags.slice(0, 3).map((t) => (
+                        n.tags.slice(0, featured ? 5 : 3).map((t) => (
                           <Badge key={t} variant="outline" className="font-normal text-xs">
                             #{t}
                           </Badge>
