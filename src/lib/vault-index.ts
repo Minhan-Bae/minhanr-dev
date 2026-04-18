@@ -1,5 +1,6 @@
 import { unstable_cache } from "next/cache";
 import { CACHE_TTL_VAULT, VAULT_INDEX_URL } from "./constants";
+import { VAULT_PATHS, bucketOf as bucketOfPath } from "./vault-paths";
 
 export interface VaultNoteRecord {
   title?: string;        // Layer 1: 인덱스 사전 추출
@@ -81,7 +82,7 @@ export interface VaultAggregates {
   recent_growing: VaultNote[];
 }
 
-const RESEARCH_PREFIX = "040_Resources/041_Tech/Research/";
+const RESEARCH_PREFIX = `${VAULT_PATHS.techResearch}/`;
 
 export async function fetchVaultIndex(): Promise<VaultIndexFile> {
   const token = process.env.GITHUB_TOKEN;
@@ -120,13 +121,8 @@ function topFolderOf(path: string): string {
   return seg;
 }
 
-function bucketOf(path: string): "Daily" | "Projects" | "Resources" | "Areas" | "Other" {
-  if (path.startsWith("010_Daily/")) return "Daily";
-  if (path.startsWith("020_Projects/")) return "Projects";
-  if (path.startsWith("040_Resources/")) return "Resources";
-  if (path.startsWith("030_Areas/")) return "Areas";
-  return "Other";
-}
+// vault-paths.ts의 bucketOf를 재-export 형태로 사용. 로컬 이름 유지로 호출처 영향 최소화.
+const bucketOf = bucketOfPath;
 
 function monthOf(dateStr?: string): string | null {
   if (!dateStr) return null;

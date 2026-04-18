@@ -16,6 +16,7 @@ import { requireUser } from "@/lib/api-auth";
 import { updateFrontmatterField } from "@/lib/vault-write";
 import { commitToGitHub } from "@/lib/github";
 import { nowInKST } from "@/lib/time";
+import { VAULT_PATHS } from "@/lib/vault-paths";
 
 export type VaultAction = "pause" | "complete" | "archive";
 
@@ -148,7 +149,7 @@ export async function createInboxNoteAction(
     .replace(/[^a-zA-Z0-9가-힣\s-]/g, "")
     .replace(/\s+/g, "-");
   const fileName = `dashboard_${ts}_${slug}`.slice(0, 80);
-  const path = `000_Inbox/${fileName}.md`;
+  const path = `${VAULT_PATHS.inbox}/${fileName}.md`;
 
   const content = `---
 source: dashboard

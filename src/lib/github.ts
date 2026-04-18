@@ -5,6 +5,7 @@
 
 import { GITHUB_REPO } from "./constants";
 import { todayKstDate, todayKstDayName } from "./time";
+import { VAULT_PATHS } from "./vault-paths";
 
 const GITHUB_API = `https://api.github.com/repos/${GITHUB_REPO}/contents`;
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN || "";
@@ -102,7 +103,7 @@ export async function appendToDailyNote(
   date?: string
 ): Promise<{ ok: boolean; error?: string }> {
   const dateStr = date || todayDate();
-  const dailyPath = `010_Daily/${dateStr}.md`;
+  const dailyPath = `${VAULT_PATHS.daily}/${dateStr}.md`;
   const existing = await getFileContent(dailyPath);
 
   if (existing) {
@@ -153,7 +154,7 @@ export async function updateDailyCheckbox(
   date?: string
 ): Promise<{ ok: boolean; error?: string }> {
   const dateStr = date || todayDate();
-  const dailyPath = `010_Daily/${dateStr}.md`;
+  const dailyPath = `${VAULT_PATHS.daily}/${dateStr}.md`;
   const existing = await getFileContent(dailyPath);
   if (!existing) return { ok: false, error: "Daily note not found" };
 

@@ -7,6 +7,7 @@ import rehypeRaw from "rehype-raw";
 import rehypeHighlight from "rehype-highlight";
 import rehypeStringify from "rehype-stringify";
 import { CACHE_TTL_VAULT, GITHUB_API_BASE } from "./constants";
+import { surfaceOf } from "./vault-paths";
 
 export interface VaultNoteFrontmatter {
   title?: string;
@@ -132,36 +133,17 @@ export function deriveNoteTitle(path: string, frontmatter?: VaultNoteFrontmatter
 /**
  * vault 경로의 상위 폴더에 따라 surface 컨텍스트를 결정.
  * 노트 상세 페이지에서 "어디로 돌아가기" 링크 결정에 사용.
+ *
+ * /papers and /projects were retired as private surfaces in the editorial
+ * redesign. Research and Projects notes now fall back to /notes (the unified
+ * vault browser), so no back-link ever lands on a redirect stub.
+ *
+ * 실제 prefix 매칭 규칙은 vault-paths.ts의 surfaceOf로 위임 (SSOT 단일화).
  */
 export function deriveNoteSurface(path: string): {
   surface: "papers" | "projects" | "notes" | "daily" | "areas" | "inbox" | "archive" | "system";
   label: string;
   backHref: string;
 } {
-  // /papers and /projects were retired as private surfaces in the
-  // editorial redesign. Research and Projects notes now fall back to
-  // /notes (the unified vault browser), so no back-link ever lands on
-  // a redirect stub.
-  if (path.startsWith("040_Resources/041_Tech/Research/")) {
-    return { surface: "papers", label: "Research", backHref: "/notes" };
-  }
-  if (path.startsWith("020_Projects/")) {
-    return { surface: "projects", label: "Projects", backHref: "/notes" };
-  }
-  if (path.startsWith("010_Daily/")) {
-    return { surface: "daily", label: "Daily", backHref: "/notes" };
-  }
-  if (path.startsWith("030_Areas/")) {
-    return { surface: "areas", label: "Areas", backHref: "/notes" };
-  }
-  if (path.startsWith("000_Inbox/")) {
-    return { surface: "inbox", label: "Inbox", backHref: "/notes" };
-  }
-  if (path.startsWith("050_Archive/")) {
-    return { surface: "archive", label: "Archive", backHref: "/notes" };
-  }
-  if (path.startsWith("090_System/")) {
-    return { surface: "system", label: "System", backHref: "/notes" };
-  }
-  return { surface: "notes", label: "Notes", backHref: "/notes" };
+  return surfaceOf(path);
 }

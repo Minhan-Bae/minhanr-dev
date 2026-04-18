@@ -11,8 +11,10 @@ import { revalidatePath } from "next/cache";
 import { requireUser } from "@/lib/api-auth";
 import { getFileContent, commitToGitHub } from "@/lib/github";
 import { todayKstDate, isoWeek } from "@/lib/time";
+import { VAULT_PATHS } from "@/lib/vault-paths";
 
-const WEEKLY_DIR = "010_Daily/Weekly";
+// 2026-04-18 Level 1 청소: 010_Daily/Weekly/ 폴더 → 010_Daily/012_Weekly_Review/ 통합.
+const WEEKLY_DIR = VAULT_PATHS.weeklyReview;
 
 export interface WeeklyReviewState {
   ok: boolean;

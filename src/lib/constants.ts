@@ -1,10 +1,11 @@
 import { AGENTS } from "./agents";
+import { VAULT_FILES } from "./vault-paths";
 
 /* ── GitHub ── */
 export const GITHUB_REPO = process.env.GITHUB_REPO || "Minhan-Bae/oikbas-vault";
 export const GITHUB_API_BASE = `https://api.github.com/repos/${GITHUB_REPO}`;
 export const GITHUB_COMMITS_URL = `${GITHUB_API_BASE}/commits`;
-export const VAULT_INDEX_URL = `${GITHUB_API_BASE}/contents/090_System/vault_index.json`;
+export const VAULT_INDEX_URL = `${GITHUB_API_BASE}/contents/${VAULT_FILES.vaultIndex}`;
 
 /* ── Polling & Cache ── */
 export const DASHBOARD_POLL_MS = 60_000;   // 60s
