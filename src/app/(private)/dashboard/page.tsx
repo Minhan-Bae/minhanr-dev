@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { StatKpiCard } from "@/components/stat-kpi-card";
 import { DashboardCalendar, type CalendarEvent, type WeekCommitment } from "@/components/dashboard-calendar";
 import { VaultUnreachablePrivate } from "@/components/vault-unreachable";
+import { NoteQuickActions } from "@/components/note-quick-actions";
 import { FileText, Send, Inbox, Layers } from "lucide-react";
 import { aggregate, getCachedVaultIndex, KB_HUB_HIDDEN_STATUSES, listNotes } from "@/lib/vault-index";
 import { vaultPathToHref } from "@/lib/vault-note";
@@ -224,12 +225,15 @@ async function DashboardContent() {
               <ul className="space-y-3">
                 {activeProjects.map((p) => (
                   <li key={p.path} className="group space-y-1 p-2 -mx-2 rounded-md transition-colors hover:bg-muted/50">
-                    <Link
-                      href={vaultPathToHref(p.path)}
-                      className="text-base font-semibold truncate block group-hover:text-primary transition-colors"
-                    >
-                      {p.title}
-                    </Link>
+                    <div className="flex items-center justify-between gap-2">
+                      <Link
+                        href={vaultPathToHref(p.path)}
+                        className="text-base font-semibold truncate group-hover:text-primary transition-colors flex-1 min-w-0"
+                      >
+                        {p.title}
+                      </Link>
+                      <NoteQuickActions path={p.path} />
+                    </div>
                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
                       {p.priority && <Badge variant="outline" className="font-mono text-[10px]">{p.priority}</Badge>}
                       {p.status && <span className="capitalize">{p.status}</span>}
