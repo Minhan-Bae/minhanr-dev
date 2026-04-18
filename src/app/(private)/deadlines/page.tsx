@@ -1,11 +1,8 @@
-import Link from "next/link";
 import { Suspense } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardDescription, CardTitle } from "@/components/ui/card";
 import { VaultUnreachablePrivate } from "@/components/vault-unreachable";
-import { NoteQuickActions } from "@/components/note-quick-actions";
+import { DeadlinesBucket } from "@/components/dashboard/deadlines-bucket";
 import { getCachedVaultIndex } from "@/lib/vault-index";
-import { vaultPathToHref } from "@/lib/vault-note";
 
 export const metadata = {
   title: "Deadlines | minhanr.dev",
@@ -103,48 +100,14 @@ async function DeadlinesContent() {
         ))}
       </div>
       <div className="space-y-4">
-        {groupOrder.map((g) => {
-          const list = groups[g.key];
-          if (list.length === 0) return null;
-          return (
-            <Card key={g.key}>
-              <CardHeader className="pb-2">
-                <CardTitle className={`text-sm ${g.tone}`}>{g.label}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-2">
-                  {list.map((it) => (
-                    <li key={it.path} className="group flex items-start justify-between gap-3 text-sm py-1.5 px-2 -mx-2 rounded hover:bg-muted/50 transition-colors">
-                      <div className="min-w-0 flex-1">
-                        <Link
-                          href={vaultPathToHref(it.path)}
-                          className="font-medium hover:underline"
-                        >
-                          {it.title}
-                        </Link>
-                        <p className="text-[10px] text-muted-foreground/70 truncate font-mono">{it.path}</p>
-                      </div>
-                      <div className="flex shrink-0 items-center gap-1.5 text-xs">
-                        <NoteQuickActions path={it.path} />
-                        {it.priority && (
-                          <Badge variant="outline" className="font-normal">
-                            {it.priority}
-                          </Badge>
-                        )}
-                        {it.status && (
-                          <Badge variant="outline" className="font-normal">
-                            {it.status}
-                          </Badge>
-                        )}
-                        <span className="tabular-nums text-muted-foreground">{it.deadline}</span>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
-          );
-        })}
+        {groupOrder.map((g) => (
+          <DeadlinesBucket
+            key={g.key}
+            label={g.label}
+            tone={g.tone}
+            items={groups[g.key]}
+          />
+        ))}
       </div>
     </>
   );
