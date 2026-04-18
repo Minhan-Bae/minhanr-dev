@@ -383,15 +383,20 @@
   transform: scale(0.97);
 }
 
-/* Editorial image hover — subtle zoom of the inner <img>/media,
-   leaving the frame still. Pair with `overflow-hidden` on the frame. */
+/* Editorial image hover — the frame stays put; the inner
+   <img>/media scales up smoothly on hover for a "closer view" feel.
+   Pair with `overflow-hidden` on the frame so the enlarged image
+   doesn't escape its bounds. Author preference is for a pronounced,
+   slowly-advancing zoom rather than a subtle nudge — 1.1 scale over
+   1.4 s with the ease-out-expo curve reads as "gradually expanding"
+   instead of a click response. */
 .media-zoom { overflow: hidden; }
 .media-zoom > :first-child {
-  transition: transform 0.9s var(--ease-out);
+  transition: transform 1.4s var(--ease-out-expo);
   will-change: transform;
 }
 .media-zoom:hover > :first-child {
-  transform: scale(1.03);
+  transform: scale(1.1);
 }
 
 /* Link underline that grows on hover */
@@ -485,6 +490,7 @@
 .frame-4x5   { aspect-ratio: 4 / 5; }
 .frame-16x9  { aspect-ratio: 16 / 9; }
 .frame-21x9  { aspect-ratio: 21 / 9; }
+.frame-3x1   { aspect-ratio: 3 / 1; }
 .frame-3x4   { aspect-ratio: 3 / 4; }
 .frame-square { aspect-ratio: 1 / 1; }
 

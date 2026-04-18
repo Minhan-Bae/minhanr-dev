@@ -10,7 +10,7 @@ interface WorkCoverProps {
   /** Secondary line inside the placeholder — subject or year. */
   sublabel?: string;
   /** Aspect ratio utility class — defaults to `frame-4x5` (editorial portrait). */
-  aspect?: "frame-4x5" | "frame-16x9" | "frame-21x9" | "frame-3x4" | "frame-square";
+  aspect?: "frame-4x5" | "frame-16x9" | "frame-21x9" | "frame-3x1" | "frame-3x4" | "frame-square";
   /** next/image `sizes` attribute. */
   sizes?: string;
   /** next/image `priority` for above-the-fold. */
