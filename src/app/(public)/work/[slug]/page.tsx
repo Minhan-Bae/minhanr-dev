@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, ArrowUpRight } from "lucide-react";
 import { getAllWork, getWorkBySlug } from "@/lib/work";
 import { WorkCover } from "@/components/work-cover";
+import { Typewriter } from "@/components/typewriter";
 
 export function generateStaticParams() {
   return getAllWork().map((w) => ({ slug: w.slug }));
@@ -69,12 +70,16 @@ export default async function CaseStudyPage({
             >
               {item.discipline} · {item.year}
             </p>
-            <h1
-              className="font-display leading-[1.1] tracking-[-0.02em] animate-fade-up"
-              style={{ fontSize: "var(--font-size-display)", animationDelay: "180ms" }}
-            >
-              {item.title}
-            </h1>
+            <Typewriter
+              as="h1"
+              lang="en"
+              text={item.title}
+              stagger={70}
+              delay={180}
+              cursor={false}
+              className="font-display italic leading-[1.1] tracking-[-0.02em] block"
+              style={{ fontSize: "var(--font-size-display)" }}
+            />
             <p
               className="mt-6 font-display italic text-lg leading-snug text-muted-foreground sm:text-xl animate-fade-up"
               style={{ animationDelay: "300ms" }}
@@ -116,20 +121,23 @@ export default async function CaseStudyPage({
         </header>
       </section>
 
-      {/* Cover image — edge-to-edge */}
+      {/* Cover image — edge-to-edge. `viewTransitionName` matches the
+          wrapper on /work index so navigating in / out morphs the cover. */}
       <section
         className="mx-auto mt-16 w-full max-w-[1440px] px-6 sm:mt-24 sm:px-10 animate-fade-up"
-        style={{ animationDelay: "540ms" }}
+        style={{ animationDelay: "540ms", viewTransitionName: `work-cover-${item.slug}` }}
       >
-        <WorkCover
-          src={item.coverImage}
-          alt={item.coverAlt ?? item.title}
-          label={item.title}
-          sublabel={item.subject}
-          aspect="frame-21x9"
-          sizes="100vw"
-          priority
-        />
+        <div className="parallax-slow">
+          <WorkCover
+            src={item.coverImage}
+            alt={item.coverAlt ?? item.title}
+            label={item.title}
+            sublabel={item.subject}
+            aspect="frame-21x9"
+            sizes="100vw"
+            priority
+          />
+        </div>
       </section>
 
       {/* ─── Body ─── */}

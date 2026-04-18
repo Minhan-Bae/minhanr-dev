@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { getAllWork } from "@/lib/work";
 import { WorkCover } from "@/components/work-cover";
+import { Typewriter } from "@/components/typewriter";
 
 export const metadata: Metadata = {
   title: "작업",
@@ -32,12 +33,15 @@ export default function WorkIndex() {
           >
             Work · 작업
           </p>
-          <h1
-            className="font-display leading-[1.1] tracking-[-0.02em] animate-fade-up"
-            style={{ fontSize: "var(--font-size-h1)", animationDelay: "120ms" }}
-          >
-            Case studies.
-          </h1>
+          <Typewriter
+            as="h1"
+            lang="en"
+            text="Case studies."
+            stagger={80}
+            delay={120}
+            className="font-display italic leading-[1.1] tracking-[-0.02em] block"
+            style={{ fontSize: "var(--font-size-h1)" }}
+          />
           <p
             className="mt-6 max-w-xl text-[15px] leading-[1.7] text-muted-foreground sm:text-base animate-fade-up"
             style={{ animationDelay: "240ms" }}
@@ -63,15 +67,18 @@ export default function WorkIndex() {
                       ? "sm:col-span-7"
                       : "sm:col-span-7 sm:col-start-6 sm:order-2"
                   }`}
+                  style={{ viewTransitionName: `work-cover-${item.slug}` }}
                 >
-                  <WorkCover
-                    src={item.coverImage}
-                    alt={item.coverAlt ?? item.title}
-                    label={item.title}
-                    sublabel={item.subject}
-                    aspect={i % 2 === 0 ? "frame-4x5" : "frame-16x9"}
-                    priority={i === 0}
-                  />
+                  <div className="parallax-slow">
+                    <WorkCover
+                      src={item.coverImage}
+                      alt={item.coverAlt ?? item.title}
+                      label={item.title}
+                      sublabel={item.subject}
+                      aspect={i % 2 === 0 ? "frame-4x5" : "frame-16x9"}
+                      priority={i === 0}
+                    />
+                  </div>
                 </div>
                 <div
                   className={`${

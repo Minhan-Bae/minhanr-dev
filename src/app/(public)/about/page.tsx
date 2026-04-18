@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { ArrowUpRight } from "lucide-react";
 import { BRAND_IDENTITY } from "@/lib/brand/tokens";
+import { Typewriter } from "@/components/typewriter";
 
 export const metadata: Metadata = {
   title: "소개",
@@ -29,13 +30,23 @@ export default function AboutPage() {
           >
             About · 소개
           </p>
-          <h1
-            className="font-display leading-[1.05] tracking-[-0.03em] animate-fade-up"
-            style={{ fontSize: "var(--font-size-display)", animationDelay: "120ms" }}
+          <Typewriter
+            as="h1"
+            lang="en"
+            text={BRAND_IDENTITY.studio}
+            stagger={140}
+            delay={120}
+            cursor={false}
+            className="font-display italic leading-[1.05] tracking-[-0.03em] block"
+            style={{ fontSize: "var(--font-size-display)" }}
           >
-            {BRAND_IDENTITY.studio}
-            <span className="text-muted-foreground">.dev</span>
-          </h1>
+            <span
+              className="text-muted-foreground animate-fade-up"
+              style={{ animationDelay: `${120 + BRAND_IDENTITY.studio.length * 140 + 120}ms` }}
+            >
+              .dev
+            </span>
+          </Typewriter>
           <p
             className="mt-6 font-technical text-[15px] text-muted-foreground sm:text-base animate-fade-up"
             style={{ animationDelay: "240ms" }}

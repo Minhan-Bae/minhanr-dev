@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getAllPosts } from "@/lib/blog";
 import { BlogList } from "@/components/blog-list";
 import { NotesGraph } from "@/components/notes-graph";
+import { Typewriter } from "@/components/typewriter";
 
 export const metadata: Metadata = {
   title: "글",
@@ -41,12 +42,15 @@ export default function WritingIndex() {
           >
             Writing · 글
           </p>
-          <h1
-            className="font-display leading-[1.1] tracking-[-0.02em] animate-fade-up"
-            style={{ fontSize: "var(--font-size-h1)", animationDelay: "120ms" }}
-          >
-            Notes from the studio.
-          </h1>
+          <Typewriter
+            as="h1"
+            lang="en"
+            text="Notes from the studio."
+            stagger={55}
+            delay={120}
+            className="font-display italic leading-[1.1] tracking-[-0.02em] block"
+            style={{ fontSize: "var(--font-size-h1)" }}
+          />
           <p
             className="mt-6 max-w-xl text-[15px] leading-[1.7] text-muted-foreground sm:text-base animate-fade-up"
             style={{ animationDelay: "240ms" }}
