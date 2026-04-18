@@ -1,6 +1,5 @@
 import { SiteBackground } from "@/components/site-background";
 import { RainEffect } from "@/components/rain-effect";
-import { OceanWaves } from "@/components/ocean-waves";
 import { MouseSpotlight } from "@/components/mouse-spotlight";
 import { SiteWordmark } from "@/components/site-wordmark";
 import { SiteDock } from "@/components/site-dock";
@@ -32,7 +31,6 @@ export default async function PublicLayout({
     <div className="relative flex min-h-svh flex-col">
       <SiteBackground />
       <RainEffect />
-      <OceanWaves />
       <SiteWordmark />
       <SeoulDatum />
 

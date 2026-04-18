@@ -11,8 +11,7 @@ import {
  * Ambient audio by theme, with a single user-facing toggle.
  *
  *   • dark  → steady rain on glass (CC0 / Internet Archive)
- *   • light → gentle ocean waves (CC0 / Internet Archive) — pairs with
- *            the sunny-beach scene set on the light theme
+ *   • light → blustery wind loop (CC0 / Internet Archive)
  *
  * Browser autoplay policies require a user gesture before any audio
  * plays, so the toggle is OFF by default. Once the visitor enables it,
@@ -29,7 +28,7 @@ const AMBIENT_KEY = "minhanr-ambient";
 
 const TRACKS: Record<SceneTheme, string> = {
   dark: "/ambient/rain.mp3",
-  light: "/ambient/waves.mp3",
+  light: "/ambient/wind.mp3",
 };
 
 const FADE_MS = 1200;
