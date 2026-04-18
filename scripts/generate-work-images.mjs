@@ -129,12 +129,56 @@ function parseArgs(argv) {
   return args;
 }
 
-/** Call Imagen 4 with a prompt; return JPEG bytes. */
+/**
+ * Primary: Gemini 3 Pro Image Preview — "Nano Banana Pro".
+ * Higher-quality generation than Imagen for the editorial brief we're
+ * using; Imagen is kept as a fallback only.
+ */
+async function generateWithNanoBanana({ apiKey, prompt, aspectRatio }) {
+  const model = "gemini-3-pro-image-preview";
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+  // Aspect ratio goes both into the generationConfig and as a trailing
+  // text hint. Different 3.x revisions have weighted the two inputs
+  // differently, so sending both is cheaper than a failed generation.
+  const body = {
+    contents: [
+      {
+        parts: [
+          { text: `${prompt}\n\n(aspect ratio: ${aspectRatio})` },
+        ],
+      },
+    ],
+    generationConfig: {
+      responseModalities: ["IMAGE"],
+      imageConfig: { aspectRatio },
+    },
+  };
+  const resp = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  if (!resp.ok) {
+    const txt = await resp.text();
+    const err = new Error(
+      `NanoBanana ${resp.status}: ${txt.slice(0, 400)}`
+    );
+    err.status = resp.status;
+    err.detail = txt;
+    throw err;
+  }
+  const data = await resp.json();
+  const parts = data?.candidates?.[0]?.content?.parts ?? [];
+  for (const p of parts) {
+    if (p.inlineData?.data) return Buffer.from(p.inlineData.data, "base64");
+  }
+  throw new Error(
+    `NanoBanana returned no image: ${JSON.stringify(data).slice(0, 300)}`
+  );
+}
+
+/** Fallback: Imagen 4 via the Generative Language predict endpoint. */
 async function generateWithImagen({ apiKey, prompt, aspectRatio }) {
-  // Imagen 4 is the current flagship on the Generative Language API
-  // (Imagen 3 has been retired as of 2026 Q1). Use the standard variant;
-  // "fast" / "ultra" are available if quality/throughput tradeoffs become
-  // relevant later.
   const model = "imagen-4.0-generate-001";
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:predict?key=${apiKey}`;
   const body = {
@@ -168,46 +212,14 @@ async function generateWithImagen({ apiKey, prompt, aspectRatio }) {
   return Buffer.from(b64, "base64");
 }
 
-/** Fallback: Gemini image model via generateContent with image modality. */
-async function generateWithGemini({ apiKey, prompt }) {
-  // Current image-capable Gemini family on the public API. Prefer 3.x
-  // preview for quality; fall back through on 404.
-  const model = "gemini-3-pro-image-preview";
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-  const body = {
-    contents: [{ parts: [{ text: prompt }] }],
-    generationConfig: { responseModalities: ["IMAGE", "TEXT"] },
-  };
-  const resp = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
-  if (!resp.ok) {
-    const txt = await resp.text();
-    const err = new Error(`Gemini ${resp.status}: ${txt.slice(0, 400)}`);
-    err.status = resp.status;
-    err.detail = txt;
-    throw err;
-  }
-  const data = await resp.json();
-  const parts = data?.candidates?.[0]?.content?.parts ?? [];
-  for (const p of parts) {
-    if (p.inlineData?.data) return Buffer.from(p.inlineData.data, "base64");
-  }
-  throw new Error(
-    `Gemini returned no image: ${JSON.stringify(data).slice(0, 300)}`
-  );
-}
-
 async function generate({ apiKey, prompt, aspectRatio }) {
   try {
-    return await generateWithImagen({ apiKey, prompt, aspectRatio });
+    return await generateWithNanoBanana({ apiKey, prompt, aspectRatio });
   } catch (err) {
     console.warn(
-      `  [imagen fallback] ${err.message.split("\n")[0].slice(0, 160)}`
+      `  [nano banana → imagen fallback] ${err.message.split("\n")[0].slice(0, 180)}`
     );
-    return await generateWithGemini({ apiKey, prompt });
+    return await generateWithImagen({ apiKey, prompt, aspectRatio });
   }
 }
 
