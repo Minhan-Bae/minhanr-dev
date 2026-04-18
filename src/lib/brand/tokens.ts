@@ -53,3 +53,17 @@ export const BRAND_IDENTITY = {
   manifestoEn:
     "Selected work in AI and visual systems.",
 } as const;
+
+/**
+ * Public contact / collaboration channels used by the Studio
+ * engagement surface. Values here are what shows up in the footer
+ * rail, the /studio deck, and any "contact" CTA. Nullable fields are
+ * gated in the UI so unset channels just don't render — no dead links.
+ */
+export const BRAND_CONTACT = {
+  email: "hi@minhanr.dev",
+  github: "https://github.com/Minhan-Bae",
+  location: "Seoul, South Korea",
+  /** ISO year the studio's been operating as a named practice. */
+  est: 2020,
+} as const;
