@@ -2,8 +2,10 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Search as SearchIcon } from "lucide-react";
 import { VisitorCounter } from "@/components/visitor-counter";
 import { AmbientToggle } from "@/components/ambient-audio";
+import { openSiteSearch } from "@/components/site-search";
 
 type NavLink = { href: string; label: string };
 
@@ -67,6 +69,15 @@ export function SiteDock() {
         </ul>
         <div className="mx-1 h-4 w-px bg-[var(--hairline)] sm:mx-2" aria-hidden />
         <div className="flex items-center gap-0.5 sm:gap-1">
+          <button
+            type="button"
+            onClick={openSiteSearch}
+            aria-label="Search notes (⌘K)"
+            title="Search — ⌘K"
+            className="flex h-7 w-7 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-[var(--surface-2)] hover:text-foreground sm:h-8 sm:w-8"
+          >
+            <SearchIcon className="h-[14px] w-[14px]" aria-hidden />
+          </button>
           <AmbientToggle />
           <VisitorCounter />
         </div>

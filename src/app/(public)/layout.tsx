@@ -6,6 +6,8 @@ import { SiteDock } from "@/components/site-dock";
 import { SeoulDatum } from "@/components/seoul-datum";
 import { SiteColophon } from "@/components/site-colophon";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { SiteSearch } from "@/components/site-search";
+import { getAllPosts } from "@/lib/blog";
 
 /**
  * Public layout — minimal chrome, heavy atmosphere.
@@ -28,6 +30,16 @@ export default async function PublicLayout({
 }: {
   children: React.ReactNode;
 }) {
+  // Shrink the dataset down to what the client-side search actually
+  // filters against — keeps the payload per public navigation small.
+  const searchItems = getAllPosts().map((p) => ({
+    slug: p.slug,
+    title: p.title,
+    date: p.date,
+    tags: p.tags,
+    summary: p.summary,
+  }));
+
   return (
     <div className="relative flex min-h-svh flex-col">
       <SiteBackground />
@@ -40,6 +52,7 @@ export default async function PublicLayout({
       <ThemeToggle />
       <SiteColophon />
       <SiteDock />
+      <SiteSearch items={searchItems} />
       <MouseSpotlight />
     </div>
   );
