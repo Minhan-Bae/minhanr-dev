@@ -1,15 +1,17 @@
 #!/usr/bin/env node
 /**
- * Generate the full-page background image via Imagen 4.
+ * Generate time-of-day background scenes via Imagen 4 / Nano Banana Pro.
  *
- * The site background is a single 16:9 landscape placed behind every
- * public page. A slow Ken-Burns CSS animation on top gives it the
- * "gentle video" feel without the weight (or API cost, or autoplay
- * restrictions) of an actual video file.
+ * Six editorial scenes rotate through the day on the public pages
+ * (see src/lib/scenes.ts for the hour mapping). Each is a 16:9
+ * full-bleed image designed to sit under the WebGL rain canvas —
+ * lots of small bright highlights against a dark field give each
+ * water droplet something visually rich to magnify.
  *
- *   node scripts/generate-backgrounds.mjs              # skip if exists
- *   node scripts/generate-backgrounds.mjs --force      # regenerate
- *   node scripts/generate-backgrounds.mjs --dry        # print prompt only
+ *   node scripts/generate-backgrounds.mjs                     # all, skip existing
+ *   node scripts/generate-backgrounds.mjs --force             # all, force
+ *   node scripts/generate-backgrounds.mjs --scene forest      # one scene only
+ *   node scripts/generate-backgrounds.mjs --dry               # print prompts, generate nothing
  *
  * Uses the same VERTEX_AI_API_KEY as the work-cover pipeline and the
  * same Nano-Banana-Pro → Imagen-4 primary/fallback shape.
@@ -24,26 +26,95 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, "..");
 const WORKSPACE_ENV = path.resolve(ROOT, "../.env");
 const LOCAL_ENV = path.resolve(ROOT, ".env.local");
-const OUT_FILE = path.resolve(ROOT, "public/bg.jpg");
-
-const PROMPT = [
-  "Editorial cinematic abstract background, medium format aesthetic.",
-  "Rain-soaked window looking out onto a stormy harbour at dusk,",
-  "deep Prussian-blue sky with volumetric fog drifting across the frame,",
-  "distant city lights blurred through a veil of moisture,",
-  "cool signal-cobalt glow bleeding through from the horizon line,",
-  "faint amethyst tail-light diffused in the far haze.",
-  "Palette: deep Prussian night blue, Overcast Mist off-white highlights,",
-  "Signal Cobalt in the distant haze, a single Amethyst Shadow bloom.",
-  "Wide cinematic aspect, shot on medium format film, soft focus,",
-  "no text, no people, no logos, no neon, no vignette overlay.",
-  "Composition works as a seamless background — centre-weighted,",
-  "edges fade to dark for readable overlay text.",
-].join(" ");
+const OUT_DIR = path.resolve(ROOT, "public/scenes");
+/** Legacy fallback file — kept in sync with the first scene so any
+ *  surface hard-coded to /bg.jpg still looks like the current brand. */
+const LEGACY_OUT = path.resolve(ROOT, "public/bg.jpg");
 
 const ASPECT_RATIO = "16:9";
 
-// ── Env loader (copy-aligned with generate-work-images.mjs) ──────────
+/** Shared palette / composition line appended to every prompt so all
+ *  six scenes read as one family under the rain canvas. */
+const COMMON = [
+  "Editorial cinematic abstract background, medium format aesthetic.",
+  "Palette leans deep Prussian-night blue overall,",
+  "with Overcast Mist off-white highlights, Signal Cobalt mid-tones,",
+  "a single Amethyst Shadow bloom in the far distance.",
+  "Designed to be refracted by a rain-on-glass canvas layer on top —",
+  "lots of small bright highlights against a dark field give each",
+  "water droplet something visually rich to magnify.",
+  "Wide cinematic aspect, shot on medium format film, long exposure.",
+  "No text, no people, no logos, no readable signage, no vignette overlay,",
+  "no anamorphic flares.",
+  "Composition works as a seamless background — centre-weighted,",
+  "edges fade to near-black for readable overlay text.",
+].join(" ");
+
+const SCENES = [
+  {
+    name: "harbour",
+    label: "Pre-dawn harbour",
+    prompt: [
+      "Rainy harbour viewed from a dock at 4am,",
+      "distant ship running lights glow as small warm-white pinpricks,",
+      "volumetric fog rolls across the water,",
+      "a thin cool signal-cobalt band on the horizon hints at sunrise,",
+    ].join(" "),
+  },
+  {
+    name: "forest",
+    label: "Misty forest morning",
+    prompt: [
+      "Deep pine forest at blue-hour morning,",
+      "narrow shafts of cool signal-cobalt light pierce through",
+      "a dense drift of fog between the trunks,",
+      "tiny dewdrop-lit leaves catch the light like bokeh,",
+    ].join(" "),
+  },
+  {
+    name: "peaks",
+    label: "Cloud peaks",
+    prompt: [
+      "High mountain peaks rising above a dense cloud sea at midday,",
+      "a pale Overcast Mist diffuses across the entire upper frame,",
+      "scattered lens-flare pinpricks where stray sun catches moisture,",
+      "a single Amethyst Shadow streak along the furthest ridge,",
+    ].join(" "),
+  },
+  {
+    name: "shore",
+    label: "Overcast shore",
+    prompt: [
+      "Stormy coastline seen through a sheet of drifting sea mist,",
+      "wet sand reflects cold cobalt-blue sky,",
+      "distant breaker crests read as small bright arcs,",
+      "a far-off lighthouse beam diffused through the haze,",
+    ].join(" "),
+  },
+  {
+    name: "skyline",
+    label: "Dusk city skyline",
+    prompt: [
+      "City skyline at rain-heavy dusk,",
+      "hundreds of warm-white window lights scattered across",
+      "a deep Prussian-night backdrop like a field of bokeh stars,",
+      "silhouetted architecture anchors the bottom third,",
+      "a cool signal-cobalt atmospheric haze thickens toward the top,",
+    ].join(" "),
+  },
+  {
+    name: "night-city",
+    label: "Late-night downtown",
+    prompt: [
+      "Downtown intersection seen from above at 3am,",
+      "reflective wet streets double every street-light as a bright pinprick,",
+      "distant shop-window glow scatters in the fog,",
+      "a single amethyst-violet neon sign bleeds through the rain moisture,",
+    ].join(" "),
+  },
+];
+
+// ── Env loader ───────────────────────────────────────────────────
 
 async function loadEnvFile(file) {
   if (!existsSync(file)) return {};
@@ -68,12 +139,20 @@ async function loadEnvFile(file) {
 }
 
 function parseArgs(argv) {
-  const args = { force: false, dry: false };
-  for (const a of argv.slice(2)) {
-    if (a === "--force") args.force = true;
-    else if (a === "--dry" || a === "--dry-run") args.dry = true;
-    else if (a === "--help" || a === "-h") {
-      console.log("Usage: node scripts/generate-backgrounds.mjs [--force] [--dry]");
+  const args = { force: false, dry: false, scene: null };
+  const a = argv.slice(2);
+  for (let i = 0; i < a.length; i++) {
+    const tok = a[i];
+    if (tok === "--force") args.force = true;
+    else if (tok === "--dry" || tok === "--dry-run") args.dry = true;
+    else if (tok === "--scene" && i + 1 < a.length) {
+      args.scene = a[i + 1];
+      i++;
+    } else if (tok === "--help" || tok === "-h") {
+      console.log(
+        "Usage: node scripts/generate-backgrounds.mjs [--force] [--dry] [--scene <name>]"
+      );
+      console.log("Scenes:", SCENES.map((s) => s.name).join(", "));
       process.exit(0);
     }
   }
@@ -149,10 +228,20 @@ async function generate({ apiKey, prompt, aspectRatio }) {
 
 async function main() {
   const args = parseArgs(process.argv);
+  const selected = args.scene
+    ? SCENES.filter((s) => s.name === args.scene)
+    : SCENES;
+
+  if (selected.length === 0) {
+    console.error(`No scene matches "${args.scene}". Known:`, SCENES.map((s) => s.name).join(", "));
+    process.exit(1);
+  }
 
   if (args.dry) {
-    console.log(`── background (${ASPECT_RATIO}) ──`);
-    console.log(PROMPT);
+    for (const s of selected) {
+      console.log(`── ${s.name} (${s.label}) ──`);
+      console.log(`${s.prompt} ${COMMON}\n`);
+    }
     return;
   }
 
@@ -166,18 +255,33 @@ async function main() {
     process.exit(1);
   }
 
-  if (existsSync(OUT_FILE) && !args.force) {
-    console.log(`[skip] ${path.relative(ROOT, OUT_FILE)} exists. Use --force to regenerate.`);
-    return;
+  await fs.mkdir(OUT_DIR, { recursive: true });
+
+  for (const scene of selected) {
+    const outFile = path.resolve(OUT_DIR, `${scene.name}.jpg`);
+    if (existsSync(outFile) && !args.force) {
+      console.log(`[skip] ${path.relative(ROOT, outFile)} exists. Use --force to regenerate.`);
+      continue;
+    }
+    console.log(`[gen ] ${scene.name} — ${scene.label}`);
+    const prompt = `${scene.prompt} ${COMMON}`;
+    const bytes = await generate({ apiKey, prompt, aspectRatio: ASPECT_RATIO });
+    await fs.writeFile(outFile, bytes);
+    console.log(
+      `[ok  ] ${path.relative(ROOT, outFile)} — ${(bytes.length / 1024).toFixed(0)} KB`
+    );
   }
 
-  console.log(`[gen ] background (${ASPECT_RATIO})`);
-  const bytes = await generate({ apiKey, prompt: PROMPT, aspectRatio: ASPECT_RATIO });
-  await fs.mkdir(path.dirname(OUT_FILE), { recursive: true });
-  await fs.writeFile(OUT_FILE, bytes);
-  console.log(
-    `[ok  ] ${path.relative(ROOT, OUT_FILE)} — ${(bytes.length / 1024).toFixed(0)} KB`
-  );
+  // Mirror the first requested scene into /public/bg.jpg as the
+  // legacy fallback. Anything that still hard-codes /bg.jpg (OG image
+  // placeholder, no-JS fallback) picks up the new palette without
+  // touching every call site.
+  const first = selected[0];
+  const sourceFile = path.resolve(OUT_DIR, `${first.name}.jpg`);
+  if (existsSync(sourceFile)) {
+    await fs.copyFile(sourceFile, LEGACY_OUT);
+    console.log(`[copy] ${first.name}.jpg → public/bg.jpg (legacy fallback)`);
+  }
 }
 
 main().catch((err) => {

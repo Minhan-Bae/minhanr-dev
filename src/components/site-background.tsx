@@ -1,20 +1,33 @@
+"use client";
+
 import Image from "next/image";
+import { useEffect, useState } from "react";
+import { FALLBACK_SCENE, getCurrentScene, type Scene } from "@/lib/scenes";
 
 /**
- * SiteBackground — full-bleed bg.jpg sitting behind every public page.
+ * SiteBackground — full-bleed time-of-day backdrop sitting behind every
+ * public page.
  *
- * Acts as the WebGL-fallback layer for RainEffect: when the rain
- * renderer's WebGL context initializes it paints an opaque canvas
- * over this (so the user sees the rain scene instead), but if WebGL
- * fails or hasn't loaded yet, this image is what they see.
+ * Picks one of six scenes from src/lib/scenes.ts based on the
+ * visitor's local hour (pre-dawn harbour, misty forest, cloud peaks,
+ * overcast shore, dusk skyline, late-night downtown). Acts as the
+ * WebGL-fallback layer for RainEffect — when the rain renderer's
+ * WebGL context initializes it paints an opaque canvas over this,
+ * but if WebGL fails or hasn't loaded yet, this is what the visitor
+ * sees.
  *
- * The rain renderer applies its own blur internally when building
- * its offscreen `textureBg`, so no CSS blur is needed here.
- *
- * Placed inside `(public)/layout.tsx` so the studio surfaces
- * (/dashboard and friends) stay on solid colour.
+ * Scene selection runs inside `useEffect` so the server and client
+ * renders agree on the fallback image (the hour on the server is
+ * unknowable), then the client upgrades to the time-correct scene
+ * once mounted.
  */
 export function SiteBackground() {
+  const [scene, setScene] = useState<Scene>(FALLBACK_SCENE);
+
+  useEffect(() => {
+    setScene(getCurrentScene());
+  }, []);
+
   return (
     <div
       aria-hidden
@@ -22,7 +35,8 @@ export function SiteBackground() {
     >
       <div className="ken-burns-drift absolute inset-[-4%]">
         <Image
-          src="/bg.jpg"
+          key={scene.file}
+          src={scene.file}
           alt=""
           fill
           priority

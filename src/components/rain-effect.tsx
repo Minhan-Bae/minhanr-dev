@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { Raindrops } from "@/lib/rain/raindrops";
 import { RainRenderer } from "@/lib/rain/rain-renderer";
+import { getCurrentScene } from "@/lib/scenes";
 
 /**
  * RainEffect — WebGL rain-on-glass, ported from codrops/RainEffect.
@@ -64,7 +65,7 @@ export function RainEffect() {
     Promise.all([
       loadImage("/rain/drop-alpha.png"),
       loadImage("/rain/drop-color.png"),
-      loadImage("/bg.jpg"),
+      loadImage(getCurrentScene().file),
     ])
       .then(([dropAlpha, dropColor, bgImage]) => {
         if (cancelled) return;
@@ -148,7 +149,7 @@ export function RainEffect() {
       Promise.all([
         loadImage("/rain/drop-alpha.png"),
         loadImage("/rain/drop-color.png"),
-        loadImage("/bg.jpg"),
+        loadImage(getCurrentScene().file),
       ])
         .then(([dropAlpha, dropColor, bgImage]) => {
           if (cancelled || !canvas) return;
