@@ -129,9 +129,13 @@ function parseArgs(argv) {
   return args;
 }
 
-/** Call Imagen 3 with a prompt; return JPEG bytes. */
+/** Call Imagen 4 with a prompt; return JPEG bytes. */
 async function generateWithImagen({ apiKey, prompt, aspectRatio }) {
-  const model = "imagen-3.0-generate-002";
+  // Imagen 4 is the current flagship on the Generative Language API
+  // (Imagen 3 has been retired as of 2026 Q1). Use the standard variant;
+  // "fast" / "ultra" are available if quality/throughput tradeoffs become
+  // relevant later.
+  const model = "imagen-4.0-generate-001";
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:predict?key=${apiKey}`;
   const body = {
     instances: [{ prompt }],
@@ -164,9 +168,11 @@ async function generateWithImagen({ apiKey, prompt, aspectRatio }) {
   return Buffer.from(b64, "base64");
 }
 
-/** Fallback: Gemini 2.0 Flash with image response modality. */
+/** Fallback: Gemini image model via generateContent with image modality. */
 async function generateWithGemini({ apiKey, prompt }) {
-  const model = "gemini-2.0-flash-exp-image-generation";
+  // Current image-capable Gemini family on the public API. Prefer 3.x
+  // preview for quality; fall back through on 404.
+  const model = "gemini-3-pro-image-preview";
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
   const body = {
     contents: [{ parts: [{ text: prompt }] }],
