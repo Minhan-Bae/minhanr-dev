@@ -1,10 +1,4 @@
-/**
- * Shared types for admin/* components.
- *
- * Phase Admin-Cleanup (2026-04-11): extracted from the 1167-line
- * src/app/(private)/admin/page.tsx so each sub-component can live in
- * its own file without re-declaring shapes.
- */
+/** Shared types for admin/* components. */
 
 export interface AgentHeartbeat {
   id: string;

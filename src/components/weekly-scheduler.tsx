@@ -108,8 +108,7 @@ export function WeeklyScheduler() {
   const gridRef = useRef<HTMLDivElement>(null);
 
   // Drag — isDragging is state (not ref) so isDragSelected can read it
-  // safely during render. Phase G-part-2 (2026-04-11): pre-existing
-  // react-hooks/refs lint error fix.
+  // safely during render (refs would violate react-hooks rules-of-hooks).
   const [dragStart, setDragStart] = useState<{ day: number; hour: number } | null>(null);
   const [dragEnd, setDragEnd] = useState<{ day: number; hour: number } | null>(null);
   const [isDragging, setIsDragging] = useState(false);

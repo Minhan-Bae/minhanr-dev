@@ -21,13 +21,7 @@ import type {
 
 /**
  * Admin page — single workspace surface for the autonomous-agent system.
- *
- * Phase Admin-Cleanup (2026-04-11): scattered 4-tab layout consolidated to
- * 2 tabs (Dashboard / Planning). PublishQueue stub removed. QuickNote tab
- * removed (FloatingQuickNote covers it). Eisenhower folded into Planning
- * alongside WeeklyScheduler so the "what should I work on" surfaces live
- * in one place. The 8 sub-components were extracted to src/components/admin/
- * to make this file a thin orchestration shell.
+ * Thin orchestration shell over src/components/admin/ subcomponents.
  */
 
 export default function AdminDashboard() {
@@ -38,11 +32,10 @@ export default function AdminDashboard() {
   const [logFilter, setLogFilter] = useState("");
   const [loggingOut, setLoggingOut] = useState(false);
 
-  // Phase F-2-RLS: agent_heartbeats has RLS enabled with no policies, so the
-  // browser anon client can no longer read it directly. Route the poll
-  // through /api/heartbeat (server-side service-role admin client).
-  // redirectOn401: false so a background poll near session-expiry doesn't
-  // yank the user off the page mid-task.
+  // agent_heartbeats has RLS enabled with no policies, so the browser anon
+  // client cannot read it directly — the poll goes through /api/heartbeat
+  // (server-side service-role). redirectOn401: false so a background poll
+  // near session-expiry doesn't yank the user off the page mid-task.
   const loadAgents = useCallback(async () => {
     try {
       const d = await apiFetch<{ agents?: AgentHeartbeat[] }>(

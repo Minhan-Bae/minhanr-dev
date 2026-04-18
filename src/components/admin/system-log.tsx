@@ -37,8 +37,8 @@ export function SystemLog({
   }, [agents]);
 
   // Webhook health: any agents with recent heartbeats (within 15 min)?
-  // Phase Lint-Cleanup: hoist Date.now() into a state that ticks every minute
-  // so the memo is a pure function of (agents, nowMs).
+  // nowMs as state (ticks every minute) keeps the memo below as a pure
+  // function of (agents, nowMs) — not of Date.now() at render time.
   const [nowMs, setNowMs] = useState(() => Date.now());
   useEffect(() => {
     const id = setInterval(() => setNowMs(Date.now()), 60_000);

@@ -1,9 +1,4 @@
-/**
- * Shared helpers for admin/* components.
- *
- * Phase Admin-Cleanup (2026-04-11): extracted from the 1167-line
- * src/app/(private)/admin/page.tsx.
- */
+/** Shared helpers for admin/* components. */
 
 export function StatusLed({ status }: { status: string }) {
   const color =

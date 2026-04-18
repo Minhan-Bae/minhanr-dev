@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { Suspense } from "react";
 import {
   Card,
@@ -120,7 +121,14 @@ async function ReviewContent() {
               return (
                 <div key={c.path} className="flex items-start gap-3 p-3 rounded-lg border border-border hover:border-border/80 transition-colors">
                   {c.coverImage && !c.coverImage.startsWith("/api/") && (
-                    <img src={c.coverImage} alt="" className="w-16 h-16 rounded object-cover shrink-0" />
+                    <Image
+                      src={c.coverImage}
+                      alt=""
+                      width={64}
+                      height={64}
+                      className="w-16 h-16 rounded object-cover shrink-0"
+                      unoptimized
+                    />
                   )}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
