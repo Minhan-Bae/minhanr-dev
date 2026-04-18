@@ -283,12 +283,14 @@
        handling now lives in SlideDeck directly (touchstart/move/end). */
     scroll-behavior: smooth; /* Kept for anchor-link jumps on non-home pages. */
   }
-  /* The slide class — a marker. Height comes from the SlideDeck
-     wrapper around each slide (100svh in fullscreen mode, 100% of
-     parent in inline mode), so this doesn't assert a viewport-sized
-     minimum that would overflow an inline deck. */
+  /* The slide class — fills its SlideDeck wrapper, so inside
+     components can rely on `flex-1` / `justify-center` for vertical
+     layout. The wrapper itself is 100svh in fullscreen mode and 100%
+     of parent in inline mode; either way `height: 100%` on the slide
+     resolves to the correct full-slide extent without asserting a
+     viewport-sized minimum that would overflow an inline deck. */
   .slide {
-    /* intentionally empty — height driven by parent wrapper. */
+    height: 100%;
   }
   body {
     @apply bg-background text-foreground;
