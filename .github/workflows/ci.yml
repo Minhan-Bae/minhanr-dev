@@ -21,7 +21,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'npm'
 
       - name: Install dependencies
@@ -35,6 +35,12 @@ jobs:
 
       - name: Build
         env:
-          # Vercel 실제 env 없이도 빌드는 되는지 확인. 런타임 값은 Vercel에서 주입.
+          # CI 더미 값 — build 단계의 정적 prerender(/login 등)가 @supabase/ssr
+          # 클라이언트를 construct하는데 실패하지 않도록 주입. 실제 API 호출은
+          # 런타임에 Vercel env로 덮어쓴 값으로 동작.
+          NEXT_PUBLIC_SUPABASE_URL: 'https://ci-placeholder.supabase.co'
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: 'ci-placeholder-anon-key'
+          SUPABASE_SERVICE_KEY: 'ci-placeholder-service-key'
+          GITHUB_REPO: 'Minhan-Bae/oikbas-vault'
           NEXT_TELEMETRY_DISABLED: '1'
         run: npm run build
