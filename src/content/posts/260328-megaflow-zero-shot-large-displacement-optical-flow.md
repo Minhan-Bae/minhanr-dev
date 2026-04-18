@@ -17,6 +17,9 @@ title: 'MegaFlow: Zero-Shot Large Displacement Optical Flow'
 > **arXiv**: 2603.25739v1 | **Published**: 2026-03-26
 > **Authors**: Dingxi Zhang, Fangjinhua Wang, Marc Pollefeys, Haofei Xu
 
+![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260328-megaflow-zero-shot-large-displacement-optical-flow/fig-1.png)
+*Source: [arXiv 2603.25739 (Fig. 1)](https://arxiv.org/abs/2603.25739)*
+
 ## 핵심 내용
 
 **방법론**: 대변위(large displacement) optical flow 추정은 기존 방법들이 반복적 로컬 검색(iterative local search)이나 도메인 특화 파인튜닝에 의존하여, 대변위 상황과 zero-shot 일반화에서 성능이 제한되는 근본적 한계가 있었다. MegaFlow는 복잡한 태스크 특화 아키텍처 대신, 강력한 사전학습된 비전 모델(vision foundation model)을 optical flow 추정에 적응시키는 접근을 취한다. 글로벌 매칭 기반의 coarse-to-fine 전략으로 대변위에서도 정확한 대응점을 찾으며, 도메인 특화 학습 없이 다양한 시나리오에서 범용적으로 적용 가능하다.

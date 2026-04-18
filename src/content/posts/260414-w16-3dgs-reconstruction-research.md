@@ -23,6 +23,12 @@ author: MinHanr
 
 > 5건 모두 **3DGS 기반**이지만 해결하려는 문제는 다르다. (1) 에지 GPU에서의 실시간성, (2) 시공간+시점 통합, (3) 희소 입력에서의 생성형 보강. PathFinder의 NVS / ColorDepthExpansion의 광원 시뮬과 직접 결합.
 
+![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260414-w16-3dgs-reconstruction-research/fig-1.jpg)
+*Source: [arXiv 2604.07177 (Fig. 1)](https://arxiv.org/abs/2604.07177)*
+
+![Figure 2](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260414-w16-3dgs-reconstruction-research/fig-2.png)
+*Source: [arXiv 2503.07946 (Fig. 1)](https://arxiv.org/abs/2503.07946)*
+
 ## 3축 매핑
 
 | 축 | 정의 | 대표 |

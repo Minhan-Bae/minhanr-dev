@@ -26,6 +26,12 @@ date: '2026-04-13'
 
 # Materialist: Physically Based Editing Using Single-Image Inverse Rendering
 
+![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260413-materialist-single-image-inverse-rendering/fig-1.png)
+*Source: [arXiv 2501.03717 (Fig. 1)](https://arxiv.org/abs/2501.03717)*
+
+![Figure 2](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260413-materialist-single-image-inverse-rendering/fig-2.png)
+*Source: [GitHub · lez-s/Materialist](https://github.com/lez-s/Materialist)*
+
 **저자**: Lezhong Wang 외 7인
 **발표**: arXiv:2501.03717 (2025-01-07, v2 2025-06-26)
 **프로젝트**: [lez-s.github.io/materialist_project](https://lez-s.github.io/materialist_project/)

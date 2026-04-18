@@ -19,6 +19,12 @@ categories:
 
 # AI 에이전트 생태계 소셜 트렌드 종합 — 2026-04-01
 
+![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/ai-agent-ecosystem-social-trend-synthesis/fig-1.png)
+*Source: [arXiv 2602.12430 (Fig. 1)](https://arxiv.org/abs/2602.12430)*
+
+![Figure 2](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/ai-agent-ecosystem-social-trend-synthesis/fig-2.png)
+*Source: [arXiv 2603.02766 (Fig. 1)](https://arxiv.org/abs/2603.02766)*
+
 ## 메타 트렌드: 엔지니어링 패러다임의 세 번째 전환
 
 2026년 4월 현재, AI 에이전트 분야의 가장 큰 구조적 변화는 **엔지니어링 패러다임의 전환**이다:

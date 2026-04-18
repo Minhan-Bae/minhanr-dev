@@ -21,6 +21,12 @@ author: MinHanr
 
 > 2026-04-05 ~ 2026-04-12 수집된 10건 통합.
 
+![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260412-w15-trends-3d-weekly-digest/fig-1.png)
+*Source: [Hugging Face · papers/2603.27183](https://huggingface.co/papers/2603.27183)*
+
+![Figure 2](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260412-w15-trends-3d-weekly-digest/fig-2.png)
+*Source: [Hugging Face · papers/2604.03619](https://huggingface.co/papers/2604.03619)*
+
 ## 수록 노트
 
 | # | 제목 | 출처 | 생성일 |

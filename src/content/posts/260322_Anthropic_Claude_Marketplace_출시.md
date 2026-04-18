@@ -19,6 +19,9 @@ categories:
 
 > **한줄 요약**: Anthropic이 수수료 0%의 Claude Marketplace를 출시, 기업 고객이 기존 API 예산으로 서드파티 AI 앱을 구매할 수 있게 하여 SaaS 유통 구조에 도전장을 내밀었다.
 
+![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260322_Anthropic_Claude_Marketplace_출시/fig-1.png)
+*Source: [siliconangle.com](https://siliconangle.com/2026/03/06/anthropic-launches-claude-marketplace-third-party-cloud-services/)*
+
 ---
 
 ## 핵심 내용

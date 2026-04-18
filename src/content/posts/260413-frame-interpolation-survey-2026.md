@@ -24,6 +24,12 @@ date: '2026-04-13'
 
 # AceVFI: A Comprehensive Survey of Advances in Video Frame Interpolation
 
+![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260413-frame-interpolation-survey-2026/fig-1.png)
+*Source: [arXiv 2506.01061 (Fig. 1)](https://arxiv.org/abs/2506.01061)*
+
+![Figure 2](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260413-frame-interpolation-survey-2026/fig-2.png)
+*Source: [GitHub · CMLab-Korea/Awesome-Video-Frame-Interpolation](https://github.com/CMLab-Korea/Awesome-Video-Frame-Interpolation)*
+
 **발표**: IEEE TCSVT 2026 (arXiv:2506.01061, 2025-06-01, 업데이트 2026-03-12)
 
 ## 핵심 요약

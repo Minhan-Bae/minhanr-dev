@@ -24,6 +24,12 @@ author: MinHanr
 
 > Skill/Capability를 일급 객체로 보고, 그 위에 hierarchical MAS와 vendor-neutral CLI를 얹는 흐름이 W15~W16에 동시 다발로 출현. PathFinder의 plan→execute 분리, TrinityX의 RT 슬롯 토폴로지 설계의 직접 레퍼런스.
 
+![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260414-w16-agent-orchestration-ecosystem/fig-1.png)
+*Source: [arXiv 2603.02176 (Fig. 1)](https://arxiv.org/abs/2603.02176)*
+
+![Figure 2](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260414-w16-agent-orchestration-ecosystem/fig-2.png)
+*Source: [Hugging Face · papers/2604.06392](https://huggingface.co/papers/2604.06392)*
+
 ## 4축 매핑
 
 | 축 | 정의 | 대표 |

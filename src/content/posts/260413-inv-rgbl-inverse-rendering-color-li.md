@@ -28,6 +28,9 @@ date: '2026-04-13'
 
 # InvRGB+L: Inverse Rendering of Complex Scenes with Unified Color and LiDAR Reflectance Modeling
 
+![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260413-inv-rgbl-inverse-rendering-color-li/fig-1.png)
+*Source: [arXiv 2507.17613 (Fig. 1)](https://arxiv.org/abs/2507.17613)*
+
 **저자**: Chen et al.
 **발표**: ICCV 2025 (arXiv:2507.17613)
 

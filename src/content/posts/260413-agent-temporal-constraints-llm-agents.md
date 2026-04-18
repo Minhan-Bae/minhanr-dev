@@ -32,6 +32,9 @@ date: '2026-04-13'
 
 > Kamath, Zhang, Xu, Ugare, Singh, Misailovic (2025-12) — 시간적 안전 정책의 런타임 강제를 위한 SMT 기반 프레임워크
 
+![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260413-agent-temporal-constraints-llm-agents/fig-1.png)
+*Source: [hf.co](https://hf.co/papers/2512.23738)*
+
 ## 핵심 요약
 
 LLM 에이전트가 안전 필수 환경에 배치되지만, 기존 guardrail은 **액션 순서에 관한 시간적 안전 정책**(temporal safety policies)의 위반을 방지하지 못한다. 예: 인증 전 민감 데이터 접근, 비인가 결제 수단으로 환불 처리. Agent-C는 시간적 속성을 DSL로 표현 → 1차 논리로 변환 → SMT 솔버로 토큰 생성 중 비순응 액션을 탐지하고 순응 대안을 constrained generation으로 생성하는 프레임워크이다.

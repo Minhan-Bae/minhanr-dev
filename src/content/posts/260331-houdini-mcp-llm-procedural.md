@@ -19,7 +19,7 @@ summary: HoudiniMCP는 Capoom이 개발한 오픈소스 MCP(Model Context Protoc
 author: MinHanr
 publish_ready: true
 cover:
-  image: /images/posts/260331-houdini-mcp-llm-procedural/cover.jpg
+  image: https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260331-houdini-mcp-llm-procedural/cover.jpg
   alt: 260331 houdini mcp llm procedural
 date: '2026-03-31'
 categories:
@@ -27,6 +27,12 @@ categories:
 ---
 
 # HoudiniMCP: LLM이 Houdini를 직접 제어하는 MCP 서버
+
+![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260331-houdini-mcp-llm-procedural/fig-1.png)
+*Source: [GitHub · capoomgit/houdini-mcp](https://github.com/capoomgit/houdini-mcp)*
+
+![Figure 2](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260331-houdini-mcp-llm-procedural/fig-2.png)
+*Source: [glama.ai](https://glama.ai/mcp/servers/capoom/houdini-mcp)*
 
 ## 개요
 

@@ -17,12 +17,18 @@ summary: 중국 AI 스타트업 MiniMax가 공개한 M2.5 모델이 SWE-Bench Ve
 author: MinHanr
 publish_ready: true
 cover:
-  image: /images/posts/260324-minimax-m2.5/cover.jpg
+  image: https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260324-minimax-m2.5/cover.jpg
   alt: 260324 MiniMax M2.5 에이전틱 코딩 모델
 date: '2026-03-24'
 categories:
   - Writing
 ---
+![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260324-minimax-m2.5/fig-1.png)
+*Source: [minimax.io](https://www.minimax.io/news/minimax-m25)*
+
+![Figure 2](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260324-minimax-m2.5/fig-2.png)
+*Source: [blog.galaxy.ai](https://blog.galaxy.ai/model/minimax-m2-5)*
+
 ## 한줄 요약
 
 중국 AI 스타트업 MiniMax가 공개한 M2.5 모델이 SWE-Bench Verified 80.2%를 달성하며 GPT-5.2 및 Claude Opus 4.6에 근접한 코딩 성능을 입력 토큰당 $0.20이라는 파격적 가격으로 제공한다.

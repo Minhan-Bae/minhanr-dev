@@ -20,7 +20,7 @@ summary: '(EXCAI) | arXiv: 2501.03847 HuggingFace Space | Papers with Code Diffu
 author: MinHanr
 publish_ready: true
 cover:
-  image: /images/posts/260404-diffusionasshader-3daware-video-diffusion-control/cover.png
+  image: https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260404-diffusionasshader-3daware-video-diffusion-control/cover.png
   alt: 260404 DiffusionAsShader 3DAware Video Diffusion Control DaS
 date: '2026-04-04'
 categories:
@@ -31,6 +31,12 @@ categories:
 
 > Ye et al. (EXCAI) | arXiv: 2501.03847
 > [HuggingFace Space](https://huggingface.co/spaces/EXCAI/Diffusion-As-Shader) | [Papers with Code](https://paperswithcode.com/paper/diffusion-as-shader-3d-aware-video-diffusion)
+
+![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260404-diffusionasshader-3daware-video-diffusion-control/fig-1.png)
+*Source: [arXiv 2501.03847 (Fig. 1)](https://arxiv.org/abs/2501.03847)*
+
+![Figure 2](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260404-diffusionasshader-3daware-video-diffusion-control/fig-2.png)
+*Source: [Hugging Face · spaces/EXCAI/Diffusion-As-Shader](https://huggingface.co/spaces/EXCAI/Diffusion-As-Shader)*
 
 ## 개요
 

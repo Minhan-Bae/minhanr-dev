@@ -16,6 +16,12 @@ title: 'Spectrum: Adaptive Spectral Feature Forecasting for Diffusion Sampling A
 
 # Spectrum: Adaptive Spectral Feature Forecasting for Diffusion Sampling Acceleration
 
+![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260328-spectrum-trainingfree-dit-accelerator-spec/fig-1.png)
+*Source: [arXiv 2603.01623 (Fig. 1)](https://arxiv.org/abs/2603.01623)*
+
+![Figure 2](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260328-spectrum-trainingfree-dit-accelerator-spec/fig-2.png)
+*Source: [GitHub · hanjq17/Spectrum](https://github.com/hanjq17/Spectrum)*
+
 **저자:** Jiaqi Han, Juntong Shi, Puheng Li, Haotian Ye, Qiushan Guo, Stefano Ermon (Stanford University, ByteDance)
 **발표:** CVPR 2026 / arXiv:2603.01623 (March 2026)
 **프로젝트:** https://hanjq17.github.io/Spectrum/

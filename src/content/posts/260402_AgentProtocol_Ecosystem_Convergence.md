@@ -20,6 +20,12 @@ categories:
 
 > 52건 growing 노트 클러스터 통합. TrinityX 아키텍처 + OIKBAS 에이전틱 시스템 직결.
 
+![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260402_AgentProtocol_Ecosystem_Convergence/fig-1.png)
+*Source: [Hugging Face · papers/2603.13417](https://huggingface.co/papers/2603.13417)*
+
+![Figure 2](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260402_AgentProtocol_Ecosystem_Convergence/fig-2.png)
+*Source: [arXiv 2602.12430 (Fig. 1)](https://arxiv.org/abs/2602.12430)*
+
 ## 핵심 테제
 
 2026 Q1, 에이전트 프로토콜 생태계가 **프래그먼테이션 → 수렴** 단계에 진입했다. AAIF(146개 기업, Linux Foundation), A2A v1.0 stable, MCP v2.0 SDK 로드맵이 동시에 발표되며, 합의된 3계층 스택(**WebMCP / MCP / A2A**)이 확립되었다. IBM의 ACP도 A2A에 병합. 이는 "AI의 TCP/IP 모먼트"로 평가된다.

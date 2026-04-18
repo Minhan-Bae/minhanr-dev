@@ -24,6 +24,12 @@ author: MinHanr
 
 > 2026-W15~W16에 정제된 에이전트 거버넌스 17건. 단일 턴 LLM 가드레일이 아니라 **execution-time enforcement**가 공통 주제. ISO/IEC 42001·NIST AI RMF·OWASP Agentic Top 10이 표준 앵커로 자리 잡음.
 
+![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260414-w16-agent-safety-governance-landscape/fig-1.png)
+*Source: [arXiv 2603.12621 (Fig. 1)](https://arxiv.org/abs/2603.12621)*
+
+![Figure 2](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260414-w16-agent-safety-governance-landscape/fig-2.png)
+*Source: [Hugging Face · papers/2603.13247](https://huggingface.co/papers/2603.13247)*
+
 ## 한 줄 정리
 
 | 축 | 정의 | 대표 작업 |

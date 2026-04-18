@@ -26,6 +26,9 @@ date: '2026-04-13'
 
 # CtrlVDiff: Controllable Video Generation via Unified Multimodal Video Diffusion
 
+![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260413-ctrl-vdiff-controllable-video-multimodal-diffusion/fig-1.png)
+*Source: [arXiv 2511.21129 (Fig. 1)](https://arxiv.org/abs/2511.21129)*
+
 **발표**: arXiv:2511.21129 (2025-11)
 
 ## 핵심 요약

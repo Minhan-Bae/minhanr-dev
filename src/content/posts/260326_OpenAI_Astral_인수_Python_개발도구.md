@@ -17,6 +17,12 @@ summary: 한줄 요약 OpenAI가 Python 생태계의 핵심 오픈소스 도구(
 categories:
   - Industry
 ---
+![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260326_OpenAI_Astral_인수_Python_개발도구/fig-1.jpg)
+*Source: [astral.sh](https://astral.sh/blog/openai)*
+
+![Figure 2](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260326_OpenAI_Astral_인수_Python_개발도구/fig-2.jpg)
+*Source: [cnbc.com](https://www.cnbc.com/2026/03/19/openai-to-acquire-developer-tooling-startup-astral.html)*
+
 ## 한줄 요약
 
 OpenAI가 Python 생태계의 핵심 오픈소스 도구(uv, Ruff, ty)를 만든 **Astral**을 인수하며, 월간 수억 건 다운로드의 개발 인프라를 Codex 팀에 통합한다.

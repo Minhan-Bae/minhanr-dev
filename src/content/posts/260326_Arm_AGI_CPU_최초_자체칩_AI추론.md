@@ -16,6 +16,12 @@ summary: 한줄 요약 Arm이 35년 역사 최초로 자체 설계·제조 칩 A
 categories:
   - Systems
 ---
+![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260326_Arm_AGI_CPU_최초_자체칩_AI추론/fig-1.jpg)
+*Source: [newsroom.arm.com](https://newsroom.arm.com/blog/introducing-arm-agi-cpu)*
+
+![Figure 2](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260326_Arm_AGI_CPU_최초_자체칩_AI추론/fig-2.jpg)
+*Source: [newsroom.arm.com](https://newsroom.arm.com/news/arm-agi-cpu-launch)*
+
 ## 한줄 요약
 
 Arm이 35년 역사 최초로 자체 설계·제조 칩 **AGI CPU**를 출시하며, 라이선스 전용 기업에서 실리콘 공급자로의 역사적 전환을 선언했다.

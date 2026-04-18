@@ -25,6 +25,12 @@ date: '2026-04-13'
 
 # Cosmos World Foundation Model Platform for Physical AI
 
+![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260413-cosmos-world-foundation-model-nvidia/fig-1.jpg)
+*Source: [arXiv 2501.03575 (Fig. 1)](https://arxiv.org/abs/2501.03575)*
+
+![Figure 2](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260413-cosmos-world-foundation-model-nvidia/fig-2.jpg)
+*Source: [nvidia.com](https://www.nvidia.com/en-us/ai/cosmos/)*
+
 **저자**: Yogesh Balaji 외 76인 (NVIDIA)
 **발표**: arXiv:2501.03575 (2025-01-07, 업데이트 2025-07-09)
 **공식**: [nvidia.com/ai/cosmos](https://www.nvidia.com/en-us/ai/cosmos/)

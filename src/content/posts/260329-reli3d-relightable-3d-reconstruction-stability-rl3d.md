@@ -15,6 +15,12 @@ title: 'ReLi3D: Relightable Multi-view 3D Reconstruction with Disentangled Illum
 
 # ReLi3D: Relightable Multi-view 3D Reconstruction with Disentangled Illumination
 
+![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260329-reli3d-relightable-3d-reconstruction-stability-rl3d/fig-1.jpg)
+*Source: [arXiv 2603.19753 (Fig. 1)](https://arxiv.org/abs/2603.19753)*
+
+![Figure 2](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260329-reli3d-relightable-3d-reconstruction-stability-rl3d/fig-2.png)
+*Source: [GitHub · Stability-AI/ReLi3D](https://github.com/Stability-AI/ReLi3D)*
+
 **저자:** Jan-Niklas Dihlmann, Mark Boss, Simon Donne, Andreas Engelhardt, Hendrik P. A. Lensch, Varun Jampani (Stability AI)
 **발표:** 2026-03-25 (arXiv: 2603.19753) | **ICLR 2026** 채택
 

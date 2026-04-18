@@ -27,6 +27,12 @@ author: MinHanr
 
 > 에이전트 거버넌스·오케스트레이션 프레임워크 폭발적 수렴 — 6건 growing 클러스터 통합
 
+![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260413-trinityx-weekly-synthesis-w16/fig-1.png)
+*Source: [arXiv 2604.01020 (Fig. 1)](https://arxiv.org/abs/2604.01020)*
+
+![Figure 2](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260413-trinityx-weekly-synthesis-w16/fig-2.png)
+*Source: [arXiv 2604.04749 (Fig. 1)](https://arxiv.org/abs/2604.04749)*
+
 ## 주간 핵심 시그널
 
 W16 첫 사이클에서 TrinityX 관련 growing 6건이 단일 방향으로 수렴한다: **런타임 거버넌스가 탑재된 멀티에이전트 오케스트레이션**. 단순한 에이전트 협업을 넘어, 에이전트가 행동하기 전에 규칙을 컴파일하고 강제하는 "Control Plane" 패러다임이 업계 전반에서 동시다발적으로 등장하고 있다.

@@ -27,6 +27,12 @@ date: '2026-04-13'
 
 # DNF-Intrinsic: Deterministic Noise-Free Diffusion for Indoor Inverse Rendering
 
+![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260413-dnf-intrinsic-noise-free-indoor-inverse/fig-1.png)
+*Source: [arXiv 2507.03924 (Fig. 1)](https://arxiv.org/abs/2507.03924)*
+
+![Figure 2](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260413-dnf-intrinsic-noise-free-indoor-inverse/fig-2.png)
+*Source: [GitHub · OnlyZZZZ/DNF-Intrinsic](https://github.com/OnlyZZZZ/DNF-Intrinsic)*
+
 **저자**: Zheng et al.
 **발표**: ICCV 2025 (arXiv:2507.03924)
 

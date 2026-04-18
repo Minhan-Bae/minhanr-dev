@@ -27,6 +27,9 @@ date: '2026-04-13'
 
 # Ouroboros: Single-step Diffusion Models for Cycle-consistent Forward and Inverse Rendering
 
+![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260413-ouroboros-cycle-consistent-diffusion-rendering/fig-1.png)
+*Source: [arXiv 2508.14461 (Fig. 1)](https://arxiv.org/abs/2508.14461)*
+
 **저자**: Shanlin Sun, Yifan Wang, Hanwen Zhang, Yifeng Xiong, Qin Ren, Ruogu Fang, Xiaohui Xie, Chenyu You
 **발표**: ICCV 2025 (arXiv:2508.14461)
 

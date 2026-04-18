@@ -25,6 +25,9 @@ date: '2026-04-13'
 
 # Multi-view Surface Reconstruction Using Normal and Reflectance Cues
 
+![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260413-multi-view-surface-reconstruction-normal-reflectance/fig-1.png)
+*Source: [arXiv 2506.04115 (Fig. 1)](https://arxiv.org/abs/2506.04115)*
+
 **저자**: Robin Bruneau, Baptiste Brument, Yvain Quéau 외
 **발표**: IJCV 2025 (arXiv:2506.04115)
 

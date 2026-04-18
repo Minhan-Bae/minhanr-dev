@@ -18,6 +18,12 @@ summary: 한줄 요약 Moonshot AI(Kimi) 팀이 10년간 고정되어 온 Transf
 categories:
   - Research
 ---
+![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260325_Kimi_Attention_Residuals_트랜스포머_잔차연결_혁신/fig-1.png)
+*Source: [Hugging Face · papers/2603.15031](https://huggingface.co/papers/2603.15031)*
+
+![Figure 2](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260325_Kimi_Attention_Residuals_트랜스포머_잔차연결_혁신/fig-2.png)
+*Source: [GitHub · MoonshotAI/Attention-Residuals](https://github.com/MoonshotAI/Attention-Residuals)*
+
 ## 한줄 요약
 
 Moonshot AI(Kimi) 팀이 10년간 고정되어 온 Transformer의 잔차 연결(Residual Connection)을 깊이 방향 어텐션으로 대체하는 **Attention Residuals**를 발표, GPQA-Diamond에서 +7.5pt 향상을 달성했다.

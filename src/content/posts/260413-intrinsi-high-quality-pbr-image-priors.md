@@ -27,6 +27,9 @@ date: '2026-04-13'
 
 # IntrinsiX: High-Quality PBR Generation using Image Priors
 
+![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260413-intrinsi-high-quality-pbr-image-priors/fig-1.jpg)
+*Source: [arXiv 2504.01008 (Fig. 1)](https://arxiv.org/abs/2504.01008)*
+
 **저자**: Peter Kocsis, Lukas Höllein, Matthias Nießner
 **발표**: arXiv:2504.01008 (2025-03-31, v2 2025-11-27)
 **프로젝트**: [peter-kocsis.github.io/IntrinsiX](https://peter-kocsis.github.io/IntrinsiX/)

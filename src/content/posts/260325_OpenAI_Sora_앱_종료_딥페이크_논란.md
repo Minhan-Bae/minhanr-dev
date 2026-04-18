@@ -19,6 +19,12 @@ summary: 한줄 요약 OpenAI가 딥페이크 논란과 사용자 이탈 속에 
 categories:
   - Visual
 ---
+![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260325_OpenAI_Sora_앱_종료_딥페이크_논란/fig-1.jpg)
+*Source: [techcrunch.com](https://techcrunch.com/2026/03/24/openais-sora-was-the-creepiest-app-on-your-phone-now-its-shutting-down/)*
+
+![Figure 2](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260325_OpenAI_Sora_앱_종료_딥페이크_논란/fig-2.png)
+*Source: [variety.com](https://variety.com/2026/digital/news/openai-shutting-down-sora-video-disney-1236698277/)*
+
 ## 한줄 요약
 
 OpenAI가 딥페이크 논란과 사용자 이탈 속에 AI 비디오 생성 앱 **Sora**의 서비스 종료를 발표하며, 비디오 AI의 소비자 시장 진입 한계를 드러냈다.

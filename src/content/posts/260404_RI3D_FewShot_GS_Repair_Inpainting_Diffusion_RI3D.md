@@ -28,6 +28,12 @@ categories:
 > **ICCV 2025** | Avinash Paliwal et al. (Texas A&M University)
 > arXiv: 2503.10860 | [Project Page](https://people.engr.tamu.edu/nimak/Papers/RI3D/index.html) | [GitHub](https://github.com/avinashpaliwal/RI3D) (코드 공개 예정)
 
+![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260404_RI3D_FewShot_GS_Repair_Inpainting_Diffusion_RI3D/fig-1.png)
+*Source: [arXiv 2503.10860 (Fig. 1)](https://arxiv.org/abs/2503.10860)*
+
+![Figure 2](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260404_RI3D_FewShot_GS_Repair_Inpainting_Diffusion_RI3D/fig-2.png)
+*Source: [people.engr.tamu.edu](https://people.engr.tamu.edu/nimak/Papers/RI3D/index.html)*
+
 ## 개요
 
 RI3D는 극소수(few-shot) 입력 이미지로부터 고품질 3D Gaussian Splatting 복원을 달성하는 새로운 접근법이다. 핵심 아이디어는 뷰 합성 과정을 **가시 영역 복원(Repair)**과 **비가시 영역 생성(Inpainting)**이라는 두 개의 독립적 태스크로 분리하고, 각각에 특화된 맞춤형 디퓨전 모델을 도입하는 것이다. 기존 few-shot NVS 방법들이 단일 모델로 양쪽을 동시에 처리하려 시도한 반면, RI3D는 각 태스크의 성격이 근본적으로 다르다는 점에 착안하여 이원화 전략을 취한다.

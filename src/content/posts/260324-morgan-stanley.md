@@ -24,6 +24,12 @@ date: '2026-03-24'
 categories:
   - Writing
 ---
+![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260324-morgan-stanley/fig-1.jpg)
+*Source: [fortune.com](https://fortune.com/2026/03/13/elon-musk-morgan-stanley-ai-leap-2026/)*
+
+![Figure 2](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260324-morgan-stanley/fig-2.jpg)
+*Source: [muleai.io](https://muleai.io/blog/2026-03-14-morgan-stanley-ai-breakthrough-2026/)*
+
 ## 한줄 요약
 
 Morgan Stanley가 2026년 상반기 내 "변혁적 AI 도약(Transformative AI Leap)"이 임박했다고 경고하며, 10배 컴퓨팅 투입 시 모델 지능이 2배로 향상되는 스케일링 법칙이 여전히 유효하고 GPT-5.4가 인간 전문가 수준(GDPVal 83.0%)에 도달했음을 근거로 제시했다.

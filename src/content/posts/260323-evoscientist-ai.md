@@ -17,12 +17,15 @@ summary: EvoScientist는 지속적 메모리와 자기진화 메커니즘을 갖
 author: MinHanr
 publish_ready: true
 cover:
-  image: /images/posts/260323-evoscientist-ai/cover.png
+  image: https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260323-evoscientist-ai/cover.png
   alt: 260323 EvoScientist 자기진화 AI 과학자
 date: '2026-03-23'
 categories:
   - Writing
 ---
+![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260323-evoscientist-ai/fig-1.png)
+*Source: [arXiv 2603.08127 (Fig. 1)](https://arxiv.org/abs/2603.08127)*
+
 ## 한줄 요약
 
 EvoScientist는 지속적 메모리와 자기진화 메커니즘을 갖춘 멀티에이전트 AI 과학자 프레임워크로, 생성한 6편의 논문이 전부 ICAIS 2025에 채택되며 그중 2편이 수상했다.

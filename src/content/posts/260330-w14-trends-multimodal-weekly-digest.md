@@ -26,6 +26,12 @@ author: MinHanr
 
 > 2026-03-13 ~ 2026-04-12 수집된 5건 통합.
 
+![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260330-w14-trends-multimodal-weekly-digest/fig-1.png)
+*Source: [arXiv 2507.12784 (Fig. 1)](https://arxiv.org/abs/2507.12784)*
+
+![Figure 2](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260330-w14-trends-multimodal-weekly-digest/fig-2.png)
+*Source: [arXiv 2412.04030 (Fig. 1)](https://arxiv.org/abs/2412.04030)*
+
 ## 수록 노트
 
 | # | 제목 | 출처 | 생성일 |

@@ -9,6 +9,9 @@ summary: "물리 시뮬레이션도, Diffusion 반복도 없이 텍스트 프롬
 description: "PromptVFX는 3D 애니메이션을 field prediction 태스크로 재정의하여, 기존 방법 대비 30배 이상 빠른 속도로 open-world VFX를 생성합니다. LLM→코드→Gaussian 조작이라는 에이전틱 패턴이 VFX 파이프라인의 미래를 어떻게 바꾸는지 분석합니다."
 keywords: ["PromptVFX", "3D Gaussian Splatting", "VFX", "LLM", "VLM", "4D flow field", "real-time animation", "text-driven VFX", "open-world"]
 ---
+![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/promptvfx-text-driven-3d-gaussian-vfx/fig-1.png)
+*Source: [arXiv 2506.01091 (Fig. 1)](https://arxiv.org/abs/2506.01091)*
+
 
 3D 씬에 불을 붙이고, 폭발시키고, 색을 바꾸려면 지금까지 어떤 선택지가 있었을까요?
 

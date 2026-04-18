@@ -23,6 +23,12 @@ categories:
 
 > **한줄 요약**: NVIDIA가 120B 파라미터(12B 활성) 규모의 하이브리드 Mamba-Transformer MoE 모델을 오픈소스로 공개, 기존 대비 5배 이상의 처리량과 100만 토큰 네이티브 컨텍스트를 실현했다.
 
+![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260322_NVIDIA_Nemotron_3_Super_하이브리드_MoE/fig-1.webp)
+*Source: [developer.nvidia.com](https://developer.nvidia.com/blog/introducing-nemotron-3-super-an-open-hybrid-mamba-transformer-moe-for-agentic-reasoning/)*
+
+![Figure 2](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260322_NVIDIA_Nemotron_3_Super_하이브리드_MoE/fig-2.jpg)
+*Source: [build.nvidia.com](https://build.nvidia.com/nvidia/nemotron-3-super-120b-a12b/modelcard)*
+
 ---
 
 ## 핵심 내용

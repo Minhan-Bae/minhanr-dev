@@ -57,6 +57,12 @@ author: MinHanr
 
 > 2026-03-13 ~ 2026-04-12 수집된 15건 통합.
 
+![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260328-w13-research-video-generation-weekly-digest-part2/fig-1.jpg)
+*Source: [arXiv 2303.07909 (Fig. 1)](https://arxiv.org/abs/2303.07909)*
+
+![Figure 2](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260328-w13-research-video-generation-weekly-digest-part2/fig-2.png)
+*Source: [Hugging Face · papers/2212.11685](https://huggingface.co/papers/2212.11685)*
+
 ## 수록 노트
 
 | # | 제목 | 출처 | 생성일 |

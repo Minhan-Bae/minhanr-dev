@@ -15,6 +15,9 @@ title: 'CausVid: Streaming Autoregressive Video Generation via Diagonal Distilla
 
 # CausVid: Streaming Autoregressive Video Generation via Diagonal Distillation
 
+![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260328-causvid-streaming-ar-video-diagonal-distillation-csvd/fig-1.png)
+*Source: [arXiv 2603.09488 (Fig. 1)](https://arxiv.org/abs/2603.09488)*
+
 **저자:** Jinxiu Liu, Xuanming Liu, Kangfu Mei, Yandong Wen, Ming-Hsuan Yang, Weiyang Liu
 **소속:** South China Univ. of Technology, Westlake University, Johns Hopkins, UC Merced, CUHK
 **발표:** ICLR 2026 / arXiv:2603.09488 (March 10, 2026)

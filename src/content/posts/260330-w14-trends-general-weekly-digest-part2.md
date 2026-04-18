@@ -64,6 +64,12 @@ author: MinHanr
 
 > 2026-03-13 ~ 2026-04-12 수집된 11건 통합.
 
+![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260330-w14-trends-general-weekly-digest-part2/fig-1.jpg)
+*Source: [marketermilk.com](https://www.marketermilk.com/blog/seo-trends-2026)*
+
+![Figure 2](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260330-w14-trends-general-weekly-digest-part2/fig-2.png)
+*Source: [github.blog](https://github.blog/open-source/maintainers/this-years-most-influential-open-source-projects/)*
+
 ## 수록 노트
 
 | # | 제목 | 출처 | 생성일 |

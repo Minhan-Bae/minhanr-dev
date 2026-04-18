@@ -26,6 +26,9 @@ date: '2026-04-13'
 
 # Diffusion-based G-buffer Generation and Rendering (PBR-Inspired Controllable Diffusion)
 
+![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260413-diffusion-gbuffer-generation-rendering/fig-1.png)
+*Source: [arXiv 2503.15147 (Fig. 1)](https://arxiv.org/abs/2503.15147)*
+
 **발표**: arXiv:2503.15147 (2025-03-18, 개정 2026-02-07)
 
 ## 핵심 요약

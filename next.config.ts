@@ -4,6 +4,9 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "images.unsplash.com" },
+      // R2 bucket for post body figures + covers (minhanr-dev-images).
+      // See scripts/upload-to-r2.mjs. Eventually CNAME to images.minhanr.dev.
+      { protocol: "https", hostname: "pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev" },
     ],
     // `/api/og` is the exact route; `/api/og/**` covers any future
     // nested variant. Both entries together mean the OG route works

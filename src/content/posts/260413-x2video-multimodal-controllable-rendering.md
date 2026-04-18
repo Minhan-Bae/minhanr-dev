@@ -25,6 +25,9 @@ date: '2026-04-13'
 
 # X2Video: Adapting Diffusion Models for Multimodal Controllable Neural Video Rendering
 
+![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260413-x2video-multimodal-controllable-rendering/fig-1.png)
+*Source: [arXiv 2510.08530 (Fig. 1)](https://arxiv.org/abs/2510.08530)*
+
 **발표**: arXiv:2510.08530 (2025-10-09)
 **프로젝트**: [luckyhzt.github.io/x2video](https://luckyhzt.github.io/x2video)
 

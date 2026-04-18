@@ -37,6 +37,9 @@ date: '2026-04-12'
 
 > Wang, Singhal, Kelkar, Tuo (2025-08) · arXiv 2508.03858
 
+![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260412-mi9-runtime-governance-framework-agentic-ai/fig-1.png)
+*Source: [arXiv 2508.03858 (Fig. 1)](https://arxiv.org/abs/2508.03858)*
+
 ## 핵심 요약
 
 에이전틱 AI 시스템은 추론·계획·실행 능력을 갖추면서 기존 AI 모델과 근본적으로 다른 거버넌스 과제를 제기한다. **런타임에 발현하는 예상치 못한 창발적 행동**(emergent behavior)은 사전 배포 거버넌스만으로 대응할 수 없다. MI9는 이를 위해 설계된 **최초의 완전 통합 런타임 거버넌스 프레임워크**로, 6개 핵심 컴포넌트를 통해 이질적 에이전트 아키텍처에 투명하게 작동하며 **99.81% 탐지율**을 달성한다.

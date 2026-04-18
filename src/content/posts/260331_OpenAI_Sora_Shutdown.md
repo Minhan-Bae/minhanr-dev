@@ -17,6 +17,12 @@ categories:
 
 # OpenAI Sora 서비스 종료 — 영상생성 시장 전환점
 
+![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260331_OpenAI_Sora_Shutdown/fig-1.jpg)
+*Source: [techcrunch.com](https://techcrunch.com/2026/03/29/why-openai-really-shut-down-sora/)*
+
+![Figure 2](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260331_OpenAI_Sora_Shutdown/fig-2.png)
+*Source: [variety.com](https://variety.com/2026/digital/news/openai-shutting-down-sora-video-disney-1236698277/)*
+
 ## 개요
 
 2026년 3월 24일, OpenAI가 Sora 앱 및 API 서비스 종료를 공식 발표했다. 2단계로 진행: (1) Sora 웹/앱 — 4월 26일 종료, (2) Sora API — 9월 24일 종료. WSJ 조사에 따르면 출시 후 전 세계 사용자 수가 약 100만 명에서 50만 미만으로 급감한 가운데, 하루 약 $100만의 운영 비용이 발생하고 있었다.

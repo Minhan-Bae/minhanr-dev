@@ -9,6 +9,9 @@ summary: "Feed-Forward 3D Gaussian Splatting의 해상도 스케일링 한계를
 description: "LGTM(Less Gaussians, Texture More)은 기존 피셀 정렬 3DGS의 2차 스케일링 문제를 해결하여, 단일 포워드 패스에서 4K 해상도 렌더링을 가능하게 합니다. 실시간 VFX 파이프라인에 미치는 영향을 분석합니다."
 keywords: ["LGTM", "Gaussian Splatting", "3DGS", "4K rendering", "real-time rendering", "feed-forward", "neural rendering", "VFX"]
 ---
+![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/lgtm-4k-gaussian-splatting/fig-1.png)
+*Source: [arXiv 2603.25745 (Fig. 1)](https://arxiv.org/abs/2603.25745)*
+
 
 3D Gaussian Splatting(3DGS)이 NeRF를 대체하며 실시간 렌더링의 새 표준으로 자리잡고 있습니다. 그러나 한 가지 근본적 한계가 있었습니다: **해상도가 올라가면 프리미티브 수가 2차적으로 폭증**하여, 4K 해상도에서의 실시간 합성은 사실상 불가능했습니다.
 

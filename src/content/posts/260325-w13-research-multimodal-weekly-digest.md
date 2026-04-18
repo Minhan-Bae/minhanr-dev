@@ -29,6 +29,12 @@ author: MinHanr
 
 > 2026-03-13 ~ 2026-04-12 수집된 8건 통합.
 
+![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260325-w13-research-multimodal-weekly-digest/fig-1.png)
+*Source: [arXiv 2601.02760 (Fig. 1)](https://arxiv.org/abs/2601.02760)*
+
+![Figure 2](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260325-w13-research-multimodal-weekly-digest/fig-2.png)
+*Source: [arXiv 2603.16340 (Fig. 1)](https://arxiv.org/abs/2603.16340)*
+
 ## 수록 노트
 
 | # | 제목 | 출처 | 생성일 |

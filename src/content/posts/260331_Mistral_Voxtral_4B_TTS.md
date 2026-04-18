@@ -17,6 +17,12 @@ categories:
 
 # Mistral Voxtral 4B TTS: 프론티어급 오픈웨이트 음성 생성
 
+![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260331_Mistral_Voxtral_4B_TTS/fig-1.png)
+*Source: [mistral.ai](https://mistral.ai/news/voxtral-tts)*
+
+![Figure 2](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260331_Mistral_Voxtral_4B_TTS/fig-2.png)
+*Source: [Hugging Face · mistralai/Voxtral-4B-TTS-2603](https://huggingface.co/mistralai/Voxtral-4B-TTS-2603)*
+
 ## 개요
 
 Mistral AI가 2026년 3월 26일 공개한 4B 파라미터 text-to-speech 모델. ElevenLabs Flash v2.5 대비 68.4% 승률을 기록하며 "최초의 프론티어급 오픈웨이트 TTS"를 표방한다. 3초 레퍼런스만으로 커스텀 보이스 적응이 가능하며, 9개 언어(영/불/독/스/네/포/이/힌/아)를 지원한다.

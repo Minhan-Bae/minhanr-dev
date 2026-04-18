@@ -27,6 +27,9 @@ date: '2026-04-13'
 
 # SViM3D: Stable Video Material Diffusion for Single Image 3D Generation
 
+![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260413-svi-m3d-stable-video-material-diffusion/fig-1.png)
+*Source: [arXiv 2510.08271 (Fig. 1)](https://arxiv.org/abs/2510.08271)*
+
 **저자**: Engelhardt et al.
 **소속**: Stability AI
 **발표**: ICCV 2025 (arXiv:2510.08271)

@@ -29,6 +29,12 @@ categories:
 > Ye et al. (EXCAI) | arXiv: 2501.03847
 > [HuggingFace Space](https://huggingface.co/spaces/EXCAI/Diffusion-As-Shader) | [Papers with Code](https://paperswithcode.com/paper/diffusion-as-shader-3d-aware-video-diffusion)
 
+![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260404_DiffusionAsShader_3DAware_Video_Diffusion_Control_DaS/fig-1.png)
+*Source: [arXiv 2501.03847 (Fig. 1)](https://arxiv.org/abs/2501.03847)*
+
+![Figure 2](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260404_DiffusionAsShader_3DAware_Video_Diffusion_Control_DaS/fig-2.png)
+*Source: [Hugging Face · spaces/EXCAI/Diffusion-As-Shader](https://huggingface.co/spaces/EXCAI/Diffusion-As-Shader)*
+
 ## 개요
 
 Diffusion as Shader(DaS)는 3D 트래킹 비디오를 제어 입력으로 활용하여 비디오 디퓨전 프로세스를 본질적으로 3D-aware하게 만드는 새로운 프레임워크이다. 기존 비디오 생성 제어 방식이 2D 시그널(optical flow, pose skeleton 등)에 의존한 반면, DaS는 3D 메시 렌더링 결과를 직접 컨디셔닝으로 사용함으로써 카메라 제어, 모션 전이, 오브젝트 조작, 메시→비디오 생성 등 다양한 3D-aware 비디오 제어 태스크를 하나의 통합 아키텍처에서 수행한다.

@@ -27,6 +27,12 @@ categories:
 
 > Meituan이 LongCat-Next를 오픈소스 공개 (March 25, 2026). 텍스트·비전·오디오를 단일 오토리그레시브 토큰 예측 프레임워크로 통합한 네이티브 멀티모달 모델. 68.5B 총 파라미터, 3B 활성 (MoE A3B), MIT 라이선스.
 
+![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260329_Meituan_LongCat-Next_네이티브_멀티모달_LCNX/fig-1.png)
+*Source: [arXiv 2509.01322 (Fig. 1)](https://arxiv.org/abs/2509.01322)*
+
+![Figure 2](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260329_Meituan_LongCat-Next_네이티브_멀티모달_LCNX/fig-2.png)
+*Source: [arXiv 2510.22200 (Fig. 1)](https://arxiv.org/abs/2510.22200)*
+
 ## 핵심 내용
 
 ### 아키텍처: DiNA + dNaViT

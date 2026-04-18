@@ -21,6 +21,12 @@ categories:
 
 > **한줄 요약**: "말로 설명하면 어떤 에이전트든 훈련 가능" — 다양한 환경 신호를 동시에 활용하는 범용 에이전트 학습 프레임워크.
 
+![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260322_OpenClaw-RL_범용_에이전트_훈련/fig-1.png)
+*Source: [Hugging Face · papers/trending](https://huggingface.co/papers/trending)*
+
+![Figure 2](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260322_OpenClaw-RL_범용_에이전트_훈련/fig-2.png)
+*Source: [Hugging Face · papers/2603.10165](https://huggingface.co/papers/2603.10165)*
+
 ---
 
 ## 핵심 내용

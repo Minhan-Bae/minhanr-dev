@@ -26,6 +26,12 @@ date: '2026-04-13'
 
 # IntrinsicEdit: Precise Generative Image Manipulation in Intrinsic Space
 
+![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260413-intrinsic-edit-generative-manipulation-intrinsic/fig-1.png)
+*Source: [arXiv 2505.08889 (Fig. 1)](https://arxiv.org/abs/2505.08889)*
+
+![Figure 2](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260413-intrinsic-edit-generative-manipulation-intrinsic/fig-2.png)
+*Source: [intrinsic-edit.github.io](https://intrinsic-edit.github.io/)*
+
 **저자**: Linjie Lyu, Valentin Deschaintre, Yannick Hold-Geoffroy, Miloš Hašan, Jae Shin Yoon, Thomas Leimkühler, Christian Theobalt, Iliyan Georgiev
 **소속**: MPI Informatics · Adobe Research
 **발표**: ACM Transactions on Graphics 44(4), 2025 (arXiv:2505.08889)

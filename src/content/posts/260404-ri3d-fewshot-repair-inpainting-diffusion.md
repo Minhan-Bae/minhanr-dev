@@ -17,7 +17,7 @@ summary: ICCV 2025 | Avinash Paliwal et al
 author: MinHanr
 publish_ready: true
 cover:
-  image: /images/posts/260404-ri3d-fewshot-repair-inpainting-diffusion/cover.png
+  image: https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260404-ri3d-fewshot-repair-inpainting-diffusion/cover.png
   alt: 260404 RI3D FewShot GS Repair Inpainting Diffusion RI3D
 date: '2026-04-04'
 categories:
@@ -28,6 +28,12 @@ categories:
 
 > **ICCV 2025** | Avinash Paliwal et al. (Texas A&M University)
 > arXiv: 2503.10860 | [Project Page](https://people.engr.tamu.edu/nimak/Papers/RI3D/index.html) | [GitHub](https://github.com/avinashpaliwal/RI3D) (코드 공개 예정)
+
+![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260404-ri3d-fewshot-repair-inpainting-diffusion/fig-1.png)
+*Source: [arXiv 2503.10860 (Fig. 1)](https://arxiv.org/abs/2503.10860)*
+
+![Figure 2](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260404-ri3d-fewshot-repair-inpainting-diffusion/fig-2.png)
+*Source: [people.engr.tamu.edu](https://people.engr.tamu.edu/nimak/Papers/RI3D/index.html)*
 
 ## 개요
 

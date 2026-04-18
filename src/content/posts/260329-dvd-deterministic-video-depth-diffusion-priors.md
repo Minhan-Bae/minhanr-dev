@@ -15,6 +15,12 @@ title: 'DVD: Deterministic Video Depth Estimation with Generative Priors'
 
 # DVD: Deterministic Video Depth Estimation with Generative Priors
 
+![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260329-dvd-deterministic-video-depth-diffusion-priors/fig-1.png)
+*Source: [Hugging Face · papers/2603.12250](https://huggingface.co/papers/2603.12250)*
+
+![Figure 2](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260329-dvd-deterministic-video-depth-diffusion-priors/fig-2.png)
+*Source: [GitHub · EnVision-Research/DVD](https://github.com/EnVision-Research/DVD)*
+
 **저자:** Hongfei Zhang, Harold Haodong Chen, Chenfei Liao, Jing He 외 (EnVision Research)
 **발표:** 2026-03-12 (arXiv: 2603.12250)
 **프로젝트:** https://dvd-project.github.io/

@@ -16,6 +16,12 @@ title: 'daVinci-MagiHuman: Single-Stream Audio-Video Generative Foundation Model
 
 # daVinci-MagiHuman: Single-Stream Audio-Video Generative Foundation Model
 
+![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260329-davinci-magihuman-singlestream-audiovideo-generation-dvmh/fig-1.png)
+*Source: [arXiv 2603.21986 (Fig. 1)](https://arxiv.org/abs/2603.21986)*
+
+![Figure 2](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260329-davinci-magihuman-singlestream-audiovideo-generation-dvmh/fig-2.png)
+*Source: [GitHub · GAIR-NLP/daVinci-MagiHuman](https://github.com/GAIR-NLP/daVinci-MagiHuman)*
+
 **저자:** SII-GAIR, Sand.ai (Ethan Chern, Hansi Teng 외 37명)
 **발표:** 2026-03-23 (arXiv: 2603.21986)
 **코드:** https://github.com/GAIR-NLP/daVinci-MagiHuman

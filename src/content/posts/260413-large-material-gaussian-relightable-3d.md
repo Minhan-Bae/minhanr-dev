@@ -28,6 +28,9 @@ date: '2026-04-13'
 
 # Large Material Gaussian Model for Relightable 3D Generation
 
+![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260413-large-material-gaussian-relightable-3d/fig-1.png)
+*Source: [arXiv 2509.22112 (Fig. 1)](https://arxiv.org/abs/2509.22112)*
+
 **저자**: Jingrui Ye 외 7인
 **발표**: arXiv:2509.22112 (2025-09-26)
 

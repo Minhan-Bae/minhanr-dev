@@ -22,6 +22,9 @@ categories:
 
 > 81건 growing 노트 클러스터 통합. SBA 과제 Houdini MCP 프로토타입 직결.
 
+![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260402_Project3D_Houdini_MCP_Convergence/fig-1.png)
+*Source: [arXiv 2602.10116 (Fig. 1)](https://arxiv.org/abs/2602.10116)*
+
 ## 핵심 테제
 
 **LLM + MCP + Visual Feedback Loop**이 에이전틱 3D 생성의 지배적 아키텍처 패턴으로 수렴하고 있다. 3개의 독립적 구현(3Dify, capoom/houdini-mcp, SAGE)이 동일한 설계 원칙에 도달했으며, 이를 Project-3D Houdini MCP 프로토타입에 즉시 적용 가능하다.

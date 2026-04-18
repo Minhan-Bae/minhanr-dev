@@ -16,6 +16,12 @@ title: Wan2.2 — MoE 기반 오픈소스 비디오 생성 모델의 SOTA 달성
 
 > Alibaba Tongyi Lab이 공개한 Wan2.2는 Mixture-of-Experts(MoE) 아키텍처를 비디오 디퓨전 모델에 최초 적용하여, VBench 84.7%+ 달성과 함께 2026년 오픈소스 비디오 생성 분야의 새로운 기준을 수립했다.
 
+![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260328-wan22-moe-videogeneration-opensource/fig-1.jpg)
+*Source: [medium.com](https://medium.com/@cliprise/the-state-of-ai-video-generation-in-february-2026-every-major-model-analyzed-6dbfedbe3a5c)*
+
+![Figure 2](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260328-wan22-moe-videogeneration-opensource/fig-2.webp)
+*Source: [pinggy.io](https://pinggy.io/blog/best_video_generation_ai_models/)*
+
 ## 개요
 
 2026년 3월 기준, AI 비디오 생성 분야는 상용 모델(Kling 3.0, Veo 3.1, Seedance 2.0)과 오픈소스 모델 간의 성능 격차가 급속히 좁혀지고 있다. 이 변화의 중심에 Alibaba Tongyi Lab의 Wan2.2가 있다. Wan2.2는 비디오 디퓨전 모델에 Mixture-of-Experts(MoE) 아키텍처를 도입한 최초의 모델로, 15억 개 비디오와 100억 개 이미지로 학습되어 기존 오픈소스 모델을 압도하고 상용 솔루션과 경쟁하는 수준에 도달했다.

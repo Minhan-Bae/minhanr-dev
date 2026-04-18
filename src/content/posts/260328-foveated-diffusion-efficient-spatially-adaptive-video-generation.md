@@ -5,7 +5,7 @@ categories:
 cover:
   alt: 260328 FoveatedDiffusion overview
   caption: ''
-  image: /images/posts/260328-foveated-diffusion-efficient-spatially-adaptive-video-generation/260328_FoveatedDiffusion_overview.png
+  image: https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260328-foveated-diffusion-efficient-spatially-adaptive-video-generation/260328_FoveatedDiffusion_overview.png
 date: '2026-03-28'
 draft: false
 slug: 260328-foveated-diffusion-efficient-spatially-adaptive-video-generation
@@ -19,6 +19,9 @@ title: 'Foveated Diffusion: Efficient Spatially Adaptive Image and Video Generat
 # Foveated Diffusion: Efficient Spatially Adaptive Image and Video Generation
 
 > 인간 시각의 중심와(fovea) 특성을 활용, 시선 위치 기반 비균일 토큰 할당으로 디퓨전 모델의 이미지·비디오 생성 시간을 대폭 단축. 전해상도 생성과 지각적으로 구분 불가능한 결과를 달성. Stanford 연구팀.
+
+![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260328-foveated-diffusion-efficient-spatially-adaptive-video-generation/fig-1.png)
+*Source: [arXiv 2603.23491 (Fig. 1)](https://arxiv.org/abs/2603.23491)*
 
 ## 핵심 내용
 

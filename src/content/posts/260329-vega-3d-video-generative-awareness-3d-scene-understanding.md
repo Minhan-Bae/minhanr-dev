@@ -16,6 +16,12 @@ title: 'VEGA-3D: Generation Models Know Space — Unleashing Implicit 3D Priors 
 
 # VEGA-3D: Generation Models Know Space — Unleashing Implicit 3D Priors for Scene Understanding
 
+![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260329-vega-3d-video-generative-awareness-3d-scene-understanding/fig-1.png)
+*Source: [arXiv 2603.19235 (Fig. 1)](https://arxiv.org/abs/2603.19235)*
+
+![Figure 2](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260329-vega-3d-video-generative-awareness-3d-scene-understanding/fig-2.png)
+*Source: [GitHub · H-EmbodVis/VEGA-3D](https://github.com/H-EmbodVis/VEGA-3D)*
+
 **저자:** Xianjin Wu, Dingkang Liang, Tianrui Feng, Kui Xia, Yumeng Zhang, Xiaofan Li, Xiao Tan, Xiang Bai
 **소속:** Huazhong University of Science and Technology (HUST) 외
 **발표:** arXiv:2603.19235 (March 19, 2026) / 코드+체크포인트 3월 25일 공개

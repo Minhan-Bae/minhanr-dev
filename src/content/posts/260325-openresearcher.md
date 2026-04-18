@@ -19,12 +19,18 @@ summary: TIGER-Lab이 프로프라이어터리 웹 API 없이 완전 오프라�
 author: MinHanr
 publish_ready: true
 cover:
-  image: /images/posts/260325-openresearcher/cover.png
+  image: https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260325-openresearcher/cover.png
   alt: 260325 OpenResearcher 오픈소스 딥리서치 파이프라인
 date: '2026-03-25'
 categories:
   - Research
 ---
+![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260325-openresearcher/fig-1.png)
+*Source: [arXiv 2603.20278 (Fig. 1)](https://arxiv.org/abs/2603.20278)*
+
+![Figure 2](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260325-openresearcher/fig-2.png)
+*Source: [Hugging Face · collections/TIGER-Lab/openresearcher](https://huggingface.co/collections/TIGER-Lab/openresearcher)*
+
 ## 한줄 요약
 
 TIGER-Lab이 프로프라이어터리 웹 API 없이 완전 오프라인으로 97K+ 딥리서치 궤적(trajectory)을 합성하는 오픈소스 파이프라인 **OpenResearcher**를 공개, BrowseComp-Plus에서 +34pt 향상을 달성했다.

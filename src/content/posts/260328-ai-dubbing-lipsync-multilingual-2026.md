@@ -16,6 +16,12 @@ title: AI 더빙 & 립싱크 다국어 기술 — 2026년 3월 시장 현황과 
 
 > 2026년 3월 기준, AI 더빙과 다국어 립싱크 기술이 산업화 단계에 진입했다. 130+ 언어 지원, 화자 음성 보존(voice cloning), 밀리초 단위 포네임-비짐 정렬, 오클루전 대응이 시장 표준으로 자리잡은 가운데, 오픈소스(FunCineForge)와 상용(Perso AI, Synthesia, HeyGen) 솔루션의 경쟁이 기술 발전을 가속화하고 있다.
 
+![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260328-ai-dubbing-lipsync-multilingual-2026/fig-1.png)
+*Source: [perso.ai](https://perso.ai/ai-lip-sync)*
+
+![Figure 2](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260328-ai-dubbing-lipsync-multilingual-2026/fig-2.jpg)
+*Source: [synthesia.io](https://www.synthesia.io/features/ai-dubbing)*
+
 ## 개요
 
 AI 기반 비디오 더빙과 립싱크 기술은 2024~2025년의 데모 단계를 지나, 2026년에 프로덕션급 도구로 전환되었다. 핵심 전환점은 세 가지이다: 첫째, 언어 커버리지가 130개 이상으로 확대되어 글로벌 콘텐츠 로컬라이제이션이 단일 파이프라인에서 가능해졌다. 둘째, 화자의 원본 음성 특성을 보존하는 음성 클로닝과 립싱크가 통합되어, 번역된 콘텐츠에서도 원본 화자의 아이덴티티가 유지된다. 셋째, Alibaba FunCineForge의 오픈소스 공개로 영화급 멀티캐릭터 더빙이 비용 장벽 없이 접근 가능해졌다.

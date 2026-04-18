@@ -62,6 +62,12 @@ author: MinHanr
 
 > 2026-04-05 ~ 2026-04-12 수집된 15건 통합.
 
+![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260412-w15-research-agents-weekly-digest-part2/fig-1.png)
+*Source: [arXiv 2604.04872 (Fig. 1)](https://arxiv.org/abs/2604.04872)*
+
+![Figure 2](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260412-w15-research-agents-weekly-digest-part2/fig-2.png)
+*Source: [arXiv 2604.07065 (Fig. 1)](https://arxiv.org/abs/2604.07065)*
+
 ## 수록 노트
 
 | # | 제목 | 출처 | 생성일 |

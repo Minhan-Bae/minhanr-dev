@@ -27,6 +27,9 @@ date: '2026-04-13'
 
 # MCPToolBench++: 대규모 MCP 도구 사용 벤치마크 (4K+ 서버, 1.5K QA)
 
+![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260413-mcptool-bench-plus-large-scale-mcp/fig-1.png)
+*Source: [Hugging Face · papers/2508.07575](https://huggingface.co/papers/2508.07575)*
+
 ## 개요
 
 MCPToolBench++는 AI 에이전트의 MCP(Model Context Protocol) 도구 사용 능력을 평가하는 대규모 멀티도메인 벤치마크이다 (arXiv 2508.07575, 2025년 8월). 기존 MCP 벤치마크가 제한된 도구·도메인만 다뤘다면, 본 연구는 **4,000개 이상의 MCP 서버** (40+ 카테고리, MCP 마켓플레이스 + GitHub 커뮤니티 수집)와 **1,500개 QA 쌍** (6개 도메인)으로 구성된 포괄적 평가 프레임워크를 제시한다.

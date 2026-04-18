@@ -17,6 +17,12 @@ categories:
 
 # World Labs Spark 2.0 — 오픈소스 3DGS 웹 렌더러 메이저 업데이트
 
+![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260331_World_Labs_Spark2_GS_Renderer/fig-1.png)
+*Source: [sparkjs.dev](https://sparkjs.dev/2.0.0-preview/docs/new-features-2.0/)*
+
+![Figure 2](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260331_World_Labs_Spark2_GS_Renderer/fig-2.png)
+*Source: [GitHub · sparkjsdev/spark](https://github.com/sparkjsdev/spark)*
+
 ## 개요
 
 Fei-Fei Li가 이끄는 World Labs가 Spark 2.0 Developer Preview를 공개했다. Spark는 THREE.js와 통합되는 고성능 Gaussian Splatting 웹 렌더러로, 2.0은 수억~수십억 개의 splat을 가진 거대 3D 씬을 동적으로 렌더링할 수 있도록 렌더러를 완전히 재작성한 메이저 업데이트다. World Labs는 $1B 펀드레이징을 완료하고 공간 지능(Spatial Intelligence) 분야를 선도하며, Marble이라는 멀티모달 World Model도 함께 개발 중이다.

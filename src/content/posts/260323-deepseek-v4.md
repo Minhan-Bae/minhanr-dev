@@ -23,6 +23,9 @@ date: '2026-03-23'
 categories:
   - Writing
 ---
+![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260323-deepseek-v4/fig-2.webp)
+*Source: [ai2.work](https://ai2.work/blog/deepseek-v4-china-s-trillion-parameter-multimodal-ai-rival-in-2026)*
+
 ## 한줄 요약
 
 DeepSeek이 1조 파라미터 규모의 멀티모달 모델 V4를 공개하며, 토큰당 ~37B만 활성화하는 초효율 아키텍처로 GPT-5 대비 최대 50배 저렴한 추론 비용을 실현했다.

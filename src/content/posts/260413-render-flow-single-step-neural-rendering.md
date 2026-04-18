@@ -26,6 +26,9 @@ date: '2026-04-13'
 
 # RenderFlow: Single-Step Neural Rendering via Flow Matching
 
+![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260413-render-flow-single-step-neural-rendering/fig-1.png)
+*Source: [arXiv 2601.06928 (Fig. 1)](https://arxiv.org/abs/2601.06928)*
+
 **발표**: arXiv:2601.06928 (2026-01-11)
 
 ## 핵심 요약

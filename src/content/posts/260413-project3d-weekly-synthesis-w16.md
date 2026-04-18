@@ -26,6 +26,12 @@ author: MinHanr
 
 > LLM 기반 3D 코드 생성 + 에이전트 거버넌스 = 자율 3D 파이프라인 기반 확립
 
+![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260413-project3d-weekly-synthesis-w16/fig-1.png)
+*Source: [arXiv 2604.02580 (Fig. 1)](https://arxiv.org/abs/2604.02580)*
+
+![Figure 2](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260413-project3d-weekly-synthesis-w16/fig-2.png)
+*Source: [arXiv 2601.12234 (Fig. 1)](https://arxiv.org/abs/2601.12234)*
+
 ## 주간 핵심 시그널
 
 W16 Project-3D 클러스터 5건은 두 가지 축으로 수렴한다: **(1) LLM이 코드를 통해 3D 세계를 직접 생성·편집하는 패러다임 확립**, **(2) 이를 통제할 수 있는 에이전트 거버넌스 인프라**. VoxelCodeBench와 Proc3D가 "LLM → 3D 코드 생성"의 성능 한계와 해법을 정량화하고, OrgAgent/AITrustOS/Ruflo가 이 파이프라인을 자율 운용할 때 필요한 통제 계층을 제공한다.

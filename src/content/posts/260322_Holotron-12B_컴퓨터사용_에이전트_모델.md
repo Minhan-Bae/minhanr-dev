@@ -22,6 +22,12 @@ categories:
 
 > **한줄 요약**: H Company가 NVIDIA와 협력하여 SSM-Attention 하이브리드 아키텍처 기반 12B 멀티모달 모델을 공개, WebVoyager 80.5%를 달성하며 오픈소스 컴퓨터 사용 에이전트의 새 기준을 세웠다.
 
+![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260322_Holotron-12B_컴퓨터사용_에이전트_모델/fig-1.png)
+*Source: [Hugging Face · blog/Hcompany/holotron-12b](https://huggingface.co/blog/Hcompany/holotron-12b)*
+
+![Figure 2](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260322_Holotron-12B_컴퓨터사용_에이전트_모델/fig-2.png)
+*Source: [Hugging Face · Hcompany/Holotron-12B](https://huggingface.co/Hcompany/Holotron-12B)*
+
 ---
 
 ## 핵심 내용

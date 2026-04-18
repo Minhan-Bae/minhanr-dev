@@ -20,6 +20,9 @@ categories:
 
 > Stanford + Zillow 공동 연구. 3D Gaussian Splatting 렌더링의 floater, 깜빡임, blur 아티팩트를 geometry-informed video-to-video 생성 모델로 제거하여 NVS 품질을 SOTA로 끌어올림. 실시간 변형은 16 FPS.
 
+![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260401-gaussfusion-geometry-informed-3dgs-refinement/fig-1.jpg)
+*Source: [lidarnews.com](https://lidarnews.com/zillow-3d-tours-with-gaussian-splatting/)*
+
 ## 핵심 내용
 
 ### 문제 정의

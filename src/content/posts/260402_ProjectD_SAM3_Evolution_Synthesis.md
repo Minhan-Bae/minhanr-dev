@@ -22,6 +22,12 @@ categories:
 
 > 9건 growing 노트 통합. AX지원사업 SAM 3 PoC + 제안서 직결.
 
+![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260402_ProjectD_SAM3_Evolution_Synthesis/fig-1.png)
+*Source: [arXiv 2511.16719 (Fig. 1)](https://arxiv.org/abs/2511.16719)*
+
+![Figure 2](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260402_ProjectD_SAM3_Evolution_Synthesis/fig-2.png)
+*Source: [arXiv 2512.04585 (Fig. 1)](https://arxiv.org/abs/2512.04585)*
+
 ## 핵심 테제
 
 SAM 3 패밀리가 3개월 만에 **Concept Segmentation → Instruction-Guided → Multi-Object Shared Memory**로 급속 진화했다. 이 3단계 스택이 AX지원사업 PoC의 기술적 근간이 된다.

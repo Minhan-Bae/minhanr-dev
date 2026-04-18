@@ -27,6 +27,9 @@ date: '2026-04-13'
 
 # WeatherDiffusion: Weather-Guided Diffusion Model for Forward and Inverse Rendering
 
+![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260413-weather-diffusion-weather-guided-rendering/fig-1.png)
+*Source: [arXiv 2508.06982 (Fig. 1)](https://arxiv.org/abs/2508.06982)*
+
 **발표**: arXiv:2508.06982 (후속 제목: IntrinsicWeather: Controllable Weather Editing in Intrinsic Space)
 
 ## 핵심 요약

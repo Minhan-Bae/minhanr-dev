@@ -43,6 +43,12 @@ author: MinHanr
 
 > 2026-04-05 ~ 2026-04-12 수집된 15건 통합.
 
+![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260412-w15-research-agents-weekly-digest-part3/fig-1.png)
+*Source: [Hugging Face · papers/2603.03194](https://huggingface.co/papers/2603.03194)*
+
+![Figure 2](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260412-w15-research-agents-weekly-digest-part3/fig-2.png)
+*Source: [arXiv 2603.16938 (Fig. 1)](https://arxiv.org/abs/2603.16938)*
+
 ## 수록 노트
 
 | # | 제목 | 출처 | 생성일 |

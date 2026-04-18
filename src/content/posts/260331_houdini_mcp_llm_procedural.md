@@ -17,6 +17,12 @@ categories:
 
 # HoudiniMCP: LLM이 Houdini를 직접 제어하는 MCP 서버
 
+![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260331_houdini_mcp_llm_procedural/fig-1.png)
+*Source: [GitHub · capoomgit/houdini-mcp](https://github.com/capoomgit/houdini-mcp)*
+
+![Figure 2](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260331_houdini_mcp_llm_procedural/fig-2.png)
+*Source: [glama.ai](https://glama.ai/mcp/servers/capoom/houdini-mcp)*
+
 ## 개요
 
 HoudiniMCP는 Capoom이 개발한 오픈소스 MCP(Model Context Protocol) 서버로, Claude 등 LLM 에이전트가 SideFX Houdini를 자연어로 직접 제어할 수 있게 한다. 2026년 3월 기준 GitHub Stars 177개, MIT 라이선스, Python 100% 구현. 같은 아키텍처 패턴의 선행작인 blender-mcp를 Houdini에 적용한 형태다.

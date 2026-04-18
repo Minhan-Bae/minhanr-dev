@@ -17,6 +17,9 @@ title: 'ShotStream: Streaming Multi-Shot Video Generation for Interactive Storyt
 > **arXiv**: 2603.25746v1 | **Published**: 2026-03-26
 > **Authors**: Yawen Luo, Xiaoyu Shi, Junhao Zhuang, Yutian Chen, Quande Liu, Xintao Wang, Pengfei Wan, Tianfan Xue
 
+![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260328-shotstream-streaming-multi-shot-video-generation-for-interac/fig-1.png)
+*Source: [arXiv 2603.25746 (Fig. 1)](https://arxiv.org/abs/2603.25746)*
+
 ## 한줄 요약
 
 양방향(bidirectional) 멀티샷 비디오 생성의 고지연·비인터랙티브 한계를 돌파하는 인과적(causal) 스트리밍 아키텍처. Distribution Matching Distillation과 듀얼 캐시 메모리를 결합하여 단일 GPU에서 16 FPS, sub-second latency로 일관된 멀티샷 비디오를 생성한다.

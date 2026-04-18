@@ -16,6 +16,9 @@ title: Gaussian Splatting 산업 표준화 — glTF 확장, OpenUSD 26.03, Nuke 
 
 > 2026년 초, 3D Gaussian Splatting(3DGS)이 연구 단계를 넘어 산업 표준으로 진입하는 결정적 전환점에 도달했다. Khronos Group의 glTF 2.0 확장, OpenUSD 26.03의 네이티브 스키마, Foundry Nuke 17.0의 공식 지원이 동시다발적으로 발표되며, 3DGS의 프로덕션 파이프라인 통합이 현실화되었다.
 
+![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260328-gaussiansplatting-industrystandard-gltf-openusd/fig-2.jpg)
+*Source: [radiancefields.substack.com](https://radiancefields.substack.com/p/gaussian-splatting-in-february-2026)*
+
 ## 개요
 
 2023년 INRIA의 원 논문 발표 이후 3D Gaussian Splatting은 NeRF를 대체하는 실시간 렌더링 기술로 급부상했으나, 산업 표준 부재로 프로덕션 도입에 제약이 있었다. 2026년 1분기, 3대 표준화 기관/도구가 동시에 3DGS 지원을 공식화하면서 이 장벽이 제거되고 있다. 이는 단순한 기술 트렌드가 아니라, VFX/시각화/게임 전 산업에 걸친 인프라 전환을 의미한다.

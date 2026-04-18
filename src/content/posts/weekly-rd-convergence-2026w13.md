@@ -9,6 +9,12 @@ summary: "66건의 기술 리서치 노트에서 발견한 5가지 교차 수렴
 description: "2026년 3월 넷째 주, AI 영상 생성과 VFX 기술 리서치에서 발견된 5가지 교차 수렴 패턴을 분석합니다. 디퓨전 모델의 범용화, Gaussian Splatting의 산업 표준화, LLM 기반 3D 제어의 부상, 멀티모달 네이티브 생성의 등장, AI 더빙의 산업화가 하나의 큰 흐름으로 합쳐지고 있습니다."
 keywords: ["AI video generation", "VFX pipeline", "diffusion model", "gaussian splatting", "3D generation", "lip sync", "LLM procedural", "convergence analysis", "Wan2.2", "Seedance 2.0", "SAGE", "FunCineForge", "OpenUSD"]
 ---
+![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/weekly-rd-convergence-2026w13/fig-1.png)
+*Source: [arXiv 2603.12238 (Fig. 1)](https://arxiv.org/abs/2603.12238)*
+
+![Figure 2](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/weekly-rd-convergence-2026w13/fig-2.jpg)
+*Source: [techcrunch.com](https://techcrunch.com/2026/03/26/bytedances-new-ai-video-generation-model-dreamina-seedance-2-0-comes-to-capcut/)*
+
 
 매주 수십 건의 논문, 제품 출시, 산업 뉴스를 리서치하다 보면 개별 기술의 진보보다 더 흥미로운 것이 보입니다. 서로 다른 영역에서 독립적으로 발전하던 기술들이 어느 순간 하나의 교차점으로 수렴하는 패턴입니다.
 

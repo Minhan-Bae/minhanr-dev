@@ -28,6 +28,12 @@ date: '2026-04-13'
 
 # ComGS: Efficient 3D Object-Scene Composition via Surface Octahedral Probes
 
+![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260413-com-gs-3d-object-scene-composition/fig-1.png)
+*Source: [arXiv 2510.07729 (Fig. 1)](https://arxiv.org/abs/2510.07729)*
+
+![Figure 2](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260413-com-gs-3d-object-scene-composition/fig-2.svg)
+*Source: [nju-3dv.github.io](https://nju-3dv.github.io/projects/ComGS/)*
+
 **발표**: ICLR 2025 (arXiv:2510.07729)
 **프로젝트**: [nju-3dv.github.io/projects/ComGS](https://nju-3dv.github.io/projects/ComGS/)
 

@@ -28,6 +28,9 @@ date: '2026-04-13'
 
 # 3D Gaussian Inverse Rendering with Approximated Global Illumination
 
+![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260413-3dgs-inverse-rendering-approximated-gi-3gir/fig-1.png)
+*Source: [arXiv 2504.01358 (Fig. 1)](https://arxiv.org/abs/2504.01358)*
+
 **저자**: Zirui Wu et al.
 **발표**: arXiv:2504.01358 (2025-04-02)
 

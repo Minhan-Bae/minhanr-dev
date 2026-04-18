@@ -29,6 +29,9 @@ date: '2026-04-13'
 
 # Neural LightRig: Unlocking Accurate Object Normal and Material Estimation with Multi-Light Diffusion
 
+![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260413-neural-light-rig-multi-light-diffusion/fig-1.png)
+*Source: [arXiv 2412.09593 (Fig. 1)](https://arxiv.org/abs/2412.09593)*
+
 **저자**: Zexin He, Tengfei Wang, Xin Huang, Xingang Pan, Ziwei Liu
 **발표**: CVPR 2025 (arXiv:2412.09593)
 **프로젝트**: [projects.zxhezexin.com/neural-lightrig](https://projects.zxhezexin.com/neural-lightrig/)

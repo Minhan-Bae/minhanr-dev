@@ -42,6 +42,12 @@ author: MinHanr
 
 > 2026-03-13 ~ 2026-04-12 수집된 6건 통합.
 
+![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260331-w14-research-inpainting-weekly-digest/fig-1.png)
+*Source: [arXiv 2504.17761 (Fig. 1)](https://arxiv.org/abs/2504.17761)*
+
+![Figure 2](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260331-w14-research-inpainting-weekly-digest/fig-2.png)
+*Source: [arXiv 2601.08587 (Fig. 1)](https://arxiv.org/abs/2601.08587)*
+
 ## 수록 노트
 
 | # | 제목 | 출처 | 생성일 |

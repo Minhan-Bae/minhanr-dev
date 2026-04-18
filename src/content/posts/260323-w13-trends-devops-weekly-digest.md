@@ -23,6 +23,9 @@ author: MinHanr
 
 > 2026-03-13 ~ 2026-04-12 수집된 6건 통합.
 
+![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260323-w13-trends-devops-weekly-digest/fig-1.png)
+*Source: [arXiv 2502.09417 (Fig. 1)](https://arxiv.org/abs/2502.09417)*
+
 ## 수록 노트
 
 | # | 제목 | 출처 | 생성일 |

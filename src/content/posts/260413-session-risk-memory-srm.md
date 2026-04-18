@@ -32,6 +32,9 @@ date: '2026-04-13'
 
 > Chitan (2026-03) — 정적 per-action 게이트를 session-level 궤적 감시로 확장하는 경량 모듈
 
+![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260413-session-risk-memory-srm/fig-1.png)
+*Source: [hf.co](https://hf.co/papers/2603.22350)*
+
 ## 핵심 요약
 
 기존의 deterministic pre-execution safety gate는 개별 에이전트 액션이 할당된 역할에 부합하는지를 평가하지만, 여러 개의 "개별적으로는 적법한" 단계로 분산된 공격(slow-burn exfiltration, gradual privilege escalation, compliance drift)에 구조적으로 취약하다. SRM은 stateless execution gate 위에 trajectory-level authorization 계층을 추가하는 경량 deterministic 모듈이다.

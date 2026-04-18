@@ -26,6 +26,9 @@ date: '2026-04-13'
 
 # StableIntrinsic: Detail-preserving One-step Diffusion Model for Multi-view Material Estimation
 
+![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260413-stable-intrinsic-one-step-multi-view/fig-1.png)
+*Source: [arXiv 2508.19789 (Fig. 1)](https://arxiv.org/abs/2508.19789)*
+
 **저자**: (arXiv:2508.19789, 2025-08-27)
 
 ## 핵심 요약

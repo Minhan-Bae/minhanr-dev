@@ -20,7 +20,7 @@ summary: '저자: Simon Zeng 외 발표: arXiv 2511.15833 코드: https://github
 author: MinHanr
 publish_ready: true
 cover:
-  image: /images/posts/260403-efficientsam3-progressive-distillation-edgedeploy-esam3/cover.png
+  image: https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260403-efficientsam3-progressive-distillation-edgedeploy-esam3/cover.png
   alt: 260403 EfficientSAM3 Progressive Distillation EdgeDeploy ESA
 date: '2026-04-03'
 categories:
@@ -28,6 +28,12 @@ categories:
 ---
 
 # EfficientSAM3: Progressive Hierarchical Distillation for Video Concept Segmentation
+
+![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260403-efficientsam3-progressive-distillation-edgedeploy-esam3/fig-1.png)
+*Source: [arXiv 2511.15833 (Fig. 1)](https://arxiv.org/abs/2511.15833)*
+
+![Figure 2](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260403-efficientsam3-progressive-distillation-edgedeploy-esam3/fig-2.png)
+*Source: [GitHub · SimonZeng7108/efficientsam3](https://github.com/SimonZeng7108/efficientsam3)*
 
 **저자:** Simon Zeng 외
 **발표:** arXiv 2511.15833

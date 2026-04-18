@@ -40,6 +40,9 @@ author: MinHanr
 
 > 2026-04-05 ~ 2026-04-12 수집된 6건 통합.
 
+![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260412-w15-trends-agents-weekly-digest-part3/fig-1.png)
+*Source: [GitHub · OpenHands/software-agent-sdk](https://github.com/OpenHands/software-agent-sdk)*
+
 ## 수록 노트
 
 | # | 제목 | 출처 | 생성일 |

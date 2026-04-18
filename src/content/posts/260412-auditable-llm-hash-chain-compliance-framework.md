@@ -31,6 +31,9 @@ date: '2026-04-12'
 
 > Li, D.; Yu, G.; Wang, X.; Liang, B. — Electronics 2026, 15(1), 56. Published 2025-12-23.
 
+![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260412-auditable-llm-hash-chain-compliance-framework/fig-1.png)
+*Source: [researchgate.net](https://www.researchgate.net/publication/399003645_AuditableLLM_A_Hash-Chain-Backed_Compliance-Aware_Auditable_Framework_for_Large_Language_Models)*
+
 ## 핵심 요약
 
 LLM의 학습·미세조정·언러닝 등 모델 업데이트 전 생애주기에 걸쳐 **해시체인 기반 변조 불가(tamper-evident) 감사 추적(audit trail)**을 제공하는 경량 프레임워크다. 모델 업데이트 실행 계층과 감사·검증 계층을 분리(decouple)하여, 기존 학습 파이프라인에 최소한의 오버헤드로 규제 준수(compliance) 가능한 감사 기록을 남긴다.

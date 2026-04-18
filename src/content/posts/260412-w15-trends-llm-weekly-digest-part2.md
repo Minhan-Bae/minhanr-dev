@@ -20,6 +20,12 @@ author: MinHanr
 
 > 2026-04-05 ~ 2026-04-12 수집된 15건 통합.
 
+![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260412-w15-trends-llm-weekly-digest-part2/fig-1.png)
+*Source: [Hugging Face · papers/2604.06392](https://huggingface.co/papers/2604.06392)*
+
+![Figure 2](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260412-w15-trends-llm-weekly-digest-part2/fig-2.png)
+*Source: [arXiv 2604.06696 (Fig. 1)](https://arxiv.org/abs/2604.06696)*
+
 ## 수록 노트
 
 | # | 제목 | 출처 | 생성일 |
