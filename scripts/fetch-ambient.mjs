@@ -1,21 +1,16 @@
 #!/usr/bin/env node
 /**
- * Fetch commercially-usable ambient audio tracks to `/public/ambient/`.
+ * Fetch CC0-licensed ambient audio tracks to `/public/ambient/`.
  *
  * Usage:
  *   node scripts/fetch-ambient.mjs                # all tracks, skip existing
  *   node scripts/fetch-ambient.mjs --force        # re-download
  *   node scripts/fetch-ambient.mjs --track rain   # single track
  *
- * URL sources below are sane defaults. If one breaks (CDN rotation /
- * takedown), edit the TRACKS table — every URL is preserved here so
- * an audit can verify the license of the artifact we actually shipped.
- *
- * All URLs listed MUST be from sources that explicitly allow commercial
- * use with no attribution:
- *   • Pixabay Content License — https://pixabay.com/service/license-summary/
- *   • Mixkit Free License     — https://mixkit.co/license
- *   • CC0 (public domain)     — https://creativecommons.org/publicdomain/zero/1.0/
+ * Sources are Internet Archive items explicitly marked CC0 1.0
+ * (public domain, commercial use OK, no attribution required). URLs
+ * are preserved here so a later audit can confirm the license status
+ * of the artifact actually shipped.
  */
 
 import fs from "node:fs/promises";
@@ -28,31 +23,27 @@ const ROOT = path.resolve(__dirname, "..");
 const OUT_DIR = path.resolve(ROOT, "public/ambient");
 
 /** Per-track candidate URLs — the fetcher tries each in order and
- *  stops at the first 200. Edit to swap a track; keep at least one
- *  working source per name to avoid a missing file in production. */
+ *  stops at the first 200. Keep at least two CC0-verified sources
+ *  per track so a CDN hiccup doesn't brick the script. */
 const TRACKS = {
   rain: {
     label: "Rain on glass (dark theme)",
-    license: "Pixabay Content License — commercial use, no attribution",
+    license:
+      "CC0 1.0 Universal — Internet Archive, relaxingrainsounds collection",
     candidates: [
-      "https://cdn.pixabay.com/audio/2022/03/15/audio_ec3f1a4c35.mp3",
-      "https://cdn.pixabay.com/audio/2022/10/21/audio_fa5ac1c8a5.mp3",
+      "https://archive.org/download/relaxingrainsounds/Rain%20Sounds.mp3",
+      "https://archive.org/download/relaxingrainsounds/Tropical%20Rain.mp3",
+      "https://archive.org/download/relaxingrainsounds/Light%20Gentle%20Rain%20Part%201.mp3",
     ],
   },
   wind: {
-    label: "Soft wind (gray theme)",
-    license: "Pixabay Content License — commercial use, no attribution",
+    label: "Blustery wind loop (light theme)",
+    license:
+      "CC0 1.0 Universal — Internet Archive, Red_Library_Nature_Wind (USC Cinema collection)",
     candidates: [
-      "https://cdn.pixabay.com/audio/2022/03/24/audio_d5f3c84eae.mp3",
-      "https://cdn.pixabay.com/audio/2022/08/02/audio_884fe92c21.mp3",
-    ],
-  },
-  nature: {
-    label: "Birdsong / grass (light theme)",
-    license: "Pixabay Content License — commercial use, no attribution",
-    candidates: [
-      "https://cdn.pixabay.com/audio/2022/05/16/audio_db6591201e.mp3",
-      "https://cdn.pixabay.com/audio/2022/11/22/audio_febc508a8c.mp3",
+      "https://archive.org/download/Red_Library_Nature_Wind/R22-11-Blustery%20Wind%20Loop.mp3",
+      "https://archive.org/download/Red_Library_Nature_Wind/R21-38-Good%20Mechanical%20Wind.mp3",
+      "https://archive.org/download/Red_Library_Nature_Wind/R22-15-Noisy%20Dull%20Wind.mp3",
     ],
   },
 };

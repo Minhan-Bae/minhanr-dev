@@ -1,10 +1,9 @@
 /**
  * Scenes — theme × time-of-day background rotation.
  *
- * Each of the three themes owns its own scene set:
+ * Two themes own their own scene set:
  *   • dark — storm-blue rain scenes (six slots, hourly)
  *   • light — sunny, clear-weather scenes (morning / noon / golden hour)
- *   • gray — overcast / fog scenes (AM / PM)
  *
  * Selection is intentionally done on the client — on the server we
  * don't know the viewer's clock or theme class (the pre-paint script
@@ -13,7 +12,7 @@
  * local hour inside `useEffect`.
  */
 
-export type SceneTheme = "dark" | "light" | "gray";
+export type SceneTheme = "dark" | "light";
 
 export interface Scene {
   key: string;
@@ -25,8 +24,6 @@ export interface Scene {
   /** Theme the scene belongs to. */
   theme: SceneTheme;
 }
-
-const H_ALL = Array.from({ length: 24 }, (_, i) => i);
 
 export const SCENES_DARK: Scene[] = [
   { theme: "dark", key: "harbour",    label: "Pre-dawn harbour",    file: "/scenes/harbour.jpg",    hours: [0, 1, 2, 3, 4, 5] },
@@ -43,19 +40,13 @@ export const SCENES_LIGHT: Scene[] = [
   { theme: "light", key: "sunset-beach",  label: "Golden hour shore", file: "/scenes/sunset-beach.jpg", hours: [15, 16, 17, 18, 19, 20, 21, 22, 23] },
 ];
 
-export const SCENES_GRAY: Scene[] = [
-  { theme: "gray", key: "morning-fog",      label: "Morning fog bank",  file: "/scenes/morning-fog.jpg", hours: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] },
-  { theme: "gray", key: "overcast-harbour", label: "Overcast harbour",  file: "/scenes/overcast-harbour.jpg", hours: [12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23] },
-];
-
 export const SCENES_BY_THEME: Record<SceneTheme, Scene[]> = {
   dark: SCENES_DARK,
   light: SCENES_LIGHT,
-  gray: SCENES_GRAY,
 };
 
 /** Full flat list — used by SSR fallback helpers and asset audits. */
-export const SCENES: Scene[] = [...SCENES_DARK, ...SCENES_LIGHT, ...SCENES_GRAY];
+export const SCENES: Scene[] = [...SCENES_DARK, ...SCENES_LIGHT];
 
 /** First dark scene is the legacy fallback — also copied to /bg.jpg
  *  for the no-JS / WebGL-unavailable case by the generator script. */
@@ -63,8 +54,7 @@ export const FALLBACK_SCENE: Scene = SCENES_DARK[0];
 
 /**
  * Rain-engine presets, per theme. Rain intensity mirrors the weather
- * family of each scene set: clear on light, drizzle on gray, storm on
- * dark.
+ * family of each scene set: clear on light, storm on dark.
  */
 export interface RainPreset {
   raining: boolean;
@@ -99,21 +89,6 @@ export const RAIN_PRESETS: Record<SceneTheme, RainPreset> = {
     backdropOpacity: 0.22,
     overlayGradient:
       "linear-gradient(to bottom, color-mix(in oklch, var(--background) 25%, transparent), color-mix(in oklch, var(--background) 65%, transparent) 50%, var(--background))",
-  },
-  gray: {
-    raining: true,
-    rainChance: 0.12,
-    rainLimit: 1,
-    trailRate: 0.5,
-    dropletsRate: 20,
-    minR: 8,
-    maxR: 28,
-    bgBlurPx: 2,
-    bgBrightness: 0.7,
-    bgWashRgba: "rgba(70, 90, 110, 0.20)",
-    backdropOpacity: 0.38,
-    overlayGradient:
-      "linear-gradient(to bottom, color-mix(in oklch, var(--background) 10%, transparent), color-mix(in oklch, var(--background) 45%, transparent) 55%, color-mix(in oklch, var(--background) 90%, transparent))",
   },
   light: {
     raining: false,
@@ -153,7 +128,6 @@ export function getActiveTheme(): SceneTheme {
   if (typeof document === "undefined") return "dark";
   const cl = document.documentElement.classList;
   if (cl.contains("light")) return "light";
-  if (cl.contains("gray")) return "gray";
   return "dark";
 }
 
@@ -167,7 +141,3 @@ export function observeTheme(onChange: (t: SceneTheme) => void): () => void {
   });
   return () => obs.disconnect();
 }
-
-// Silence "unused H_ALL" — kept as a handy export for future scenes that
-// want 24h coverage in one slot.
-void H_ALL;

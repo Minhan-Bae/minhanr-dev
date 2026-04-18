@@ -18,16 +18,10 @@ const PAUSE_MS = 900;
 /**
  * Hero — 100svh cinematic masthead.
  *
- * Layered composition on top of `<SiteBackground />`:
- *   • Corner metadata (00, SEOUL 2026, role) anchors the frame.
- *   • Giant serif italic wordmark is the lede — magazine-cover energy.
- *   • Bottom rail pairs a Korean tagline, scroll affordance, and
- *     two tabular counters (selected / writing) so the visitor grasps
- *     scope in one glance.
- *
- * No background of its own; sits transparently over `bg.jpg` so the
- * Ken-Burns drift shows through. The bottom gradient in SiteBackground
- * hands off to the first content section below.
+ * The four-corner magazine frame is provided by the public layout
+ * (wordmark TL · SeoulDatum TR · SiteColophon BR · SiteDock BC), so
+ * this component focuses on just the centerpiece type + a quiet
+ * Selected / Writing counter rail at the bottom.
  */
 export function Hero({ workCount, writingCount }: HeroProps) {
   const word = BRAND_IDENTITY.studio;
@@ -37,18 +31,6 @@ export function Hero({ workCount, writingCount }: HeroProps) {
       data-slide
       className="slide relative flex w-full flex-col overflow-hidden"
     >
-      {/* ─── Top rail ───────────────────────────────────────────────── */}
-      <div className="relative z-10 flex items-start justify-between px-6 pt-20 font-technical text-[10px] uppercase tracking-[0.22em] text-muted-foreground sm:px-10 sm:pt-24 sm:text-[11px]">
-        <div>
-          <div className="text-foreground">Studio № 01</div>
-          <div className="mt-1 tabular-nums">Seoul · 2026</div>
-        </div>
-        <div className="text-right">
-          <div className="text-foreground">{BRAND_IDENTITY.role}</div>
-          <div className="mt-1 tabular-nums">Est. 2020</div>
-        </div>
-      </div>
-
       {/* ─── Centerpiece wordmark ───────────────────────────────────── */}
       <div className="relative z-0 flex flex-1 items-center justify-center px-6 sm:px-10">
         <div className="relative">
@@ -79,32 +61,24 @@ export function Hero({ workCount, writingCount }: HeroProps) {
         </div>
       </div>
 
-      {/* ─── Bottom rail ────────────────────────────────────────────────
-          Positioned above the floating SiteDock (which occupies roughly
-          72–88px at the viewport bottom). We reserve ~128px of bottom
-          padding so the counters clear the dock on every breakpoint,
-          and we drop the old centre "Scroll" hint — the dock already
-          communicates navigation, so a second scroll affordance just
-          competed with it for attention. */}
-      <div className="relative z-10 flex items-end justify-between gap-6 px-6 pb-28 sm:px-10 sm:pb-32">
-        <div className="font-technical text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
-          <div className="text-[9px] sm:text-[10px]">Selected</div>
-          <div
-            className="mt-1 font-display italic tabular-nums text-foreground"
-            style={{ fontSize: "clamp(1.5rem, 3vw, 2.25rem)", lineHeight: "0.9" }}
-          >
+      {/* ─── Bottom rail — quiet scope counter ──────────────────────
+          Left-aligned single line, well clear of the bottom-right
+          SiteColophon and the bottom-center SiteDock. Selected /
+          Writing totals live here as a single line of editorial
+          metadata (e.g. "Selected 12 · Writing 42"), not as large
+          display numbers — the hero's focal point is the typewriter,
+          not the counts. */}
+      <div className="relative z-10 px-6 pb-28 sm:px-10 sm:pb-32">
+        <div className="font-technical text-[10px] uppercase tracking-[0.24em] text-muted-foreground sm:text-[11px]">
+          <span className="text-foreground">Selected</span>
+          <span className="mx-1.5 tabular-nums text-foreground/80">
             {String(workCount).padStart(2, "0")}
-          </div>
-        </div>
-
-        <div className="text-right font-technical text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
-          <div className="text-[9px] sm:text-[10px]">Writing</div>
-          <div
-            className="mt-1 font-display italic tabular-nums text-foreground"
-            style={{ fontSize: "clamp(1.5rem, 3vw, 2.25rem)", lineHeight: "0.9" }}
-          >
+          </span>
+          <span className="mx-2 opacity-40">·</span>
+          <span className="text-foreground">Writing</span>
+          <span className="ml-1.5 tabular-nums text-foreground/80">
             {String(writingCount).padStart(2, "0")}
-          </div>
+          </span>
         </div>
       </div>
     </section>

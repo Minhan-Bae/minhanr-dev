@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-type Theme = "dark" | "light" | "gray";
+type Theme = "dark" | "light";
 
 // Tier 0 brand is "Minhan Bae" (see docs/brand-tenets.md). Storage key
 // follows the public-facing brand name, not the internal system codename.
@@ -13,14 +13,12 @@ const THEME_KEY = "minhanr-theme";
 const THEME_CONFIG: Record<Theme, { label: string; icon: string }> = {
   dark: { label: "Dark", icon: "●" },
   light: { label: "Light", icon: "○" },
-  gray: { label: "Gray", icon: "◐" },
 };
 
 function getThemeFromDOM(): Theme {
   if (typeof document === "undefined") return "dark";
   const cl = document.documentElement.classList;
   if (cl.contains("light")) return "light";
-  if (cl.contains("gray")) return "gray";
   return "dark";
 }
 
@@ -48,9 +46,7 @@ export function ThemeSwitcher() {
   }
 
   function cycle() {
-    const order: Theme[] = ["dark", "gray", "light"];
-    const next = order[(order.indexOf(theme) + 1) % order.length];
-    applyTheme(next);
+    applyTheme(theme === "dark" ? "light" : "dark");
   }
 
   // Prevent hydration mismatch - render nothing until mounted

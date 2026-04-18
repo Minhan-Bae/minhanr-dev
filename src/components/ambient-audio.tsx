@@ -10,26 +10,25 @@ import {
 /**
  * Ambient audio by theme, with a single user-facing toggle.
  *
- *   • dark  → steady rain on glass
- *   • gray  → soft wind
- *   • light → open-air birdsong / grass stir
+ *   • dark  → steady rain on glass (CC0 / Internet Archive)
+ *   • light → blustery wind loop (CC0 / Internet Archive)
  *
  * Browser autoplay policies require a user gesture before any audio
  * plays, so the toggle is OFF by default. Once the visitor enables it,
  * we persist the preference under `minhanr-ambient` and restart the
  * right loop whenever the theme changes.
  *
- * Audio files are CC0 / Pixabay-Content-Licensed (commercial use OK)
- * and live under `/public/ambient/`. A missing file fails gracefully —
- * the `<audio>` tag silently skips to nothing.
+ * Audio files live under `/public/ambient/` and are sourced from
+ * Internet Archive CC0 collections (see public/ambient/README.md). A
+ * missing file fails gracefully — the `<audio>` tag silently skips to
+ * nothing and the toggle disables itself.
  */
 
 const AMBIENT_KEY = "minhanr-ambient";
 
 const TRACKS: Record<SceneTheme, string> = {
   dark: "/ambient/rain.mp3",
-  gray: "/ambient/wind.mp3",
-  light: "/ambient/nature.mp3",
+  light: "/ambient/wind.mp3",
 };
 
 const FADE_MS = 1200;
@@ -151,7 +150,6 @@ export function AmbientToggle() {
         preload="none"
         loop
         playsInline
-        // `crossOrigin` helps future-proof if we swap in a CDN source.
         crossOrigin="anonymous"
       />
     </>

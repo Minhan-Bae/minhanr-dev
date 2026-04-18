@@ -100,7 +100,7 @@ export default function RootLayout({
           // "oikbas-theme" key to "minhanr-theme" (Tier 0 brand: Minhan Bae,
           // not OIKBAS — see docs/brand-tenets.md).
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var k="minhanr-theme",legacy="oikbas-theme",t=localStorage.getItem(k);if(!t){var old=localStorage.getItem(legacy);if(old){t=old;localStorage.setItem(k,old);localStorage.removeItem(legacy);}}if(t&&["dark","light","gray"].indexOf(t)>=0){document.documentElement.classList.remove("dark","light","gray");document.documentElement.classList.add(t);}}catch(e){}})()`,
+            __html: `(function(){try{var k="minhanr-theme",legacy="oikbas-theme",t=localStorage.getItem(k);if(!t){var old=localStorage.getItem(legacy);if(old){t=old;localStorage.setItem(k,old);localStorage.removeItem(legacy);}}if(t==="gray"){t="dark";localStorage.setItem(k,t);}if(t&&["dark","light"].indexOf(t)>=0){document.documentElement.classList.remove("dark","light","gray");document.documentElement.classList.add(t);}}catch(e){}})()`,
           }}
         />
       </head>

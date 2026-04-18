@@ -1,40 +1,39 @@
 # Ambient audio
 
 The site dock ships with a speaker toggle that plays a theme-matched
-ambient loop. All three tracks must be **commercially usable** (CC0,
-Pixabay Content License, or Mixkit Free License — anything that allows
-commercial use with no attribution). The dock component
+ambient loop. Every track here is **commercially usable** (CC0 1.0
+Universal — public domain). The dock component
 (`src/components/ambient-audio.tsx`) fails silently if a file is
 missing, so the site works fine even without these files.
 
-## Expected files
+## Files
 
 ```
 public/ambient/
-├── rain.mp3     — Dark theme (storm rain on glass, ~2–4 min loop)
-├── wind.mp3     — Gray theme (soft wind, overcast day, ~2–4 min loop)
-└── nature.mp3   — Light theme (birdsong / grass, ~2–4 min loop)
+├── rain.mp3   — Dark theme (gentle storm rain)
+└── wind.mp3   — Light theme (blustery wind loop)
 ```
 
-Target loudness: around `-20 LUFS` so the loop sits under any content
-without demanding attention. Keep each file under ~4 MB — these ship to
-the Vercel edge and load on toggle-enable.
+## Sources (all CC0 1.0 Universal)
 
-## Sourcing (recommended starting points)
+| File      | Source                                                                                                                           |
+| --------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| rain.mp3  | [Internet Archive — relaxingrainsounds](https://archive.org/details/relaxingrainsounds) → `Rain Sounds.mp3`                       |
+| wind.mp3  | [Internet Archive — Red_Library_Nature_Wind](https://archive.org/details/Red_Library_Nature_Wind) → `R22-11-Blustery Wind Loop.mp3` |
 
-- **Pixabay** — https://pixabay.com/sound-effects/search/rain/
-  - License: https://pixabay.com/service/license-summary/ (commercial
-    use OK, no attribution required).
-- **Mixkit** — https://mixkit.co/free-sound-effects/rain/
-  - License: https://mixkit.co/license (free for commercial use).
-- **Freesound.org** — filter by CC0 only
-  (https://freesound.org/search/?f=license:%22Creative+Commons+0%22).
+The CC0 1.0 Universal public-domain dedication permits unrestricted
+commercial use with no attribution requirement, so the site can ship
+these files with the rest of the build.
 
-Drop the downloaded files at the expected paths above and commit. The
-toggle will pick them up on the next build.
+## Regenerating
 
-## License audit trail
+```bash
+node scripts/fetch-ambient.mjs            # skip existing
+node scripts/fetch-ambient.mjs --force    # re-download all
+node scripts/fetch-ambient.mjs --track rain
+```
 
-If you commit the audio files, please also commit a `SOURCES.md` in
-this directory listing each file's source URL, author (if any), and
-license. That record protects us if a license dispute ever comes up.
+Each entry in `scripts/fetch-ambient.mjs` carries at least three
+candidate URLs from the same CC0 collection, so a single archive.org
+hiccup won't break the fetch — the script falls through to the next
+URL and reports which one it used.

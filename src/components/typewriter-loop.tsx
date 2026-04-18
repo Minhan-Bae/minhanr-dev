@@ -7,6 +7,10 @@ import {
   type CSSProperties,
   type ElementType,
 } from "react";
+import {
+  ensureTypewriterAudio,
+  playTypewriterClick,
+} from "@/lib/typewriter-sfx";
 
 type Phase = "typing" | "hold" | "erasing" | "pause";
 
@@ -67,6 +71,11 @@ export function TypewriterLoop({
   const [phase, setPhase] = useState<Phase>("typing");
   const timerRef = useRef<number | null>(null);
 
+  // Prime the Web Audio context + hook first-gesture unlock once.
+  useEffect(() => {
+    ensureTypewriterAudio();
+  }, []);
+
   useEffect(() => {
     const clearTimer = () => {
       if (timerRef.current != null) {
@@ -77,10 +86,10 @@ export function TypewriterLoop({
 
     if (phase === "typing") {
       if (visibleCount < letters.length) {
-        timerRef.current = window.setTimeout(
-          () => setVisibleCount((c) => c + 1),
-          typeDelay
-        );
+        timerRef.current = window.setTimeout(() => {
+          setVisibleCount((c) => c + 1);
+          playTypewriterClick();
+        }, typeDelay);
       } else {
         timerRef.current = window.setTimeout(() => setPhase("hold"), holdMs);
       }
@@ -88,10 +97,10 @@ export function TypewriterLoop({
       setPhase("erasing");
     } else if (phase === "erasing") {
       if (visibleCount > 0) {
-        timerRef.current = window.setTimeout(
-          () => setVisibleCount((c) => c - 1),
-          eraseDelay
-        );
+        timerRef.current = window.setTimeout(() => {
+          setVisibleCount((c) => c - 1);
+          playTypewriterClick({ volume: 0.07 });
+        }, eraseDelay);
       } else {
         timerRef.current = window.setTimeout(() => setPhase("pause"), pauseMs);
       }

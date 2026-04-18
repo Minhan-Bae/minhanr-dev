@@ -164,37 +164,7 @@ const LIGHT_SCENES = [
   },
 ];
 
-/** Fog-leaning scenes for the Gray theme — compositionally calm, lots
- *  of grey diffuse light, a mid-tone neutral cast for the daytime
- *  interior-lit working mode. */
-const GRAY_SCENES = [
-  {
-    name: "morning-fog",
-    theme: "gray",
-    label: "Morning fog bank",
-    prompt: [
-      "Rolling pasture drowned in morning fog,",
-      "desaturated cool-grey tonality throughout,",
-      "a line of barely-visible tree silhouettes recedes into white-out,",
-      "glistening dew catches what little light there is as tiny specular points,",
-      "quiet, contemplative, evenly-lit from above,",
-    ].join(" "),
-  },
-  {
-    name: "overcast-harbour",
-    theme: "gray",
-    label: "Overcast harbour",
-    prompt: [
-      "Working harbour under solid grey overcast sky,",
-      "cold signal-cobalt water, restrained greys dominate the frame,",
-      "a moored ferry silhouette mid-distance,",
-      "warm pinpoint dock lights already on despite daylight,",
-      "weather flat and diffuse with no shadow direction,",
-    ].join(" "),
-  },
-];
-
-const SCENES = [...DARK_SCENES, ...LIGHT_SCENES, ...GRAY_SCENES];
+const SCENES = [...DARK_SCENES, ...LIGHT_SCENES];
 
 // ── Env loader ───────────────────────────────────────────────────
 
