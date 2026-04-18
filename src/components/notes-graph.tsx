@@ -40,13 +40,21 @@ const CX = VB_W / 2;
 const CY = VB_H / 2;
 
 // Physics — tuned against ~116 public nodes + 5 shadows
-const REPEL_STRENGTH = 340;  // Coulomb constant
-const REPEL_CUTOFF   = 260;  // ignore pairs beyond this distance
-const SPRING_REST    = 90;
-const SPRING_K       = 0.018;
-const GRAVITY        = 0.006; // pull toward (CX, CY)
+const REPEL_STRENGTH = 620;  // Coulomb constant (higher = more spread)
+const REPEL_CUTOFF   = 420;  // ignore pairs beyond this distance
+const SPRING_REST    = 170;
+const SPRING_K       = 0.016;
+const GRAVITY        = 0.0025; // pull toward (CX, CY) — weakened so the
+                               // graph fills ~0.75 of the viewBox
 const DAMPING        = 0.82;
-const MAX_STEP       = 12;    // clamp per-tick displacement per axis
+const MAX_STEP       = 14;     // clamp per-tick displacement per axis
+
+// Soft boundary: nodes outside the inner 75% of the viewBox get pushed
+// back in proportional to how far they've strayed. Gives the graph a
+// natural frame without hard walls.
+const BOUND_MARGIN_X = VB_W * 0.125;   // 12.5% on each side
+const BOUND_MARGIN_Y = VB_H * 0.125;
+const BOUND_STRENGTH = 0.06;
 
 const CATEGORY_ORDER = [
   "AI",
@@ -58,16 +66,38 @@ const CATEGORY_ORDER = [
 
 type CategoryKey = (typeof CATEGORY_ORDER)[number];
 
+/**
+ * Category → display label, plus a base hue for colour generation.
+ * Each public node pulls its actual colour from its category band
+ * (base hue ± half-range) using its slug seed, so posts within the
+ * same category read as a family instead of identical dots.
+ */
 const CATEGORY_STYLE: Record<
   CategoryKey,
-  { color: string; label: string }
+  { label: string; baseHue: number; hueRange: number }
 > = {
-  AI:                    { color: "var(--chart-1)", label: "AI" },
-  VFX:                   { color: "var(--chart-2)", label: "VFX" },
-  Research:              { color: "var(--chart-3)", label: "Research" },
-  "Creative Technology": { color: "var(--chart-4)", label: "Creative" },
-  General:               { color: "var(--chart-5)", label: "General" },
+  AI:                    { label: "AI",       baseHue: 205, hueRange: 36 },
+  VFX:                   { label: "VFX",      baseHue: 355, hueRange: 30 },
+  Research:              { label: "Research", baseHue: 160, hueRange: 30 },
+  "Creative Technology": { label: "Creative", baseHue: 75,  hueRange: 28 },
+  General:               { label: "General",  baseHue: 235, hueRange: 40 },
 };
+
+/**
+ * OKLCH string tuned for legible nodes on both dark and light surfaces.
+ * Lightness 0.68 + chroma 0.14 is a "neon-avoiding" mid-band that keeps
+ * contrast without the 2026 palette leaking into candy colours.
+ */
+function nodeColor(cat: CategoryKey, seed: number): string {
+  const { baseHue, hueRange } = CATEGORY_STYLE[cat];
+  const hue = baseHue + (seed - 0.5) * hueRange;
+  return `oklch(0.68 0.14 ${hue.toFixed(1)})`;
+}
+
+/** Legend swatch — representative colour per category (mid-hue). */
+function legendColor(cat: CategoryKey): string {
+  return `oklch(0.68 0.14 ${CATEGORY_STYLE[cat].baseHue})`;
+}
 
 const PRIVATE_CATEGORIES = [
   { id: "priv-daily",   label: "일지" },
@@ -163,7 +193,7 @@ function buildGraph(posts: BlogPostMeta[]): {
       slug: post.slug,
       tags: post.tags,
       category: cat,
-      color: CATEGORY_STYLE[cat].color,
+      color: nodeColor(cat, seed),
       r: 6,
       x: CX + Math.cos(angle) * r0,
       y: CY + Math.sin(angle) * r0,
@@ -321,22 +351,17 @@ export function NotesGraph({ posts }: NotesGraphProps) {
       typeof window !== "undefined" &&
       window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    // Initial paint so the graph is never a pile of dots at (0,0) in
-    // the moment between hydration and the first rAF frame. Nodes
-    // already have seeded bx/by positions from buildGraph().
+    // Pre-settle the layout so the opening moments are already calm
+    // instead of a visible "gathering" animation. 80 ticks gets the
+    // spread 90% of the way there; the live simulation handles the
+    // last 10% and any subsequent interaction. Reduced-motion users
+    // get a heavier pre-settle (160) and a gentler cadence after.
+    const preSettle = prefersReduce ? 160 : 80;
+    for (let i = 0; i < preSettle; i++) step();
     paint();
-
-    // For reduced-motion users we still want a "living" graph — just
-    // slower. Pre-settle 120 ticks so it starts relaxed, then continue
-    // the simulation at a gentler cadence.
-    if (prefersReduce) {
-      for (let i = 0; i < 120; i++) step();
-      paint();
-    }
 
     let raf = 0;
     let lastT = 0;
-    // Interval gate for reduced-motion (~30fps equivalent)
     const minDt = prefersReduce ? 33 : 0;
     function frame(t: number) {
       if (t - lastT >= minDt) {
@@ -399,13 +424,28 @@ export function NotesGraph({ posts }: NotesGraphProps) {
       b.vy -= fy;
     }
 
-    // 3. Gravity toward (CX, CY) + per-node anchor (shadow nodes)
+    // 3. Gravity + per-node anchor + soft boundary
     for (const node of nodes) {
+      // Weak pull toward centre so the graph doesn't drift off screen.
       node.vx += (CX - node.x) * GRAVITY;
       node.vy += (CY - node.y) * GRAVITY;
+      // Shadow nodes (private) have an extra anchor at their slot.
       if (node.anchor) {
         node.vx += (node.anchor.x - node.x) * node.anchor.k;
         node.vy += (node.anchor.y - node.y) * node.anchor.k;
+      }
+      // Soft boundary: push back into the inner 75% of the viewBox
+      // when a node drifts past the margin. Proportional force so
+      // nearby nodes feel a gentle nudge and far-out ones get yanked.
+      if (node.x < BOUND_MARGIN_X) {
+        node.vx += (BOUND_MARGIN_X - node.x) * BOUND_STRENGTH;
+      } else if (node.x > VB_W - BOUND_MARGIN_X) {
+        node.vx -= (node.x - (VB_W - BOUND_MARGIN_X)) * BOUND_STRENGTH;
+      }
+      if (node.y < BOUND_MARGIN_Y) {
+        node.vy += (BOUND_MARGIN_Y - node.y) * BOUND_STRENGTH;
+      } else if (node.y > VB_H - BOUND_MARGIN_Y) {
+        node.vy -= (node.y - (VB_H - BOUND_MARGIN_Y)) * BOUND_STRENGTH;
       }
     }
 
@@ -675,7 +715,7 @@ export function NotesGraph({ posts }: NotesGraphProps) {
           pointer-move; only the hovered-id state drives the content. */}
       <div
         ref={tooltipRef}
-        className="font-technical pointer-events-none fixed z-50 w-max max-w-[360px] rounded-sm bg-[var(--card)]/92 px-3 py-1.5 text-[12px] leading-snug text-foreground backdrop-blur-sm transition-opacity duration-150"
+        className="font-technical pointer-events-none fixed z-50 w-max max-w-[360px] rounded-sm bg-[var(--card)]/92 px-3 py-1.5 text-[12px] leading-snug text-foreground backdrop-blur-sm transition-opacity duration-75"
         style={{
           left: 0,
           top: 0,
@@ -720,7 +760,7 @@ export function NotesGraph({ posts }: NotesGraphProps) {
           <span key={cat} className="flex items-center gap-1.5">
             <span
               className="inline-block h-[6px] w-[6px] rounded-full"
-              style={{ background: CATEGORY_STYLE[cat].color }}
+              style={{ background: legendColor(cat) }}
             />
             {CATEGORY_STYLE[cat].label}
           </span>
