@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { VaultUnreachablePrivate } from "@/components/vault-unreachable";
+import { NoteQuickActions } from "@/components/note-quick-actions";
 import { getCachedVaultIndex } from "@/lib/vault-index";
 import { vaultPathToHref } from "@/lib/vault-note";
 
@@ -113,7 +114,7 @@ async function DeadlinesContent() {
               <CardContent>
                 <ul className="space-y-2">
                   {list.map((it) => (
-                    <li key={it.path} className="flex items-start justify-between gap-3 text-sm">
+                    <li key={it.path} className="group flex items-start justify-between gap-3 text-sm py-1.5 px-2 -mx-2 rounded hover:bg-muted/50 transition-colors">
                       <div className="min-w-0 flex-1">
                         <Link
                           href={vaultPathToHref(it.path)}
@@ -121,9 +122,10 @@ async function DeadlinesContent() {
                         >
                           {it.title}
                         </Link>
-                        <p className="text-xs text-muted-foreground truncate">{it.path}</p>
+                        <p className="text-[10px] text-muted-foreground/70 truncate font-mono">{it.path}</p>
                       </div>
                       <div className="flex shrink-0 items-center gap-1.5 text-xs">
+                        <NoteQuickActions path={it.path} />
                         {it.priority && (
                           <Badge variant="outline" className="font-normal">
                             {it.priority}
