@@ -2,10 +2,10 @@ import { BRAND_IDENTITY } from "@/lib/brand/tokens";
 import { TypewriterLoop } from "@/components/typewriter-loop";
 
 interface HeroProps {
-  workCount: number;
-  writingCount: number;
-  /** `YYYY.MM` — most recent publish on the site, from the newest post. */
-  lastUpdated?: string;
+  // The Selected / Writing / Updated stats used to live on the hero's
+  // bottom rail but moved out to <HomeStats /> (fixed bottom-left in
+  // the home layout) so they stay put while the SlideDeck transforms.
+  // The hero no longer takes those as props.
 }
 
 /** Per-letter delay for the boomerang typewriter hero. */
@@ -25,7 +25,7 @@ const PAUSE_MS = 900;
  * this component focuses on just the centerpiece type + a quiet
  * Selected / Writing counter rail at the bottom.
  */
-export function Hero({ workCount, writingCount, lastUpdated }: HeroProps) {
+export function Hero(_props: HeroProps) {
   const word = BRAND_IDENTITY.studio;
 
   return (
@@ -64,35 +64,6 @@ export function Hero({ workCount, writingCount, lastUpdated }: HeroProps) {
         </div>
       </div>
 
-      {/* ─── Bottom rail — quiet scope counter ──────────────────────
-          Left-aligned single line, well clear of the bottom-right
-          SiteColophon and the bottom-center SiteDock. Selected /
-          Writing totals live here as a single line of editorial
-          metadata (e.g. "Selected 12 · Writing 42"), not as large
-          display numbers — the hero's focal point is the typewriter,
-          not the counts. */}
-      <div className="relative z-10 px-6 pb-36 sm:px-10 sm:pb-40">
-        <div className="font-technical text-[10px] uppercase tracking-[0.24em] text-muted-foreground sm:text-[11px]">
-          <span className="text-foreground">Selected</span>
-          <span className="ml-1.5 tabular-nums text-foreground/80">
-            ({String(workCount).padStart(2, "0")})
-          </span>
-          <span className="mx-2 opacity-40">·</span>
-          <span className="text-foreground">Writing</span>
-          <span className="ml-1.5 tabular-nums text-foreground/80">
-            ({String(writingCount).padStart(2, "0")})
-          </span>
-          {lastUpdated && (
-            <>
-              <span className="mx-2 opacity-40">·</span>
-              <span>Updated</span>
-              <span className="ml-1.5 tabular-nums text-foreground/80">
-                {lastUpdated}
-              </span>
-            </>
-          )}
-        </div>
-      </div>
     </section>
   );
 }

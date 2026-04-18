@@ -6,6 +6,7 @@ import { WritingIndex } from "@/components/home/writing-index";
 import { Closer } from "@/components/home/closer";
 import { SectionKicker } from "@/components/home/section-kicker";
 import { SlideDeck } from "@/components/slide-deck";
+import { HomeStats } from "@/components/home-stats";
 
 /**
  * Home — transform-driven slide deck (v5).
@@ -29,28 +30,31 @@ export default function Home() {
     : "";
 
   return (
-    <SlideDeck>
-      <Hero
+    <>
+      <SlideDeck>
+        <Hero />
+        <SectionKicker
+          kicker="Selected Work · 01"
+          headline="Made, shipped, running."
+          note="Hand-picked case studies — one slide per project. Wheel, swipe, or press space to advance."
+        />
+        {selected.map((item, i) => (
+          <WorkSlide
+            key={item.slug}
+            item={item}
+            index={i}
+            total={selected.length}
+            flip={i % 2 === 1}
+          />
+        ))}
+        <WritingIndex posts={recentPosts} total={allPosts.length} />
+        <Closer />
+      </SlideDeck>
+      <HomeStats
         workCount={selected.length}
         writingCount={allPosts.length}
         lastUpdated={lastUpdated}
       />
-      <SectionKicker
-        kicker="Selected Work · 01"
-        headline="Made, shipped, running."
-        note="Hand-picked case studies — one slide per project. Wheel, swipe, or press space to advance."
-      />
-      {selected.map((item, i) => (
-        <WorkSlide
-          key={item.slug}
-          item={item}
-          index={i}
-          total={selected.length}
-          flip={i % 2 === 1}
-        />
-      ))}
-      <WritingIndex posts={recentPosts} total={allPosts.length} />
-      <Closer />
-    </SlideDeck>
+    </>
   );
 }
