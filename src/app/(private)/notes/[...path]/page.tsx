@@ -6,6 +6,7 @@ import { StateBadge } from "@/components/state-badge";
 import { GITHUB_REPO } from "@/lib/constants";
 import {
   getVaultNote,
+  fetchVaultNoteRaw,
   deriveNoteTitle,
   deriveNoteSurface,
   vaultPathToHref,
@@ -13,6 +14,7 @@ import {
 import { getBacklinks } from "@/lib/vault-backlinks";
 import { isTier2Path } from "@/lib/vault-tiers";
 import { createSupabaseServer } from "@/lib/supabase-server";
+import { NoteEditor } from "@/components/note-editor";
 
 // ISR: Generate on first visit, cache for vault TTL.
 export const revalidate = 300;
@@ -21,6 +23,7 @@ export const dynamicParams = true;
 
 interface PageProps {
   params: Promise<{ path: string[] }>;
+  searchParams?: Promise<{ edit?: string }>;
 }
 
 function joinPath(segments: string[]): string {
@@ -64,19 +67,23 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
-export default async function NoteDetailPage({ params }: PageProps) {
+export default async function NoteDetailPage({
+  params,
+  searchParams,
+}: PageProps) {
   const { path: segments } = await params;
+  const sp = (await searchParams) ?? {};
   const path = joinPath(segments);
+  const isEdit = sp.edit === "1";
 
   // 안전성 체크: .md 파일만 허용
   if (!path.endsWith(".md")) {
     notFound();
   }
 
-  // 이중 방어: Tier 3 경로(010_Daily, 030_Areas/032_*, 034_Finance 등)는
-  // 미들웨어가 먼저 /login으로 redirect하지만, 만에 하나 우회되더라도
-  // 라우트 자체에서 비인증 사용자에게는 존재 자체를 노출하지 않는다 (404).
-  if (!isTier2Path(path)) {
+  // 이중 방어: Tier 3 경로 + 모든 edit 모드는 인증 필수.
+  // (edit은 Tier 2 여부와 상관없이 studio 소유자만)
+  if (!isTier2Path(path) || isEdit) {
     const supabase = await createSupabaseServer();
     const {
       data: { user },
@@ -84,6 +91,13 @@ export default async function NoteDetailPage({ params }: PageProps) {
     if (!user) {
       notFound();
     }
+  }
+
+  // Edit mode — hand off to the client editor.
+  if (isEdit) {
+    const raw = await fetchVaultNoteRaw(path);
+    if (raw === null) notFound();
+    return <NoteEditor path={path} initialContent={raw} />;
   }
 
   // Fetch note body and reverse-link graph in parallel — both touch the
@@ -113,14 +127,27 @@ export default async function NoteDetailPage({ params }: PageProps) {
   const summary =
     typeof note.frontmatter.summary === "string" ? note.frontmatter.summary : null;
 
+  const editHref =
+    "/notes/" +
+    segments.map(encodeURIComponent).join("/") +
+    "?edit=1";
+
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-10 sm:py-16">
-      <Link
-        href={surface.backHref}
-        className="inline-flex items-center text-xs text-muted-foreground hover:text-foreground/80 transition-colors mb-8"
-      >
-        &larr; Back to {surface.label}
-      </Link>
+      <div className="mb-8 flex items-center justify-between gap-4">
+        <Link
+          href={surface.backHref}
+          className="inline-flex items-center text-xs text-muted-foreground hover:text-foreground/80 transition-colors"
+        >
+          &larr; Back to {surface.label}
+        </Link>
+        <Link
+          href={editHref}
+          className="font-technical rounded-sm border border-[var(--hairline)] px-3 py-1.5 text-[11px] uppercase tracking-[0.16em] text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground"
+        >
+          편집
+        </Link>
+      </div>
 
       <article>
         <header className="mb-8 space-y-3">

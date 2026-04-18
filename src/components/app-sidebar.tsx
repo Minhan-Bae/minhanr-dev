@@ -7,6 +7,7 @@ import {
   LayoutDashboard,
   Activity,
   FileText,
+  FilePlus,
   BookOpen,
   FolderKanban,
   Tag,
@@ -64,6 +65,7 @@ const NAV_GROUPS: NavGroup[] = [
     label: "Knowledge",
     items: [
       { title: "Notes", href: "/notes", icon: FileText },
+      { title: "New note", href: "/notes/new", icon: FilePlus },
       { title: "Papers", href: "/papers", icon: BookOpen },
       { title: "Projects", href: "/projects", icon: FolderKanban },
       { title: "Graph", href: "/graph", icon: Network },
