@@ -7,6 +7,10 @@ const nextConfig: NextConfig = {
       // R2 bucket for post body figures + covers (minhanr-dev-images).
       // See scripts/upload-to-r2.mjs. Eventually CNAME to images.minhanr.dev.
       { protocol: "https", hostname: "pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev" },
+      // HF Papers social thumbnails — 21 posts still use these as their
+      // cover.image from an earlier vault publish pass. Eventually rewrite
+      // to R2 or /api/og; for now, allow so next/image doesn't 400.
+      { protocol: "https", hostname: "cdn-thumbnails.huggingface.co" },
     ],
     // `/api/og` is the exact route; `/api/og/**` covers any future
     // nested variant. Both entries together mean the OG route works

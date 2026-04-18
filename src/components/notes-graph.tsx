@@ -350,6 +350,8 @@ export function NotesGraph({ posts, privateNotes = [] }: NotesGraphProps) {
   const tooltipRef = useRef<HTMLDivElement | null>(null);
 
   const [hoveredId, setHoveredId] = useState<string | null>(null);
+  const [query, setQuery] = useState("");
+  const [selectedArea, setSelectedArea] = useState<AreaKey | null>(null);
   const draggingRef = useRef<string | null>(null);
   const dragMovedRef = useRef(false);
   const dragVelRef = useRef<{
@@ -402,6 +404,29 @@ export function NotesGraph({ posts, privateNotes = [] }: NotesGraphProps) {
     }
     return set;
   }, [hoveredId, nodeById, tagIndex]);
+
+  /** Per-area counts: public + private, for the legend pills. */
+  const areaCounts = useMemo(() => {
+    const m: Record<AreaKey, { pub: number; priv: number }> = Object.fromEntries(
+      AREA_ORDER.map((a) => [a, { pub: 0, priv: 0 }])
+    ) as Record<AreaKey, { pub: number; priv: number }>;
+    for (const n of nodes) {
+      m[n.area][n.isPrivate ? "priv" : "pub"]++;
+    }
+    return m;
+  }, [nodes]);
+
+  /** Whether any filter is active (search or area selection). When a
+   *  filter is active, non-matching nodes dim hard. */
+  const filterActive = query.trim().length > 0 || selectedArea !== null;
+  const queryLower = query.trim().toLowerCase();
+
+  /** Does this node survive the active filters? */
+  function matchesFilter(n: NodeData): boolean {
+    if (selectedArea && n.area !== selectedArea) return false;
+    if (queryLower && !n.label.toLowerCase().includes(queryLower)) return false;
+    return true;
+  }
 
   useEffect(() => {
     const prefersReduce =
@@ -676,7 +701,9 @@ export function NotesGraph({ posts, privateNotes = [] }: NotesGraphProps) {
           {nodes.map((n) => {
             const isHovered = !n.isPrivate && n.id === hoveredId;
             const isNeighbour = !n.isPrivate && (neighbours?.has(n.id) ?? false);
-            const dim = hoveredId && !isHovered && !isNeighbour;
+            const hoverDim = hoveredId && !isHovered && !isNeighbour;
+            const filterDim = filterActive && !matchesFilter(n);
+            const dim = hoverDim || filterDim;
             const rEff = isHovered
               ? n.r * 1.9
               : isNeighbour
@@ -771,17 +798,62 @@ export function NotesGraph({ posts, privateNotes = [] }: NotesGraphProps) {
         )}
       </div>
 
-      {/* Legend */}
-      <figcaption className="font-technical absolute bottom-3 left-4 flex flex-wrap gap-x-5 gap-y-1.5 text-[10.5px] uppercase tracking-[0.16em] text-muted-foreground sm:bottom-5 sm:left-6 sm:gap-x-7">
-        {AREA_ORDER.map((a) => (
-          <span key={a} className="flex items-center gap-1.5">
-            <span
-              className="inline-block h-[6px] w-[6px] rounded-full"
-              style={{ background: legendColor(a) }}
-            />
-            {AREA_STYLE[a].kr}
-          </span>
-        ))}
+      {/* Search — top-right overlay. stopPropagation keeps clicks out of
+          the SVG drag handler. */}
+      <div className="absolute top-3 right-4 z-10 flex items-center gap-2 sm:top-5 sm:right-6">
+        <input
+          type="search"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="노트 검색…"
+          aria-label="노트 제목으로 검색"
+          onPointerDown={(e) => e.stopPropagation()}
+          className="font-technical w-40 rounded-sm border border-[var(--hairline)] bg-[var(--card)]/88 px-2.5 py-1 text-[11px] text-foreground backdrop-blur-sm outline-none placeholder:text-muted-foreground focus:border-[var(--primary)] sm:w-56"
+        />
+      </div>
+
+      {/* Legend — each pill is now a filter toggle with its count. */}
+      <figcaption className="font-technical absolute bottom-3 left-4 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[10.5px] uppercase tracking-[0.16em] text-muted-foreground sm:bottom-5 sm:left-6 sm:gap-x-5">
+        {AREA_ORDER.map((a) => {
+          const active = selectedArea === a;
+          const counts = areaCounts[a];
+          const total = counts.pub + counts.priv;
+          const anySelected = selectedArea !== null;
+          return (
+            <button
+              key={a}
+              type="button"
+              onPointerDown={(e) => e.stopPropagation()}
+              onClick={() => setSelectedArea(active ? null : a)}
+              aria-pressed={active}
+              aria-label={`${AREA_STYLE[a].label} ${total}개 — 필터 토글`}
+              className={`flex items-center gap-1.5 transition-opacity hover:text-foreground ${
+                active ? "text-foreground" : anySelected ? "opacity-50" : ""
+              }`}
+            >
+              <span
+                className="inline-block h-[6px] w-[6px] rounded-full"
+                style={{ background: legendColor(a) }}
+              />
+              {AREA_STYLE[a].kr}
+              <span className="tabular-nums opacity-70">({total})</span>
+            </button>
+          );
+        })}
+        {(selectedArea || query) && (
+          <button
+            type="button"
+            onPointerDown={(e) => e.stopPropagation()}
+            onClick={() => {
+              setSelectedArea(null);
+              setQuery("");
+            }}
+            className="text-foreground hover:underline"
+            aria-label="필터 초기화"
+          >
+            × reset
+          </button>
+        )}
       </figcaption>
     </figure>
   );
