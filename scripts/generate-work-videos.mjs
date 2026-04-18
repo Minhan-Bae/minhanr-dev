@@ -35,6 +35,19 @@ const OUT_ROOT = path.resolve(ROOT, "public/work");
 const DEFAULT_MODEL = "veo-2.0-generate-001";
 const API_BASE = "https://generativelanguage.googleapis.com/v1beta";
 
+// ── Image-to-video motion prompts ────────────────────────────────────
+// Used with --from-cover. The still cover carries the composition;
+// the prompt only describes the motion we want Veo to add. Keep these
+// short — camera verbs + atmospheric cues, no redundant scene description.
+const MOTION_PROMPTS = {
+  "oikbas-ecosystem":
+    "Slow lateral parallax drift across the still composition. The luminous nodes breathe gently — a subtle pulsing brightness travels between them. Soft film grain shimmer. No new elements, no zoom, no cuts. Seamlessly loopable.",
+  "vfx-research-pipeline":
+    "Glacial 5% push-in on the silhouetted figure. The beam of cobalt light slowly sweeps left to right. Dust motes drift through the haze. Near-static otherwise. Seamlessly loopable.",
+  "minhanr-dev":
+    "Slow top-down drift across the flat-lay. A few water droplets slide down the glass, catching highlights. The paper breathes almost imperceptibly. No zoom, no cuts. Seamlessly loopable.",
+};
+
 // ── Prompts — one per work slug ──────────────────────────────────────
 // Each prompt describes a 4–8 second silent atmospheric clip that will
 // loop behind the Work grid / case study hero. Palette + tone match
@@ -119,17 +132,19 @@ function parseArgs(argv) {
     dry: false,
     slug: null,
     model: DEFAULT_MODEL,
+    fromCover: false,
     pollIntervalMs: 10_000,
     pollMaxAttempts: 60, // ≈ 10 min ceiling per clip
   };
   for (const a of argv.slice(2)) {
     if (a === "--force") args.force = true;
     else if (a === "--dry" || a === "--dry-run") args.dry = true;
+    else if (a === "--from-cover") args.fromCover = true;
     else if (a.startsWith("--slug=")) args.slug = a.slice("--slug=".length);
     else if (a.startsWith("--model=")) args.model = a.slice("--model=".length);
     else if (a === "--help" || a === "-h") {
       console.log(
-        "Usage: node scripts/generate-work-videos.mjs [--force] [--dry] [--slug=NAME] [--model=veo-2.0-generate-001]"
+        "Usage: node scripts/generate-work-videos.mjs [--force] [--dry] [--slug=NAME] [--model=veo-2.0-generate-001] [--from-cover]"
       );
       process.exit(0);
     }
@@ -141,17 +156,21 @@ function sleep(ms) {
   return new Promise((r) => setTimeout(r, ms));
 }
 
-/** POST models/{model}:predictLongRunning → returns operation name. */
+/** POST models/{model}:predictLongRunning → returns operation name.
+ *  If initialImage is provided, switches to Veo image-to-video mode. */
 async function startVideoGeneration({
   apiKey,
   model,
   prompt,
   aspectRatio,
   durationSeconds,
+  initialImage, // { bytesBase64Encoded, mimeType } | undefined
 }) {
   const url = `${API_BASE}/models/${model}:predictLongRunning?key=${apiKey}`;
+  const instance = { prompt };
+  if (initialImage) instance.image = initialImage;
   const body = {
-    instances: [{ prompt }],
+    instances: [instance],
     parameters: {
       aspectRatio,
       durationSeconds,
@@ -237,6 +256,7 @@ async function generate({
   prompt,
   aspectRatio,
   durationSeconds,
+  initialImage,
   pollIntervalMs,
   pollMaxAttempts,
 }) {
@@ -246,6 +266,7 @@ async function generate({
     prompt,
     aspectRatio,
     durationSeconds,
+    initialImage,
   });
   console.log(`  op: ${opName}`);
   const opResult = await pollOperation({
@@ -255,6 +276,29 @@ async function generate({
     maxAttempts: pollMaxAttempts,
   });
   return await extractVideoBytes({ apiKey, opResult });
+}
+
+/** Load an existing cover image and return a Veo-compatible image payload. */
+async function loadCoverImage(slug) {
+  const candidates = [
+    path.join(OUT_ROOT, slug, "cover.jpg"),
+    path.join(OUT_ROOT, slug, "cover.jpeg"),
+    path.join(OUT_ROOT, slug, "cover.png"),
+  ];
+  for (const p of candidates) {
+    if (existsSync(p)) {
+      const bytes = await fs.readFile(p);
+      const ext = path.extname(p).toLowerCase();
+      const mimeType =
+        ext === ".png" ? "image/png" : "image/jpeg";
+      return {
+        bytesBase64Encoded: bytes.toString("base64"),
+        mimeType,
+        sourcePath: p,
+      };
+    }
+  }
+  return null;
 }
 
 // ── Main ─────────────────────────────────────────────────────────────
@@ -292,24 +336,55 @@ async function main() {
       continue;
     }
 
+    let initialImage = null;
+    let effectivePrompt = spec.prompt;
+    if (args.fromCover) {
+      initialImage = await loadCoverImage(slug);
+      if (!initialImage) {
+        console.warn(
+          `[skip] ${slug} — --from-cover but no cover.{jpg,jpeg,png} found under ${path.relative(ROOT, outDir)}`
+        );
+        continue;
+      }
+      const motion = MOTION_PROMPTS[slug];
+      if (!motion) {
+        console.warn(
+          `[warn] ${slug} — no motion prompt; using the text-to-video prompt instead. This may conflict with the still.`
+        );
+      } else {
+        effectivePrompt = motion;
+      }
+    }
+
     if (args.dry) {
       console.log(
-        `\n── ${slug} (${spec.aspectRatio}, ${spec.durationSeconds}s, ${args.model}) ──`
+        `\n── ${slug} (${spec.aspectRatio}, ${spec.durationSeconds}s, ${args.model}${args.fromCover ? ", from-cover" : ""}) ──`
       );
-      console.log(spec.prompt);
+      if (initialImage) {
+        console.log(
+          `  initial image: ${path.relative(ROOT, initialImage.sourcePath)} (${initialImage.mimeType})`
+        );
+      }
+      console.log(effectivePrompt);
       continue;
     }
 
     console.log(
-      `[gen ] ${slug} (${spec.aspectRatio}, ${spec.durationSeconds}s)`
+      `[gen ] ${slug} (${spec.aspectRatio}, ${spec.durationSeconds}s${args.fromCover ? ", from-cover" : ""})`
     );
     try {
       const bytes = await generate({
         apiKey,
         model: args.model,
-        prompt: spec.prompt,
+        prompt: effectivePrompt,
         aspectRatio: spec.aspectRatio,
         durationSeconds: spec.durationSeconds,
+        initialImage: initialImage
+          ? {
+              bytesBase64Encoded: initialImage.bytesBase64Encoded,
+              mimeType: initialImage.mimeType,
+            }
+          : undefined,
         pollIntervalMs: args.pollIntervalMs,
         pollMaxAttempts: args.pollMaxAttempts,
       });
