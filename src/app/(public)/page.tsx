@@ -4,6 +4,7 @@ import { getAllPosts } from "@/lib/blog";
 import { getSelectedWork } from "@/lib/work";
 import { BRAND_IDENTITY } from "@/lib/brand/tokens";
 import { WorkCover } from "@/components/work-cover";
+import { NetworkGraph } from "@/components/network-graph";
 
 /**
  * Home — editorial portfolio index, per brand-tenets v2.
@@ -46,7 +47,27 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ─── 2. Selected Work ────────────────────────────────────────── */}
+      {/* ─── 2. System — interactive 7-node network ─────────────────── */}
+      <section className="hairline-t mx-auto w-full max-w-[1440px] px-6 py-12 sm:px-10 sm:py-16">
+        <header className="mb-8 flex items-baseline justify-between sm:mb-10">
+          <div>
+            <p className="kicker mb-3">시스템 · System</p>
+            <h2
+              className="font-display tracking-[-0.02em]"
+              style={{ fontSize: "var(--font-size-h2)" }}
+            >
+              일곱 개의 에이전트, 세 개의 축.
+            </h2>
+          </div>
+          <p className="font-technical hidden max-w-xs text-right text-[12px] leading-relaxed text-muted-foreground sm:block">
+            매일 이 네트워크가 작업과 글을 수집하고,<br />
+            수렴하고, 선별해 바깥에 둡니다.
+          </p>
+        </header>
+        <NetworkGraph />
+      </section>
+
+      {/* ─── 3. Selected Work ────────────────────────────────────────── */}
       <section className="hairline-y mx-auto w-full max-w-[1440px] px-6 py-16 sm:px-10 sm:py-24">
         <header className="mb-12 flex items-baseline justify-between sm:mb-20">
           <div>
