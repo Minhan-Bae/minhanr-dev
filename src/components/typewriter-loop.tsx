@@ -34,18 +34,20 @@ interface TypewriterLoopProps {
 }
 
 /**
- * TypewriterLoop — boomerang typewriter.
+ * TypewriterLoop — boomerang typewriter with a cursor that tracks the
+ * typing head.
  *
- * Types the word in letter-by-letter (left→right), holds, then erases
- * letter-by-letter (right→left), pauses at empty, and cycles forever.
- * A tiny state machine in useEffect drives the visible letter count;
- * each letter carries a small CSS transition so appearances and removals
- * fade instead of snapping.
+ * Only letters that have been typed are rendered in the DOM; the
+ * blinking cursor is rendered immediately after the last visible
+ * letter. That way the cursor "advances" with the text as it types in
+ * and "retreats" as it erases, instead of camping at the end of the
+ * full word. Each newly-mounted letter runs `tw-letter-in` so it
+ * fades-and-drops into place; erased letters are unmounted and read
+ * as a hard backspace — fast and legible.
  *
- * Client component — the server render shows a blank (pre-cycle)
- * string, JS fills in on mount. That's intentional: the boomerang IS
- * the brand motion; a static wordmark would be a poorer first impression
- * than a brief empty moment.
+ * Client component — the server render is empty; JS fills in on mount.
+ * The boomerang IS the brand motion, so the brief empty moment before
+ * hydration is accepted as part of the design.
  */
 export function TypewriterLoop({
   text,
@@ -102,7 +104,7 @@ export function TypewriterLoop({
 
   return (
     <Tag className={className} style={style} lang={lang} aria-label={text}>
-      {letters.map((char, i) => {
+      {letters.slice(0, visibleCount).map((char, i) => {
         if (char === " ") {
           return (
             <span key={i} aria-hidden>
@@ -110,13 +112,8 @@ export function TypewriterLoop({
             </span>
           );
         }
-        const visible = i < visibleCount;
         return (
-          <span
-            key={i}
-            aria-hidden
-            className={`tw-letter-loop${visible ? " is-visible" : ""}`}
-          >
+          <span key={i} aria-hidden className="tw-letter-loop">
             {char}
           </span>
         );

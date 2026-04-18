@@ -686,24 +686,23 @@ html:has(.dashboard-snap-root) {
 }
 
 /* ── Typewriter-loop — boomerang (type → hold → erase → loop) ──────
-   Partner to `src/components/typewriter-loop.tsx`. The JS state
-   machine adds/removes `.is-visible` one letter at a time; CSS just
-   cross-fades each letter in a way that sits convincingly under the
-   hero serif italic without any layout shift (opacity + y-axis nudge
-   only). The cursor blinks continuously so it reads as alive even
-   during pause phases. */
+   Partner to `src/components/typewriter-loop.tsx`. Letters are mounted
+   into the DOM one at a time by the JS state machine, so the word's
+   rendered width grows/shrinks with the typing head — and the cursor,
+   rendered as the last inline sibling, rides along naturally.
+
+   On mount, each letter plays `tw-letter-boomerang-in` to fade+drop
+   into place; on erase, letters unmount and the cursor slides left by
+   one glyph-width. The cursor keeps blinking across all phases so it
+   reads as alive during the pause at empty. */
+@keyframes tw-letter-boomerang-in {
+  from { opacity: 0; transform: translate3d(0, 0.18em, 0); }
+  to   { opacity: 1; transform: translate3d(0, 0, 0); }
+}
 .tw-letter-loop {
   display: inline-block;
-  opacity: 0;
-  transform: translate3d(0, 0.14em, 0);
-  transition:
-    opacity 240ms var(--ease-out-expo),
-    transform 240ms var(--ease-out-expo);
+  animation: tw-letter-boomerang-in 0.28s var(--ease-out-expo) both;
   will-change: opacity, transform;
-}
-.tw-letter-loop.is-visible {
-  opacity: 1;
-  transform: translate3d(0, 0, 0);
 }
 .tw-cursor-loop {
   display: inline-block;
