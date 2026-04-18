@@ -1,13 +1,5 @@
 import Link from "next/link";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { HoverGauge } from "@/components/hover-gauge";
+import { ArrowUpRight } from "lucide-react";
 import type { BlogPostMeta } from "@/lib/blog";
 
 /**
@@ -16,33 +8,18 @@ import type { BlogPostMeta } from "@/lib/blog";
  * Adding a public category: add one entry here. Done.
  * Removing / hiding a category: delete the entry. `isPublicCategory()`
  *   automatically excludes it from the filter UI in BlogList.
- *
- * TrinityX is intentionally absent — Tier 3 internal codename, never exposed.
  */
-const CATEGORY_PALETTE: Record<string, { border: string; bg: string }> = {
-  AI: { border: "border-l-primary", bg: "bg-primary" },
-  VFX: { border: "border-l-chart-3", bg: "bg-chart-3" },
-  Research: { border: "border-l-chart-1", bg: "bg-chart-1" },
-  "Creative Technology": { border: "border-l-chart-4", bg: "bg-chart-4" },
-};
-
-const FALLBACK_COLORS = { border: "border-l-border", bg: "bg-foreground/30" };
+const PUBLIC_CATEGORIES = new Set([
+  "AI",
+  "VFX",
+  "Research",
+  "Creative Technology",
+  "General",
+]);
 
 /** True iff `cat` is in the public palette (i.e. safe to expose in filter UIs). */
 export function isPublicCategory(cat: string): boolean {
-  return cat in CATEGORY_PALETTE;
-}
-
-/**
- * Resolve the visual treatment for a post's categories.
- * Picks the first matching public category; falls back to neutral border/bg.
- */
-export function getCategoryColors(categories: string[]): { border: string; bg: string } {
-  for (const cat of categories) {
-    const palette = CATEGORY_PALETTE[cat];
-    if (palette) return palette;
-  }
-  return FALLBACK_COLORS;
+  return PUBLIC_CATEGORIES.has(cat);
 }
 
 type Variant = "featured" | "default" | "cover-hero" | "quote";
@@ -54,247 +31,213 @@ interface BlogCardProps {
 }
 
 /**
- * variant 자동 선택:
- *   - cover 이미지 있으면 cover-hero
- *   - summary가 길고 의미 있으면 (≥120자) quote
- *   - 그 외 default
+ * variant auto-selection. Editorial design uses a single card family;
+ * `featured` is promoted, everything else collapses to the same `default`
+ * list-item. `cover-hero` survives when a post ships with real imagery.
  */
 export function pickVariant(post: BlogPostMeta): Exclude<Variant, "featured"> {
   if (post.cover?.image) return "cover-hero";
-  if (post.summary && post.summary.length >= 120) return "quote";
   return "default";
 }
 
-export function BlogCard({ post, variant = "default", className = "" }: BlogCardProps) {
+export function BlogCard({
+  post,
+  variant = "default",
+  className = "",
+}: BlogCardProps) {
   if (variant === "featured") return <FeaturedCard post={post} className={className} />;
-  if (variant === "cover-hero") return <CoverHeroCard post={post} className={className} />;
-  if (variant === "quote") return <QuoteCard post={post} className={className} />;
-  return <DefaultCard post={post} className={className} />;
+  if (variant === "cover-hero") return <CoverCard post={post} className={className} />;
+  // `quote` collapses into default — the new layout conveys that via the
+  // lede italic under the title instead of a separate card shape.
+  return <DefaultRow post={post} className={className} />;
 }
 
-function FeaturedCard({ post, className }: { post: BlogPostMeta; className: string }) {
-  const colors = getCategoryColors(post.categories);
+/** ISO YYYY-MM-DD → "MAR 22 '26" short editorial stamp. */
+function formatDate(iso: string): string {
+  if (!iso) return "";
+  const d = new Date(iso + "T00:00:00Z");
+  if (Number.isNaN(d.getTime())) return iso;
+  const month = d
+    .toLocaleString("en-US", { month: "short", timeZone: "UTC" })
+    .toUpperCase();
+  const day = String(d.getUTCDate()).padStart(2, "0");
+  const year = String(d.getUTCFullYear()).slice(-2);
+  return `${month} ${day} '${year}`;
+}
+
+/**
+ * Featured — first post in an unfiltered listing. Pulls a larger layout
+ * that leads the page editorially.
+ */
+function FeaturedCard({
+  post,
+  className,
+}: {
+  post: BlogPostMeta;
+  className: string;
+}) {
   const hasCover = Boolean(post.cover?.image);
+  const primaryCategory = post.categories[0];
 
   return (
     <Link
       href={`/blog/${post.slug}`}
-      className={`block group ${className}`}
+      className={`group block ${className}`}
     >
-      <Card
-        className={`relative border-border hover:border-primary/30 hover:bg-[var(--surface-1)] card-lift transition-all border-l-4 ${colors.border} overflow-hidden`}
-      >
-        <div className="grid md:grid-cols-[3fr_2fr] gap-0">
-          {/* Text column */}
-          <div className="flex flex-col justify-between p-5 sm:p-6 min-h-[200px]">
-            <div className="space-y-3">
-              <div className="flex items-center gap-2 flex-wrap">
-                {post.categories.map((cat) => (
-                  <Badge
-                    key={cat}
-                    variant="secondary"
-                    className="text-xs px-2 py-0.5"
-                  >
-                    {cat}
-                  </Badge>
-                ))}
-                <CardDescription className="text-xs text-muted-foreground tabular-nums">
-                  {post.date}
-                </CardDescription>
-              </div>
-              <h2
-                className="font-medium text-foreground group-hover:text-primary transition-colors leading-tight"
-                style={{ fontSize: "var(--font-size-h4)" }}
-              >
-                {post.title}
-              </h2>
-              {post.summary && (
-                <p className="text-sm text-muted-foreground line-clamp-3">
-                  {post.summary}
-                </p>
-              )}
-            </div>
-            {post.tags.length > 0 && (
-              <div className="flex gap-1.5 flex-wrap mt-4">
-                {post.tags.slice(0, 4).map((tag) => (
-                  <span
-                    key={tag}
-                    className="text-xs text-primary/80 bg-primary/10 rounded px-1.5 py-0.5"
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Visual column — cover image or aurora placeholder */}
-          <div className="relative aspect-[16/10] md:aspect-auto md:min-h-full bg-[var(--surface-1)] overflow-hidden">
-            {hasCover ? (
-              // Project pattern: raw <img> for cover (matches blog/[slug] detail page).
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={post.cover!.image}
-                alt={post.cover?.alt || post.title}
-                className="absolute inset-0 w-full h-full object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-[1.03]"
-              />
-            ) : (
+      <article className="grid gap-8 sm:grid-cols-12 sm:gap-10">
+        <div className="sm:col-span-7 media-zoom overflow-hidden rounded-sm">
+          {hasCover ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={post.cover!.image}
+              alt={post.cover?.alt || post.title}
+              className="aspect-[16/10] w-full object-cover"
+            />
+          ) : (
+            <div
+              className="grain relative aspect-[16/10] w-full"
+              style={{
+                background:
+                  "linear-gradient(135deg, color-mix(in oklch, var(--primary) 22%, var(--surface-2)) 0%, var(--surface-1) 60%, var(--background) 100%)",
+              }}
+            >
               <div
-                aria-hidden="true"
-                className="absolute inset-0 mesh-aurora"
+                aria-hidden
+                className="absolute left-6 top-0 h-12 w-[3px] bg-primary"
               />
-            )}
-          </div>
+              <div className="absolute inset-0 flex items-end p-8">
+                <span className="font-display text-4xl leading-[0.95] tracking-tight text-foreground">
+                  {post.title.slice(0, 28)}
+                </span>
+              </div>
+            </div>
+          )}
         </div>
-        <HoverGauge color={colors.bg} align="edge" />
-      </Card>
+
+        <div className="sm:col-span-5 sm:pt-4">
+          <p className="kicker mb-4">
+            Featured
+            {primaryCategory ? ` · ${primaryCategory}` : ""} ·{" "}
+            {formatDate(post.date)}
+          </p>
+          <h3
+            className="font-display leading-[0.98] tracking-[-0.02em] transition-colors group-hover:text-primary"
+            style={{ fontSize: "var(--font-size-h2)" }}
+          >
+            {post.title}
+          </h3>
+          {post.summary && (
+            <p className="mt-5 max-w-prose text-base leading-relaxed text-muted-foreground">
+              {post.summary}
+            </p>
+          )}
+          <span className="font-technical mt-8 inline-flex items-center gap-2 text-[13px] uppercase tracking-[0.14em] text-foreground/80">
+            Read
+            <ArrowUpRight
+              className="h-4 w-4 transition-all duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-primary"
+              strokeWidth={1.5}
+            />
+          </span>
+        </div>
+      </article>
     </Link>
   );
 }
 
-function CoverHeroCard({ post, className }: { post: BlogPostMeta; className: string }) {
-  const colors = getCategoryColors(post.categories);
+/**
+ * CoverCard — post with a cover image, rendered as a media-forward card.
+ * Used when a grid layout is appropriate (e.g. filtered results two-up).
+ */
+function CoverCard({
+  post,
+  className,
+}: {
+  post: BlogPostMeta;
+  className: string;
+}) {
+  const primaryCategory = post.categories[0];
+
   return (
-    <Link href={`/blog/${post.slug}`} className={`block group ${className}`}>
-      <Card
-        className={`relative overflow-hidden hover-lift border-border hover:border-primary/30 transition-[border-color] duration-[var(--duration-quick)] border-l-4 ${colors.border}`}
-      >
-        {/* Cover dominant — 16:9 상단 */}
-        <div className="relative aspect-[16/9] bg-[var(--surface-1)] overflow-hidden">
+    <Link
+      href={`/blog/${post.slug}`}
+      className={`group block ${className}`}
+    >
+      <article>
+        <div className="media-zoom overflow-hidden rounded-sm">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={post.cover!.image}
             alt={post.cover?.alt || post.title}
             loading="lazy"
-            className="absolute inset-0 w-full h-full object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-[1.04]"
+            className="aspect-[16/10] w-full object-cover"
           />
-          {/* Gradient scrim for legibility */}
-          <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-transparent" />
-          {/* Date/category chip overlayed */}
-          <div className="absolute bottom-3 left-3 flex items-center gap-1.5">
-            {post.categories.slice(0, 1).map((cat) => (
-              <Badge key={cat} variant="secondary" className="text-[10px] px-1.5 py-0 bg-background/80 backdrop-blur-sm">
-                {cat}
-              </Badge>
-            ))}
-            <span className="text-[10px] text-white/80 tabular-nums bg-black/30 backdrop-blur-sm rounded px-1.5 py-0.5">
-              {post.date}
-            </span>
-          </div>
         </div>
-        <CardContent className="p-4 space-y-2">
-          <CardTitle className="text-sm font-semibold leading-tight group-hover:text-primary transition-colors line-clamp-2">
+        <div className="mt-4">
+          <p className="font-technical text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+            {primaryCategory ?? "Writing"} · {formatDate(post.date)}
+          </p>
+          <h3
+            className="mt-2 font-display leading-tight tracking-[-0.015em] transition-colors group-hover:text-primary"
+            style={{ fontSize: "var(--font-size-h4)" }}
+          >
             {post.title}
-          </CardTitle>
+          </h3>
           {post.summary && (
-            <p className="text-xs text-muted-foreground line-clamp-2">{post.summary}</p>
-          )}
-        </CardContent>
-        <HoverGauge color={colors.bg} align="edge" />
-      </Card>
-    </Link>
-  );
-}
-
-function QuoteCard({ post, className }: { post: BlogPostMeta; className: string }) {
-  const colors = getCategoryColors(post.categories);
-  return (
-    <Link href={`/blog/${post.slug}`} className={`block group ${className}`}>
-      <Card
-        className={`relative hover-lift border-border hover:border-primary/20 transition-[border-color] duration-[var(--duration-quick)] border-l-4 ${colors.border}`}
-      >
-        <CardContent className="p-5 space-y-3">
-          {/* Pull quote — summary를 시각 중심으로 */}
-          <div className="relative pl-6">
-            <span
-              aria-hidden
-              className="absolute left-0 top-0 text-3xl leading-none font-serif text-primary/30 select-none"
-            >
-              &ldquo;
-            </span>
-            <p className="text-sm font-medium text-foreground/90 leading-relaxed line-clamp-3 italic">
+            <p className="mt-2 text-sm leading-relaxed text-muted-foreground line-clamp-2">
               {post.summary}
             </p>
-          </div>
-          {/* Footer: title as small caption + meta */}
-          <div className="pt-2 border-t border-hairline space-y-1">
-            <CardTitle className="text-xs font-medium text-muted-foreground group-hover:text-primary transition-colors line-clamp-1 not-italic">
-              — {post.title}
-            </CardTitle>
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-[10px] text-muted-foreground/70 tabular-nums">{post.date}</span>
-              {post.categories.slice(0, 1).map((cat) => (
-                <Badge key={cat} variant="secondary" className="text-[10px] px-1.5 py-0">
-                  {cat}
-                </Badge>
-              ))}
-            </div>
-          </div>
-        </CardContent>
-        <HoverGauge color={colors.bg} align="edge" />
-      </Card>
+          )}
+        </div>
+      </article>
     </Link>
   );
 }
 
-function DefaultCard({ post, className }: { post: BlogPostMeta; className: string }) {
-  const colors = getCategoryColors(post.categories);
+/**
+ * DefaultRow — the workhorse. Hairline-divided editorial list row. Parent
+ * should wrap children in `<ul className="divide-y divide-[var(--hairline)] hairline-t">`
+ * to stack these correctly.
+ */
+function DefaultRow({
+  post,
+  className,
+}: {
+  post: BlogPostMeta;
+  className: string;
+}) {
+  const primaryCategory = post.categories[0];
 
   return (
     <Link
       href={`/blog/${post.slug}`}
-      className={`block group ${className}`}
+      className={`group grid grid-cols-[auto_1fr_auto] items-baseline gap-4 py-5 transition-colors hover:bg-[var(--surface-1)] sm:grid-cols-[88px_120px_1fr_auto] sm:gap-6 ${className}`}
     >
-      <Card
-        className={`relative border-border hover:border-primary/20 hover:bg-[var(--surface-1)] card-lift transition-all border-l-4 ${colors.border}`}
+      <time
+        dateTime={post.date}
+        className="font-technical w-20 text-[11px] uppercase tracking-[0.16em] text-muted-foreground tabular-nums sm:w-auto"
       >
-        <CardHeader className="p-4 pb-2">
-          <div className="flex items-center gap-2 flex-wrap">
-            <CardDescription className="text-xs text-muted-foreground tabular-nums">
-              {post.date}
-            </CardDescription>
-            {post.categories.map((cat) => (
-              <Badge
-                key={cat}
-                variant="secondary"
-                className="text-xs px-1.5 py-0"
-              >
-                {cat}
-              </Badge>
-            ))}
-          </div>
-          <CardTitle className="text-sm font-medium text-foreground group-hover:text-primary transition-colors leading-relaxed mt-1">
-            {post.title}
-          </CardTitle>
-        </CardHeader>
-        {(post.summary || post.tags.length > 0) && (
-          <CardContent className="p-4 pt-0">
-            {post.summary && (
-              <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
-                {post.summary}
-              </p>
-            )}
-            {post.tags.length > 0 && (
-              <div className="flex gap-1.5 flex-wrap">
-                {post.tags.slice(0, 5).map((tag) => (
-                  <span
-                    key={tag}
-                    className="text-xs text-primary/80 bg-primary/10 rounded px-1.5 py-0.5"
-                  >
-                    {tag}
-                  </span>
-                ))}
-                {post.tags.length > 5 && (
-                  <span className="text-xs text-muted-foreground/50">
-                    +{post.tags.length - 5}
-                  </span>
-                )}
-              </div>
-            )}
-          </CardContent>
+        {formatDate(post.date)}
+      </time>
+      <span className="font-technical hidden text-[11px] uppercase tracking-[0.16em] text-muted-foreground sm:inline">
+        {primaryCategory ?? ""}
+      </span>
+      <div className="min-w-0 col-span-2 sm:col-span-1">
+        <h3
+          className="font-display leading-snug tracking-[-0.01em] transition-colors group-hover:text-primary"
+          style={{ fontSize: "var(--font-size-h4)" }}
+        >
+          {post.title}
+        </h3>
+        {post.summary && (
+          <p className="mt-1 line-clamp-1 text-[14px] text-muted-foreground">
+            {post.summary}
+          </p>
         )}
-        <HoverGauge color={colors.bg} align="edge" />
-      </Card>
+      </div>
+      <ArrowUpRight
+        className="h-4 w-4 flex-none text-muted-foreground transition-all duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-primary"
+        strokeWidth={1.5}
+      />
     </Link>
   );
 }

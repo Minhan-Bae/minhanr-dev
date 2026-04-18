@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Card, CardContent } from "@/components/ui/card";
 import { BlogCard, isPublicCategory, pickVariant } from "@/components/blog-card";
 import type { BlogPostMeta } from "@/lib/blog";
 
@@ -50,7 +49,6 @@ function groupPostsByTime(posts: BlogPostMeta[]): Group[] {
   if (recent.length > 0) {
     groups.push({ key: "recent", label: "Recent", posts: recent });
   }
-  // Insertion order is newest-first because input is date-desc sorted.
   for (const bucket of monthBuckets.values()) {
     groups.push(bucket);
   }
@@ -68,19 +66,19 @@ export function BlogList({ posts }: { posts: BlogPostMeta[] }) {
   const categories = useMemo(() => {
     const set = new Set<string>();
     posts.forEach((p) => p.categories.forEach((c) => set.add(c)));
-    // Defense in depth: only show categories listed in the public palette
-    // (CATEGORY_PALETTE in blog-card.tsx). Anything else — including the
-    // Tier 3 TrinityX codename — is filtered out even if a stale post
-    // still carries that frontmatter.
     return Array.from(set).filter(isPublicCategory).sort();
   }, [posts]);
 
   const topTags = useMemo(() => {
     const counts: Record<string, number> = {};
-    posts.forEach((p) => p.tags.forEach((t) => { counts[t] = (counts[t] || 0) + 1; }));
+    posts.forEach((p) =>
+      p.tags.forEach((t) => {
+        counts[t] = (counts[t] || 0) + 1;
+      })
+    );
     return Object.entries(counts)
       .sort((a, b) => b[1] - a[1])
-      .slice(0, 12)
+      .slice(0, 10)
       .map(([tag]) => tag);
   }, [posts]);
 
@@ -120,113 +118,138 @@ export function BlogList({ posts }: { posts: BlogPostMeta[] }) {
 
   return (
     <>
-      {/* 검색 */}
-      <div className="relative">
-        <input
-          type="text"
-          placeholder={`Wander through ${posts.length} notes...`}
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          className="w-full rounded-lg border border-border bg-card px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/50 focus:border-primary/50 focus:outline-none focus:ring-1 focus:ring-primary/20 transition-all"
-        />
-        {query && (
-          <button
-            onClick={() => setQuery("")}
-            aria-label="Clear search"
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground/80 text-xs"
-          >
-            Clear
-          </button>
+      {/* Search + filter rail — editorial hairline style */}
+      <div className="font-technical mx-auto max-w-[1120px] space-y-6">
+        <div className="relative">
+          <input
+            type="search"
+            placeholder={`Search ${posts.length} pieces`}
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            className="w-full border-b border-[var(--hairline)] bg-transparent pb-3 pt-1 text-base text-foreground placeholder:text-muted-foreground/60 focus:border-primary focus:outline-none transition-colors"
+          />
+          {query && (
+            <button
+              onClick={() => setQuery("")}
+              aria-label="Clear search"
+              className="absolute right-0 top-1 text-[11px] uppercase tracking-[0.16em] text-muted-foreground hover:text-foreground"
+            >
+              Clear
+            </button>
+          )}
+        </div>
+
+        <div className="flex flex-wrap items-baseline gap-x-6 gap-y-3 text-[11px] uppercase tracking-[0.16em]">
+          <span className="text-muted-foreground/70">Category</span>
+          {categories.map((cat) => (
+            <button
+              key={cat}
+              onClick={() =>
+                setSelectedCategory(selectedCategory === cat ? null : cat)
+              }
+              className={`transition-colors ${
+                selectedCategory === cat
+                  ? "text-primary"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+
+        {topTags.length > 0 && (
+          <div className="flex flex-wrap items-baseline gap-x-4 gap-y-2 text-[11px] tracking-[0.08em]">
+            <span className="uppercase text-muted-foreground/70 tracking-[0.16em]">
+              Tags
+            </span>
+            {topTags.map((tag) => (
+              <button
+                key={tag}
+                onClick={() =>
+                  setSelectedTag(selectedTag === tag ? null : tag)
+                }
+                className={`transition-colors ${
+                  selectedTag === tag
+                    ? "text-primary"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                #{tag}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {hasFilters && (
+          <div className="flex items-center gap-4 text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
+            <span>
+              {filtered.length} / {posts.length}
+            </span>
+            <button
+              onClick={clearFilters}
+              className="link-underline hover:text-foreground"
+            >
+              Reset
+            </button>
+          </div>
         )}
       </div>
 
-      {/* 카테고리 필터 */}
-      <div className="flex flex-wrap gap-2">
-        {categories.map((cat) => (
-          <button
-            key={cat}
-            onClick={() => setSelectedCategory(selectedCategory === cat ? null : cat)}
-            className={`rounded-full px-3 py-1 text-xs border transition-colors ${
-              selectedCategory === cat
-                ? "border-primary bg-primary/10 text-primary"
-                : "border-border text-muted-foreground hover:border-primary/30 hover:text-foreground/80"
-            }`}
-          >
-            {cat}
-          </button>
-        ))}
-      </div>
-
-      {/* 태그 필터 */}
-      <div className="flex flex-wrap gap-1.5">
-        {topTags.map((tag) => (
-          <button
-            key={tag}
-            onClick={() => setSelectedTag(selectedTag === tag ? null : tag)}
-            className={`rounded px-2 py-0.5 text-xs transition-colors ${
-              selectedTag === tag
-                ? "bg-primary/15 text-primary"
-                : "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground/80"
-            }`}
-          >
-            {tag}
-          </button>
-        ))}
-      </div>
-
-      {/* 필터 상태 */}
-      {hasFilters && (
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <span>{filtered.length} / {posts.length} posts</span>
-          <button onClick={clearFilters} className="text-muted-foreground hover:text-primary underline">
-            Reset
-          </button>
-        </div>
-      )}
-
-      {/* 본문: 필터 활성 시 평면 결과, 아니면 Featured + 시간 그루핑 */}
-      {hasFilters ? (
-        <div className="space-y-3">
-          {filtered.map((post) => (
-            <BlogCard key={post.slug} post={post} variant={pickVariant(post)} />
-          ))}
-          {filtered.length === 0 && (
-            <Card className="border-border">
-              <CardContent className="py-10 text-center text-muted-foreground text-sm">
-                No matching posts.
-              </CardContent>
-            </Card>
-          )}
-        </div>
-      ) : (
-        <div className="space-y-10">
-          {featured && <BlogCard post={featured} variant="featured" />}
-
-          {groups.map((group) => (
-            <section key={group.key} className="space-y-3">
-              <h2
-                className="font-medium text-foreground/90 tracking-tight"
-                style={{ fontSize: "var(--font-size-h3)" }}
-              >
-                {group.label}
-              </h2>
-              <div className="grid gap-3 sm:grid-cols-2">
-                {group.posts.map((post) => (
-                  <BlogCard key={post.slug} post={post} variant={pickVariant(post)} />
-                ))}
+      {/* Body */}
+      <div className="mx-auto max-w-[1120px] pt-6">
+        {hasFilters ? (
+          <ul className="divide-y divide-[var(--hairline)] hairline-t hairline-b">
+            {filtered.map((post) => (
+              <li key={post.slug}>
+                <BlogCard post={post} variant={pickVariant(post)} />
+              </li>
+            ))}
+            {filtered.length === 0 && (
+              <li className="py-16 text-center text-sm text-muted-foreground">
+                No matching pieces.
+              </li>
+            )}
+          </ul>
+        ) : (
+          <div className="space-y-20 sm:space-y-28">
+            {featured && (
+              <div>
+                <BlogCard post={featured} variant="featured" />
               </div>
-            </section>
-          ))}
+            )}
 
-          {posts.length === 0 && (
-            <Card className="border-border">
-              <CardContent className="py-10 text-center text-muted-foreground text-sm">
-                No posts yet.
-              </CardContent>
-            </Card>
-          )}
-        </div>
-      )}
+            {groups.map((group) => (
+              <section key={group.key}>
+                <header className="mb-6 flex items-baseline justify-between hairline-b pb-3">
+                  <h2
+                    className="font-display tracking-[-0.015em]"
+                    style={{ fontSize: "var(--font-size-h3)" }}
+                  >
+                    {group.label}
+                  </h2>
+                  <span className="font-technical text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+                    {group.posts.length}
+                  </span>
+                </header>
+                <ul className="divide-y divide-[var(--hairline)] hairline-b">
+                  {group.posts.map((post) => (
+                    <li key={post.slug}>
+                      <BlogCard post={post} variant={pickVariant(post)} />
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            ))}
+
+            {posts.length === 0 && (
+              <p className="py-16 text-center text-sm text-muted-foreground">
+                No pieces published yet.
+              </p>
+            )}
+          </div>
+        )}
+      </div>
     </>
   );
 }

@@ -6,12 +6,24 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* ════════════════════════════════════════════════════════════════
+   minhanr.dev — Editorial Cinematic
+   See docs/brand-tenets.md (v2). Legacy ocean system preserved at
+   globals.legacy.css for reference only.
+   ──────────────────────────────────────────────────────────────── */
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
+
+  /* ── Font families ─────────────────────────────────────────────── */
+  --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-sans);
+  --font-display: var(--font-instrument-serif);
+  /* Headings default to the display serif. Override with `font-sans`
+     on anything technical (product copy, metadata). */
+  --font-heading: var(--font-instrument-serif);
+
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -41,680 +53,294 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
-  --radius-sm: calc(var(--radius) * 0.6);
-  --radius-md: calc(var(--radius) * 0.8);
+
+  --radius-sm: calc(var(--radius) * 0.5);
+  --radius-md: calc(var(--radius) * 0.75);
   --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) * 1.4);
-  --radius-2xl: calc(var(--radius) * 1.8);
-  --radius-3xl: calc(var(--radius) * 2.2);
-  --radius-4xl: calc(var(--radius) * 2.6);
+  --radius-xl: calc(var(--radius) * 1.5);
+  --radius-2xl: calc(var(--radius) * 2);
 
-  /* ── Integrated typography scale (1.25 ratio, base 16px) ──
-     Single source of truth for headings across home and sub-pages.
-     See docs/brand-tenets.md "Tenet 5: One surface, many entries". */
-  --font-size-display: 3.815rem;  /* 61px    — /colophon, special only */
-  --font-size-h1:      3.052rem;  /* 48.8px  — page hero, one per page */
-  --font-size-h2:      2.441rem;  /* 39px    — section title */
-  --font-size-h3:      1.953rem;  /* 31.25px — card / subsection */
-  --font-size-h4:      1.563rem;  /* 25px    — card emphasis */
-  --font-size-body-lg: 1.25rem;   /* 20px    — manifesto subline */
-  --font-size-body:    1rem;      /* 16px    — body text */
-  --font-size-micro:   0.8rem;    /* 12.8px  — meta, badge, timestamp */
+  /* ── Editorial typography scale ────────────────────────────────
+     Fluid clamps so headings breathe on wide cinematic viewports
+     without blowing up on mobile. The display face (Instrument
+     Serif) is light and benefits from a little optical oversize. */
+  --font-size-display: clamp(3rem, 8vw, 6rem);         /* hero */
+  --font-size-h1:      clamp(2.25rem, 5vw, 3.75rem);   /* page title */
+  --font-size-h2:      clamp(1.875rem, 3.5vw, 2.625rem); /* section */
+  --font-size-h3:      1.5rem;                         /* card / aside */
+  --font-size-h4:      1.125rem;
+  --font-size-body-lg: 1.125rem;                       /* lede */
+  --font-size-body:    1rem;
+  --font-size-micro:   0.8125rem;                      /* meta / mono */
 
-  /* State tokens (Tenet 2: Garage door open) */
-  --color-state-growing:   var(--state-growing);
-  --color-state-mature:    var(--state-mature);
-  --color-state-published: var(--state-published);
-
-  /* Thin separator (Tenet 4: Instruments over decorations) */
+  /* Hairline — shared token (kept from legacy) */
   --color-hairline: var(--hairline);
 }
 
+/* ══════════════════════════════════════════════════════════════════
+   Light — Paper
+   Cream ground, ink text, deep burgundy accent. Leans editorial.
+   ────────────────────────────────────────────────────────────────── */
 :root {
-  /* ── Shallow water — sunlit cyan tint ── */
-  --background: oklch(0.985 0.015 200);
-  --foreground: oklch(0.20 0.045 220);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.20 0.045 220);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.20 0.045 220);
-  --primary: oklch(0.62 0.175 200);
-  --primary-foreground: oklch(0.99 0.005 200);
-  --secondary: oklch(0.955 0.018 200);
-  --secondary-foreground: oklch(0.25 0.040 215);
-  --muted: oklch(0.955 0.018 200);
-  --muted-foreground: oklch(0.50 0.040 210);
-  --accent: oklch(0.68 0.180 25);
-  --accent-foreground: oklch(0.99 0.005 200);
-  --destructive: oklch(0.58 0.20 25);
-  --border: oklch(0.90 0.035 195);
-  --input: oklch(0.90 0.035 195);
-  --ring: oklch(0.62 0.175 200);
-  --chart-1: oklch(0.42 0.165 245);
-  --chart-2: oklch(0.56 0.175 215);
-  --chart-3: oklch(0.65 0.170 195);
-  --chart-4: oklch(0.62 0.150 170);
-  --chart-5: oklch(0.62 0.180 25);
-  --radius: 0.75rem;
-  --sidebar: oklch(0.975 0.018 195);
-  --sidebar-foreground: oklch(0.20 0.045 220);
-  --sidebar-primary: oklch(0.62 0.175 200);
-  --sidebar-primary-foreground: oklch(0.99 0.005 200);
-  --sidebar-accent: oklch(0.955 0.018 200);
-  --sidebar-accent-foreground: oklch(0.25 0.040 215);
-  --sidebar-border: oklch(0.90 0.035 195);
-  --sidebar-ring: oklch(0.62 0.175 200);
+  --background:          oklch(0.975 0.010 85);
+  --foreground:          oklch(0.165 0.012 270);
+  --card:                oklch(1 0 0);
+  --card-foreground:     oklch(0.165 0.012 270);
+  --popover:             oklch(1 0 0);
+  --popover-foreground:  oklch(0.165 0.012 270);
 
-  /* Surface elevation */
-  --surface-1: oklch(0.975 0.018 195);
-  --surface-2: oklch(0.945 0.022 195);
-  --surface-3: oklch(0.915 0.026 195);
+  --primary:             oklch(0.42 0.155 28);            /* deep vermilion */
+  --primary-foreground:  oklch(0.985 0.008 85);
 
-  /* Gradient endpoints — aqua → coral */
-  --gradient-start: oklch(0.62 0.175 200);
-  --gradient-end: oklch(0.68 0.180 25);
+  --secondary:           oklch(0.94 0.010 85);
+  --secondary-foreground: oklch(0.20 0.012 270);
 
-  /* Glow effects */
-  --glow-primary: oklch(0.62 0.175 200 / 18%);
-  --glow-accent: oklch(0.68 0.180 25 / 14%);
-  --glow-cyan: oklch(0.65 0.170 195 / 18%);
-  --glow-pink: oklch(0.56 0.175 215 / 16%);
-  --glow-foam: oklch(0.62 0.150 170 / 14%);
+  --muted:               oklch(0.94 0.010 85);
+  --muted-foreground:    oklch(0.46 0.015 275);
 
-  /* State tokens — light theme (Tenet 2) */
-  --state-growing:   oklch(0.62 0.190 30);
-  --state-mature:    oklch(0.68 0.150 80);
-  --state-published: oklch(0.62 0.140 170);
+  --accent:              oklch(0.42 0.155 28);
+  --accent-foreground:   oklch(0.985 0.008 85);
 
-  /* Hairline — light theme */
-  --hairline: oklch(0 0 0 / 6%);
+  --destructive:         oklch(0.52 0.20 25);
+
+  --border:              oklch(0.165 0.012 270 / 12%);
+  --input:               oklch(0.165 0.012 270 / 12%);
+  --ring:                oklch(0.42 0.155 28 / 40%);
+
+  /* Editorial chart palette — muted jewel */
+  --chart-1: oklch(0.42 0.155 28);
+  --chart-2: oklch(0.38 0.090 240);
+  --chart-3: oklch(0.45 0.075 165);
+  --chart-4: oklch(0.55 0.090 80);
+  --chart-5: oklch(0.32 0.065 300);
+
+  --radius: 0.5rem;
+
+  --sidebar:                    oklch(0.96 0.010 85);
+  --sidebar-foreground:         oklch(0.165 0.012 270);
+  --sidebar-primary:            oklch(0.42 0.155 28);
+  --sidebar-primary-foreground: oklch(0.985 0.008 85);
+  --sidebar-accent:             oklch(0.94 0.010 85);
+  --sidebar-accent-foreground:  oklch(0.20 0.012 270);
+  --sidebar-border:             oklch(0.165 0.012 270 / 10%);
+  --sidebar-ring:               oklch(0.42 0.155 28 / 40%);
+
+  --surface-1: oklch(0.96 0.010 85);
+  --surface-2: oklch(0.93 0.012 85);
+  --surface-3: oklch(0.89 0.014 85);
+
+  --hairline: oklch(0.165 0.012 270 / 8%);
+  --header-bg: oklch(0.975 0.010 85 / 88%);
+  --header-border: oklch(0.165 0.012 270 / 8%);
 }
 
+/* ══════════════════════════════════════════════════════════════════
+   Dark — Ink (default)
+   Near-black cool ground, ivory text, cinematic vermilion accent.
+   ────────────────────────────────────────────────────────────────── */
 .dark {
-  /* ── Deep ocean base — hue 220 ── */
-  --background: oklch(0.15 0.038 220);
-  --foreground: oklch(0.97 0.012 200);
-  --card: oklch(0.21 0.042 210);
-  --card-foreground: oklch(0.97 0.012 200);
-  --popover: oklch(0.18 0.040 215);
-  --popover-foreground: oklch(0.97 0.012 200);
-  /* Vibrant aqua primary — hue 195 */
-  --primary: oklch(0.78 0.165 195);
-  --primary-foreground: oklch(0.15 0.030 220);
-  --secondary: oklch(0.27 0.045 205);
-  --secondary-foreground: oklch(0.97 0.012 200);
-  --muted: oklch(0.25 0.042 210);
-  --muted-foreground: oklch(0.72 0.030 205);
-  /* Coral accent — hue 25 (warm counterpoint) */
-  --accent: oklch(0.74 0.155 25);
-  --accent-foreground: oklch(0.15 0.030 220);
-  --destructive: oklch(0.70 0.175 20);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 14%);
-  --ring: oklch(0.78 0.165 195);
-  /* Ocean chart palette — perceptually ordered */
-  --chart-1: oklch(0.55 0.150 245);
-  --chart-2: oklch(0.72 0.160 215);
-  --chart-3: oklch(0.80 0.155 195);
-  --chart-4: oklch(0.78 0.140 170);
-  --chart-5: oklch(0.74 0.155 25);
-  /* Sidebar — abyss */
-  --sidebar: oklch(0.12 0.035 225);
-  --sidebar-foreground: oklch(0.97 0.012 200);
-  --sidebar-primary: oklch(0.78 0.165 195);
-  --sidebar-primary-foreground: oklch(0.15 0.030 220);
-  --sidebar-accent: oklch(0.24 0.045 215);
-  --sidebar-accent-foreground: oklch(0.97 0.012 200);
-  --sidebar-border: oklch(1 0 0 / 8%);
-  --sidebar-ring: oklch(0.78 0.165 195);
+  --background:          oklch(0.125 0.008 270);
+  --foreground:          oklch(0.96 0.008 85);
+  --card:                oklch(0.17 0.010 270);
+  --card-foreground:     oklch(0.96 0.008 85);
+  --popover:             oklch(0.15 0.010 270);
+  --popover-foreground:  oklch(0.96 0.008 85);
 
-  /* Surface elevation */
-  --surface-1: oklch(0.21 0.042 210);
-  --surface-2: oklch(0.27 0.048 205);
-  --surface-3: oklch(0.33 0.052 200);
+  --primary:             oklch(0.68 0.175 32);            /* warm vermilion */
+  --primary-foreground:  oklch(0.14 0.010 270);
 
-  /* Gradient endpoints — aqua → coral */
-  --gradient-start: oklch(0.78 0.165 195);
-  --gradient-end: oklch(0.74 0.155 25);
+  --secondary:           oklch(0.22 0.010 270);
+  --secondary-foreground: oklch(0.96 0.008 85);
 
-  /* Glow effects — visible cyan/coral/foam */
-  --glow-primary: oklch(0.78 0.165 195 / 35%);
-  --glow-accent: oklch(0.74 0.155 25 / 25%);
-  --glow-cyan: oklch(0.85 0.180 195 / 35%);
-  --glow-pink: oklch(0.72 0.160 215 / 30%);
-  --glow-foam: oklch(0.78 0.140 170 / 25%);
+  --muted:               oklch(0.20 0.010 270);
+  --muted-foreground:    oklch(0.68 0.012 85);
 
-  /* State tokens — dark theme (Tenet 2) */
-  --state-growing:   oklch(0.74 0.180 30);
-  --state-mature:    oklch(0.78 0.160 80);
-  --state-published: oklch(0.78 0.140 170);
+  --accent:              oklch(0.68 0.175 32);
+  --accent-foreground:   oklch(0.14 0.010 270);
 
-  /* Hairline — dark theme */
-  --hairline: oklch(1 0 0 / 5%);
+  --destructive:         oklch(0.62 0.20 25);
+
+  --border:              oklch(1 0 0 / 9%);
+  --input:               oklch(1 0 0 / 13%);
+  --ring:                oklch(0.68 0.175 32 / 45%);
+
+  --chart-1: oklch(0.68 0.175 32);
+  --chart-2: oklch(0.62 0.120 240);
+  --chart-3: oklch(0.70 0.090 165);
+  --chart-4: oklch(0.74 0.095 80);
+  --chart-5: oklch(0.58 0.090 300);
+
+  --sidebar:                    oklch(0.105 0.008 270);
+  --sidebar-foreground:         oklch(0.96 0.008 85);
+  --sidebar-primary:            oklch(0.68 0.175 32);
+  --sidebar-primary-foreground: oklch(0.14 0.010 270);
+  --sidebar-accent:             oklch(0.20 0.010 270);
+  --sidebar-accent-foreground:  oklch(0.96 0.008 85);
+  --sidebar-border:             oklch(1 0 0 / 7%);
+  --sidebar-ring:               oklch(0.68 0.175 32 / 45%);
+
+  --surface-1: oklch(0.17 0.010 270);
+  --surface-2: oklch(0.22 0.010 270);
+  --surface-3: oklch(0.28 0.012 270);
+
+  --hairline:       oklch(1 0 0 / 8%);
+  --header-bg:      oklch(0.125 0.008 270 / 80%);
+  --header-border:  oklch(1 0 0 / 6%);
 }
 
+/* ══════════════════════════════════════════════════════════════════
+   Gray — Concrete
+   Mid-tone neutral for bright rooms / anti-glare. Same accent.
+   ────────────────────────────────────────────────────────────────── */
 .gray {
-  /* ── Tide pool — mid-tone teal ── */
-  --background: oklch(0.30 0.030 215);
-  --foreground: oklch(0.96 0.012 200);
-  --card: oklch(0.35 0.034 210);
-  --card-foreground: oklch(0.96 0.012 200);
-  --popover: oklch(0.33 0.032 212);
-  --popover-foreground: oklch(0.96 0.012 200);
-  --primary: oklch(0.80 0.155 195);
-  --primary-foreground: oklch(0.18 0.030 220);
-  --secondary: oklch(0.40 0.038 208);
-  --secondary-foreground: oklch(0.96 0.012 200);
-  --muted: oklch(0.38 0.036 210);
-  --muted-foreground: oklch(0.72 0.028 205);
-  --accent: oklch(0.74 0.155 25);
-  --accent-foreground: oklch(0.18 0.030 220);
-  --destructive: oklch(0.70 0.175 20);
-  --border: oklch(1 0 0 / 12%);
-  --input: oklch(1 0 0 / 16%);
-  --ring: oklch(0.80 0.155 195);
-  --chart-1: oklch(0.62 0.155 245);
-  --chart-2: oklch(0.74 0.160 215);
-  --chart-3: oklch(0.82 0.155 195);
-  --chart-4: oklch(0.78 0.140 170);
-  --chart-5: oklch(0.74 0.155 25);
+  --background:          oklch(0.32 0.006 270);
+  --foreground:          oklch(0.95 0.008 85);
+  --card:                oklch(0.36 0.008 270);
+  --card-foreground:     oklch(0.95 0.008 85);
+  --popover:             oklch(0.34 0.008 270);
+  --popover-foreground:  oklch(0.95 0.008 85);
 
-  /* Surface elevation */
-  --surface-1: oklch(0.35 0.034 210);
-  --surface-2: oklch(0.40 0.038 208);
-  --surface-3: oklch(0.45 0.042 205);
+  --primary:             oklch(0.70 0.170 32);
+  --primary-foreground:  oklch(0.18 0.010 270);
 
-  /* Gradient endpoints */
-  --gradient-start: oklch(0.80 0.155 195);
-  --gradient-end: oklch(0.74 0.155 25);
+  --secondary:           oklch(0.40 0.010 270);
+  --secondary-foreground: oklch(0.95 0.008 85);
 
-  /* Glow effects */
-  --glow-primary: oklch(0.80 0.155 195 / 30%);
-  --glow-accent: oklch(0.74 0.155 25 / 24%);
-  --glow-cyan: oklch(0.85 0.180 195 / 28%);
-  --glow-pink: oklch(0.74 0.160 215 / 26%);
-  --glow-foam: oklch(0.78 0.140 170 / 22%);
+  --muted:               oklch(0.38 0.008 270);
+  --muted-foreground:    oklch(0.72 0.012 85);
 
-  /* State tokens — gray theme (Tenet 2) */
-  --state-growing:   oklch(0.76 0.180 30);
-  --state-mature:    oklch(0.80 0.155 80);
-  --state-published: oklch(0.80 0.140 170);
+  --accent:              oklch(0.70 0.170 32);
+  --accent-foreground:   oklch(0.18 0.010 270);
 
-  /* Hairline — gray theme */
-  --hairline: oklch(1 0 0 / 6%);
+  --destructive:         oklch(0.62 0.20 25);
+
+  --border:              oklch(1 0 0 / 12%);
+  --input:               oklch(1 0 0 / 15%);
+  --ring:                oklch(0.70 0.170 32 / 45%);
+
+  --chart-1: oklch(0.70 0.170 32);
+  --chart-2: oklch(0.66 0.120 240);
+  --chart-3: oklch(0.74 0.090 165);
+  --chart-4: oklch(0.78 0.095 80);
+  --chart-5: oklch(0.60 0.090 300);
+
+  --surface-1: oklch(0.36 0.008 270);
+  --surface-2: oklch(0.40 0.010 270);
+  --surface-3: oklch(0.46 0.012 270);
+
+  --hairline:      oklch(1 0 0 / 9%);
+  --header-bg:     oklch(0.28 0.006 270 / 85%);
+  --header-border: oklch(1 0 0 / 10%);
 }
 
-/* ── Theme-aware header colors ── */
-.dark {
-  --header-bg: oklch(0.12 0.035 225); --header-border: oklch(1 0 0 / 8%);
-}
-:root, .light {
-  --header-bg: oklch(1 0 0); --header-border: oklch(0.90 0.035 195);
-}
-.gray {
-  --header-bg: oklch(0.27 0.028 215); --header-border: oklch(1 0 0 / 10%);
-}
-
+/* ══════════════════════════════════════════════════════════════════
+   Base
+   ────────────────────────────────────────────────────────────────── */
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
-  body {
-    @apply bg-background text-foreground;
+  html {
+    font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
   }
-  html {
-    @apply font-sans;
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "ss01", "cv02", "cv11";
+  }
+  /* Headings default to the editorial serif */
+  h1, h2, h3, h4 {
+    font-family: var(--font-instrument-serif), ui-serif, Georgia, serif;
+    font-weight: 400;              /* Instrument Serif reads heavy at 400 */
+    letter-spacing: -0.015em;
+    line-height: 1.05;
+    text-wrap: balance;
+  }
+  p {
+    text-wrap: pretty;
+  }
+  /* Opt-out: any node inside `.font-technical` flips to the sans stack
+     so technical copy (metadata, code, CTAs) doesn't read as an essay. */
+  .font-technical, .font-technical * {
+    font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+    letter-spacing: normal;
+  }
+  ::selection {
+    background: var(--primary);
+    color: var(--primary-foreground);
   }
 }
 
-/* ── Design system utilities ── */
+/* ══════════════════════════════════════════════════════════════════
+   Typographic utilities
+   ────────────────────────────────────────────────────────────────── */
+.font-display { font-family: var(--font-instrument-serif), ui-serif, Georgia, serif; }
+.font-sans    { font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif; }
+.font-mono    { font-family: var(--font-geist-mono), ui-monospace, SFMono-Regular, monospace; }
 
-/* Gradient text */
-.text-gradient {
-  background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-/* Card hover lift */
-.card-lift {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-.card-lift:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 16px oklch(0 0 0 / 20%);
+/* Small caps label — editorial section kicker */
+.kicker {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
 }
 
-/* Glow on hover */
-.glow-hover {
-  transition: box-shadow 0.3s ease;
-}
-.glow-hover:hover {
-  box-shadow: 0 0 20px var(--glow-primary), 0 0 40px var(--glow-primary);
+/* Big drop-cap on editorial posts */
+.drop-cap::first-letter {
+  font-family: var(--font-instrument-serif), ui-serif, Georgia, serif;
+  float: left;
+  font-size: 5.5rem;
+  line-height: 0.85;
+  padding-right: 0.4rem;
+  padding-top: 0.2rem;
+  color: var(--primary);
 }
 
-/* Staggered fade-up animation */
+/* ══════════════════════════════════════════════════════════════════
+   Motion — restrained, calibrated to prefers-reduced-motion
+   ────────────────────────────────────────────────────────────────── */
+:root {
+  --ease-linear:    linear;
+  --ease-out:       cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out:    cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-out-back:  cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-out-expo:  cubic-bezier(0.19, 1, 0.22, 1);
+  --ease-spring:    cubic-bezier(0.5, 1.6, 0.4, 0.8);
+
+  --duration-instant: 80ms;
+  --duration-snap:    160ms;
+  --duration-quick:   240ms;
+  --duration-smooth:  360ms;
+  --duration-page:    500ms;
+  --duration-long:    800ms;
+}
+
 @keyframes fade-up {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 .animate-fade-up {
-  animation: fade-up 0.4s ease forwards;
+  animation: fade-up 0.6s var(--ease-out) forwards;
   opacity: 0;
 }
 
-/* Skeleton shimmer (upgrade from pulse) */
-@keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
-}
-.skeleton-shimmer {
-  background: linear-gradient(90deg, var(--muted) 25%, var(--surface-2) 50%, var(--muted) 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
-}
-
-/* ── Mesh gradient backgrounds ── */
-
-/* Aurora mesh — multiple radial gradients overlapping */
-.mesh-aurora {
-  position: relative;
-  isolation: isolate;
-}
-.mesh-aurora::before {
-  content: '';
-  position: absolute;
-  inset: -20% -10% -20% -10%;
-  background:
-    radial-gradient(ellipse 60% 40% at 20% 30%, var(--glow-primary), transparent 60%),
-    radial-gradient(ellipse 50% 35% at 80% 20%, var(--glow-pink), transparent 55%),
-    radial-gradient(ellipse 55% 40% at 60% 80%, var(--glow-cyan), transparent 60%),
-    radial-gradient(ellipse 45% 30% at 30% 70%, var(--glow-accent), transparent 55%);
-  filter: blur(40px);
-  pointer-events: none;
-  z-index: -1;
-}
-
-/* Animated aurora — slow drift */
-@keyframes aurora-drift {
-  0%, 100% { transform: translate(0, 0) rotate(0deg) scale(1); }
-  33% { transform: translate(2%, -2%) rotate(2deg) scale(1.05); }
-  66% { transform: translate(-2%, 2%) rotate(-2deg) scale(0.98); }
-}
-.mesh-aurora::before {
-  animation: aurora-drift 18s ease-in-out infinite;
-}
-
-/* Floating orb — single colored orb that drifts */
-.orb {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(60px);
-  opacity: 0.6;
-  pointer-events: none;
-  z-index: -1;
-}
-.orb-primary { background: var(--glow-primary); }
-.orb-accent { background: var(--glow-accent); }
-.orb-cyan { background: var(--glow-cyan); }
-.orb-pink { background: var(--glow-pink); }
-
-@keyframes orb-float-1 {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  50% { transform: translate(20px, -30px) scale(1.1); }
-}
-@keyframes orb-float-2 {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  50% { transform: translate(-30px, 20px) scale(0.9); }
-}
-.orb-anim-1 { animation: orb-float-1 14s ease-in-out infinite; }
-.orb-anim-2 { animation: orb-float-2 16s ease-in-out infinite; }
-
-/* Hero radial glow (legacy — keep for backward compat) */
-.hero-glow {
-  position: relative;
-  isolation: isolate;
-}
-.hero-glow::before {
-  content: '';
-  position: absolute;
-  top: -10%;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 400px;
-  height: 300px;
-  background: radial-gradient(ellipse, var(--glow-primary) 0%, transparent 70%);
-  pointer-events: none;
-  z-index: -1;
-}
-@media (min-width: 640px) {
-  .hero-glow::before {
-    top: -20%;
-    width: 800px;
-    height: 500px;
-  }
-}
-
-/* ── Glassmorphism cards ── */
-.glass {
-  background: color-mix(in oklch, var(--card) 60%, transparent);
-  backdrop-filter: blur(20px) saturate(140%);
-  -webkit-backdrop-filter: blur(20px) saturate(140%);
-  border: 1px solid color-mix(in oklch, var(--foreground) 8%, transparent);
-}
-
-.glass-strong {
-  background: color-mix(in oklch, var(--card) 75%, transparent);
-  backdrop-filter: blur(24px) saturate(160%);
-  -webkit-backdrop-filter: blur(24px) saturate(160%);
-  border: 1px solid color-mix(in oklch, var(--foreground) 10%, transparent);
-}
-
-/* ── Gradient border (animated) ── */
-@keyframes gradient-border-rotate {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-.gradient-border {
-  position: relative;
-  background: var(--card);
-  border-radius: var(--radius-xl);
-}
-.gradient-border::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  padding: 1px;
-  background: linear-gradient(135deg,
-    var(--gradient-start),
-    var(--chart-2),
-    var(--gradient-end),
-    var(--chart-1),
-    var(--gradient-start)
-  );
-  background-size: 300% 300%;
-  animation: gradient-border-rotate 8s ease infinite;
-  -webkit-mask:
-    linear-gradient(#fff 0 0) content-box,
-    linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  pointer-events: none;
-}
-
-/* ── Animated gradient text ── */
-@keyframes gradient-text-shift {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-}
-.text-gradient-animated {
-  background: linear-gradient(135deg,
-    var(--gradient-start),
-    var(--chart-2),
-    var(--gradient-end),
-    var(--chart-1),
-    var(--gradient-start)
-  );
-  background-size: 300% 300%;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  animation: gradient-text-shift 6s ease infinite;
-}
-
-/* ── Glow on hover (visible version) ── */
-.glow-on-hover {
-  transition: box-shadow 0.4s ease, border-color 0.3s ease;
-}
-.glow-on-hover:hover {
-  box-shadow:
-    0 0 0 1px var(--primary),
-    0 0 24px var(--glow-primary),
-    0 0 48px var(--glow-primary);
-}
-
-/* ── Subtle noise texture overlay ── */
-.noise {
-  position: relative;
-}
-.noise::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
-  opacity: 0.04;
-  mix-blend-mode: overlay;
-  pointer-events: none;
-  border-radius: inherit;
-}
-
-/* ── Ocean wave background (drifting linear gradients) ── */
-@keyframes wave-drift {
-  0%, 100% { background-position: 0% 50%, 100% 50%; }
-  50% { background-position: 100% 50%, 0% 50%; }
-}
-.wave-bg {
-  position: relative;
-}
-.wave-bg::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(120deg, transparent 30%, var(--glow-cyan) 50%, transparent 70%) 0 0 / 200% 100%,
-    linear-gradient(60deg, transparent 30%, var(--glow-foam) 50%, transparent 70%) 0 0 / 200% 100%;
-  animation: wave-drift 24s ease-in-out infinite;
-  pointer-events: none;
-  z-index: -1;
-  opacity: 0.5;
-  border-radius: inherit;
-}
-
-/* ── Caustic light rays (rotating conic) ── */
-@keyframes caustic-rotate {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-.caustic-rays {
-  position: relative;
-  isolation: isolate;
-  overflow: hidden;
-}
-.caustic-rays::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 200%;
-  height: 200%;
-  transform: translate(-50%, -50%);
-  background: conic-gradient(from 180deg at 50% 50%,
-    transparent 0deg,
-    var(--glow-cyan) 12deg,
-    transparent 25deg,
-    transparent 60deg,
-    var(--glow-foam) 72deg,
-    transparent 85deg,
-    transparent 180deg,
-    var(--glow-pink) 192deg,
-    transparent 205deg,
-    transparent 270deg,
-    var(--glow-accent) 282deg,
-    transparent 295deg
-  );
-  mix-blend-mode: screen;
-  animation: caustic-rotate 60s linear infinite;
-  pointer-events: none;
-  z-index: -1;
-  opacity: 0.6;
-}
-
-/* ── Floating bubbles ── */
-@keyframes bubble-rise {
-  0% { transform: translateY(110vh) translateX(0); opacity: 0; }
-  10% { opacity: 0.6; }
-  90% { opacity: 0.6; }
-  100% { transform: translateY(-10vh) translateX(var(--drift, 20px)); opacity: 0; }
-}
-.bubble {
-  position: absolute;
-  width: var(--size, 12px);
-  height: var(--size, 12px);
-  border-radius: 50%;
-  background: radial-gradient(circle at 30% 30%,
-    oklch(0.95 0.08 195 / 0.55),
-    oklch(0.75 0.12 200 / 0.08)
-  );
-  border: 1px solid oklch(0.85 0.10 195 / 0.25);
-  box-shadow: 0 0 8px oklch(0.85 0.18 195 / 0.3);
-  animation: bubble-rise var(--duration, 12s) ease-in infinite;
-  animation-delay: var(--delay, 0s);
-  pointer-events: none;
-}
-
-/* ── Animated SVG ocean waves — parallax 3 layers ──
-   Used by the manifesto section on the home page. The SVG path is twice
-   the visual width and translates by -50% to loop seamlessly. Three layers
-   with different speeds create a parallax depth effect.
-
-   Tenet 4 note (docs/brand-tenets.md): self-made, theme-aware, encodes the
-   "ocean / depth" identity that's already in the OKLCH palette. Not stock,
-   not external, no asset payload. The single concentrated visual moment
-   on the home, by Tenet 5 limited to one section. */
-@keyframes ocean-wave-shift {
-  from { transform: translate3d(0, 0, 0); }
-  to   { transform: translate3d(-50%, 0, 0); }
-}
-.ocean-wave-back  { animation: ocean-wave-shift 26s linear infinite; }
-.ocean-wave-mid   { animation: ocean-wave-shift 18s linear infinite; }
-.ocean-wave-front { animation: ocean-wave-shift 12s linear infinite; }
-
-@media (prefers-reduced-motion: reduce) {
-  .ocean-wave-back,
-  .ocean-wave-mid,
-  .ocean-wave-front {
-    animation: none;
-  }
-}
-
-/* ── Depth layer (vertical ocean depth gradient) ── */
-.depth-layer {
-  background: linear-gradient(180deg,
-    oklch(0.13 0.030 225) 0%,
-    oklch(0.16 0.040 220) 30%,
-    oklch(0.19 0.045 215) 60%,
-    oklch(0.22 0.050 210) 100%
-  );
-}
-
-/* Reduced motion support */
-@media (prefers-reduced-motion: reduce) {
-  .animate-fade-up,
-  .mesh-aurora::before,
-  .orb-anim-1,
-  .orb-anim-2,
-  .gradient-border::before,
-  .text-gradient-animated,
-  .wave-bg::before,
-  .caustic-rays::before,
-  .bubble {
-    animation: none;
-  }
-  .animate-fade-up {
-    opacity: 1;
-  }
-  .card-lift:hover {
-    transform: none;
-  }
-  .glow-hover:hover,
-  .glow-on-hover:hover {
-    box-shadow: none;
-  }
-  .skeleton-shimmer {
-    animation: none;
-  }
-  .bubble {
-    display: none;
-  }
-}
-
-/* ════════════════════════════════════════════════════════════════
-   Motion Tokens (2026 modernization Phase A3)
-   표준 easing curve + duration scale.
-   사용 예:
-     transition: transform var(--duration-snap) var(--ease-out-back);
-   ──────────────────────────────────────────────────────────────── */
-:root {
-  /* Easing curves */
-  --ease-linear:    linear;
-  --ease-out:       cubic-bezier(0.16, 1, 0.3, 1);          /* smooth decel */
-  --ease-in-out:    cubic-bezier(0.65, 0, 0.35, 1);         /* balanced */
-  --ease-out-back:  cubic-bezier(0.34, 1.56, 0.64, 1);      /* subtle overshoot — cards */
-  --ease-out-expo:  cubic-bezier(0.19, 1, 0.22, 1);         /* fast → stop — reveals */
-  --ease-spring:    cubic-bezier(0.5, 1.6, 0.4, 0.8);       /* bouncy — tap feedback */
-
-  /* Duration scale — 8 step geometric */
-  --duration-instant: 80ms;    /* tap feedback */
-  --duration-snap:    160ms;   /* micro-interaction */
-  --duration-quick:   240ms;   /* hover/focus */
-  --duration-smooth:  360ms;   /* panel reveal */
-  --duration-page:    500ms;   /* route transition */
-  --duration-long:    800ms;   /* hero/splash */
-}
-
-/* ════════════════════════════════════════════════════════════════
-   View Transitions (2026 modernization Phase A2)
-   Next.js 16 + React 19 ViewTransition 래퍼와 함께 사용.
-   라우트 간 자동 cross-fade.
-
-   ▸ 체감 지연 방지: 240ms(quick)로 단축 (이전 500ms).
-   ▸ opacity만 사용(translate 제거) — 컴포지터 레이어 승격 최소화.
-   ──────────────────────────────────────────────────────────────── */
-::view-transition-old(root),
-::view-transition-new(root) {
-  animation-duration: var(--duration-quick);
-  animation-timing-function: var(--ease-out);
-}
-
-::view-transition-old(root) {
-  animation-name: vt-fade-out;
-}
-
-::view-transition-new(root) {
-  animation-name: vt-fade-in;
-}
-
-@keyframes vt-fade-out {
-  to { opacity: 0; }
-}
-
-@keyframes vt-fade-in {
+@keyframes fade-in {
   from { opacity: 0; }
   to   { opacity: 1; }
 }
-
-@media (prefers-reduced-motion: reduce) {
-  ::view-transition-old(root),
-  ::view-transition-new(root) {
-    animation: none;
-  }
+.animate-fade-in {
+  animation: fade-in 0.8s var(--ease-out) forwards;
 }
 
-/* ════════════════════════════════════════════════════════════════
-   Interaction primitives (Phase A3 helpers)
-   전역 재사용 — Bento/Active Grid에서 호출.
-   ──────────────────────────────────────────────────────────────── */
 .hover-lift {
-  transition: transform var(--duration-quick) var(--ease-out-back),
-              box-shadow var(--duration-quick) var(--ease-out);
+  transition: transform var(--duration-quick) var(--ease-out);
 }
 .hover-lift:hover {
-  transform: translateY(-2px);
+  transform: translateY(-3px);
 }
 
 .tap-scale {
@@ -724,14 +350,102 @@
   transform: scale(0.97);
 }
 
-.reveal-expand {
-  overflow: hidden;
-  transition: max-height var(--duration-smooth) var(--ease-out-expo),
-              opacity var(--duration-quick) var(--ease-out);
+/* Editorial image hover — subtle zoom of the inner <img>/media,
+   leaving the frame still. Pair with `overflow-hidden` on the frame. */
+.media-zoom { overflow: hidden; }
+.media-zoom > :first-child {
+  transition: transform 0.9s var(--ease-out);
+  will-change: transform;
+}
+.media-zoom:hover > :first-child {
+  transform: scale(1.03);
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .hover-lift, .tap-scale, .reveal-expand {
-    transition: none;
-  }
+/* Link underline that grows on hover */
+.link-underline {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-size: 0% 1px;
+  background-repeat: no-repeat;
+  background-position: left bottom;
+  transition: background-size var(--duration-smooth) var(--ease-out);
 }
+.link-underline:hover {
+  background-size: 100% 1px;
+}
+
+/* Skeleton shimmer */
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
+.skeleton-shimmer {
+  background: linear-gradient(90deg, var(--muted) 25%, var(--surface-2) 50%, var(--muted) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   View Transitions — cross-fade between routes
+   ────────────────────────────────────────────────────────────────── */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: var(--duration-quick);
+  animation-timing-function: var(--ease-out);
+}
+::view-transition-old(root) { animation-name: vt-fade-out; }
+::view-transition-new(root) { animation-name: vt-fade-in; }
+
+@keyframes vt-fade-out { to { opacity: 0; } }
+@keyframes vt-fade-in  { from { opacity: 0; } to { opacity: 1; } }
+
+/* ══════════════════════════════════════════════════════════════════
+   Reduced motion respect
+   ────────────────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-up,
+  .animate-fade-in { animation: none; opacity: 1; transform: none; }
+  .hover-lift:hover,
+  .media-zoom:hover > :first-child { transform: none; }
+  .skeleton-shimmer { animation: none; }
+  ::view-transition-old(root),
+  ::view-transition-new(root) { animation: none; }
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   Editorial primitives
+   ────────────────────────────────────────────────────────────────── */
+
+/* Hairline separators */
+.hairline-t { border-top: 1px solid var(--hairline); }
+.hairline-b { border-bottom: 1px solid var(--hairline); }
+.hairline-y { border-top: 1px solid var(--hairline); border-bottom: 1px solid var(--hairline); }
+
+/* Quiet grain — organic paper texture, never over text */
+.grain {
+  position: relative;
+}
+.grain::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.4'/%3E%3C/svg%3E");
+  opacity: 0.035;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+/* Glass surface (sticky header) */
+.glass {
+  background: color-mix(in oklch, var(--background) 75%, transparent);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  border-bottom: 1px solid var(--header-border);
+}
+
+/* Aspect-ratio frames for media-forward cards */
+.frame-4x5   { aspect-ratio: 4 / 5; }
+.frame-16x9  { aspect-ratio: 16 / 9; }
+.frame-21x9  { aspect-ratio: 21 / 9; }
+.frame-3x4   { aspect-ratio: 3 / 4; }
+.frame-square { aspect-ratio: 1 / 1; }
