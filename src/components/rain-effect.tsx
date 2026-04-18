@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Raindrops } from "@/lib/rain/raindrops";
 import { RainRenderer } from "@/lib/rain/rain-renderer";
 import {
@@ -14,10 +14,13 @@ import {
 /**
  * RainEffect — WebGL rain-on-glass, ported from codrops/RainEffect.
  *
- * Theme-aware: dark → heavy rain; gray → drizzle; light → clear (no
- * rain, just refraction of the sunny scene). Rebuilds the engine when
- * the `<html>` class changes so the theme switcher swaps weather in
- * real time.
+ * Dark-theme only. The light theme uses the clean sunny-beach scene
+ * straight from SiteBackground, with no rain canvas overlaying it —
+ * the blurred-BG texture that the shader composites was still dulling
+ * the scene even with `raining: false`, which defeated the "clear
+ * weather" read. Simpler: when the active theme is light, the
+ * component renders nothing at all. On switch to dark it re-mounts
+ * and re-initialises the engine.
  */
 
 const TEXTURE_BG_W = 512;
@@ -26,16 +29,26 @@ const TEXTURE_FG_W = 96;
 const TEXTURE_FG_H = 54;
 
 export function RainEffect() {
+  const [theme, setTheme] = useState<SceneTheme>("dark");
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
+  // Track the active theme so we can mount/unmount the canvas + engine
+  // on theme change. Initial value is set in a mount effect to avoid
+  // the SSR/hydration mismatch from reading `<html>` at render time.
   useEffect(() => {
+    setTheme(getActiveTheme());
+    return observeTheme((next) => setTheme(next));
+  }, []);
+
+  useEffect(() => {
+    if (theme !== "dark") return; // light theme skips the rain engine entirely
     const canvas = canvasRef.current;
     if (!canvas) return;
 
     let raindrops: Raindrops | null = null;
     let renderer: RainRenderer | null = null;
     let cancelled = false;
-    let currentTheme: SceneTheme = getActiveTheme();
+    let currentTheme: SceneTheme = theme;
 
     const resize = () => {
       if (!canvas) return;
@@ -152,21 +165,21 @@ export function RainEffect() {
     };
     window.addEventListener("resize", debouncedResize);
 
-    const unsubscribeTheme = observeTheme((next) => {
-      if (next === currentTheme) return;
-      currentTheme = next;
-      build(next).catch(() => {});
-    });
+    // When the theme flips away from dark, this whole effect returns
+    // early on the next run, and the cleanup below tears the engine
+    // down. No in-effect theme observer needed here anymore — the
+    // outer state+useEffect above owns that responsibility.
 
     return () => {
       cancelled = true;
-      unsubscribeTheme();
       window.removeEventListener("resize", debouncedResize);
       if (resizeTimer != null) window.clearTimeout(resizeTimer);
       raindrops?.destroy();
       renderer?.destroy();
     };
-  }, []);
+  }, [theme]);
+
+  if (theme !== "dark") return null;
 
   return (
     <canvas

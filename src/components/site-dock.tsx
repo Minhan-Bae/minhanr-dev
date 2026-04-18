@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ThemeSwitcher } from "@/components/theme-switcher";
 import { VisitorCounter } from "@/components/visitor-counter";
 import { AmbientToggle } from "@/components/ambient-audio";
 
@@ -33,7 +32,7 @@ export function SiteDock() {
   const pathname = usePathname() ?? "/";
 
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-16 z-40 flex justify-center px-3 sm:bottom-20 sm:px-6">
+    <div className="pointer-events-none fixed inset-x-0 bottom-24 z-40 flex justify-center px-3 sm:bottom-28 sm:px-6">
       <nav
         aria-label="Primary"
         className="pointer-events-auto glass font-technical flex w-full max-w-[720px] items-center gap-1 rounded-full border border-[var(--hairline)] px-1.5 py-1 shadow-[0_16px_42px_-20px_rgba(0,0,0,0.55)] sm:gap-2 sm:px-2 sm:py-1.5"
@@ -64,7 +63,6 @@ export function SiteDock() {
         <div className="mx-1 h-4 w-px bg-[var(--hairline)] sm:mx-2" aria-hidden />
         <div className="flex items-center gap-0.5 sm:gap-1">
           <AmbientToggle />
-          <ThemeSwitcher />
           <VisitorCounter />
         </div>
       </nav>

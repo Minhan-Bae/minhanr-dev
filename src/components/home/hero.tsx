@@ -13,7 +13,7 @@ const TYPE_DELAY_MS = 170;
 /** Erase is snappier than typing so the word reads as being rewound. */
 const ERASE_DELAY_MS = 80;
 /** ms the fully-typed wordmark sits on-screen before erasing. */
-const HOLD_MS = 3200;
+const HOLD_MS = 5000;
 /** ms the hero sits empty between cycles. */
 const PAUSE_MS = 900;
 

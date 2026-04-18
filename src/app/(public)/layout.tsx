@@ -5,6 +5,7 @@ import { SiteWordmark } from "@/components/site-wordmark";
 import { SiteDock } from "@/components/site-dock";
 import { SeoulDatum } from "@/components/seoul-datum";
 import { SiteColophon } from "@/components/site-colophon";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 /**
  * Public layout — minimal chrome, heavy atmosphere.
@@ -34,8 +35,9 @@ export default async function PublicLayout({
       <SiteWordmark />
       <SeoulDatum />
 
-      <main className="flex-1 pb-36 sm:pb-44">{children}</main>
+      <main className="flex-1 pb-40 sm:pb-48">{children}</main>
 
+      <ThemeToggle />
       <SiteColophon />
       <SiteDock />
       <MouseSpotlight />
