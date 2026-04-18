@@ -79,31 +79,29 @@ export function Hero({ workCount, writingCount }: HeroProps) {
         </div>
       </div>
 
-      {/* ─── Bottom rail ────────────────────────────────────────────── */}
-      <div className="relative z-10 grid grid-cols-[1fr_auto_1fr] items-end gap-6 px-6 pb-10 sm:px-10 sm:pb-12">
+      {/* ─── Bottom rail ────────────────────────────────────────────────
+          Positioned above the floating SiteDock (which occupies roughly
+          72–88px at the viewport bottom). We reserve ~128px of bottom
+          padding so the counters clear the dock on every breakpoint,
+          and we drop the old centre "Scroll" hint — the dock already
+          communicates navigation, so a second scroll affordance just
+          competed with it for attention. */}
+      <div className="relative z-10 flex items-end justify-between gap-6 px-6 pb-28 sm:px-10 sm:pb-32">
         <div className="font-technical text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
           <div className="text-[9px] sm:text-[10px]">Selected</div>
           <div
             className="mt-1 font-display italic tabular-nums text-foreground"
-            style={{ fontSize: "clamp(1.75rem, 3.5vw, 2.5rem)", lineHeight: "0.9" }}
+            style={{ fontSize: "clamp(1.5rem, 3vw, 2.25rem)", lineHeight: "0.9" }}
           >
             {String(workCount).padStart(2, "0")}
           </div>
-        </div>
-
-        <div className="hidden items-center gap-3 font-technical text-[10px] uppercase tracking-[0.3em] text-muted-foreground sm:flex">
-          <span>Scroll</span>
-          <span
-            aria-hidden
-            className="block h-px w-14 bg-foreground/60 [animation:scroll-hint_2.6s_ease-in-out_infinite]"
-          />
         </div>
 
         <div className="text-right font-technical text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
           <div className="text-[9px] sm:text-[10px]">Writing</div>
           <div
             className="mt-1 font-display italic tabular-nums text-foreground"
-            style={{ fontSize: "clamp(1.75rem, 3.5vw, 2.5rem)", lineHeight: "0.9" }}
+            style={{ fontSize: "clamp(1.5rem, 3vw, 2.25rem)", lineHeight: "0.9" }}
           >
             {String(writingCount).padStart(2, "0")}
           </div>
