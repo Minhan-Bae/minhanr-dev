@@ -7,12 +7,13 @@ import { WorkCover } from "@/components/work-cover";
 
 /**
  * Home — editorial portfolio index, per brand-tenets v2.
+ * Korean-first copy. Latin wordmark treated as a secondary typographic
+ * line, not the lede.
  *
- *   1. Masthead       — wordmark, practice, teal keyline bar
- *   2. Lede           — one-sentence manifesto
- *   3. Selected Work  — curator-ordered case grid (asymmetric)
- *   4. Selected Writing — 3 most recent posts
- *   5. Contact        — one line, direct
+ *   1. Masthead        — Korean name (hero) + Latin subtitle + intro
+ *   2. Selected Work   — curator-ordered asymmetric case grid
+ *   3. Selected Writing — 3 most recent posts
+ *   4. Contact         — one direct line
  */
 export default function Home() {
   const selected = getSelectedWork();
@@ -21,25 +22,28 @@ export default function Home() {
   return (
     <>
       {/* ─── 1. Masthead ────────────────────────────────────────────── */}
-      <section className="relative mx-auto w-full max-w-[1440px] px-6 pt-20 pb-16 sm:px-10 sm:pt-32 sm:pb-24">
-        {/* Vermilion accent bar */}
+      <section className="relative mx-auto w-full max-w-[1440px] px-6 pt-20 pb-16 sm:px-10 sm:pt-28 sm:pb-24">
+        {/* Teal keyline bar — brand signature */}
         <div
           aria-hidden
-          className="absolute left-6 top-20 h-24 w-[3px] bg-primary sm:left-10 sm:top-32 sm:h-32"
+          className="absolute left-6 top-20 h-20 w-[3px] bg-primary sm:left-10 sm:top-28 sm:h-24"
         />
 
         <div className="ml-8 sm:ml-12">
           <p className="kicker mb-6">{BRAND_IDENTITY.domain}</p>
           <h1
-            className="font-display leading-[0.92] tracking-[-0.03em]"
+            className="font-display leading-[1.1] tracking-[-0.02em]"
             style={{ fontSize: "var(--font-size-display)" }}
           >
             {BRAND_IDENTITY.person}
+            <span className="ml-3 align-baseline font-technical text-base font-normal text-muted-foreground sm:ml-4 sm:text-lg">
+              {BRAND_IDENTITY.personLatin}
+            </span>
           </h1>
-          <p className="mt-8 max-w-xl font-technical text-base text-muted-foreground sm:text-lg">
+          <p className="mt-6 max-w-xl font-technical text-[15px] leading-[1.7] text-muted-foreground sm:mt-8 sm:text-base">
             <span className="text-foreground">{BRAND_IDENTITY.role}.</span>{" "}
-            Selected work in intelligent systems and visual computing —
-            building tools that think in the language of the craft they serve.
+            인공지능과 시각 시스템 사이에서 일합니다. 장인이 쓰는 연장처럼
+            읽히는 도구, 완성된 상태로 공개할 수 있는 작업만 여기에 둡니다.
           </p>
         </div>
       </section>
@@ -48,29 +52,25 @@ export default function Home() {
       <section className="hairline-y mx-auto w-full max-w-[1440px] px-6 py-16 sm:px-10 sm:py-24">
         <header className="mb-12 flex items-baseline justify-between sm:mb-20">
           <div>
-            <p className="kicker mb-3">Selected Work</p>
+            <p className="kicker mb-3">선별 작업 · Selected Work</p>
             <h2
               className="font-display tracking-[-0.02em]"
               style={{ fontSize: "var(--font-size-h2)" }}
             >
-              Things that shipped.
+              실제로 출시된 것들.
             </h2>
           </div>
           <Link
             href="/work"
             className="font-technical link-underline hidden text-sm text-muted-foreground hover:text-foreground sm:inline-block"
           >
-            All work
+            작업 전체 보기
           </Link>
         </header>
 
         <div className="grid gap-x-8 gap-y-16 sm:grid-cols-12 sm:gap-y-24">
           {selected.map((item, i) => {
-            // Asymmetric editorial grid:
-            //   1st item : 7 cols (wide, leading)
-            //   2nd item : 5 cols, offset top
-            //   3rd item : 7 cols, offset right
-            //   rest     : 6 cols each
+            // Asymmetric editorial grid
             const layout =
               i === 0
                 ? "sm:col-span-7"
@@ -105,10 +105,10 @@ export default function Home() {
                       >
                         {item.title}
                       </h3>
-                      <p className="font-technical mt-1 text-[13px] uppercase tracking-[0.16em] text-muted-foreground">
+                      <p className="font-technical mt-1 text-[12px] uppercase tracking-[0.16em] text-muted-foreground">
                         {item.discipline} · {item.year}
                       </p>
-                      <p className="mt-4 max-w-prose text-[15px] leading-relaxed text-muted-foreground">
+                      <p className="mt-4 max-w-prose text-[15px] leading-[1.65] text-muted-foreground">
                         {item.summary}
                       </p>
                     </div>
@@ -128,7 +128,7 @@ export default function Home() {
             href="/work"
             className="font-technical link-underline text-sm text-muted-foreground"
           >
-            All work
+            작업 전체 보기
           </Link>
         </div>
       </section>
@@ -137,19 +137,19 @@ export default function Home() {
       <section className="mx-auto w-full max-w-[1440px] px-6 py-16 sm:px-10 sm:py-24">
         <header className="mb-12 flex items-baseline justify-between">
           <div>
-            <p className="kicker mb-3">Writing</p>
+            <p className="kicker mb-3">글 · Writing</p>
             <h2
               className="font-display tracking-[-0.02em]"
               style={{ fontSize: "var(--font-size-h2)" }}
             >
-              Notes from the studio.
+              스튜디오의 메모.
             </h2>
           </div>
           <Link
             href="/blog"
             className="font-technical link-underline hidden text-sm text-muted-foreground hover:text-foreground sm:inline-block"
           >
-            All writing
+            전체 글
           </Link>
         </header>
 
@@ -168,7 +168,7 @@ export default function Home() {
                 </time>
                 <div className="min-w-0">
                   <h3
-                    className="font-display tracking-[-0.01em] transition-colors group-hover:text-primary"
+                    className="font-display tracking-[-0.01em] leading-snug transition-colors group-hover:text-primary"
                     style={{ fontSize: "var(--font-size-h4)" }}
                   >
                     {post.title}
@@ -193,7 +193,7 @@ export default function Home() {
             href="/blog"
             className="font-technical link-underline text-sm text-muted-foreground"
           >
-            All writing
+            전체 글
           </Link>
         </div>
       </section>
@@ -202,23 +202,23 @@ export default function Home() {
       <section className="hairline-t mx-auto w-full max-w-[1440px] px-6 py-20 sm:px-10 sm:py-28">
         <div className="flex flex-col gap-8 sm:flex-row sm:items-end sm:justify-between">
           <div className="max-w-xl">
-            <p className="kicker mb-3">Contact</p>
+            <p className="kicker mb-3">연락 · Contact</p>
             <p
-              className="font-display tracking-[-0.02em]"
+              className="font-display leading-[1.2] tracking-[-0.02em]"
               style={{ fontSize: "var(--font-size-h2)" }}
             >
-              Working on something unusual?{" "}
+              흥미로운 작업을 만들고 계신가요?{" "}
               <Link
                 href="/about"
                 className="text-primary underline decoration-primary/40 underline-offset-[6px] transition hover:decoration-primary"
               >
-                Let's talk.
+                대화해요.
               </Link>
             </p>
           </div>
-          <div className="font-technical text-sm text-muted-foreground">
-            <p>Currently based in Seoul.</p>
-            <p>Open to select collaborations.</p>
+          <div className="font-technical text-sm leading-relaxed text-muted-foreground">
+            <p>서울에서 작업합니다.</p>
+            <p>선별된 협업을 환영합니다.</p>
           </div>
         </div>
       </section>
@@ -226,12 +226,12 @@ export default function Home() {
   );
 }
 
-/** YYYY-MM-DD → "MAR 22 '26" short editorial stamp. */
+/** YYYY-MM-DD → "2026.03.22" short date stamp. Korean-friendly. */
 function formatDate(iso: string): string {
   const d = new Date(iso + "T00:00:00Z");
   if (Number.isNaN(d.getTime())) return iso;
-  const month = d.toLocaleString("en-US", { month: "short", timeZone: "UTC" }).toUpperCase();
+  const y = d.getUTCFullYear();
+  const m = String(d.getUTCMonth() + 1).padStart(2, "0");
   const day = String(d.getUTCDate()).padStart(2, "0");
-  const year = String(d.getUTCFullYear()).slice(-2);
-  return `${month} ${day} '${year}`;
+  return `${y}.${m}.${day}`;
 }

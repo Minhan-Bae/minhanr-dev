@@ -6,19 +6,19 @@ import { ThemeSwitcher } from "@/components/theme-switcher";
 
 type NavLink = { href: string; label: string };
 
-// URL paths stay stable (SEO, inbound links). Labels carry the editorial
-// naming: /blog is displayed as "Writing".
+// URL paths stay stable (SEO, inbound links). Labels are Korean-first.
 const STATIC_NAV: NavLink[] = [
-  { href: "/work", label: "Work" },
-  { href: "/blog", label: "Writing" },
-  { href: "/about", label: "About" },
+  { href: "/work", label: "작업" },
+  { href: "/blog", label: "글" },
+  { href: "/about", label: "소개" },
 ];
 
 interface PublicHeaderProps {
   /**
    * Server-resolved auth state. Drives the trailing nav item:
-   * - true  → "Studio" (links to /dashboard, owner shortcut)
-   * - false → no extra item (visitors never see a login link on public surface)
+   * - true  → "스튜디오" (links directly to /dashboard)
+   * - false → "로그인"   (links to /login so the owner can sign in
+   *                      without typing the URL by hand)
    */
   isAuthenticated: boolean;
 }
@@ -26,21 +26,26 @@ interface PublicHeaderProps {
 export function PublicHeader({ isAuthenticated }: PublicHeaderProps) {
   const pathname = usePathname() ?? "/";
 
-  const navLinks: NavLink[] = isAuthenticated
-    ? [...STATIC_NAV, { href: "/dashboard", label: "Studio" }]
-    : STATIC_NAV;
+  // Always surface a way to reach the authenticated surface — without it
+  // signing in requires memorising /login. Labelled softly.
+  const trailing: NavLink = isAuthenticated
+    ? { href: "/dashboard", label: "스튜디오" }
+    : { href: "/login", label: "로그인" };
+
+  const navLinks: NavLink[] = [...STATIC_NAV, trailing];
 
   return (
     <header className="sticky top-0 z-30 glass font-technical">
       <div className="mx-auto flex h-16 max-w-[1440px] items-center justify-between px-6 sm:px-10">
-        {/* Wordmark — serif, always a link home */}
+        {/* Wordmark — serif, always a link home. Korean reads first,
+            Latin wordmark sits as a quiet subtitle. */}
         <Link
           href="/"
-          aria-label="Home"
+          aria-label="홈"
           className="group flex items-baseline gap-2 tap-scale"
         >
-          <span className="font-display text-2xl tracking-tight leading-none transition-colors group-hover:text-primary">
-            Minhan Bae
+          <span className="font-display text-xl sm:text-2xl tracking-tight leading-none transition-colors group-hover:text-primary">
+            배민한
           </span>
           <span className="hidden sm:inline text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
             minhanr.dev

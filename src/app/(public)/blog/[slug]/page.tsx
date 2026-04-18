@@ -61,14 +61,14 @@ function estimateReadingTime(html: string): number {
   return Math.max(1, Math.round(words / 200));
 }
 
-/** ISO YYYY-MM-DD → "Mar 22, 2026" — editorial long form */
+/** ISO YYYY-MM-DD → "2026년 3월 22일" — Korean long form */
 function formatLongDate(iso: string): string {
   const d = new Date(iso + "T00:00:00Z");
   if (Number.isNaN(d.getTime())) return iso;
-  return d.toLocaleDateString("en-US", {
+  return d.toLocaleDateString("ko-KR", {
+    year: "numeric",
     month: "long",
     day: "numeric",
-    year: "numeric",
     timeZone: "UTC",
   });
 }
@@ -101,27 +101,27 @@ export default async function BlogPostPage({
           className="font-technical inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] text-muted-foreground transition-colors hover:text-foreground"
         >
           <ArrowLeft className="h-3.5 w-3.5" strokeWidth={1.75} />
-          All writing
+          전체 글
         </Link>
 
         <div className="mx-auto mt-10 max-w-[900px] sm:mt-16">
           <p className="kicker mb-5">
             {primaryCategory ?? "Writing"} · {formatLongDate(post.date)} ·{" "}
-            {readingTime} min
+            {readingTime}분
           </p>
           <h1
-            className="font-display leading-[0.98] tracking-[-0.025em]"
+            className="font-display leading-[1.15] tracking-[-0.02em]"
             style={{ fontSize: "var(--font-size-h1)" }}
           >
             {post.title}
           </h1>
           {post.summary && (
-            <p className="mt-6 font-display italic text-xl leading-snug text-muted-foreground sm:text-2xl">
+            <p className="mt-6 font-display italic text-lg leading-snug text-muted-foreground sm:text-xl">
               {post.summary}
             </p>
           )}
           <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2 font-technical text-[12px] uppercase tracking-[0.14em] text-muted-foreground">
-            <span>By {post.author || "Minhan Bae"}</span>
+            <span>글 {post.author || "배민한"}</span>
             {post.tags.length > 0 && (
               <span className="flex gap-x-3">
                 {post.tags.slice(0, 4).map((t) => (
@@ -206,13 +206,13 @@ export default async function BlogPostPage({
                 className="h-4 w-4 transition-transform group-hover:-translate-x-0.5"
                 strokeWidth={1.5}
               />
-              All writing
+              전체 글
             </Link>
             <a
               href="/feed.xml"
               className="group font-technical inline-flex items-center gap-2 text-[13px] uppercase tracking-[0.16em] text-muted-foreground transition-colors hover:text-foreground"
             >
-              Subscribe via RSS
+              RSS 구독
               <ArrowUpRight
                 className="h-4 w-4 transition-all duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
                 strokeWidth={1.5}

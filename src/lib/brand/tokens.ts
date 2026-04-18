@@ -43,14 +43,21 @@ export const BRAND_TOKENS = {
  * heavy lifting.
  */
 export const BRAND_IDENTITY = {
-  /** The person behind the work */
-  person: "Minhan Bae",
+  /** The person behind the work — Korean primary */
+  person: "배민한",
+  /** Latin romanisation — used in OG image, metadata, bilingual headings */
+  personLatin: "Minhan Bae",
   /** Domain wordmark */
   domain: "minhanr.dev",
   /** Practice — short, shown under the wordmark */
   role: "AI · VFX · R&D",
+  /** Korean role descriptor */
+  roleKo: "인공지능·비주얼·연구 스튜디오",
 
-  /** One-line meta description / OG tagline */
+  /** One-line meta description / OG tagline (Korean primary) */
   manifesto:
+    "AI와 시각 시스템을 다루는 배민한의 작업과 글.",
+  /** English mirror — for OG channels / consumers that don't render Korean well */
+  manifestoEn:
     "Selected work in AI and visual systems by Minhan Bae.",
 } as const;

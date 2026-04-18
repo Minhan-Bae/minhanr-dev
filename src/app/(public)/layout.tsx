@@ -8,9 +8,6 @@ export default async function PublicLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // Server-side auth resolution drives the trailing nav item. Visitors
-  // (not authenticated) see no login link at all on public surfaces —
-  // /login is reachable directly if needed, but never advertised.
   const supabase = await createSupabaseServer();
   const {
     data: { user },
@@ -27,10 +24,13 @@ export default async function PublicLayout({
       <footer className="hairline-t mt-24 font-technical">
         <div className="mx-auto grid max-w-[1440px] gap-10 px-6 py-16 sm:grid-cols-[1fr_auto] sm:items-end sm:px-10">
           <div className="space-y-4">
-            <div className="font-display text-3xl leading-none tracking-tight">
+            <div className="font-display text-3xl leading-[1.15] tracking-tight">
               {BRAND_IDENTITY.person}
+              <span className="ml-2 text-base text-muted-foreground">
+                {BRAND_IDENTITY.personLatin}
+              </span>
             </div>
-            <p className="max-w-sm text-sm text-muted-foreground">
+            <p className="max-w-sm text-sm leading-relaxed text-muted-foreground">
               {BRAND_IDENTITY.manifesto}
             </p>
           </div>
@@ -40,24 +40,24 @@ export default async function PublicLayout({
               href="/work"
               className="transition-colors hover:text-foreground"
             >
-              Work
+              작업
             </Link>
             <Link
               href="/blog"
               className="transition-colors hover:text-foreground"
             >
-              Writing
+              글
             </Link>
             <Link
               href="/about"
               className="transition-colors hover:text-foreground"
             >
-              About
+              소개
             </Link>
             <a
               href="/feed.xml"
               className="transition-colors hover:text-foreground"
-              aria-label="RSS feed"
+              aria-label="RSS 피드"
             >
               RSS
             </a>
@@ -75,7 +75,7 @@ export default async function PublicLayout({
 
         <div className="hairline-t">
           <div className="mx-auto flex max-w-[1440px] items-center justify-between px-6 py-5 text-[11px] uppercase tracking-[0.2em] text-muted-foreground sm:px-10">
-            <span>© {year} {BRAND_IDENTITY.person}</span>
+            <span>© {year} {BRAND_IDENTITY.personLatin}</span>
             <span>{BRAND_IDENTITY.domain}</span>
           </div>
         </div>

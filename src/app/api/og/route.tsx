@@ -95,7 +95,7 @@ function renderSiteOG() {
               color: BRAND_TOKENS.foreground,
             }}
           >
-            {BRAND_IDENTITY.person}
+            {BRAND_IDENTITY.personLatin}
           </div>
           <div
             style={{
@@ -121,7 +121,7 @@ function renderSiteOG() {
             maxWidth: 820,
           }}
         >
-          {BRAND_IDENTITY.manifesto}
+          {BRAND_IDENTITY.manifestoEn}
         </div>
       </div>
     ),
@@ -216,7 +216,7 @@ function renderNoteOG({
             color: BRAND_TOKENS.mutedForeground,
           }}
         >
-          <span>{BRAND_IDENTITY.person}</span>
+          <span>{BRAND_IDENTITY.personLatin}</span>
           {date && (
             <span style={{ fontFamily: "monospace", letterSpacing: "0.04em" }}>
               {date}

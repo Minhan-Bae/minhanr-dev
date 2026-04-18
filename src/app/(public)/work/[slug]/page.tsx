@@ -57,7 +57,7 @@ export default async function CaseStudyPage({
           className="font-technical inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] text-muted-foreground transition-colors hover:text-foreground"
         >
           <ArrowLeft className="h-3.5 w-3.5" strokeWidth={1.75} />
-          All work
+          작업 전체
         </Link>
 
         <header className="mt-12 grid gap-8 sm:mt-16 sm:grid-cols-12 sm:gap-12">
@@ -66,12 +66,12 @@ export default async function CaseStudyPage({
               {item.discipline} · {item.year}
             </p>
             <h1
-              className="font-display leading-[0.95] tracking-[-0.03em]"
+              className="font-display leading-[1.1] tracking-[-0.02em]"
               style={{ fontSize: "var(--font-size-display)" }}
             >
               {item.title}
             </h1>
-            <p className="mt-6 font-display italic text-xl text-muted-foreground sm:text-2xl">
+            <p className="mt-6 font-display italic text-lg leading-snug text-muted-foreground sm:text-xl">
               {item.subject}
             </p>
           </div>
@@ -94,7 +94,7 @@ export default async function CaseStudyPage({
               {item.role && (
                 <div className="hairline-b flex items-baseline justify-between gap-4 py-3">
                   <dt className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-                    Role
+                    역할
                   </dt>
                   <dd className="text-[13px] text-foreground text-right">
                     {item.role}
@@ -150,7 +150,7 @@ export default async function CaseStudyPage({
             href={`/work/${nextItem.slug}`}
             className="group block"
           >
-            <p className="kicker mb-3">Next</p>
+            <p className="kicker mb-3">다음 · Next</p>
             <div className="flex items-baseline justify-between gap-6">
               <h2
                 className="font-display tracking-[-0.02em] transition-colors group-hover:text-primary"

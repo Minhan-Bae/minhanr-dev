@@ -8,9 +8,9 @@ type Group = { key: string; label: string; posts: BlogPostMeta[] };
 
 const FOURTEEN_DAYS_MS = 14 * 86400000;
 const ONE_YEAR_MS = 365 * 86400000;
-const MONTH_FORMATTER = new Intl.DateTimeFormat("en-US", {
-  month: "long",
+const MONTH_FORMATTER = new Intl.DateTimeFormat("ko-KR", {
   year: "numeric",
+  month: "long",
 });
 
 function groupPostsByTime(posts: BlogPostMeta[]): Group[] {
@@ -47,13 +47,13 @@ function groupPostsByTime(posts: BlogPostMeta[]): Group[] {
 
   const groups: Group[] = [];
   if (recent.length > 0) {
-    groups.push({ key: "recent", label: "Recent", posts: recent });
+    groups.push({ key: "recent", label: "최근", posts: recent });
   }
   for (const bucket of monthBuckets.values()) {
     groups.push(bucket);
   }
   if (older.length > 0) {
-    groups.push({ key: "older", label: "Older", posts: older });
+    groups.push({ key: "older", label: "이전", posts: older });
   }
   return groups;
 }
@@ -123,7 +123,7 @@ export function BlogList({ posts }: { posts: BlogPostMeta[] }) {
         <div className="relative">
           <input
             type="search"
-            placeholder={`Search ${posts.length} pieces`}
+            placeholder={`${posts.length}편의 글 검색`}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             className="w-full border-b border-[var(--hairline)] bg-transparent pb-3 pt-1 text-base text-foreground placeholder:text-muted-foreground/60 focus:border-primary focus:outline-none transition-colors"
@@ -131,16 +131,16 @@ export function BlogList({ posts }: { posts: BlogPostMeta[] }) {
           {query && (
             <button
               onClick={() => setQuery("")}
-              aria-label="Clear search"
+              aria-label="검색어 지우기"
               className="absolute right-0 top-1 text-[11px] uppercase tracking-[0.16em] text-muted-foreground hover:text-foreground"
             >
-              Clear
+              지우기
             </button>
           )}
         </div>
 
         <div className="flex flex-wrap items-baseline gap-x-6 gap-y-3 text-[11px] uppercase tracking-[0.16em]">
-          <span className="text-muted-foreground/70">Category</span>
+          <span className="text-muted-foreground/70">카테고리</span>
           {categories.map((cat) => (
             <button
               key={cat}
@@ -161,7 +161,7 @@ export function BlogList({ posts }: { posts: BlogPostMeta[] }) {
         {topTags.length > 0 && (
           <div className="flex flex-wrap items-baseline gap-x-4 gap-y-2 text-[11px] tracking-[0.08em]">
             <span className="uppercase text-muted-foreground/70 tracking-[0.16em]">
-              Tags
+              태그
             </span>
             {topTags.map((tag) => (
               <button
@@ -190,7 +190,7 @@ export function BlogList({ posts }: { posts: BlogPostMeta[] }) {
               onClick={clearFilters}
               className="link-underline hover:text-foreground"
             >
-              Reset
+              초기화
             </button>
           </div>
         )}
@@ -207,7 +207,7 @@ export function BlogList({ posts }: { posts: BlogPostMeta[] }) {
             ))}
             {filtered.length === 0 && (
               <li className="py-16 text-center text-sm text-muted-foreground">
-                No matching pieces.
+                해당하는 글이 없습니다.
               </li>
             )}
           </ul>
@@ -244,7 +244,7 @@ export function BlogList({ posts }: { posts: BlogPostMeta[] }) {
 
             {posts.length === 0 && (
               <p className="py-16 text-center text-sm text-muted-foreground">
-                No pieces published yet.
+                아직 발행된 글이 없습니다.
               </p>
             )}
           </div>

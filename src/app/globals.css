@@ -17,12 +17,15 @@
   --color-foreground: var(--foreground);
 
   /* ── Font families ─────────────────────────────────────────────── */
-  --font-sans: var(--font-geist-sans);
+  /* Hangul KR faces are stacked BEFORE the Latin faces on the same
+     font-family declaration. Browsers resolve glyphs left-to-right, so
+     Hangul code-points render in Noto Sans/Serif KR while Latin code-
+     points fall through to Geist / Instrument Serif. Result: proper
+     Korean typography without forcing lang-scoped CSS. */
+  --font-sans: var(--font-noto-sans-kr), var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-  --font-display: var(--font-instrument-serif);
-  /* Headings default to the display serif. Override with `font-sans`
-     on anything technical (product copy, metadata). */
-  --font-heading: var(--font-instrument-serif);
+  --font-display: var(--font-instrument-serif), var(--font-noto-serif-kr);
+  --font-heading: var(--font-instrument-serif), var(--font-noto-serif-kr);
 
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
@@ -61,15 +64,16 @@
   --radius-2xl: calc(var(--radius) * 2);
 
   /* ── Editorial typography scale ────────────────────────────────
-     Fluid clamps so headings breathe on wide cinematic viewports
-     without blowing up on mobile. The display face (Instrument
-     Serif) is light and benefits from a little optical oversize. */
-  --font-size-display: clamp(3rem, 8vw, 6rem);         /* hero */
-  --font-size-h1:      clamp(2.25rem, 5vw, 3.75rem);   /* page title */
-  --font-size-h2:      clamp(1.875rem, 3.5vw, 2.625rem); /* section */
-  --font-size-h3:      1.5rem;                         /* card / aside */
-  --font-size-h4:      1.125rem;
-  --font-size-body-lg: 1.125rem;                       /* lede */
+     Rescaled for Korean + English mixed use. Hangul glyphs occupy more
+     optical space than Latin at the same point size, so the whole scale
+     is pulled down compared to a Latin-only system. Fluid clamps let
+     headings breathe on wide viewports without overflowing on mobile. */
+  --font-size-display: clamp(2rem, 5vw, 4rem);         /* hero */
+  --font-size-h1:      clamp(1.75rem, 3.5vw, 2.75rem); /* page title */
+  --font-size-h2:      clamp(1.375rem, 2.5vw, 2rem);   /* section */
+  --font-size-h3:      1.25rem;                        /* card / aside */
+  --font-size-h4:      1.0625rem;
+  --font-size-body-lg: 1.0625rem;                      /* lede */
   --font-size-body:    1rem;
   --font-size-micro:   0.8125rem;                      /* meta / mono */
 
@@ -255,7 +259,9 @@
     @apply border-border outline-ring/50;
   }
   html {
-    font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+    /* Body default: Noto Sans KR for Hangul → Geist for Latin. */
+    font-family: var(--font-noto-sans-kr), var(--font-geist-sans),
+                 ui-sans-serif, system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
@@ -264,22 +270,35 @@
     @apply bg-background text-foreground;
     font-feature-settings: "ss01", "cv02", "cv11";
   }
-  /* Headings default to the editorial serif */
+  /* Headings default to the editorial serif. Latin renders in
+     Instrument Serif, Hangul in Noto Serif KR (glyph fallback). */
   h1, h2, h3, h4 {
-    font-family: var(--font-instrument-serif), ui-serif, Georgia, serif;
-    font-weight: 400;              /* Instrument Serif reads heavy at 400 */
+    font-family: var(--font-instrument-serif), var(--font-noto-serif-kr),
+                 ui-serif, Georgia, serif;
+    font-weight: 400;
     letter-spacing: -0.015em;
-    line-height: 1.05;
+    /* 1.05 is correct for Latin display type but too tight for Hangul
+       which has taller glyphs. 1.15 gives Korean headings breathing room
+       while still feeling editorial in English. */
+    line-height: 1.15;
+    /* Hangul has no native word-break opportunities at spaces the same
+       way Latin does; `keep-all` prevents awkward mid-word breaks. */
+    word-break: keep-all;
     text-wrap: balance;
   }
   p {
+    /* Same rationale for Korean body paragraphs. */
+    word-break: keep-all;
     text-wrap: pretty;
   }
   /* Opt-out: any node inside `.font-technical` flips to the sans stack
-     so technical copy (metadata, code, CTAs) doesn't read as an essay. */
+     so technical copy (metadata, code, CTAs) doesn't read as an essay.
+     Korean fallback kept in the chain. */
   .font-technical, .font-technical * {
-    font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+    font-family: var(--font-noto-sans-kr), var(--font-geist-sans),
+                 ui-sans-serif, system-ui, sans-serif;
     letter-spacing: normal;
+    word-break: keep-all;
   }
   ::selection {
     background: var(--primary);
@@ -290,8 +309,8 @@
 /* ══════════════════════════════════════════════════════════════════
    Typographic utilities
    ────────────────────────────────────────────────────────────────── */
-.font-display { font-family: var(--font-instrument-serif), ui-serif, Georgia, serif; }
-.font-sans    { font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif; }
+.font-display { font-family: var(--font-instrument-serif), var(--font-noto-serif-kr), ui-serif, Georgia, serif; }
+.font-sans    { font-family: var(--font-noto-sans-kr), var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif; }
 .font-mono    { font-family: var(--font-geist-mono), ui-monospace, SFMono-Regular, monospace; }
 
 /* Small caps label — editorial section kicker */

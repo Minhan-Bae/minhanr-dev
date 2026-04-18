@@ -65,10 +65,10 @@ export function RelatedPosts({
           className="font-display tracking-[-0.015em]"
           style={{ fontSize: "var(--font-size-h3)" }}
         >
-          Keep reading
+          이어서 읽기
         </h2>
         <span className="font-technical text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-          Related
+          관련
         </span>
       </header>
 

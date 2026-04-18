@@ -5,8 +5,8 @@ import { getAllWork } from "@/lib/work";
 import { WorkCover } from "@/components/work-cover";
 
 export const metadata: Metadata = {
-  title: "Work",
-  description: "Selected case studies by Minhan Bae — AI systems, VFX R&D, editorial engineering.",
+  title: "작업",
+  description: "배민한의 선별 작업 — AI 시스템, VFX R&D, 에디토리얼 엔지니어링.",
   openGraph: {
     title: "Work — minhanr.dev",
     description: "Selected case studies — AI systems, VFX R&D, editorial engineering.",
@@ -25,16 +25,16 @@ export default function WorkIndex() {
           className="absolute left-6 top-20 h-20 w-[3px] bg-primary sm:left-10 sm:top-28"
         />
         <div className="ml-8 sm:ml-12">
-          <p className="kicker mb-5">Work</p>
+          <p className="kicker mb-5">작업 · Work</p>
           <h1
-            className="font-display leading-[0.95] tracking-[-0.03em]"
+            className="font-display leading-[1.1] tracking-[-0.02em]"
             style={{ fontSize: "var(--font-size-h1)" }}
           >
-            Case studies.
+            케이스 스터디.
           </h1>
-          <p className="mt-6 max-w-xl text-base text-muted-foreground sm:text-lg">
-            Selected projects, ordered the way I'd walk a visitor through them —
-            not by date, not by size, but by how they fit together.
+          <p className="mt-6 max-w-xl text-[15px] leading-[1.7] text-muted-foreground sm:text-base">
+            날짜나 규모가 아니라, 방문자와 함께 걸어가며 보여드리고 싶은
+            순서로 정렬했습니다. 조각들이 어떻게 맞물리는지가 먼저 읽힙니다.
           </p>
         </div>
       </section>
@@ -87,7 +87,7 @@ export default function WorkIndex() {
                     {item.summary}
                   </p>
                   <span className="font-technical mt-8 inline-flex items-center gap-2 text-[13px] uppercase tracking-[0.14em] text-foreground/80">
-                    Read case study
+                    케이스 보기
                     <ArrowUpRight
                       className="h-4 w-4 transition-all duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-primary"
                       strokeWidth={1.5}
