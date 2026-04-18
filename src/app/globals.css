@@ -580,62 +580,14 @@
 }
 
 /* ══════════════════════════════════════════════════════════════════
-   Rain-on-glass droplets — see src/components/rain-effect.tsx.
-   Each drop is an absolutely-positioned <span> with a real
-   `backdrop-filter` lens (blur + saturate), an inset rim to sell the
-   glass-bead depth, and a top-left specular glint. A subset of drops
-   is marked `.rain-drop-fall` and slides down the viewport with a
-   CSS transform — no JS per-frame work.
+   Rain-on-glass droplets — the effect itself now lives in
+   src/components/rain-effect.tsx as a WebGL renderer ported from
+   codrops/RainEffect. No CSS-side drop styling is needed; the canvas
+   simulation handles everything. SiteBackground also no longer
+   pre-blurs its image — the shader composes a sharp-through-drops /
+   blurred-everywhere-else scene from two small offscreen textures it
+   builds itself.
    ────────────────────────────────────────────────────────────────── */
-@keyframes rain-bead-in {
-  0%   { opacity: 0; transform: translate(-50%, -50%) scale(0); }
-  60%  { opacity: 1; transform: translate(-50%, -50%) scale(1.05); }
-  100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-}
-@keyframes rain-fall {
-  /* The drop beads up, pauses, then slides — ending off-screen. The
-     translate is applied on top of the -50%/-50% centering, so we
-     overshoot `-50% + 120vh` vertically. */
-  0%   { opacity: 0; transform: translate(-50%, -50%) scale(0); }
-  10%  { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-  25%  { opacity: 1; transform: translate(-50%, calc(-50% + 0px))   scale(1,  1.02); }
-  55%  { opacity: 1; transform: translate(-50%, calc(-50% + 40vh))  scale(0.95, 1.18); }
-  92%  { opacity: 0.8; transform: translate(-50%, calc(-50% + 110vh)) scale(0.7, 1.25); }
-  100% { opacity: 0;   transform: translate(-50%, calc(-50% + 130vh)) scale(0.5, 1.4); }
-}
-.rain-drop {
-  position: absolute;
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-  /* The lens — each drop paints the un-blurred bg at its own
-     viewport position via `background-attachment: fixed`. Because
-     the site background image is rendered with blur (see
-     site-background.tsx), the drop becomes a clear magnifier cut
-     into a foggy window. This is the codrops trick, minus the
-     WebGL. */
-  background-image: url("/bg.jpg");
-  background-attachment: fixed;
-  background-size: cover;
-  background-position: center;
-  /* Glass body — white rim top-left, dark rim bottom-right. The
-     combination of the inset rims + the moving lens gives the drop
-     dimensional weight. */
-  box-shadow:
-    inset 2px 2px 4px rgba(255, 255, 255, 0.32),
-    inset -2px -3px 6px rgba(0, 0, 0, 0.35),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.18),
-    0 2px 4px rgba(0, 0, 0, 0.3);
-  /* Gentle refraction — drops are slightly more saturated / brighter
-     than the fog, matching how real water acts as a contrast lens. */
-  filter: saturate(1.2) brightness(1.08);
-  animation: rain-bead-in 0.9s var(--ease-out) both;
-  will-change: transform, opacity;
-}
-.rain-drop-fall {
-  animation-name: rain-fall;
-  animation-timing-function: cubic-bezier(0.5, 0, 0.75, 0);
-  animation-iteration-count: infinite;
-}
 
 /* ══════════════════════════════════════════════════════════════════
    Hero typewriter — letter-by-letter drop-in followed by a blinking

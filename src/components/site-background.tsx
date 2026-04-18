@@ -1,19 +1,15 @@
 import Image from "next/image";
 
 /**
- * SiteBackground — the full-bleed generative image sitting behind every
- * public page.
+ * SiteBackground — full-bleed bg.jpg sitting behind every public page.
  *
- * Works together with RainEffect: the image here is rendered with a
- * soft `filter: blur(…)` so that each rain drop — which uses
- * `background-attachment: fixed` on the same `bg.jpg` — can act as a
- * clear lens over a blurred window. That's the codrops/RainEffect
- * trick: un-blur through the drops, not blur inside them.
+ * Acts as the WebGL-fallback layer for RainEffect: when the rain
+ * renderer's WebGL context initializes it paints an opaque canvas
+ * over this (so the user sees the rain scene instead), but if WebGL
+ * fails or hasn't loaded yet, this image is what they see.
  *
- * Layers (back → front):
- *   1. Blurred <Image> with `ken-burns-drift` animation
- *   2. Gradient overlay — transparent at top, solid at bottom — kept
- *      muted enough that the rain lenses still have something to look at
+ * The rain renderer applies its own blur internally when building
+ * its offscreen `textureBg`, so no CSS blur is needed here.
  *
  * Placed inside `(public)/layout.tsx` so the studio surfaces
  * (/dashboard and friends) stay on solid colour.
@@ -31,13 +27,12 @@ export function SiteBackground() {
           fill
           priority
           sizes="100vw"
-          className="object-cover opacity-[0.55]"
-          style={{ filter: "blur(6px) saturate(0.9)" }}
+          className="object-cover opacity-[0.22]"
         />
       </div>
-      {/* Softer legibility gradient — rain lenses need something to
-          magnify, so we back off the previous near-opaque bottom fill. */}
-      <div className="absolute inset-0 bg-gradient-to-b from-background/20 via-background/35 to-background/55" />
+      {/* Legibility gradient — stronger at the fold so fallback text
+          stays crisp if the rain canvas never initializes. */}
+      <div className="absolute inset-0 bg-gradient-to-b from-background/30 via-background/65 to-background" />
     </div>
   );
 }
