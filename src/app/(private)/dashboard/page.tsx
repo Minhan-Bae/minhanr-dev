@@ -11,6 +11,7 @@ import { StatKpiCard } from "@/components/stat-kpi-card";
 import { DashboardCalendar, type CalendarEvent, type WeekCommitment } from "@/components/dashboard-calendar";
 import { VaultUnreachablePrivate } from "@/components/vault-unreachable";
 import { ActiveProjectsCard } from "@/components/dashboard/active-projects-card";
+import { QuickCapture } from "@/components/dashboard/quick-capture";
 import { FileText, Send, Inbox, Layers } from "lucide-react";
 import { aggregate, getCachedVaultIndex, KB_HUB_HIDDEN_STATUSES, listNotes } from "@/lib/vault-index";
 import { vaultPathToHref } from "@/lib/vault-note";
@@ -202,6 +203,9 @@ async function DashboardContent() {
           showWeeklyReviewBanner={showWeeklyReviewBanner}
         />
       </div>
+
+      {/* Quick Capture — Inbox 신규 노트 즉시 저장 (Server Action + useOptimistic) */}
+      <QuickCapture />
 
       {/* Bento row 1 — asymmetric: featured projects (7/12) + compact recommendation (5/12) */}
       <div className="grid grid-cols-12 gap-4">

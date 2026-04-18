@@ -3,17 +3,18 @@
 /**
  * Vault Server Actions — React 19 + Next.js 16 패턴.
  *
- * 기존 /api/vault-sync/transition POST와 동일 동작이지만:
+ * 기존 /api/vault-sync/* POST와 동일 동작이지만:
  *   - HTTP 왕복 제거 (서버 함수 직접 호출)
  *   - useOptimistic / useActionState와 자연스럽게 결합
  *   - 직렬화/역직렬화 오버헤드 제거
  *
- * REST 엔드포인트(/api/vault-sync/transition)는 외부 도구·webhook용으로 유지.
+ * REST 엔드포인트(/api/vault-sync/*)는 외부 도구·webhook용으로 유지.
  */
 
 import { revalidatePath } from "next/cache";
 import { requireUser } from "@/lib/api-auth";
 import { updateFrontmatterField } from "@/lib/vault-write";
+import { commitToGitHub } from "@/lib/github";
 import { nowInKST } from "@/lib/time";
 
 export type VaultAction = "pause" | "complete" | "archive";
@@ -111,3 +112,66 @@ export async function transitionNoteAction(
 
   return { ok: true, path, action };
 }
+
+// ─────────────────────────────────────────────────────────────────────
+// Quick Capture — 000_Inbox 신규 노트 생성 (useActionState 호환)
+// ─────────────────────────────────────────────────────────────────────
+
+export interface QuickCaptureState {
+  ok: boolean;
+  message: string;
+  path?: string;
+  ts?: number;
+}
+
+export const initialQuickCaptureState: QuickCaptureState = {
+  ok: false,
+  message: "",
+};
+
+export async function createInboxNoteAction(
+  _prev: QuickCaptureState,
+  formData: FormData,
+): Promise<QuickCaptureState> {
+  const { response } = await requireUser();
+  if (response) return { ok: false, message: "unauthorized", ts: Date.now() };
+
+  const text = ((formData.get("text") as string) || "").trim();
+  if (!text) return { ok: false, message: "내용을 입력하세요", ts: Date.now() };
+
+  const kst = nowInKST();
+  const dateStr = kst.toISOString().slice(0, 10);
+  const ts = kst.toISOString().replace(/[:.]/g, "-").slice(0, 19);
+  const slug = text
+    .slice(0, 30)
+    .replace(/[^a-zA-Z0-9가-힣\s-]/g, "")
+    .replace(/\s+/g, "-");
+  const fileName = `dashboard_${ts}_${slug}`.slice(0, 80);
+  const path = `000_Inbox/${fileName}.md`;
+
+  const content = `---
+source: dashboard
+status: inbox
+created: ${dateStr}
+tags: [Quick-Capture]
+---
+
+${text}
+`;
+
+  const result = await commitToGitHub(
+    path,
+    content,
+    `inbox: dashboard quick capture`,
+  );
+
+  if (!result.ok) {
+    return { ok: false, message: result.error || "저장 실패", ts: Date.now() };
+  }
+
+  revalidatePath("/dashboard");
+  revalidatePath("/notes");
+  revalidatePath("/");
+  return { ok: true, message: "✓ Inbox에 저장됨", path, ts: Date.now() };
+}
+
