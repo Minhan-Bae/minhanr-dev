@@ -22,19 +22,28 @@ export default function WorkIndex() {
       <section className="relative mx-auto w-full max-w-[1440px] px-6 pt-20 pb-16 sm:px-10 sm:pt-28 sm:pb-20">
         <div
           aria-hidden
-          className="absolute left-6 top-20 h-20 w-[3px] bg-primary sm:left-10 sm:top-28"
+          className="animate-fade-in absolute left-6 top-20 h-20 w-[3px] bg-primary sm:left-10 sm:top-28"
+          style={{ animationDelay: "360ms" }}
         />
         <div className="ml-8 sm:ml-12">
-          <p className="kicker mb-5">작업 · Work</p>
-          <h1
-            className="font-display leading-[1.1] tracking-[-0.02em]"
-            style={{ fontSize: "var(--font-size-h1)" }}
+          <p
+            className="kicker mb-5 animate-fade-up"
+            style={{ animationDelay: "0ms" }}
           >
-            케이스 스터디.
+            Work · 작업
+          </p>
+          <h1
+            className="font-display leading-[1.1] tracking-[-0.02em] animate-fade-up"
+            style={{ fontSize: "var(--font-size-h1)", animationDelay: "120ms" }}
+          >
+            Case studies.
           </h1>
-          <p className="mt-6 max-w-xl text-[15px] leading-[1.7] text-muted-foreground sm:text-base">
-            날짜나 규모가 아니라, 방문자와 함께 걸어가며 보여드리고 싶은
-            순서로 정렬했습니다. 조각들이 어떻게 맞물리는지가 먼저 읽힙니다.
+          <p
+            className="mt-6 max-w-xl text-[15px] leading-[1.7] text-muted-foreground sm:text-base animate-fade-up"
+            style={{ animationDelay: "240ms" }}
+          >
+            Ordered the way I'd walk a visitor through them — not by date,
+            not by scale. How the pieces interlock is what reads first.
           </p>
         </div>
       </section>
@@ -42,7 +51,7 @@ export default function WorkIndex() {
       <section className="hairline-t mx-auto w-full max-w-[1440px] px-6 py-16 sm:px-10 sm:py-24">
         <ul className="flex flex-col gap-20 sm:gap-32">
           {all.map((item, i) => (
-            <li key={item.slug}>
+            <li key={item.slug} className="reveal-up">
               <Link
                 href={`/work/${item.slug}`}
                 className="group grid items-start gap-8 sm:grid-cols-12 sm:gap-12"
@@ -87,7 +96,7 @@ export default function WorkIndex() {
                     {item.summary}
                   </p>
                   <span className="font-technical mt-8 inline-flex items-center gap-2 text-[13px] uppercase tracking-[0.14em] text-foreground/80">
-                    케이스 보기
+                    Read case
                     <ArrowUpRight
                       className="h-4 w-4 transition-all duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-primary"
                       strokeWidth={1.5}

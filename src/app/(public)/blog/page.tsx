@@ -31,26 +31,39 @@ export default function WritingIndex() {
       <section className="relative mx-auto w-full max-w-[1440px] px-6 pt-20 pb-12 sm:px-10 sm:pt-28 sm:pb-16">
         <div
           aria-hidden
-          className="absolute left-6 top-20 h-20 w-[3px] bg-primary sm:left-10 sm:top-28"
+          className="animate-fade-in absolute left-6 top-20 h-20 w-[3px] bg-primary sm:left-10 sm:top-28"
+          style={{ animationDelay: "360ms" }}
         />
         <div className="ml-8 sm:ml-12">
-          <p className="kicker mb-5">글 · Writing</p>
-          <h1
-            className="font-display leading-[1.1] tracking-[-0.02em]"
-            style={{ fontSize: "var(--font-size-h1)" }}
+          <p
+            className="kicker mb-5 animate-fade-up"
+            style={{ animationDelay: "0ms" }}
           >
-            스튜디오의 메모.
+            Writing · 글
+          </p>
+          <h1
+            className="font-display leading-[1.1] tracking-[-0.02em] animate-fade-up"
+            style={{ fontSize: "var(--font-size-h1)", animationDelay: "120ms" }}
+          >
+            Notes from the studio.
           </h1>
-          <p className="mt-6 max-w-xl text-[15px] leading-[1.7] text-muted-foreground sm:text-base">
-            AI 시스템, VFX 파이프라인, 그리고 그 사이에 놓이는 도구에 대한 글{" "}
-            <span className="font-technical tabular-nums">{posts.length}</span>편.
+          <p
+            className="mt-6 max-w-xl text-[15px] leading-[1.7] text-muted-foreground sm:text-base animate-fade-up"
+            style={{ animationDelay: "240ms" }}
+          >
+            Essays on AI systems, VFX pipelines, and the tools that sit
+            between them —{" "}
+            <span className="font-technical tabular-nums text-foreground">
+              {posts.length}
+            </span>{" "}
+            pieces.
           </p>
         </div>
       </section>
 
       {/* Notes map — relocated from the home (v3). It's an index over
           the writing, not a self-introduction, so it lives here. */}
-      <section className="hairline-t mx-auto w-full max-w-[1440px] px-6 py-12 sm:px-10 sm:py-16">
+      <section className="hairline-t mx-auto w-full max-w-[1440px] px-6 py-12 sm:px-10 sm:py-16 reveal-up">
         <header className="mb-6 flex flex-col gap-3 sm:mb-10 sm:flex-row sm:items-baseline sm:justify-between">
           <div>
             <p className="kicker mb-3">Notes map</p>
@@ -70,7 +83,7 @@ export default function WritingIndex() {
         <NotesGraph posts={posts} />
       </section>
 
-      <section className="hairline-t mx-auto w-full max-w-[1440px] space-y-8 px-6 py-12 sm:px-10 sm:py-16">
+      <section className="hairline-t mx-auto w-full max-w-[1440px] space-y-8 px-6 py-12 sm:px-10 sm:py-16 reveal-up">
         <BlogList posts={posts} />
       </section>
     </>

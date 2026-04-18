@@ -54,30 +54,40 @@ export default async function CaseStudyPage({
       <section className="relative mx-auto w-full max-w-[1440px] px-6 pt-12 sm:px-10 sm:pt-16">
         <Link
           href="/work"
-          className="font-technical inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] text-muted-foreground transition-colors hover:text-foreground"
+          className="font-technical inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] text-muted-foreground transition-colors hover:text-foreground animate-fade-up"
+          style={{ animationDelay: "0ms" }}
         >
           <ArrowLeft className="h-3.5 w-3.5" strokeWidth={1.75} />
-          작업 전체
+          All work
         </Link>
 
         <header className="mt-12 grid gap-8 sm:mt-16 sm:grid-cols-12 sm:gap-12">
           <div className="sm:col-span-8">
-            <p className="kicker mb-4">
+            <p
+              className="kicker mb-4 animate-fade-up"
+              style={{ animationDelay: "80ms" }}
+            >
               {item.discipline} · {item.year}
             </p>
             <h1
-              className="font-display leading-[1.1] tracking-[-0.02em]"
-              style={{ fontSize: "var(--font-size-display)" }}
+              className="font-display leading-[1.1] tracking-[-0.02em] animate-fade-up"
+              style={{ fontSize: "var(--font-size-display)", animationDelay: "180ms" }}
             >
               {item.title}
             </h1>
-            <p className="mt-6 font-display italic text-lg leading-snug text-muted-foreground sm:text-xl">
+            <p
+              className="mt-6 font-display italic text-lg leading-snug text-muted-foreground sm:text-xl animate-fade-up"
+              style={{ animationDelay: "300ms" }}
+            >
               {item.subject}
             </p>
           </div>
 
           {item.facts && (
-            <dl className="font-technical sm:col-span-4 sm:pt-2">
+            <dl
+              className="font-technical sm:col-span-4 sm:pt-2 animate-fade-up"
+              style={{ animationDelay: "420ms" }}
+            >
               {item.facts.map((f) => (
                 <div
                   key={f.label}
@@ -94,7 +104,7 @@ export default async function CaseStudyPage({
               {item.role && (
                 <div className="hairline-b flex items-baseline justify-between gap-4 py-3">
                   <dt className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-                    역할
+                    Role
                   </dt>
                   <dd className="text-[13px] text-foreground text-right">
                     {item.role}
@@ -107,7 +117,10 @@ export default async function CaseStudyPage({
       </section>
 
       {/* Cover image — edge-to-edge */}
-      <section className="mx-auto mt-16 w-full max-w-[1440px] px-6 sm:mt-24 sm:px-10">
+      <section
+        className="mx-auto mt-16 w-full max-w-[1440px] px-6 sm:mt-24 sm:px-10 animate-fade-up"
+        style={{ animationDelay: "540ms" }}
+      >
         <WorkCover
           src={item.coverImage}
           alt={item.coverAlt ?? item.title}
@@ -121,12 +134,12 @@ export default async function CaseStudyPage({
 
       {/* ─── Body ─── */}
       <section className="mx-auto mt-20 mb-24 w-full max-w-[900px] px-6 sm:mt-32 sm:mb-32 sm:px-10">
-        <div className="drop-cap text-lg leading-[1.7] text-foreground/90 sm:text-xl">
+        <div className="drop-cap text-lg leading-[1.7] text-foreground/90 sm:text-xl reveal-up">
           {item.body}
         </div>
 
         {item.link && (
-          <div className="mt-16 hairline-t pt-10">
+          <div className="mt-16 hairline-t pt-10 reveal-up">
             <a
               href={item.link.href}
               target="_blank"
@@ -145,12 +158,12 @@ export default async function CaseStudyPage({
 
       {/* ─── Next ─── */}
       {nextItem && nextItem.slug !== item.slug && (
-        <section className="hairline-t mx-auto w-full max-w-[1440px] px-6 py-16 sm:px-10 sm:py-24">
+        <section className="hairline-t mx-auto w-full max-w-[1440px] px-6 py-16 sm:px-10 sm:py-24 reveal-up">
           <Link
             href={`/work/${nextItem.slug}`}
             className="group block"
           >
-            <p className="kicker mb-3">다음 · Next</p>
+            <p className="kicker mb-3">Next</p>
             <div className="flex items-baseline justify-between gap-6">
               <h2
                 className="font-display tracking-[-0.02em] transition-colors group-hover:text-primary"
