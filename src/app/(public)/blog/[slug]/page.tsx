@@ -7,6 +7,7 @@ import {
   getAllPosts,
   extractHeadings,
 } from "@/lib/blog";
+import { getBacklinks } from "@/lib/blog-backlinks";
 import { ReadingProgress } from "@/components/reading-progress";
 import { RelatedPosts } from "@/components/related-posts";
 import { TableOfContents } from "@/components/toc";
@@ -89,6 +90,7 @@ export default async function BlogPostPage({
   const readingTime = estimateReadingTime(post.content);
   const headings = extractHeadings(post.content);
   const allPosts = getAllPosts();
+  const backlinks = getBacklinks(post.slug);
   const primaryCategory = post.categories[0];
 
   return (
@@ -190,6 +192,49 @@ export default async function BlogPostPage({
           </aside>
         </div>
       </section>
+
+      {/* ─── Backlinks ─────────────────────────────────────────────── */}
+      {backlinks.length > 0 && (
+        <section className="hairline-t mx-auto w-full max-w-[1440px] px-6 py-16 sm:px-10 sm:py-20">
+          <div className="mx-auto max-w-[900px]">
+            <header className="mb-6 flex items-baseline justify-between hairline-b pb-3">
+              <h2
+                className="font-display tracking-[-0.015em]"
+                style={{ fontSize: "var(--font-size-h3)" }}
+              >
+                이 글을 참조하는 글
+              </h2>
+              <span className="font-technical text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+                Backlinks · {backlinks.length}
+              </span>
+            </header>
+            <ul className="divide-y divide-[var(--hairline)]">
+              {backlinks.map((b) => (
+                <li key={b.slug}>
+                  <Link
+                    href={`/blog/${b.slug}`}
+                    className="group grid grid-cols-[auto_1fr_auto] items-baseline gap-4 py-5 transition-colors hover:bg-[var(--surface-1)] sm:grid-cols-[110px_1fr_auto] sm:gap-6"
+                  >
+                    <time className="font-technical text-[11px] uppercase tracking-[0.16em] text-muted-foreground tabular-nums">
+                      {b.date}
+                    </time>
+                    <h3
+                      className="font-display tracking-[-0.01em] leading-snug transition-colors group-hover:text-primary"
+                      style={{ fontSize: "var(--font-size-h4)" }}
+                    >
+                      {b.title}
+                    </h3>
+                    <ArrowUpRight
+                      className="h-4 w-4 flex-none text-muted-foreground transition-all duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-primary"
+                      strokeWidth={1.5}
+                    />
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+      )}
 
       {/* ─── Related + footer ────────────────────────────────────── */}
       <section className="hairline-t mx-auto w-full max-w-[1440px] px-6 py-20 sm:px-10 sm:py-24">

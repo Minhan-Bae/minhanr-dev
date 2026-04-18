@@ -77,10 +77,19 @@ export function BlogList({ posts }: { posts: BlogPostMeta[] }) {
         counts[t] = (counts[t] || 0) + 1;
       })
     );
-    return Object.entries(counts)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 10)
-      .map(([tag]) => tag);
+    const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+    const top = sorted.slice(0, 36);
+    const max = top[0]?.[1] ?? 1;
+    const min = top[top.length - 1]?.[1] ?? 1;
+    return top.map(([tag, count]) => {
+      // Map frequency to a font size in [0.75rem, 1.5rem]. Log scale
+      // keeps the one-or-two-post tags from sinking into illegibility
+      // while still letting the heavy-hitters dominate the cloud.
+      const range = Math.max(1, Math.log(max) - Math.log(min));
+      const t = (Math.log(count) - Math.log(min)) / range;
+      const size = 0.75 + t * 0.75;
+      return { tag, count, size };
+    });
   }, [posts]);
 
   const filtered = useMemo(() => {
@@ -160,25 +169,41 @@ export function BlogList({ posts }: { posts: BlogPostMeta[] }) {
         </div>
 
         {topTags.length > 0 && (
-          <div className="flex flex-wrap items-baseline gap-x-4 gap-y-2 text-[11px] tracking-[0.08em]">
-            <span className="uppercase text-muted-foreground/70 tracking-[0.16em]">
-              태그
-            </span>
-            {topTags.map((tag) => (
-              <button
-                key={tag}
-                onClick={() =>
-                  setSelectedTag(selectedTag === tag ? null : tag)
-                }
-                className={`transition-colors ${
-                  selectedTag === tag
-                    ? "text-primary"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                #{tag}
-              </button>
-            ))}
+          <div>
+            <p className="mb-3 text-[11px] uppercase tracking-[0.16em] text-muted-foreground/70">
+              태그 구름 · Tag cloud
+            </p>
+            <div className="flex flex-wrap items-baseline gap-x-3 gap-y-2 leading-tight">
+              {topTags.map(({ tag, count, size }) => {
+                const active = selectedTag === tag;
+                return (
+                  <button
+                    key={tag}
+                    onClick={() =>
+                      setSelectedTag(active ? null : tag)
+                    }
+                    title={`${count}편`}
+                    style={{
+                      fontSize: `${size}rem`,
+                      lineHeight: 1.2,
+                    }}
+                    className={`font-display transition-all duration-200 ${
+                      active
+                        ? "text-primary"
+                        : "text-foreground/70 hover:text-foreground"
+                    }`}
+                  >
+                    {tag}
+                    <span
+                      className="ml-1 align-super text-[0.55em] text-muted-foreground"
+                      aria-hidden
+                    >
+                      {count}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
         )}
 
