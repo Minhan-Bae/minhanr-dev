@@ -32,17 +32,18 @@ const LOCAL_ENV = path.resolve(ROOT, ".env.local");
 const OUT_ROOT = path.resolve(ROOT, "public/work");
 
 // ── Prompts — one per work slug ──────────────────────────────────────
-// Palette keywords tuned to the 2026 colour-of-the-year quartet so that
-// generated imagery coheres with the site tokens:
+// Palette keywords tuned to the rain-glass quartet so the work covers
+// cohere with the site tokens and the time-of-day scene backgrounds:
 //
-//   Cloud Dancer   — soft off-white (#F0EFEB), Pantone 11-4201, 2026 COY
-//   Phthalo Green  — deep botanic dark (#123524)
-//   Transformative Teal — primary accent (#2F6364), WGSN/Coloro 2026 COY
-//   Divine Damson  — warm secondary accent (#4A2D3C), Graham & Brown 2026
+//   Overcast Mist    — cool off-white (#E8EEF7)
+//   Prussian Night   — deep stormy dark (#0E1A2E), canonical brand face
+//   Signal Cobalt    — primary accent (#3D7AB3)
+//   Amethyst Shadow  — cooled violet secondary (#5B5F99)
 //
-// Each prompt is an editorial brief. Avoid neon, saturated blues, or
-// warm vermilion (previous palette). Favour natural, matte, grounded,
-// organic texture — in line with Adobe's 2026 trend forecast.
+// Each prompt is an editorial brief. Avoid neon, warm vermilion, or
+// any green/teal cast (previous palette). Favour cool stormy atmospheres,
+// wet surfaces, bokeh light points — matches the WebGL rain-on-glass
+// layer that sits over every public page.
 const PROMPTS = {
   "oikbas-ecosystem": {
     aspectRatio: "4:5",
@@ -50,39 +51,43 @@ const PROMPTS = {
       "Editorial cinematic still, medium format aesthetic.",
       "Abstract visualisation of an autonomous knowledge network:",
       "seven soft luminous nodes connected by thin organic threads,",
-      "suspended in a deep phthalo green botanic haze (#123524).",
-      "The nodes glow pale Cloud Dancer off-white (#F0EFEB);",
-      "one node is accented with Transformative Teal (#2F6364),",
-      "another with a subtle Divine Damson warm plum (#4A2D3C).",
+      "suspended in a deep Prussian-night atmospheric haze (#0E1A2E).",
+      "The nodes glow pale Overcast Mist off-white (#E8EEF7);",
+      "one node is accented with Signal Cobalt blue (#3D7AB3),",
+      "another with a subtle Amethyst Shadow violet (#5B5F99).",
       "Composition: generous negative space top-left, nodes clustered bottom-right.",
       "Soft diffused studio light, fine film grain, matte finish, shallow depth of field.",
-      "No text, no UI, no logos, no neon, no digital glow. Organic editorial print quality.",
+      "No text, no UI, no logos, no neon, no digital glow, no warm red, no green cast.",
+      "Cool stormy atmosphere, editorial print quality.",
     ].join(" "),
   },
   "vfx-research-pipeline": {
     aspectRatio: "16:9",
     prompt: [
       "Cinematic still, editorial tone, shot on medium format film.",
-      "A lone silhouetted figure in a dim phthalo-green studio (#123524),",
-      "illuminated by a single soft beam of Transformative Teal light (#2F6364)",
+      "A lone silhouetted figure in a dim Prussian-night studio (#0E1A2E),",
+      "illuminated by a single soft beam of Signal Cobalt light (#3D7AB3)",
       "cutting across misty atmospheric haze.",
       "The figure studies projected abstract geometric forms on a wall —",
-      "soft caustic patterns in Cloud Dancer off-white (#F0EFEB),",
-      "a faint Divine Damson plum reflection (#4A2D3C) in the backlight.",
-      "Deep botanic shadow, subtle film grain, natural matte surfaces.",
-      "No text, no logos, no neon, no warm red. Wide cinematic composition, grounded and contemplative.",
+      "soft caustic patterns in Overcast Mist off-white (#E8EEF7),",
+      "a faint Amethyst Shadow violet reflection (#5B5F99) in the backlight.",
+      "Deep cool shadow, subtle film grain, natural matte surfaces.",
+      "No text, no logos, no neon, no warm red, no green cast.",
+      "Wide cinematic composition, grounded and contemplative.",
     ].join(" "),
   },
   "minhanr-dev": {
     aspectRatio: "4:5",
     prompt: [
-      "Editorial flat-lay photograph on soft Cloud Dancer off-white paper (#F0EFEB).",
-      "A quiet-magazine composition: a single serif display letter rendered large in deep phthalo green ink (#123524),",
-      "a thin vertical Transformative Teal accent bar to its left (#2F6364),",
-      "fragments of typographic specimens, pressed botanical leaves, and hairline-ruled paper sheets arranged asymmetrically,",
-      "a small swatch of Divine Damson (#4A2D3C) as an inkblot in the corner.",
+      "Editorial flat-lay photograph on a cool Overcast Mist off-white paper (#E8EEF7)",
+      "viewed through a rain-dotted windowpane.",
+      "A quiet-magazine composition: a single serif display letter rendered large in deep Prussian-night ink (#0E1A2E),",
+      "a thin vertical Signal Cobalt accent bar to its left (#3D7AB3),",
+      "fragments of typographic specimens, hairline-ruled paper sheets, and scattered water droplets arranged asymmetrically,",
+      "a small swatch of Amethyst Shadow violet (#5B5F99) as an inkblot in the corner.",
       "Soft overhead natural light, long gentle shadow, medium format sharpness, matte texture.",
-      "Palette: Cloud Dancer, Phthalo Green, Transformative Teal, Divine Damson. No neon, no digital glow, no warm red.",
+      "Palette: Overcast Mist, Prussian Night, Signal Cobalt, Amethyst Shadow.",
+      "No neon, no digital glow, no warm red, no green cast.",
       "Kinfolk-style editorial print quality.",
     ].join(" "),
   },

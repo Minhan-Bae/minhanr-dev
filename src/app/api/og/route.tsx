@@ -52,7 +52,7 @@ function renderSiteOG() {
           position: "relative",
         }}
       >
-        {/* Vermilion accent bar — brand signature */}
+        {/* Signal Cobalt keyline — brand signature */}
         <div
           style={{
             position: "absolute",
@@ -156,7 +156,7 @@ function renderNoteOG({
           position: "relative",
         }}
       >
-        {/* Vermilion accent bar */}
+        {/* Signal Cobalt keyline */}
         <div
           style={{
             position: "absolute",
