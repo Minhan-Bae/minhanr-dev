@@ -245,16 +245,35 @@ export function NotesGraph({ posts }: NotesGraphProps) {
   const draggingRef = useRef<string | null>(null);
   const dragMovedRef = useRef(false);
 
-  // Build graph once per posts[] (mostly once).
-  const { nodes, edges } = useMemo(() => buildGraph(posts), [posts]);
+  // ─────────────────────────────────────────────────────────────────
+  // Graph data lives in a ref, not in useMemo, for a very specific
+  // reason: React Compiler (active here — see next.config.ts
+  // reactCompiler: true) treats useMemo return values as read-only and
+  // may refuse in-place mutation on subsequent renders. The physics
+  // simulation mutates node.x / .y / .vx / .vy on every frame, so the
+  // graph must sit somewhere React Compiler doesn't reach. Refs are
+  // safe by design.
+  //
+  // The ref is initialised once on first render and reused for the
+  // lifetime of the component.
+  // ─────────────────────────────────────────────────────────────────
+  const graphRef = useRef<{ nodes: NodeData[]; edges: EdgeData[] } | null>(
+    null
+  );
+  if (graphRef.current === null) {
+    graphRef.current = buildGraph(posts);
+  }
+  const nodes = graphRef.current.nodes;
+  const edges = graphRef.current.edges;
 
+  // These derived structures don't mutate, so useMemo is fine; React
+  // Compiler can freeze them all it wants.
   const nodeById = useMemo(() => {
     const m = new Map<string, NodeData>();
     for (const n of nodes) m.set(n.id, n);
     return m;
   }, [nodes]);
 
-  // Tag index for hover highlight (not used by physics; just UI).
   const tagIndex = useMemo(() => {
     const m = new Map<string, Set<string>>();
     for (const n of nodes) {
@@ -280,38 +299,53 @@ export function NotesGraph({ posts }: NotesGraphProps) {
     return set;
   }, [hoveredId, nodeById, tagIndex]);
 
-  // Physics + render loop
+  // Physics + render loop — mount-once. All inner closures read through
+  // graphRef so they always see the current state.
   useEffect(() => {
     const prefersReduce =
       typeof window !== "undefined" &&
       window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    // Settle the layout quickly for reduced-motion users.
+    // Initial paint so the graph is never a pile of dots at (0,0) in
+    // the moment between hydration and the first rAF frame. Nodes
+    // already have seeded bx/by positions from buildGraph().
+    paint();
+
+    // For reduced-motion users we still want a "living" graph — just
+    // slower. Pre-settle 120 ticks so it starts relaxed, then continue
+    // the simulation at a gentler cadence.
     if (prefersReduce) {
-      for (let i = 0; i < 240; i++) step();
+      for (let i = 0; i < 120; i++) step();
       paint();
-      return;
     }
 
     let raf = 0;
-    function frame() {
-      step();
-      paint();
+    let lastT = 0;
+    // Interval gate for reduced-motion (~30fps equivalent)
+    const minDt = prefersReduce ? 33 : 0;
+    function frame(t: number) {
+      if (t - lastT >= minDt) {
+        step();
+        paint();
+        lastT = t;
+      }
       raf = requestAnimationFrame(frame);
     }
     raf = requestAnimationFrame(frame);
     return () => cancelAnimationFrame(raf);
-    // We intentionally don't rerun the loop when neighbours/hover change —
-    // those affect paint() via the closed-over state refs, not the loop.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [nodes, edges]);
+  }, []);
 
   /**
-   * One physics tick. Mutates node.x/y/vx/vy in place. Drag-fixed nodes
-   * are moved directly to the cursor elsewhere; here we just zero their
-   * velocity so they don't drift when released.
+   * One physics tick. Mutates node.x/y/vx/vy in place on the ref'd
+   * graph. Drag-fixed nodes are moved directly to the cursor in
+   * `onSvgPointerMove`; here we zero their velocity so they don't
+   * drift when released.
    */
   function step() {
+    const graph = graphRef.current;
+    if (!graph) return;
+    const { nodes, edges } = graph;
     const n = nodes.length;
 
     // 1. Repulsion — O(n^2) but n ~ 121, cheap.
@@ -381,13 +415,17 @@ export function NotesGraph({ posts }: NotesGraphProps) {
   }
 
   function paint() {
+    const graph = graphRef.current;
+    if (!graph) return;
+    const { nodes, edges } = graph;
     for (const node of nodes) {
       const g = nodeRefs.current.get(node.id);
       if (g) g.setAttribute("transform", `translate(${node.x} ${node.y})`);
     }
     for (const e of edges) {
-      const a = nodeById.get(e.from)!;
-      const b = nodeById.get(e.to)!;
+      const a = nodeById.get(e.from);
+      const b = nodeById.get(e.to);
+      if (!a || !b) continue;
       const line = edgeRefs.current.get(e.from + "→" + e.to);
       if (line) {
         line.setAttribute("x1", String(a.x));
