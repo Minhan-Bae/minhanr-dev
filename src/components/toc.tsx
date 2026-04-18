@@ -37,29 +37,35 @@ export function TableOfContents({ headings }: { headings: TocHeading[] }) {
 
   return (
     <nav
-      aria-label="Table of contents"
-      className="hidden lg:block sticky top-20 max-h-[calc(100svh-6rem)] overflow-y-auto"
+      aria-label="차례"
+      className="hidden lg:block sticky top-24 max-h-[calc(100svh-7rem)] overflow-y-auto font-technical"
     >
-      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
-        On this page
-      </p>
-      <ul className="space-y-1 text-sm border-l border-border">
-        {headings.map((h) => (
-          <li key={h.id}>
-            <a
-              href={`#${h.id}`}
-              className={`block py-1 transition-colors leading-snug ${
-                h.level === 3 ? "pl-6" : "pl-3"
-              } ${
-                activeId === h.id
-                  ? "text-primary border-l-2 border-primary -ml-px font-medium"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {h.text}
-            </a>
-          </li>
-        ))}
+      <p className="kicker mb-4">차례 · Contents</p>
+      <ul className="space-y-[2px] border-l border-[var(--hairline)] text-[13px]">
+        {headings.map((h) => {
+          const active = activeId === h.id;
+          return (
+            <li key={h.id}>
+              <a
+                href={`#${h.id}`}
+                className={`block py-[5px] leading-snug transition-all duration-300 ${
+                  h.level === 3 ? "pl-6" : "pl-3"
+                } ${
+                  active
+                    ? "-ml-px border-l-2 border-primary text-primary"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+                style={{
+                  // Subtle indent shift on active — the eye catches motion
+                  // cheaply without colour change doing all the work.
+                  transform: active ? "translateX(2px)" : undefined,
+                }}
+              >
+                {h.text}
+              </a>
+            </li>
+          );
+        })}
       </ul>
     </nav>
   );

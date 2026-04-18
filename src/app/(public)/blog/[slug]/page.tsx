@@ -10,6 +10,7 @@ import {
 import { ReadingProgress } from "@/components/reading-progress";
 import { RelatedPosts } from "@/components/related-posts";
 import { TableOfContents } from "@/components/toc";
+import { RevealOnScroll } from "@/components/reveal-on-scroll";
 
 export async function generateStaticParams() {
   const slugs = getAllSlugs();
@@ -156,6 +157,7 @@ export default async function BlogPostPage({
       {/* ─── Body ─────────────────────────────────────────────────── */}
       <section className="mx-auto mt-16 w-full max-w-[1440px] px-6 pb-24 sm:mt-20 sm:px-10 sm:pb-32">
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,900px)_minmax(180px,220px)] lg:justify-center lg:gap-16">
+          <RevealOnScroll as="div">
           <article
             className="prose prose-lg dark:prose-invert max-w-none
               prose-headings:font-display prose-headings:font-normal prose-headings:tracking-[-0.015em] prose-headings:text-foreground
@@ -181,6 +183,7 @@ export default async function BlogPostPage({
               prose-td:border-b prose-td:border-[var(--hairline)] prose-td:py-3 prose-td:px-4"
             dangerouslySetInnerHTML={{ __html: post.content }}
           />
+          </RevealOnScroll>
 
           <aside className="lg:sticky lg:top-24 lg:self-start">
             <TableOfContents headings={headings} />

@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { BlogCard, isPublicCategory, pickVariant } from "@/components/blog-card";
+import { RevealOnScroll } from "@/components/reveal-on-scroll";
 import type { BlogPostMeta } from "@/lib/blog";
 
 type Group = { key: string; label: string; posts: BlogPostMeta[] };
@@ -199,7 +200,12 @@ export function BlogList({ posts }: { posts: BlogPostMeta[] }) {
       {/* Body */}
       <div className="mx-auto max-w-[1120px] pt-6">
         {hasFilters ? (
-          <ul className="divide-y divide-[var(--hairline)] hairline-t hairline-b">
+          // Re-mount on filter change so the list crossfades instead of
+          // snap-updating. key is whatever identifies the current filter.
+          <ul
+            key={`${selectedCategory ?? "all"}|${selectedTag ?? "all"}|${query}`}
+            className="animate-in fade-in slide-in-from-bottom-1 duration-300 divide-y divide-[var(--hairline)] hairline-t hairline-b"
+          >
             {filtered.map((post) => (
               <li key={post.slug}>
                 <BlogCard post={post} variant={pickVariant(post)} />
@@ -214,13 +220,17 @@ export function BlogList({ posts }: { posts: BlogPostMeta[] }) {
         ) : (
           <div className="space-y-20 sm:space-y-28">
             {featured && (
-              <div>
+              <RevealOnScroll>
                 <BlogCard post={featured} variant="featured" />
-              </div>
+              </RevealOnScroll>
             )}
 
-            {groups.map((group) => (
-              <section key={group.key}>
+            {groups.map((group, groupIdx) => (
+              <RevealOnScroll
+                key={group.key}
+                as="section"
+                delayMs={groupIdx * 40}
+              >
                 <header className="mb-6 flex items-baseline justify-between hairline-b pb-3">
                   <h2
                     className="font-display tracking-[-0.015em]"
@@ -239,7 +249,7 @@ export function BlogList({ posts }: { posts: BlogPostMeta[] }) {
                     </li>
                   ))}
                 </ul>
-              </section>
+              </RevealOnScroll>
             ))}
 
             {posts.length === 0 && (
