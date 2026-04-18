@@ -5,8 +5,16 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       { protocol: "https", hostname: "images.unsplash.com" },
     ],
+    // `/api/og` is the exact route; `/api/og/**` covers any future
+    // nested variant. Both entries together mean the OG route works
+    // whether it's called bare (`/api/og?title=foo`) or with a
+    // sub-path, and next/image will proxy + optimise either form.
     localPatterns: [
+      { pathname: "/api/og" },
       { pathname: "/api/og/**" },
+      { pathname: "/images/**" },
+      { pathname: "/scenes/**" },
+      { pathname: "/work/**" },
     ],
   },
   // React Compiler: 자동 메모이제이션 + 불필요한 리렌더 제거 (Next.js 16에서 stable).
