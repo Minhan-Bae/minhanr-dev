@@ -8,6 +8,10 @@ import { NotesGraph } from "@/components/notes-graph";
 import { TypewriterLoop } from "@/components/typewriter-loop";
 import { SlideDeck } from "@/components/slide-deck";
 import { WritingFeatured } from "@/components/home/writing-featured";
+import {
+  getPrivateNoteStubs,
+  type GraphNoteStub,
+} from "@/lib/notes-graph-data";
 
 export const metadata: Metadata = {
   title: "Writing",
@@ -44,7 +48,7 @@ export const metadata: Metadata = {
  */
 const SLIDE_PB = "pb-[clamp(140px,18vh,200px)]";
 
-export default function WritingIndex() {
+export default async function WritingIndex() {
   const posts = getAllPosts();
   const tags = getAllTags().slice(0, 18);
   const years = getAllYears();
@@ -53,16 +57,22 @@ export default function WritingIndex() {
   const lastUpdated = lastUpdatedISO
     ? `${lastUpdatedISO.slice(0, 4)}.${lastUpdatedISO.slice(5, 7)}`
     : "";
+  // Private vault stubs feed the graph as dim marker nodes. Awaited
+  // at the page level so the Notes-map slide renders with the full
+  // constellation on first paint; `getPrivateNoteStubs` already
+  // degrades to an empty array if the vault index isn't reachable.
+  const privateNotes = await getPrivateNoteStubs();
 
   return (
     <SlideDeck>
       <MastheadSlide
         postCount={posts.length}
         tagCount={tags.length}
+        privateCount={privateNotes.length}
         lastUpdated={lastUpdated}
       />
       <WritingFeatured posts={latest} />
-      <NotesMapSlide posts={posts} />
+      <NotesMapSlide posts={posts} privateNotes={privateNotes} />
       <ExploreSlide
         postCount={posts.length}
         tags={tags}
@@ -76,10 +86,16 @@ export default function WritingIndex() {
 interface MastheadSlideProps {
   postCount: number;
   tagCount: number;
+  privateCount: number;
   lastUpdated: string;
 }
 
-function MastheadSlide({ postCount, tagCount, lastUpdated }: MastheadSlideProps) {
+function MastheadSlide({
+  postCount,
+  tagCount,
+  privateCount,
+  lastUpdated,
+}: MastheadSlideProps) {
   return (
     <section
       data-slide
@@ -137,6 +153,17 @@ function MastheadSlide({ postCount, tagCount, lastUpdated }: MastheadSlideProps)
               ({String(tagCount).padStart(2, "0")})
             </span>
           </span>
+          {privateCount > 0 && (
+            <>
+              <span className="opacity-40">·</span>
+              <span>
+                <span>Private</span>
+                <span className="ml-1.5 tabular-nums text-foreground/80">
+                  ({String(privateCount).padStart(3, "0")})
+                </span>
+              </span>
+            </>
+          )}
           {lastUpdated && (
             <>
               <span className="opacity-40">·</span>
@@ -154,7 +181,13 @@ function MastheadSlide({ postCount, tagCount, lastUpdated }: MastheadSlideProps)
   );
 }
 
-function NotesMapSlide({ posts }: { posts: BlogPostMeta[] }) {
+function NotesMapSlide({
+  posts,
+  privateNotes,
+}: {
+  posts: BlogPostMeta[];
+  privateNotes: GraphNoteStub[];
+}) {
   return (
     <section
       data-slide
@@ -171,12 +204,13 @@ function NotesMapSlide({ posts }: { posts: BlogPostMeta[] }) {
           </h2>
         </div>
         <p className="font-technical max-w-sm text-[11px] leading-relaxed text-muted-foreground sm:text-right">
-          Each node is one piece; colour marks the practice area.
-          Drag, hover, click.
+          Bright nodes are published pieces — drag, hover, click. Dim
+          markers are private vault notes clustered by practice area,
+          shown for density only.
         </p>
       </header>
       <div className="graph-panel relative flex-1 overflow-hidden rounded-lg border border-[var(--hairline)]">
-        <NotesGraph posts={posts} />
+        <NotesGraph posts={posts} privateNotes={privateNotes} />
       </div>
     </section>
   );
