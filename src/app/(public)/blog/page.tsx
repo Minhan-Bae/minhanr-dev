@@ -8,11 +8,11 @@ import { Typewriter } from "@/components/typewriter";
 export const metadata: Metadata = {
   title: "Writing",
   description:
-    "Notes from the studio — AI, VFX, and creative-technology essays.",
+    "Notes from the studio — AI systems, creative R&D, and editorial engineering.",
   openGraph: {
     title: "Writing — minhanr.dev",
     description:
-      "Notes from the studio — AI, VFX, and creative-technology essays.",
+      "Notes from the studio — AI systems, creative R&D, and editorial engineering.",
     type: "website",
     images: [{ url: "/api/og", width: 1200, height: 630 }],
   },
@@ -20,7 +20,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Writing — minhanr.dev",
     description:
-      "Notes from the studio — AI, VFX, and creative-technology essays.",
+      "Notes from the studio — AI systems, creative R&D, and editorial engineering.",
     images: ["/api/og"],
   },
 };
@@ -56,8 +56,8 @@ export default function WritingIndex() {
             className="mt-6 max-w-xl text-[15px] leading-[1.7] text-muted-foreground sm:text-base animate-fade-up"
             style={{ animationDelay: "240ms" }}
           >
-            Essays on AI systems, VFX pipelines, and the tools that sit
-            between them —{" "}
+            Essays on AI systems, production pipelines, and the tools
+            that sit between them —{" "}
             <span className="font-technical tabular-nums text-foreground">
               {posts.length}
             </span>{" "}
@@ -96,7 +96,13 @@ export default function WritingIndex() {
             Hover to reveal shared-tag edges. Click to open.
           </p>
         </header>
-        <NotesGraph posts={posts} />
+        {/* Opaque wrapper — the rain-on-glass layer would otherwise
+            compete with the graph nodes for attention. A dark glass
+            panel behind it gives the nodes a high-contrast reading
+            surface while still feeling part of the site. */}
+        <div className="graph-panel relative overflow-hidden rounded-lg border border-[var(--hairline)]">
+          <NotesGraph posts={posts} />
+        </div>
       </section>
 
       <section className="hairline-t mx-auto w-full max-w-[1440px] space-y-8 px-6 py-12 sm:px-10 sm:py-16 reveal-up">

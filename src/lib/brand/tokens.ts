@@ -42,9 +42,9 @@ export const BRAND_IDENTITY = {
   /** Domain — used in meta, OG, footer */
   domain: "minhanr.dev",
   /** Practice descriptor, short */
-  role: "AI · VFX · R&D",
+  role: "AI · R&D · Studio",
   /** Korean role descriptor */
-  roleKo: "AI · 비주얼 · 연구 스튜디오",
+  roleKo: "AI · 연구 · 스튜디오",
 
   /** One-line manifesto for meta / OG / footer tagline */
   manifesto:
