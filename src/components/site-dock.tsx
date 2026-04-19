@@ -19,11 +19,10 @@ const NAV: NavLink[] = [
   { href: "/", label: "Home" },
   { href: "/blog", label: "Writing" },
   { href: "/about", label: "About" },
-  // Studio = private admin workspace (auth-gated). The public-facing
-  // "Studio" pill lands visitors on /dashboard; the middleware bounces
-  // unauthenticated users to /login. Do not re-point this to a public
-  // page — the studio *is* the admin surface by design.
-  { href: "/dashboard", label: "Studio" },
+  // Studio = public brand surface answering "how the studio works"
+  // (capabilities / stack / process / engagement). Private admin
+  // workspace lives at /dashboard, accessible only by direct URL.
+  { href: "/studio", label: "Studio" },
 ];
 
 /**

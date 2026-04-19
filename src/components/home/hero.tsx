@@ -36,6 +36,12 @@ export function Hero(_props: HeroProps) {
     >
       {/* ─── Centerpiece wordmark + search ──────────────────────────── */}
       <div className="relative z-0 flex flex-1 flex-col items-center justify-center px-6 sm:px-10">
+        <p
+          className="kicker mb-4 animate-fade-up text-center"
+          style={{ animationDelay: "0ms" }}
+        >
+          Work · 01
+        </p>
         <div className="relative">
           <TypewriterLoop
             as="h1"

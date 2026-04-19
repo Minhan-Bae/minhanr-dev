@@ -111,7 +111,7 @@ function MastheadSlide({
           className="kicker mb-5 animate-fade-up"
           style={{ animationDelay: "0ms" }}
         >
-          Writing · {postCount} pieces
+          Thought · 02 · {postCount} pieces
         </p>
         <TypewriterLoop
           as="h1"

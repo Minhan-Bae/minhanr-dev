@@ -57,7 +57,7 @@ function MastheadSlide() {
       />
       <div className="ml-8 sm:ml-12">
         <p className="kicker mb-5 animate-fade-up" style={{ animationDelay: "0ms" }}>
-          About
+          Who · 03
         </p>
         <TypewriterLoop
           as="h1"
