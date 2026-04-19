@@ -1,4 +1,7 @@
+import Link from "next/link";
+import { Settings } from "lucide-react";
 import { BRAND_IDENTITY } from "@/lib/brand/tokens";
+import { createSupabaseServer } from "@/lib/supabase-server";
 
 /**
  * SiteColophon — bottom-right editorial colophon.
@@ -10,9 +13,32 @@ import { BRAND_IDENTITY } from "@/lib/brand/tokens";
  * bottom-right corner. Pairs visually with SeoulDatum in the
  * top-right so the viewport frame reads as a four-corner magazine
  * masthead: wordmark (TL) · datum (TR) · dock (BC) · colophon (BR).
+ *
+ * Admin gear (⚙)
+ *   Rendered only when the current visitor has a Supabase session.
+ *   Opens /dashboard — the private workspace. Keeps the public chrome
+ *   looking the same for visitors while giving the signed-in author
+ *   a discreet entry point to admin without re-exposing /dashboard
+ *   in the dock. Server-side auth check → zero flicker, no client
+ *   auth logic.
  */
-export function SiteColophon() {
+export async function SiteColophon() {
   const year = new Date().getFullYear();
+
+  // Auth check is cheap — reuses the existing server client + cookies.
+  // Silently swallow errors so a Supabase hiccup never breaks the
+  // public frame.
+  let isAdmin = false;
+  try {
+    const supabase = await createSupabaseServer();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    isAdmin = Boolean(user);
+  } catch {
+    isAdmin = false;
+  }
+
   return (
     <div
       aria-label="Colophon"
@@ -25,8 +51,18 @@ export function SiteColophon() {
         <span className="mx-1.5 opacity-50">·</span>
         Est. 2020
       </div>
-      <div className="tabular-nums">
-        © {year} {BRAND_IDENTITY.domain} · All rights reserved.
+      <div className="flex items-center gap-2 tabular-nums">
+        <span>© {year} {BRAND_IDENTITY.domain} · All rights reserved.</span>
+        {isAdmin && (
+          <Link
+            href="/dashboard"
+            aria-label="Admin — /dashboard"
+            title="Admin workspace"
+            className="pointer-events-auto inline-flex h-5 w-5 items-center justify-center rounded-full border border-[var(--hairline)] bg-card/50 text-muted-foreground/80 transition-colors hover:border-primary/50 hover:text-foreground"
+          >
+            <Settings className="h-3 w-3" strokeWidth={1.75} aria-hidden />
+          </Link>
+        )}
       </div>
     </div>
   );
