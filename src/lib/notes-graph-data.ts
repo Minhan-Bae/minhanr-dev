@@ -1,4 +1,4 @@
-import { getCachedVaultIndex } from "./vault-index";
+import { listNotesFromSupabase } from "./notes-supabase";
 
 /**
  * Minimal note shape the NotesGraph needs, whether the source is a
@@ -22,58 +22,42 @@ export interface GraphNoteStub {
 }
 
 /** Safety cap — the SVG graph runs a full O(n²) physics pass each
- *  frame, so we sample down the vault to this many stubs at most.
- *  A 120 public + 280 private = 400-node pair-loop (~160K pairs) runs
- *  comfortably at 60 fps on a laptop. */
+ *  frame, so we sample down the vault to this many stubs at most. */
 const MAX_PRIVATE = 280;
+const FETCH_CAP = 2500;
 
 /**
- * Pull private-note stubs from the vault index. Degrades gracefully:
- * if the index fetch fails (offline build, worker outage, anything),
- * returns an empty array — the graph still works with just the public
- * posts.
+ * Supabase `vault_notes` + `vault_tags`에서 private 노트 stub 생성.
+ * Sprint 3.4 — 이전엔 GitHub raw vault_index.json 의존, 지금은 DB 단일 소스.
  *
- * Hash-based sampling: when there are more than `MAX_PRIVATE` private
- * notes, we keep the ones whose hashed path falls below a deterministic
- * threshold. Same input → same sample across renders, no "which notes
- * are included" flicker.
+ * 600개 이상 노트가 있으므로 deterministic 샘플링으로 MAX_PRIVATE 이하로
+ * 유지 (frame budget 보호). hash-based — 같은 입력이면 같은 샘플.
  */
 export async function getPrivateNoteStubs(): Promise<GraphNoteStub[]> {
   try {
-    const index = await getCachedVaultIndex();
-    const rawNotes = index.notes ?? {};
-    const stubs: GraphNoteStub[] = [];
+    const { notes } = await listNotesFromSupabase({
+      lifecycleState: "active",
+      excludePublish: ["published"],
+      sort: "updated_desc",
+      limit: FETCH_CAP,
+    });
 
-    for (const [path, note] of Object.entries(rawNotes)) {
+    const stubs: GraphNoteStub[] = notes.map((n) => {
       const title =
-        note.title ??
-        path.split("/").pop()?.replace(/\.md$/, "") ??
-        path;
-      const tags = Array.isArray(note.tags)
-        ? note.tags.filter((t): t is string => typeof t === "string")
-        : [];
-      const summary =
-        typeof note.summary === "string" && note.summary.length > 0
-          ? note.summary
-          : typeof note.excerpt === "string"
-          ? note.excerpt
-          : undefined;
-      const folder = path.split("/")[0] ?? "Other";
-      stubs.push({
-        id: `vault:${path}`,
+        n.title ?? n.path.split("/").pop()?.replace(/\.md$/, "") ?? n.path;
+      const summary = n.summary ?? n.excerpt ?? undefined;
+      const folder = n.path.split("/")[0] ?? "Other";
+      return {
+        id: `vault:${n.path}`,
         title,
-        tags,
+        tags: n.tags ?? [],
         summary,
         folder,
-      });
-    }
+      };
+    });
 
     if (stubs.length <= MAX_PRIVATE) return stubs;
 
-    // Deterministic sampling — keep stubs whose hash is below the
-    // fraction threshold. Two runs on the same vault keep the same
-    // marker field; one new note gets added without reshuffling the
-    // whole constellation.
     const ratio = MAX_PRIVATE / stubs.length;
     return stubs.filter((s) => hashString(s.id) < ratio);
   } catch {

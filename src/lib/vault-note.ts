@@ -108,6 +108,24 @@ export async function getVaultNote(path: string): Promise<VaultNoteContent | nul
 }
 
 /**
+ * Supabase body_md만 받아 HTML로 변환 (frontmatter는 호출자가 별도 보유).
+ * Sprint 3 이후 /notes/[...path]가 Supabase `vault_notes.body_md` +
+ * frontmatter_raw를 직접 사용할 때 parse 파이프라인을 재활용.
+ */
+export async function markdownBodyToHtml(body: string): Promise<string> {
+  const stripped = stripWikilinks(body);
+  const processed = await unified()
+    .use(remarkParse)
+    .use(remarkGfm)
+    .use(remarkRehype, { allowDangerousHtml: true })
+    .use(rehypeRaw)
+    .use(rehypeHighlight, { detect: true })
+    .use(rehypeStringify)
+    .process(stripped);
+  return processed.toString();
+}
+
+/**
  * vault 경로를 native /notes/[...path] 라우트 URL로 변환.
  * 각 세그먼트를 encodeURIComponent로 안전 인코딩.
  * Knowledge Hub의 모든 노트 카드/링크는 이 함수를 통해 내부 라우트로 이동해야 한다.

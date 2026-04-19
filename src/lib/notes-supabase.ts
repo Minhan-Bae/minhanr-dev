@@ -252,6 +252,62 @@ export async function getForwardLinks(path: string): Promise<BacklinkRow[]> {
 }
 
 /**
+ * 필터 옵션 — /notes 상단 필터 드롭다운용.
+ * distinct maturity/workflow/publish 값 + top N tags.
+ */
+export async function getFilterOptions(limit = 30): Promise<{
+  maturities: string[];
+  workflows: string[];
+  publishes: string[];
+  folders: string[];
+  topTags: Array<{ tag: string; count: number }>;
+}> {
+  const sb = createSupabaseAdmin();
+  const [mat, wf, pb, folders, tags] = await Promise.all([
+    sb.from("vault_notes").select("maturity").not("maturity", "is", null),
+    sb.from("vault_notes").select("workflow").not("workflow", "is", null),
+    sb.from("vault_notes").select("publish").not("publish", "is", null),
+    sb.from("vault_notes").select("path"),
+    sb.from("vault_tags").select("tag"),
+  ]);
+  const uniq = <T>(rows: { [k: string]: T }[] | null, key: string): T[] => {
+    const set = new Set<T>();
+    for (const r of rows ?? []) {
+      const v = r[key];
+      if (v !== null && v !== undefined && v !== "") set.add(v);
+    }
+    return [...set].sort();
+  };
+  const maturities = uniq<string>(mat.data as never, "maturity");
+  const workflows = uniq<string>(wf.data as never, "workflow");
+  const publishes = uniq<string>(pb.data as never, "publish");
+
+  const folderSet = new Set<string>();
+  for (const r of folders.data ?? []) {
+    const seg = (r as { path: string }).path.split("/")[0];
+    if (seg) folderSet.add(seg);
+  }
+
+  const tagCounts = new Map<string, number>();
+  for (const r of tags.data ?? []) {
+    const t = (r as { tag: string }).tag;
+    tagCounts.set(t, (tagCounts.get(t) ?? 0) + 1);
+  }
+  const topTags = [...tagCounts.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, limit)
+    .map(([tag, count]) => ({ tag, count }));
+
+  return {
+    maturities,
+    workflows,
+    publishes,
+    folders: [...folderSet].sort(),
+    topTags,
+  };
+}
+
+/**
  * 간단 stats — 대시보드 Knowledge Hub 카드용.
  */
 export async function getVaultStats(): Promise<{

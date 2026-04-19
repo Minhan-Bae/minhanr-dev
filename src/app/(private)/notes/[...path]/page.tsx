@@ -5,20 +5,35 @@ import { Badge } from "@/components/ui/badge";
 import { StateBadge } from "@/components/state-badge";
 import { GITHUB_REPO } from "@/lib/constants";
 import {
-  getVaultNote,
-  fetchVaultNoteRaw,
+  markdownBodyToHtml,
   deriveNoteTitle,
   deriveNoteSurface,
   vaultPathToHref,
+  type VaultNoteFrontmatter,
 } from "@/lib/vault-note";
-import { getBacklinks } from "@/lib/vault-backlinks";
 import { isTier2Path } from "@/lib/vault-tiers";
 import { createSupabaseServer } from "@/lib/supabase-server";
 import { NoteEditor } from "@/components/note-editor";
+import {
+  getNoteFromSupabase,
+  getBacklinks,
+  type BacklinkRow,
+} from "@/lib/notes-supabase";
 
-// ISR: Generate on first visit, cache for vault TTL.
-export const revalidate = 300;
-// Allow any catch-all path to be generated on demand.
+/**
+ * /notes/[...path] — Sprint 3. Supabase-first detail view.
+ *
+ * 이전: GitHub raw fetch + in-process vault-index aggregation 기반.
+ * 지금: Supabase `vault_notes` + `vault_note_backlinks` 단일 소스.
+ *   • body_md → markdownBodyToHtml() (재사용)
+ *   • frontmatter_raw → 기존 VaultNoteFrontmatter 형태
+ *   • backlinks는 path 기반 (확장자 포함/미포함 둘 다 매칭)
+ *
+ * Edit 모드는 여전히 fetch → NoteEditor 경로 (Supabase에서 body_md 조회
+ * 후 원본 md 재조립 — frontmatter_raw를 gray-matter로 직렬화).
+ */
+
+export const revalidate = 60;
 export const dynamicParams = true;
 
 interface PageProps {
@@ -32,14 +47,48 @@ function joinPath(segments: string[]): string {
 
 function buildBreadcrumb(path: string): string[] {
   const parts = path.split("/");
-  // Drop the file itself for breadcrumb (last segment)
   return parts.slice(0, -1);
+}
+
+/**
+ * Supabase row → 원본 md 재조립 (frontmatter + body).
+ * 편집기는 raw md 전체를 받아서 YAML을 직접 수정할 수 있어야 한다.
+ * frontmatter_raw가 비었으면 body만 반환.
+ */
+function rebuildRawMarkdown(
+  frontmatter: Record<string, unknown>,
+  body: string
+): string {
+  if (!frontmatter || Object.keys(frontmatter).length === 0) return body;
+  // gray-matter stringify를 안 쓰는 이유: gray-matter는 빈 본문에 개행
+  // 처리 시 YAML 순서를 보장 안 함. 수동 YAML 직렬화 대신 JSON 유사.
+  // 간단 직렬화 — 원본 키 순서 어느 정도 보존.
+  const lines: string[] = ["---"];
+  for (const [k, v] of Object.entries(frontmatter)) {
+    if (v === null || v === undefined) continue;
+    if (Array.isArray(v)) {
+      if (v.length === 0) {
+        lines.push(`${k}: []`);
+      } else {
+        lines.push(`${k}:`);
+        for (const item of v) lines.push(`  - ${JSON.stringify(item)}`);
+      }
+    } else if (typeof v === "object") {
+      lines.push(`${k}: ${JSON.stringify(v)}`);
+    } else if (typeof v === "string" && /[:#\-?{}\[\]&*!|><'"%@`]/.test(v)) {
+      lines.push(`${k}: ${JSON.stringify(v)}`);
+    } else {
+      lines.push(`${k}: ${v}`);
+    }
+  }
+  lines.push("---", "", body);
+  return lines.join("\n");
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { path: segments } = await params;
   const path = joinPath(segments);
-  const note = await getVaultNote(path).catch(() => null);
+  const note = await getNoteFromSupabase(path).catch(() => null);
 
   if (!note) {
     return {
@@ -48,13 +97,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     };
   }
 
-  const title = deriveNoteTitle(path, note.frontmatter);
-  const summary =
-    typeof note.frontmatter.summary === "string"
-      ? note.frontmatter.summary
-      : `vault note · ${path}`;
+  const title = note.title ?? deriveNoteTitle(path);
+  const summary = note.summary ?? `vault note · ${path}`;
 
-  // K-2 정책: Knowledge Hub의 모든 노트 페이지는 검색엔진 인덱스에서 제외.
   return {
     title: `${title} | minhanr.dev`,
     description: summary,
@@ -76,13 +121,11 @@ export default async function NoteDetailPage({
   const path = joinPath(segments);
   const isEdit = sp.edit === "1";
 
-  // 안전성 체크: .md 파일만 허용
   if (!path.endsWith(".md")) {
     notFound();
   }
 
-  // 이중 방어: Tier 3 경로 + 모든 edit 모드는 인증 필수.
-  // (edit은 Tier 2 여부와 상관없이 studio 소유자만)
+  // Tier 3 + edit 모드 인증 필수.
   if (!isTier2Path(path) || isEdit) {
     const supabase = await createSupabaseServer();
     const {
@@ -93,24 +136,24 @@ export default async function NoteDetailPage({
     }
   }
 
-  // Edit mode — hand off to the client editor.
+  const note = await getNoteFromSupabase(path);
+  if (!note) notFound();
+
+  const frontmatter = (note.frontmatter_raw ?? {}) as VaultNoteFrontmatter;
+
+  // Edit mode — 원본 md 재조립 후 에디터로.
   if (isEdit) {
-    const raw = await fetchVaultNoteRaw(path);
-    if (raw === null) notFound();
+    const raw = rebuildRawMarkdown(frontmatter, note.body_md ?? "");
     return <NoteEditor path={path} initialContent={raw} />;
   }
 
-  // Fetch note body and reverse-link graph in parallel — both touch the
-  // vault index cache (5min TTL) and are independent.
-  const [note, backlinks] = await Promise.all([
-    getVaultNote(path),
+  // View mode — HTML + backlinks
+  const [contentHtml, backlinkRows] = await Promise.all([
+    markdownBodyToHtml(note.body_md ?? ""),
     getBacklinks(path),
   ]);
-  if (!note) {
-    notFound();
-  }
 
-  const title = deriveNoteTitle(path, note.frontmatter);
+  const title = note.title ?? deriveNoteTitle(path, frontmatter);
   const surface = deriveNoteSurface(path);
   const breadcrumb = buildBreadcrumb(path);
   const githubUrl = `https://github.com/${GITHUB_REPO}/blob/main/${segments
@@ -118,19 +161,20 @@ export default async function NoteDetailPage({
     .join("/")}`;
 
   const status =
-    typeof note.frontmatter.status === "string" ? note.frontmatter.status : null;
-  const created =
-    typeof note.frontmatter.created === "string" ? note.frontmatter.created : null;
-  const tags = Array.isArray(note.frontmatter.tags)
-    ? (note.frontmatter.tags.filter((t) => typeof t === "string") as string[])
-    : [];
-  const summary =
-    typeof note.frontmatter.summary === "string" ? note.frontmatter.summary : null;
+    note.maturity ?? note.workflow ?? note.publish ?? note.type ?? null;
+  const created = note.created ?? null;
+  const tags = note.tags ?? [];
+  const summary = note.summary ?? null;
 
   const editHref =
-    "/notes/" +
-    segments.map(encodeURIComponent).join("/") +
-    "?edit=1";
+    "/notes/" + segments.map(encodeURIComponent).join("/") + "?edit=1";
+
+  // backlinks 매핑 — 타이틀 조회 (src_path에서 파생)
+  const uniqSrc = new Map<string, BacklinkRow>();
+  for (const b of backlinkRows) {
+    if (!uniqSrc.has(b.src_path)) uniqSrc.set(b.src_path, b);
+  }
+  const backlinks = [...uniqSrc.values()];
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-10 sm:py-16">
@@ -151,7 +195,6 @@ export default async function NoteDetailPage({
 
       <article>
         <header className="mb-8 space-y-3">
-          {/* breadcrumb */}
           <nav className="text-xs text-muted-foreground/50 truncate">
             {breadcrumb.join(" / ")}
           </nav>
@@ -161,12 +204,17 @@ export default async function NoteDetailPage({
           </h1>
 
           {summary && (
-            <p className="text-sm text-muted-foreground leading-relaxed">{summary}</p>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              {summary}
+            </p>
           )}
 
           <div className="flex items-center gap-2 flex-wrap text-xs">
             {status && (
-              <Badge variant="outline" className="font-normal text-muted-foreground border-border">
+              <Badge
+                variant="outline"
+                className="font-normal text-muted-foreground border-border"
+              >
                 {status}
               </Badge>
             )}
@@ -201,45 +249,40 @@ export default async function NoteDetailPage({
             prose-td:border-border
             prose-li:text-foreground/80
             prose-blockquote:border-border prose-blockquote:text-muted-foreground"
-          dangerouslySetInnerHTML={{ __html: note.contentHtml }}
+          dangerouslySetInnerHTML={{ __html: contentHtml }}
         />
       </article>
 
-      {/* ── Links to this note ──────────────────────────────────────────
-          Andy Matuschak / Maggie Appleton 모델의 시그니처 패턴.
-          Reverse-link graph가 vault index의 `related` field로 빌드됨
-          (vault-backlinks.ts). Tier 3 source는 자동 차단됨. */}
+      {/* Backlinks */}
       {backlinks.length > 0 && (
         <section className="mt-16 pt-8 border-t border-[var(--hairline)]">
           <h2 className="text-xs font-mono uppercase tracking-widest text-muted-foreground mb-6">
             Links to this note · {backlinks.length}
           </h2>
           <ul className="space-y-1">
-            {backlinks.map((ref) => (
-              <li key={ref.path}>
-                <Link
-                  href={vaultPathToHref(ref.path)}
-                  className="group flex items-start gap-4 py-3 border-b border-[var(--hairline)] transition-colors hover:border-primary/30"
-                >
-                  {ref.status && <StateBadge status={ref.status} />}
-                  <div className="flex-1 min-w-0">
-                    <div className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">
-                      {ref.title}
-                    </div>
-                    {ref.excerpt && (
-                      <div className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                        {ref.excerpt}
+            {backlinks.map((b) => {
+              const p = b.src_path.endsWith(".md") ? b.src_path : `${b.src_path}.md`;
+              const srcTitle =
+                b.src_path.split("/").pop()?.replace(/\.md$/, "") ?? b.src_path;
+              return (
+                <li key={b.src_path}>
+                  <Link
+                    href={vaultPathToHref(p)}
+                    className="group flex items-start gap-4 py-3 border-b border-[var(--hairline)] transition-colors hover:border-primary/30"
+                  >
+                    <StateBadge status={null} />
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">
+                        {srcTitle}
                       </div>
-                    )}
-                  </div>
-                  {ref.created && (
-                    <time className="text-xs font-mono text-muted-foreground/70 whitespace-nowrap pt-0.5 tabular-nums">
-                      {ref.created}
-                    </time>
-                  )}
-                </Link>
-              </li>
-            ))}
+                      <div className="text-xs text-muted-foreground/70 mt-0.5 truncate font-mono">
+                        {b.src_path}
+                      </div>
+                    </div>
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
         </section>
       )}
