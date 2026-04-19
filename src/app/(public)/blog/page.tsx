@@ -176,6 +176,29 @@ function MastheadSlide({
             </>
           )}
         </div>
+
+        {/* Primary archive entry — foregrounded so visitors can skip
+            the deck entirely and go straight to search / filter /
+            tag drill-down. Feedback response: "키워드 없이는 전체
+            목록 접근 어렵다". */}
+        <div
+          className="mt-8 flex flex-wrap items-center gap-3 animate-fade-up"
+          style={{ animationDelay: "480ms" }}
+        >
+          <Link
+            href="/blog/archive"
+            className="font-technical inline-flex items-center gap-2 rounded-sm border border-[var(--hairline)] bg-card/50 px-4 py-2 text-[12px] uppercase tracking-[0.18em] text-foreground backdrop-blur-sm transition-colors hover:border-primary/50 hover:bg-card/70"
+          >
+            <span>Browse all {postCount} pieces</span>
+            <span aria-hidden>→</span>
+          </Link>
+          <Link
+            href="/blog/tags"
+            className="font-technical text-[11px] uppercase tracking-[0.18em] text-muted-foreground transition-colors hover:text-foreground"
+          >
+            By tag
+          </Link>
+        </div>
       </div>
     </section>
   );

@@ -169,9 +169,14 @@ export default async function BlogPostPage({
       )}
 
       {/* ─── Body ─────────────────────────────────────────────────── */}
+      {/* Wrapped in a readable scrim: semi-opaque surface + backdrop
+          blur so the rain/ken-burns background stops bleeding into
+          the prose at long reading lengths. Slight rounded border
+          makes the article feel like a page in a bound issue. */}
       <section className="mx-auto mt-16 w-full max-w-[1440px] px-6 pb-24 sm:mt-20 sm:px-10 sm:pb-32">
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,900px)_minmax(180px,220px)] lg:justify-center lg:gap-16">
           <RevealOnScroll as="div">
+          <div className="rounded-md border border-[var(--hairline)] bg-background/90 px-6 py-10 backdrop-blur-[3px] sm:px-12 sm:py-14">
           <PostBody
             html={post.content}
             className="prose prose-lg dark:prose-invert max-w-none
@@ -197,6 +202,7 @@ export default async function BlogPostPage({
               prose-th:text-foreground prose-th:font-semibold prose-th:border-b prose-th:border-[var(--hairline)] prose-th:py-3 prose-th:px-4
               prose-td:border-b prose-td:border-[var(--hairline)] prose-td:py-3 prose-td:px-4"
           />
+          </div>
           </RevealOnScroll>
 
           <aside className="lg:sticky lg:top-24 lg:self-start">
