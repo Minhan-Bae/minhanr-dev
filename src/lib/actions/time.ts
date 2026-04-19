@@ -168,3 +168,48 @@ export async function deleteEntry(id: string): Promise<void> {
   if (error) throw error;
   invalidate();
 }
+
+/**
+ * Duplicate all entries from one Sunday-anchored week to another.
+ * Offsets every slot_start by (targetWeek - sourceWeek). Called from
+ * the "Copy from previous week" button on /calendar.
+ *
+ * Does NOT deduplicate — if the target week already has entries at
+ * conflicting slots the result is two overlapping blocks. UI should
+ * prompt the user before invoking when the target week is non-empty.
+ */
+export async function duplicateWeekEntries(
+  fromWeekIso: string,
+  toWeekIso: string
+): Promise<{ inserted: number }> {
+  const { supabase, user } = await requireUser();
+  const from = new Date(fromWeekIso);
+  const to = new Date(toWeekIso);
+  const fromEnd = new Date(from.getTime() + 7 * 24 * 60 * 60 * 1000);
+  const offsetMs = to.getTime() - from.getTime();
+
+  const { data: rows, error: selErr } = await supabase
+    .from("time_entries")
+    .select("slot_start, duration_minutes, category_id, intensity, note")
+    .gte("slot_start", from.toISOString())
+    .lt("slot_start", fromEnd.toISOString());
+  if (selErr) throw selErr;
+  if (!rows || rows.length === 0) {
+    return { inserted: 0 };
+  }
+
+  const payload: TimeEntryInsert[] = rows.map((r) => ({
+    user_id: user.id,
+    slot_start: new Date(new Date(r.slot_start).getTime() + offsetMs).toISOString(),
+    duration_minutes: r.duration_minutes,
+    category_id: r.category_id,
+    intensity: r.intensity,
+    note: r.note,
+    source: "manual",
+  }));
+
+  const { error: insErr } = await supabase.from("time_entries").insert(payload);
+  if (insErr) throw insErr;
+  invalidate();
+  return { inserted: payload.length };
+}

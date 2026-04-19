@@ -660,14 +660,56 @@ function CellModal({
     dayIdx
   )} · ${rangeLabel}${span > 1 ? ` (${span * 30}분)` : ""}`;
 
-  // Close on Escape
+  // Keyboard: Escape closes, digit 1-9 picks the Nth category, Del/
+  // Backspace deletes an existing entry. Ignore when an input is
+  // focused (so typing a note doesn't also fire category shortcuts).
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") onClose();
+      const target = e.target as HTMLElement | null;
+      const inField =
+        !!target &&
+        (target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          target.isContentEditable);
+
+      if (e.key === "Escape") {
+        onClose();
+        return;
+      }
+      if (inField) return;
+
+      if ((e.key === "Delete" || e.key === "Backspace") && isEntry && entry) {
+        e.preventDefault();
+        onDelete(entry.id);
+        return;
+      }
+
+      if (/^[1-9]$/.test(e.key)) {
+        const idx = parseInt(e.key, 10) - 1;
+        const cat = categories[idx];
+        if (!cat) return;
+        e.preventDefault();
+        if (isEntry && entry) {
+          onUpdate(entry.id, { category_id: cat.id });
+        } else {
+          onCreate(dayIdx, slotIdx, span, cat.id);
+        }
+      }
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [onClose]);
+  }, [
+    onClose,
+    categories,
+    isEntry,
+    entry,
+    onUpdate,
+    onCreate,
+    onDelete,
+    dayIdx,
+    slotIdx,
+    span,
+  ]);
 
   return (
     <div
@@ -701,12 +743,18 @@ function CellModal({
         </header>
 
         <div className="space-y-1.5">
-          <p className="font-technical text-[10.5px] uppercase tracking-[0.16em] text-muted-foreground">
-            카테고리
-          </p>
+          <div className="flex items-center justify-between">
+            <p className="font-technical text-[10.5px] uppercase tracking-[0.16em] text-muted-foreground">
+              카테고리
+            </p>
+            <p className="font-technical text-[9.5px] uppercase tracking-[0.12em] text-muted-foreground opacity-70">
+              1-9 단축
+            </p>
+          </div>
           <div className="grid grid-cols-2 gap-2">
-            {categories.map((c) => {
+            {categories.map((c, i) => {
               const active = currentCat?.id === c.id;
+              const digit = i < 9 ? i + 1 : null;
               return (
                 <button
                   key={c.id}
@@ -729,7 +777,12 @@ function CellModal({
                     className="inline-block h-3 w-3 rounded-[3px] border border-black/10"
                     style={{ background: c.color_hex }}
                   />
-                  <span className="truncate">{c.label}</span>
+                  <span className="truncate flex-1">{c.label}</span>
+                  {digit !== null && (
+                    <kbd className="font-technical shrink-0 rounded-sm border border-border/80 bg-muted/60 px-1 py-0.5 text-[9.5px] text-muted-foreground">
+                      {digit}
+                    </kbd>
+                  )}
                 </button>
               );
             })}

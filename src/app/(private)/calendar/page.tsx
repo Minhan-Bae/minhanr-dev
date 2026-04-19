@@ -6,6 +6,7 @@ import { startOfWeekSundayKST, shiftWeek, DAY_COUNT, DAY_MS } from "@/lib/time/w
 import { BlockGrid } from "@/components/time/block-grid";
 import { WeekNav } from "@/components/time/week-nav";
 import { SeedCategoriesButton } from "@/components/time/seed-categories-button";
+import { DuplicateWeekButton } from "@/components/time/duplicate-week-button";
 
 export const metadata = {
   title: "Calendar | minhanr.dev",
@@ -64,6 +65,10 @@ export default async function CalendarPage({ searchParams }: PageProps) {
             prevIso={prevWeek}
             nextIso={nextWeek}
             thisWeekIso={thisWeek}
+          />
+          <DuplicateWeekButton
+            weekStartIso={safeWeekStart.toISOString()}
+            currentWeekCount={entries.length}
           />
           <Link
             href="/calendar/categories"
