@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, ArrowUpRight } from "lucide-react";
+import { PostBody } from "@/components/blog/post-body";
 import {
   getPostBySlug,
   getAllSlugs,
@@ -171,7 +172,8 @@ export default async function BlogPostPage({
       <section className="mx-auto mt-16 w-full max-w-[1440px] px-6 pb-24 sm:mt-20 sm:px-10 sm:pb-32">
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,900px)_minmax(180px,220px)] lg:justify-center lg:gap-16">
           <RevealOnScroll as="div">
-          <article
+          <PostBody
+            html={post.content}
             className="prose prose-lg dark:prose-invert max-w-none
               prose-headings:font-display prose-headings:font-normal prose-headings:tracking-[-0.015em] prose-headings:text-foreground
               prose-h2:text-[clamp(1.75rem,3vw,2.25rem)] prose-h2:mt-16 prose-h2:mb-5 prose-h2:leading-tight prose-h2:scroll-mt-24
@@ -194,7 +196,6 @@ export default async function BlogPostPage({
               prose-table:text-sm prose-table:border-collapse
               prose-th:text-foreground prose-th:font-semibold prose-th:border-b prose-th:border-[var(--hairline)] prose-th:py-3 prose-th:px-4
               prose-td:border-b prose-td:border-[var(--hairline)] prose-td:py-3 prose-td:px-4"
-            dangerouslySetInnerHTML={{ __html: post.content }}
           />
           </RevealOnScroll>
 
@@ -267,16 +268,6 @@ export default async function BlogPostPage({
               />
               All writing
             </Link>
-            <a
-              href="/feed.xml"
-              className="group font-technical inline-flex items-center gap-2 text-[13px] uppercase tracking-[0.16em] text-muted-foreground transition-colors hover:text-foreground"
-            >
-              RSS
-              <ArrowUpRight
-                className="h-4 w-4 transition-all duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
-                strokeWidth={1.5}
-              />
-            </a>
           </div>
         </div>
       </section>

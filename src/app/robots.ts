@@ -2,39 +2,78 @@ import type { MetadataRoute } from "next";
 import { SITE_URL } from "@/lib/site";
 
 /**
- * 3-Tier 정책 (src/lib/vault-tiers.ts):
- * - Tier 1 (allow): /, /blog, /blog/[slug]
- * - Tier 2 (페이지 metadata noindex로 처리, robots에선 차단하지 않음):
- *   /papers, /projects, /notes/{whitelisted}/...md 는 OG 언펄/공유 페치를
- *   허용해야 하므로 disallow하지 않는다.
- * - Tier 3 (disallow): 인증 필요 surface. 미들웨어가 /login으로 redirect하지만,
- *   robots에서도 명시적으로 차단해 크롤 예산 낭비 방지.
+ * 크롤링 정책
  *
- * NOTE: /notes는 disallow에서 제외한다. 정확 매칭(/notes 검색 인덱스)만 Tier 3이고
- * /notes/{...}는 Tier 2일 수 있는데, robots.txt prefix 매칭으로는 둘을 구분할 수
- * 없다. 인덱스 페이지는 미들웨어 + 페이지 noindex로 충분히 보호된다.
+ * 1) Standard crawlers (검색 엔진 봇)
+ *    - Tier 1 (allow): /, /blog, /blog/[slug], /about, /studio
+ *    - Tier 3 (disallow): 인증 필요 surface. 미들웨어가 /login으로
+ *      리다이렉트하지만 robots에서도 명시적으로 차단해 크롤 예산을
+ *      낭비하지 않게 한다.
+ *    - /notes 는 prefix 매칭으로 Tier 2 /notes/{whitelist} 를
+ *      잘라낼 수 없어 미들웨어 + 페이지 noindex 로 보호한다.
+ *
+ * 2) AI / LLM 학습 크롤러 (별도 block)
+ *    수집한 콘텐츠가 학습 데이터로 빨려 들어가는 걸 원하지 않는다.
+ *    Known bot User-Agent 전부를 `disallow: "/"` 로 일괄 차단.
+ *    완전한 차단은 불가능 (악성 크롤러는 UA 위장) — 합법적이고
+ *    UA를 명시하는 쪽만 막는다. 나머지는 Cloudflare 방어막 수준.
  */
+const AI_CRAWLERS = [
+  "GPTBot",            // OpenAI
+  "ChatGPT-User",      // OpenAI — realtime browsing
+  "OAI-SearchBot",     // OpenAI — search index
+  "ClaudeBot",         // Anthropic
+  "Claude-Web",        // Anthropic — realtime
+  "anthropic-ai",      // Anthropic (legacy UA)
+  "Google-Extended",   // Google Bard/Vertex learning signal
+  "GoogleOther",       // Google — product dev/training
+  "CCBot",             // Common Crawl (Apache)
+  "PerplexityBot",     // Perplexity AI
+  "Amazonbot",         // Amazon Alexa / Rufus
+  "Applebot-Extended", // Apple Intelligence
+  "Bytespider",        // ByteDance / Doubao
+  "Meta-ExternalAgent",// Meta LLM training
+  "FacebookBot",       // Meta older UA
+  "cohere-ai",         // Cohere
+  "DuckAssistBot",     // DuckDuckGo AI answers
+  "YouBot",            // You.com
+  "Omgilibot",         // Omgili / Webz.io
+  "Diffbot",           // Diffbot crawler
+  "ImagesiftBot",      // ByteDance image crawl
+  "magpie-crawler",    // Brandwatch
+  "SemrushBot",        // SEO — not LLM but aggressive
+  "AhrefsBot",         // SEO — aggressive
+];
 
 export default function robots(): MetadataRoute.Robots {
+  const tier3Disallow = [
+    "/admin",
+    "/dashboard",
+    "/command",
+    "/calendar",
+    "/finance",
+    "/trends",
+    "/review",
+    "/deadlines",
+    "/links",
+    "/tags",
+    "/statistics",
+    "/api/",
+  ];
+
   return {
-    rules: {
-      userAgent: "*",
-      allow: "/",
-      disallow: [
-        "/admin",
-        "/dashboard",
-        "/command",
-        "/calendar",
-        "/finance",
-        "/trends",
-        "/review",
-        "/deadlines",
-        "/links",
-        "/tags",
-        "/statistics",
-        "/api/",
-      ],
-    },
+    rules: [
+      {
+        userAgent: "*",
+        allow: "/",
+        disallow: tier3Disallow,
+      },
+      // LLM / AI training crawlers — full site block.
+      ...AI_CRAWLERS.map((ua) => ({
+        userAgent: ua,
+        disallow: "/",
+      })),
+    ],
     sitemap: `${SITE_URL}/sitemap.xml`,
   };
 }
