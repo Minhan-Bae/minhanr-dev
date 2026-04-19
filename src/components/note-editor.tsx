@@ -93,16 +93,14 @@ function makeWikilinkSource(
 export function NoteEditor({ path, initialContent }: NoteEditorProps) {
   const router = useRouter();
   const [content, setContent] = useState(initialContent);
+  const [savedContent, setSavedContent] = useState(initialContent);
   const [saveState, setSaveState] = useState<SaveState>({ kind: "idle" });
   const [pending, startTransition] = useTransition();
   const [notes, setNotes] = useState<NotePathItem[]>([]);
 
-  const contentRef = useRef(content);
-  contentRef.current = content;
-  const savedRef = useRef(initialContent);
   const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const dirty = content !== savedRef.current;
+  const dirty = content !== savedContent;
 
   // ── 노트 리스트 fetch (wikilink 대상) ──────────────────────────
   useEffect(() => {
@@ -128,7 +126,6 @@ export function NoteEditor({ path, initialContent }: NoteEditorProps) {
   );
 
   // ── R2 paste/drop upload ──────────────────────────────────
-  const editorViewRef = useRef<EV | null>(null);
   const [uploadState, setUploadState] = useState<
     | { kind: "idle" }
     | { kind: "uploading"; name: string }
@@ -161,11 +158,10 @@ export function NoteEditor({ path, initialContent }: NoteEditorProps) {
 
   /**
    * 에디터 편집 위치에 텍스트 삽입. CodeMirror EditorView의 dispatch로
-   * 트랜잭션 실행 — onChange는 자동으로 content 상태 동기.
+   * 트랜잭션 실행 — onChange는 자동으로 content 상태 동기. View는
+   * domEventHandlers 콜백이 두 번째 인자로 넘겨주므로 ref 불필요.
    */
-  const insertAtCursor = useCallback((text: string) => {
-    const view = editorViewRef.current;
-    if (!view) return;
+  const insertAtCursor = useCallback((view: EV, text: string) => {
     const { from } = view.state.selection.main;
     view.dispatch({
       changes: { from, insert: text },
@@ -175,14 +171,14 @@ export function NoteEditor({ path, initialContent }: NoteEditorProps) {
   }, []);
 
   const handlePasteOrDrop = useCallback(
-    async (files: FileList | File[]) => {
+    async (view: EV, files: FileList | File[]) => {
       const images = Array.from(files).filter((f) => f.type.startsWith("image/"));
       if (images.length === 0) return;
       for (const f of images) {
         const url = await uploadFile(f);
         if (url) {
           const alt = f.name.replace(/\.[^.]+$/, "");
-          insertAtCursor(`\n![${alt}](${url})\n`);
+          insertAtCursor(view, `\n![${alt}](${url})\n`);
         }
       }
     },
@@ -192,7 +188,7 @@ export function NoteEditor({ path, initialContent }: NoteEditorProps) {
   // CodeMirror DOM event extensions
   const pasteDropExtension = useMemo<Extension>(() => {
     return EditorView.domEventHandlers({
-      paste: (event) => {
+      paste: (event, view) => {
         const items = event.clipboardData?.items;
         if (!items) return false;
         const files: File[] = [];
@@ -204,14 +200,14 @@ export function NoteEditor({ path, initialContent }: NoteEditorProps) {
         }
         if (files.length === 0) return false;
         event.preventDefault();
-        handlePasteOrDrop(files);
+        handlePasteOrDrop(view, files);
         return true;
       },
-      drop: (event) => {
+      drop: (event, view) => {
         const files = event.dataTransfer?.files;
         if (!files || files.length === 0) return false;
         event.preventDefault();
-        handlePasteOrDrop(files);
+        handlePasteOrDrop(view, files);
         return true;
       },
     });
@@ -220,13 +216,13 @@ export function NoteEditor({ path, initialContent }: NoteEditorProps) {
   // ── Save ────────────────────────────────────────────────────
   const save = useCallback(
     (explicit = false) => {
-      const current = contentRef.current;
-      if (current === savedRef.current) return;
+      if (content === savedContent) return;
+      const current = content;
       setSaveState({ kind: "saving" });
       startTransition(async () => {
         const res = await saveNoteContentAction(path, current);
         if (res.ok) {
-          savedRef.current = current;
+          setSavedContent(current);
           setSaveState({ kind: "ok", at: Date.now() });
           if (explicit) {
             router.push(
@@ -239,7 +235,7 @@ export function NoteEditor({ path, initialContent }: NoteEditorProps) {
         }
       });
     },
-    [path, router]
+    [content, savedContent, path, router]
   );
 
   // ── Auto-save debounce ─────────────────────────────────────
@@ -376,9 +372,6 @@ export function NoteEditor({ path, initialContent }: NoteEditorProps) {
         <CodeMirror
           value={content}
           onChange={(v) => setContent(v)}
-          onCreateEditor={(view) => {
-            editorViewRef.current = view;
-          }}
           extensions={extensions}
           basicSetup={{
             lineNumbers: false,

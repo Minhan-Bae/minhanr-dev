@@ -71,7 +71,7 @@ function WorkIndexHeroSlide({ count }: { count: number }) {
           className="mt-6 max-w-xl text-[15px] leading-[1.7] text-muted-foreground sm:text-base animate-fade-up"
           style={{ animationDelay: "360ms" }}
         >
-          Ordered the way I'd walk a visitor through them — not by date,
+          Ordered the way I&rsquo;d walk a visitor through them — not by date,
           not by scale. How the pieces interlock is what reads first.
           Wheel, swipe, or press space to advance.
         </p>

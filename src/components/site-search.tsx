@@ -100,10 +100,6 @@ export function SiteSearch({ items }: { items: SiteSearchItem[] }) {
     return scored.slice(0, 10).map((x) => x.item);
   }, [items, query]);
 
-  useEffect(() => {
-    setSelected(0);
-  }, [query]);
-
   function onInputKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
     if (e.key === "Escape") {
       close();
@@ -146,7 +142,10 @@ export function SiteSearch({ items }: { items: SiteSearchItem[] }) {
             ref={inputRef}
             type="search"
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => {
+              setQuery(e.target.value);
+              setSelected(0);
+            }}
             onKeyDown={onInputKeyDown}
             placeholder="제목 · 태그 · 요약 검색…"
             aria-label="노트 검색"

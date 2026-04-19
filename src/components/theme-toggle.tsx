@@ -29,6 +29,12 @@ export function ThemeToggle() {
   const [theme, setTheme] = useState<Theme>("dark");
 
   useEffect(() => {
+    // Intentional setState-in-effect: the inline script in layout.tsx has
+    // already applied the persisted theme class to <html> before hydration,
+    // so reading documentElement post-mount is the only way to learn what
+    // theme is actually live. The mounted gate below prevents the
+    // hydration mismatch that would otherwise result.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setTheme(
       document.documentElement.classList.contains("light") ? "light" : "dark"
     );

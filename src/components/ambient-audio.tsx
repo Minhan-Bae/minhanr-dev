@@ -84,10 +84,13 @@ export function AmbientToggle() {
   );
 
   // Mount: restore persisted preference, but never auto-play without gesture.
+  // Reading localStorage requires post-mount setState (intentional one-time
+  // hydration of client-only state); the mount gate below masks the SSR/CSR
+  // mismatch so the cascade is purely visual setup.
   useEffect(() => {
+    let initialEnabled = false;
     try {
-      const saved = localStorage.getItem(AMBIENT_KEY);
-      if (saved === "1") setEnabled(true);
+      initialEnabled = localStorage.getItem(AMBIENT_KEY) === "1";
     } catch {}
     const t = getActiveTheme();
     themeRef.current = t;
@@ -95,6 +98,8 @@ export function AmbientToggle() {
       audioRef.current.src = TRACKS[t];
       audioRef.current.volume = 0;
     }
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (initialEnabled) setEnabled(true);
     setMounted(true);
   }, []);
 

@@ -7,7 +7,6 @@ import {
   DAY_MS,
   startOfWeekSundayKST,
 } from "@/lib/time/week";
-import { getCachedVaultIndex, listNotes, aggregate, KB_HUB_HIDDEN_STATUSES } from "@/lib/vault-index";
 import { getVaultStats, listNotesFromSupabase } from "@/lib/notes-supabase";
 import { createSupabaseAdmin } from "@/lib/supabase-admin";
 import { isoWeek } from "@/lib/time";
@@ -50,51 +49,16 @@ function fmtHours(min: number): string {
 // ─── Tier 1 ──────────────────────────────────────────────────────
 
 export async function TimeHubCard() {
+  let cats: Awaited<ReturnType<typeof listCategories>>;
+  let entries: Awaited<ReturnType<typeof listEntriesInRange>>;
+  const now = new Date();
   try {
-    const now = new Date();
     const weekStart = startOfWeekSundayKST(now);
     const weekEnd = new Date(weekStart.getTime() + DAY_COUNT * DAY_MS);
-    const [cats, entries] = await Promise.all([
+    [cats, entries] = await Promise.all([
       listCategories(),
       listEntriesInRange(weekStart.toISOString(), weekEnd.toISOString()),
     ]);
-
-    const totalMinutes = entries.reduce((s, e) => s + e.duration_minutes, 0);
-    const todayYmd = kstYmd(now);
-    const todayCount = entries.filter((e) => kstYmd(new Date(e.slot_start)) === todayYmd).length;
-
-    // Dominant category (highest minutes)
-    const catSums = new Map<string, number>();
-    for (const e of entries) {
-      const k = e.category_id ?? "__none";
-      catSums.set(k, (catSums.get(k) ?? 0) + e.duration_minutes);
-    }
-    let topLabel: string | null = null;
-    if (catSums.size > 0) {
-      const [topId] = [...catSums.entries()].sort((a, b) => b[1] - a[1])[0];
-      topLabel = cats.find((c) => c.id === topId)?.label ?? null;
-    }
-
-    return (
-      <ToolCard
-        kicker="Time · 01"
-        title="Time blocks"
-        description={cats.length === 0 ? "아직 카테고리 없음" : "30분 단위 주간 타임박스 · 일요일 시작"}
-        href="/calendar"
-        icon={Calendar}
-        primary={{ value: fmtHours(totalMinutes), label: "This week" }}
-        secondary={[
-          { label: "Today", value: String(todayCount) + " blocks" },
-          ...(topLabel ? [{ label: "Top", value: topLabel, tint: "primary" as const }] : []),
-        ]}
-      >
-        {cats.length > 0 && (
-          <div className="-mt-1 flex justify-end">
-            <QuickBlockButton categories={cats} />
-          </div>
-        )}
-      </ToolCard>
-    );
   } catch {
     return (
       <ToolCard
@@ -107,51 +71,59 @@ export async function TimeHubCard() {
       />
     );
   }
+
+  const totalMinutes = entries.reduce((s, e) => s + e.duration_minutes, 0);
+  const todayYmd = kstYmd(now);
+  const todayCount = entries.filter((e) => kstYmd(new Date(e.slot_start)) === todayYmd).length;
+
+  // Dominant category (highest minutes)
+  const catSums = new Map<string, number>();
+  for (const e of entries) {
+    const k = e.category_id ?? "__none";
+    catSums.set(k, (catSums.get(k) ?? 0) + e.duration_minutes);
+  }
+  let topLabel: string | null = null;
+  if (catSums.size > 0) {
+    const [topId] = [...catSums.entries()].sort((a, b) => b[1] - a[1])[0];
+    topLabel = cats.find((c) => c.id === topId)?.label ?? null;
+  }
+
+  return (
+    <ToolCard
+      kicker="Time · 01"
+      title="Time blocks"
+      description={cats.length === 0 ? "아직 카테고리 없음" : "30분 단위 주간 타임박스 · 일요일 시작"}
+      href="/calendar"
+      icon={Calendar}
+      primary={{ value: fmtHours(totalMinutes), label: "This week" }}
+      secondary={[
+        { label: "Today", value: String(todayCount) + " blocks" },
+        ...(topLabel ? [{ label: "Top", value: topLabel, tint: "primary" as const }] : []),
+      ]}
+    >
+      {cats.length > 0 && (
+        <div className="-mt-1 flex justify-end">
+          <QuickBlockButton categories={cats} />
+        </div>
+      )}
+    </ToolCard>
+  );
 }
 
 export async function DeadlinesHubCard() {
-  try {
-    const now = new Date();
-    const todayIso = kstYmd(now);
-    const in7 = kstYmd(new Date(now.getTime() + 7 * 86400000));
+  const now = new Date();
+  const todayIso = kstYmd(now);
+  const in7 = kstYmd(new Date(now.getTime() + 7 * 86400000));
 
+  let rows: Array<{ deadline: unknown; workflow: unknown; publish: unknown; lifecycle_state: unknown }> = [];
+  try {
     const sb = createSupabaseAdmin();
     const { data } = await sb
       .from("vault_notes")
       .select("deadline,workflow,publish,lifecycle_state")
       .not("deadline", "is", null)
       .neq("lifecycle_state", "archived");
-
-    let overdue = 0;
-    let today = 0;
-    let thisWeek = 0;
-    for (const r of data ?? []) {
-      const dl = typeof r.deadline === "string" ? r.deadline : "";
-      if (!/^\d{4}-\d{2}-\d{2}/.test(dl)) continue;
-      if (r.publish === "published") continue;
-      if (r.workflow === "completed" || r.workflow === "paused") continue;
-      if (dl < todayIso) overdue++;
-      else if (dl === todayIso) today++;
-      else if (dl <= in7) thisWeek++;
-    }
-
-    const total = overdue + today + thisWeek;
-
-    return (
-      <ToolCard
-        kicker="Deadlines · 02"
-        title="마감일"
-        description={total === 0 ? "다가오는 마감 없음" : "7일 이내 마감 기준"}
-        href="/deadlines"
-        icon={Clock}
-        primary={{ value: String(total), label: "Upcoming" }}
-        secondary={[
-          ...(overdue > 0 ? [{ label: "Overdue", value: String(overdue), tint: "danger" as const }] : []),
-          { label: "Today", value: String(today), tint: today > 0 ? ("primary" as const) : undefined },
-          { label: "Week", value: String(thisWeek) },
-        ]}
-      />
-    );
+    rows = data ?? [];
   } catch {
     return (
       <ToolCard
@@ -164,26 +136,43 @@ export async function DeadlinesHubCard() {
       />
     );
   }
+
+  let overdue = 0;
+  let today = 0;
+  let thisWeek = 0;
+  for (const r of rows) {
+    const dl = typeof r.deadline === "string" ? r.deadline : "";
+    if (!/^\d{4}-\d{2}-\d{2}/.test(dl)) continue;
+    if (r.publish === "published") continue;
+    if (r.workflow === "completed" || r.workflow === "paused") continue;
+    if (dl < todayIso) overdue++;
+    else if (dl === todayIso) today++;
+    else if (dl <= in7) thisWeek++;
+  }
+
+  const total = overdue + today + thisWeek;
+
+  return (
+    <ToolCard
+      kicker="Deadlines · 02"
+      title="마감일"
+      description={total === 0 ? "다가오는 마감 없음" : "7일 이내 마감 기준"}
+      href="/deadlines"
+      icon={Clock}
+      primary={{ value: String(total), label: "Upcoming" }}
+      secondary={[
+        ...(overdue > 0 ? [{ label: "Overdue", value: String(overdue), tint: "danger" as const }] : []),
+        { label: "Today", value: String(today), tint: today > 0 ? ("primary" as const) : undefined },
+        { label: "Week", value: String(thisWeek) },
+      ]}
+    />
+  );
 }
 
 export async function KnowledgeHubCard() {
+  let stats: Awaited<ReturnType<typeof getVaultStats>>;
   try {
-    const stats = await getVaultStats();
-    return (
-      <ToolCard
-        kicker="Knowledge · 03"
-        title="Vault"
-        description="Supabase FTS · 3-tier knowledge base"
-        href="/notes"
-        icon={FileText}
-        primary={{ value: String(stats.total), label: "Notes" }}
-        secondary={[
-          { label: "Growing", value: String(stats.growing), tint: "primary" as const },
-          { label: "Mature", value: String(stats.mature) },
-          { label: "Published", value: String(stats.published) },
-        ]}
-      />
-    );
+    stats = await getVaultStats();
   } catch {
     return (
       <ToolCard
@@ -196,6 +185,21 @@ export async function KnowledgeHubCard() {
       />
     );
   }
+  return (
+    <ToolCard
+      kicker="Knowledge · 03"
+      title="Vault"
+      description="Supabase FTS · 3-tier knowledge base"
+      href="/notes"
+      icon={FileText}
+      primary={{ value: String(stats.total), label: "Notes" }}
+      secondary={[
+        { label: "Growing", value: String(stats.growing), tint: "primary" as const },
+        { label: "Mature", value: String(stats.mature) },
+        { label: "Published", value: String(stats.published) },
+      ]}
+    />
+  );
 }
 
 export function FinanceHubCard() {
@@ -213,27 +217,18 @@ export function FinanceHubCard() {
 // ─── Tier 2 ──────────────────────────────────────────────────────
 
 export async function ProjectsHubCard() {
+  let active: Awaited<ReturnType<typeof listNotesFromSupabase>>["notes"];
+  let total: number;
   try {
-    const { notes: active, total } = await listNotesFromSupabase({
+    const result = await listNotesFromSupabase({
       folder: "020_Projects/",
       lifecycleState: "active",
       excludePublish: ["published"],
       sort: "updated_desc",
       limit: 100,
     });
-    const masters = active.filter((p) => /_Master\.md$/.test(p.path)).length;
-
-    return (
-      <ToolCard
-        kicker="Projects · 05"
-        title="Active projects"
-        description="020_Projects · lifecycle active"
-        href="/notes?folder=020_Projects"
-        icon={FolderOpen}
-        primary={{ value: String(total), label: "Active" }}
-        secondary={[{ label: "Masters", value: String(masters) }]}
-      />
-    );
+    active = result.notes;
+    total = result.total;
   } catch {
     return (
       <ToolCard
@@ -245,39 +240,35 @@ export async function ProjectsHubCard() {
       />
     );
   }
+  const masters = active.filter((p) => /_Master\.md$/.test(p.path)).length;
+
+  return (
+    <ToolCard
+      kicker="Projects · 05"
+      title="Active projects"
+      description="020_Projects · lifecycle active"
+      href="/notes?folder=020_Projects"
+      icon={FolderOpen}
+      primary={{ value: String(total), label: "Active" }}
+      secondary={[{ label: "Masters", value: String(masters) }]}
+    />
+  );
 }
 
 export async function WeeklyHubCard() {
+  const now = new Date();
+  const thisIso = isoWeek(kstYmd(now));
+  const lastIso = isoWeek(kstYmd(new Date(now.getTime() - 7 * 86400000)));
+  const thisPath = `010_Daily/Weekly/${thisIso}.md`;
+  const lastPath = `010_Daily/Weekly/${lastIso}.md`;
+  let foundPaths: string[] = [];
   try {
-    const now = new Date();
-    const thisIso = isoWeek(kstYmd(now));
-    const lastIso = isoWeek(kstYmd(new Date(now.getTime() - 7 * 86400000)));
-    const thisPath = `010_Daily/Weekly/${thisIso}.md`;
-    const lastPath = `010_Daily/Weekly/${lastIso}.md`;
     const sb = createSupabaseAdmin();
     const { data } = await sb
       .from("vault_notes")
       .select("path")
       .in("path", [thisPath, lastPath]);
-    const found = new Set((data ?? []).map((r) => r.path));
-    const hasThis = found.has(thisPath);
-    const hasLast = found.has(lastPath);
-
-    const primary = hasThis ? "✓ This week" : hasLast ? "Due now" : "Pending";
-
-    return (
-      <ToolCard
-        kicker="Weekly · 06"
-        title="주간 회고"
-        description="이번 주 리뷰 + 지난 주 리뷰 상태"
-        href="/review/weekly"
-        icon={CalendarCheck}
-        primary={{ value: primary, label: thisIso }}
-        secondary={[
-          { label: "Last week", value: hasLast ? "✓" : "—", tint: hasLast ? undefined : ("danger" as const) },
-        ]}
-      />
-    );
+    foundPaths = (data ?? []).map((r) => r.path);
   } catch {
     return (
       <ToolCard
@@ -289,6 +280,25 @@ export async function WeeklyHubCard() {
       />
     );
   }
+  const found = new Set(foundPaths);
+  const hasThis = found.has(thisPath);
+  const hasLast = found.has(lastPath);
+
+  const primary = hasThis ? "✓ This week" : hasLast ? "Due now" : "Pending";
+
+  return (
+    <ToolCard
+      kicker="Weekly · 06"
+      title="주간 회고"
+      description="이번 주 리뷰 + 지난 주 리뷰 상태"
+      href="/review/weekly"
+      icon={CalendarCheck}
+      primary={{ value: primary, label: thisIso }}
+      secondary={[
+        { label: "Last week", value: hasLast ? "✓" : "—", tint: hasLast ? undefined : ("danger" as const) },
+      ]}
+    />
+  );
 }
 
 export function ReadingHubCard() {

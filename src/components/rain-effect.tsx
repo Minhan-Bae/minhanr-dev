@@ -34,8 +34,11 @@ export function RainEffect() {
 
   // Track the active theme so we can mount/unmount the canvas + engine
   // on theme change. Initial value is set in a mount effect to avoid
-  // the SSR/hydration mismatch from reading `<html>` at render time.
+  // the SSR/hydration mismatch from reading `<html>` at render time —
+  // the post-mount setState is intentional (subscribe + initial sync
+  // pattern from an external system, the DOM `<html>` class).
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setTheme(getActiveTheme());
     return observeTheme((next) => setTheme(next));
   }, []);
@@ -48,7 +51,7 @@ export function RainEffect() {
     let raindrops: Raindrops | null = null;
     let renderer: RainRenderer | null = null;
     let cancelled = false;
-    let currentTheme: SceneTheme = theme;
+    const currentTheme: SceneTheme = theme;
 
     const resize = () => {
       if (!canvas) return;

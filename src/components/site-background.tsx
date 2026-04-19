@@ -31,6 +31,10 @@ export function SiteBackground() {
 
   useEffect(() => {
     const t = getActiveTheme();
+    // Initial sync from the external system (DOM <html> class). The
+    // observe subscription below handles further updates via setState
+    // inside its own callback, which the rule allows.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setTheme(t);
     setScene(getCurrentScene(t));
 

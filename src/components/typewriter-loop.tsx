@@ -12,7 +12,7 @@ import {
   playTypewriterClick,
 } from "@/lib/typewriter-sfx";
 
-type Phase = "typing" | "hold" | "erasing" | "pause";
+type Phase = "typing" | "erasing";
 
 interface TypewriterLoopProps {
   /** Text to type/erase on loop. */
@@ -124,21 +124,23 @@ export function TypewriterLoop({
           if (sfx) playTypewriterClick();
         }, typeDelay);
       } else {
-        timerRef.current = window.setTimeout(() => setPhase("hold"), holdMs);
+        // Hold the fully-typed wordmark on screen, then flip straight to
+        // erasing. Folding the hold into this timeout (rather than going
+        // through an intermediate `phase = "hold"`) avoids a cascading
+        // setState-in-effect render.
+        timerRef.current = window.setTimeout(() => setPhase("erasing"), holdMs);
       }
-    } else if (phase === "hold") {
-      setPhase("erasing");
-    } else if (phase === "erasing") {
+    } else {
       if (visibleCount > 0) {
         timerRef.current = window.setTimeout(() => {
           setVisibleCount((c) => c - 1);
           if (sfx) playTypewriterClick({ volume: 0.07 });
         }, eraseDelay);
       } else {
-        timerRef.current = window.setTimeout(() => setPhase("pause"), pauseMs);
+        // Same trick on the empty side: pause, then jump straight back to
+        // typing without an intermediate phase.
+        timerRef.current = window.setTimeout(() => setPhase("typing"), pauseMs);
       }
-    } else if (phase === "pause") {
-      setPhase("typing");
     }
 
     return clearTimer;
