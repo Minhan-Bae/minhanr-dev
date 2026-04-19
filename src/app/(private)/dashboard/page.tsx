@@ -10,6 +10,9 @@ import {
   WeeklyHubCard,
   ReadingHubCard,
   HabitsHubCard,
+  GoalsHubCard,
+  CRMHubCard,
+  IdeasHubCard,
 } from "@/components/dashboard/hub-cards";
 import { getCachedVaultIndex, aggregate } from "@/lib/vault-index";
 
@@ -145,6 +148,21 @@ export default async function DashboardPage() {
           </Suspense>
           <ReadingHubCard />
           <HabitsHubCard />
+        </div>
+      </section>
+
+      {/* ─── Tier 3 Hub (monthly) ────────────────────────────────── */}
+      <section className="hairline-t pt-6 sm:pt-8">
+        <header className="mb-5 flex items-baseline justify-between">
+          <p className="kicker">Tier 3 · 월 단위</p>
+          <p className="font-technical text-[10.5px] uppercase tracking-[0.14em] text-muted-foreground">
+            goals · crm · ideas
+          </p>
+        </header>
+        <div className="grid gap-4 sm:grid-cols-3">
+          <GoalsHubCard />
+          <CRMHubCard />
+          <IdeasHubCard />
         </div>
       </section>
 

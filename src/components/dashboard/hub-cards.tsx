@@ -1,5 +1,6 @@
-import { Calendar, Clock, FileText, Wallet, FolderOpen, CalendarCheck, BookOpen, Activity } from "lucide-react";
+import { Calendar, Clock, FileText, Wallet, FolderOpen, CalendarCheck, BookOpen, Activity, Target, Users, Lightbulb } from "lucide-react";
 import { ToolCard } from "@/components/dashboard/tool-card";
+import { QuickBlockButton } from "@/components/dashboard/quick-block-button";
 import { listCategories, listEntriesInRange } from "@/lib/actions/time";
 import {
   DAY_COUNT,
@@ -84,7 +85,13 @@ export async function TimeHubCard() {
           { label: "Today", value: String(todayCount) + " blocks" },
           ...(topLabel ? [{ label: "Top", value: topLabel, tint: "primary" as const }] : []),
         ]}
-      />
+      >
+        {cats.length > 0 && (
+          <div className="-mt-1 flex justify-end" onClick={(e) => e.preventDefault()}>
+            <QuickBlockButton categories={cats} />
+          </div>
+        )}
+      </ToolCard>
     );
   } catch {
     return (
@@ -306,6 +313,44 @@ export function HabitsHubCard() {
       title="Habits & Health"
       description="습관 · 운동 · 수면 · 집중 (구현 예정)"
       icon={Activity}
+      disabled
+    />
+  );
+}
+
+// ─── Tier 3 (monthly / long) ──────────────────────────────────────
+
+export function GoalsHubCard() {
+  return (
+    <ToolCard
+      kicker="Goals · 10"
+      title="Goals & OKRs"
+      description="월 · 분기 목표 · OKR 추적 (구현 예정)"
+      icon={Target}
+      disabled
+    />
+  );
+}
+
+export function CRMHubCard() {
+  return (
+    <ToolCard
+      kicker="CRM · 11"
+      title="Connections"
+      description="인맥 · 미팅 · 팔로우업 (구현 예정)"
+      icon={Users}
+      disabled
+    />
+  );
+}
+
+export function IdeasHubCard() {
+  return (
+    <ToolCard
+      kicker="Ideas · 12"
+      title="Ideas backlog"
+      description="잠재 프로젝트 · 실험 아이디어 (구현 예정)"
+      icon={Lightbulb}
       disabled
     />
   );
