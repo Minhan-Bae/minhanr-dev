@@ -15,6 +15,7 @@ import { revalidatePath } from "next/cache";
 import { requireUser } from "@/lib/api-auth";
 import { updateFrontmatterField } from "@/lib/vault-write";
 import { commitToGitHub } from "@/lib/github";
+import { createSupabaseAdmin } from "@/lib/supabase-admin";
 import { nowInKST } from "@/lib/time";
 import { VAULT_PATHS } from "@/lib/vault-paths";
 // Types / consts live in a sibling non-"use server" module because this
@@ -104,6 +105,38 @@ export async function transitionNoteAction(
   const result = await updateFrontmatterField(path, fields, message);
   if (!result.ok) {
     return { ok: false, path, action, error: result.error || "update failed" };
+  }
+
+  // Supabase write-through — vault 커밋 성공 후 `vault_notes` 의 동일
+  // 축 컬럼을 즉시 업데이트. 이렇게 해야 /deadlines · /notes · /graph
+  // 등 Supabase 를 읽는 화면이 action 직후의 revalidatePath 에 맞춰
+  // 새 상태를 반영한다. 벌트 mirror(GHA + vault-sync)는 수 분 뒤에나
+  // 따라오므로 write-through 없이는 UI 가 "안 지워진다" 처럼 보인다.
+  try {
+    const updates: Record<string, unknown> = {
+      edit_source: "studio",
+      last_edited_at: new Date().toISOString(),
+    };
+    if (action === "pause") {
+      updates.workflow = "paused";
+    } else if (action === "complete") {
+      updates.workflow = "completed";
+    } else if (action === "archive") {
+      updates.lifecycle_state = "archived";
+    }
+    const sb = createSupabaseAdmin();
+    const { error: sbErr } = await sb
+      .from("vault_notes")
+      .update(updates)
+      .eq("path", path);
+    if (sbErr) {
+      console.error(
+        `[vault.transitionNote] supabase write-through failed for ${path}:`,
+        sbErr.message,
+      );
+    }
+  } catch (e) {
+    console.error("[vault.transitionNote] supabase write-through error", e);
   }
 
   for (const r of REVALIDATE_PATHS) {

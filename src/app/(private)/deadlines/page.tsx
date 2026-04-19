@@ -1,14 +1,29 @@
 import { Suspense } from "react";
 import { Card, CardContent, CardDescription, CardTitle } from "@/components/ui/card";
-import { VaultUnreachablePrivate } from "@/components/vault-unreachable";
 import { DeadlinesBucket } from "@/components/dashboard/deadlines-bucket";
-import { getCachedVaultIndex } from "@/lib/vault-index";
+import { createSupabaseAdmin } from "@/lib/supabase-admin";
+
+/**
+ * /deadlines — Sprint 3.5. Supabase `vault_notes` 직조회로 전환.
+ *
+ * 이전엔 getCachedVaultIndex (GitHub raw vault_index.json) 를 사용했고,
+ * archive/complete/pause 서버 액션은 vault 만 커밋했다. 그 결과:
+ *   • vault commit → GHA sync → vault_index.json rebuild (5-10 분 지연)
+ *   • /deadlines ISR revalidate (추가 지연)
+ *   → 사용자 입장에서 "삭제를 눌렀는데 안 지워짐" 현상.
+ *
+ * 전환 후:
+ *   • lifecycle_state != 'archived' + deadline IS NOT NULL 조건의
+ *     vault_notes 만 불러옴 (서버측 필터).
+ *   • transitionNoteAction 은 Supabase write-through 로 같은 컬럼을
+ *     즉시 패치 → revalidatePath 직후 새 상태 반영.
+ */
 
 export const metadata = {
   title: "Deadlines | minhanr.dev",
   robots: { index: false, follow: false },
 };
-export const revalidate = 300;
+export const revalidate = 60;
 
 interface DeadlineItem {
   path: string;
@@ -36,27 +51,42 @@ function bucketize(deadline: string, now: Date): DeadlineItem["bucket"] {
 }
 
 async function DeadlinesContent() {
-  let index;
-  try {
-    index = await getCachedVaultIndex();
-  } catch (e) {
-    return <VaultUnreachablePrivate error={e} />;
+  const sb = createSupabaseAdmin();
+  const { data, error } = await sb
+    .from("vault_notes")
+    .select("path,title,deadline,workflow,publish,maturity,priority,lifecycle_state")
+    .not("deadline", "is", null)
+    .neq("lifecycle_state", "archived")
+    .neq("publish", "published")
+    .order("deadline", { ascending: true });
+
+  if (error) {
+    return (
+      <Card className="border-dashed">
+        <CardContent className="py-8 text-center text-sm text-destructive">
+          Supabase 조회 실패: {error.message}
+        </CardContent>
+      </Card>
+    );
   }
+
   const now = new Date();
   const items: DeadlineItem[] = [];
-  for (const [path, rec] of Object.entries(index.notes || {})) {
-    const dl = typeof rec.deadline === "string" ? rec.deadline : "";
+  for (const row of data ?? []) {
+    const dl = typeof row.deadline === "string" ? row.deadline : "";
     if (!/^\d{4}-\d{2}-\d{2}/.test(dl)) continue;
+    // workflow=completed 도 제외 — 이미 완료된 작업은 deadlines 에
+    // 뜰 필요 없음.
+    if (row.workflow === "completed") continue;
     items.push({
-      path,
-      title: deriveTitle(path),
+      path: row.path,
+      title: row.title ?? deriveTitle(row.path),
       deadline: dl,
-      status: typeof rec.status === "string" ? rec.status : undefined,
-      priority: typeof rec.priority === "string" ? rec.priority : undefined,
+      status: row.workflow ?? row.publish ?? row.maturity ?? undefined,
+      priority: row.priority ?? undefined,
       bucket: bucketize(dl, now),
     });
   }
-  items.sort((a, b) => a.deadline.localeCompare(b.deadline));
 
   const groups: Record<DeadlineItem["bucket"], DeadlineItem[]> = {
     overdue: [],
@@ -119,7 +149,7 @@ export default function DeadlinesPage() {
       <div className="space-y-1">
         <h1 className="text-2xl font-bold tracking-tight">Deadlines</h1>
         <p className="text-sm text-muted-foreground">
-          프론트매터 deadline 필드 기반 마감일 트래커
+          프론트매터 deadline 필드 기반 마감일 트래커 · Supabase vault_notes
         </p>
       </div>
       <Suspense fallback={<div className="h-40 skeleton-shimmer rounded-lg bg-muted" />}>
