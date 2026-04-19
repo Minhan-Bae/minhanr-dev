@@ -1,23 +1,17 @@
-import Link from "next/link";
 import { Suspense } from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { StatKpiCard } from "@/components/stat-kpi-card";
-import { DashboardCalendar, type CalendarEvent, type WeekCommitment } from "@/components/dashboard-calendar";
-import { VaultUnreachablePrivate } from "@/components/vault-unreachable";
-import { ActiveProjectsCard } from "@/components/dashboard/active-projects-card";
-import { QuickCapture } from "@/components/dashboard/quick-capture";
-import { TimeThisWeekCard } from "@/components/dashboard/time-this-week-card";
+import Link from "next/link";
 import { TodayStrip } from "@/components/dashboard/today-strip";
-import { FileText, Send, Inbox, Layers } from "lucide-react";
-import { aggregate, getCachedVaultIndex, KB_HUB_HIDDEN_STATUSES, listNotes } from "@/lib/vault-index";
-import { vaultPathToHref } from "@/lib/vault-note";
-import { isoWeek, isoWeekMonday } from "@/lib/time";
+import {
+  TimeHubCard,
+  DeadlinesHubCard,
+  KnowledgeHubCard,
+  FinanceHubCard,
+  ProjectsHubCard,
+  WeeklyHubCard,
+  ReadingHubCard,
+  HabitsHubCard,
+} from "@/components/dashboard/hub-cards";
+import { getCachedVaultIndex, aggregate } from "@/lib/vault-index";
 
 export const metadata = {
   title: "Dashboard | minhanr.dev",
@@ -25,337 +19,30 @@ export const metadata = {
 };
 export const dynamic = "force-dynamic";
 
-function ymd(d: Date): string {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${y}-${m}-${day}`;
-}
-
-function buildMonthGrid(year: number, month0: number) {
-  // returns 6x7 grid of dates (or null) starting Sunday
-  const first = new Date(year, month0, 1);
-  const startOffset = first.getDay();
-  const daysInMonth = new Date(year, month0 + 1, 0).getDate();
-  const cells: Array<{ date: Date; iso: string } | null> = [];
-  for (let i = 0; i < startOffset; i++) cells.push(null);
-  for (let d = 1; d <= daysInMonth; d++) {
-    const date = new Date(year, month0, d);
-    cells.push({ date, iso: ymd(date) });
-  }
-  while (cells.length % 7 !== 0) cells.push(null);
-  return cells;
-}
-
-async function DashboardContent() {
-  let index;
-  try {
-    index = await getCachedVaultIndex();
-  } catch (e) {
-    return <VaultUnreachablePrivate error={e} />;
-  }
-  const agg = aggregate(index);
-
-  const now = new Date();
-  const grid = buildMonthGrid(now.getFullYear(), now.getMonth());
-  const todayIso = ymd(now);
-  const weekAgoIso = ymd(new Date(now.getTime() - 7 * 86400000));
-  const monthStart = ymd(new Date(now.getFullYear(), now.getMonth(), 1));
-  const monthEnd = ymd(new Date(now.getFullYear(), now.getMonth() + 1, 0));
-  const mondayIso = isoWeekMonday(todayIso);
-  const sundayOfWeekMs = new Date(mondayIso + "T00:00:00+09:00").getTime() + 6 * 86400000;
-  const sundayIso = ymd(new Date(sundayOfWeekMs));
-
-  // ── Single-pass aggregation ──
-  let notesThisWeek = 0;
-  let publishedThisWeek = 0;
-  let inboxThisWeek = 0;
-  const linkNotesRaw: Array<{ path: string; created: string; source_url: string; rec: typeof index.notes[string] }> = [];
-  const events: CalendarEvent[] = [];
-  const weekCommitments: WeekCommitment[] = [];
-  let totalNotes = 0;
-
-  for (const [path, rec] of Object.entries(index.notes || {})) {
-    totalNotes += 1;
-    const created = typeof rec.created === "string" ? rec.created : "";
-
-    // Daily note → events (current month only)
-    const dailyMatch = /^010_Daily\/(\d{4}-\d{2}-\d{2})\.md$/.exec(path);
-    if (dailyMatch) {
-      const iso = dailyMatch[1];
-      if (iso >= monthStart && iso <= monthEnd) {
-        events.push({
-          iso,
-          type: "daily",
-          title: `데일리 ${iso}`,
-          href: `/notes/010_Daily/${iso}.md`,
-        });
-      }
-    }
-
-    // Published note in current month
-    if (rec.status === "published" && created >= monthStart && created <= monthEnd) {
-      events.push({
-        iso: created,
-        type: "published",
-        title: (path.split("/").pop() || path).replace(/\.md$/, "").replace(/_/g, " "),
-        href: vaultPathToHref(path),
-      });
-    }
-
-    // Weekly KPIs
-    if (created >= weekAgoIso) {
-      notesThisWeek += 1;
-      if (rec.status === "published") publishedThisWeek += 1;
-      if (path.startsWith("000_Inbox/")) inboxThisWeek += 1;
-    }
-
-    // Recent links
-    if (typeof rec.source_url === "string" && rec.source_url.startsWith("http")) {
-      linkNotesRaw.push({ path, created, source_url: rec.source_url, rec });
-    }
-
-    // Deadlines
-    const dl = typeof rec.deadline === "string" ? rec.deadline : "";
-    if (/^\d{4}-\d{2}-\d{2}/.test(dl)) {
-      // Event on calendar (current month)
-      if (dl >= monthStart && dl <= monthEnd) {
-        events.push({
-          iso: dl,
-          type: "deadline",
-          title: (path.split("/").pop() || path).replace(/\.md$/, "").replace(/_/g, " "),
-          href: vaultPathToHref(path),
-          status: typeof rec.status === "string" ? rec.status : undefined,
-        });
-      }
-      // Commitment: overdue, today, or this-week
-      const st = typeof rec.status === "string" ? rec.status : "";
-      const doneLike = ["published", "archived", "completed", "done"].includes(st);
-      if (!doneLike) {
-        const title = (path.split("/").pop() || path).replace(/\.md$/, "");
-        if (dl < todayIso) {
-          weekCommitments.push({ path, title, deadline: dl, status: st || undefined, priority: typeof rec.priority === "string" ? rec.priority : undefined, bucket: "overdue" });
-        } else if (dl === todayIso) {
-          weekCommitments.push({ path, title, deadline: dl, status: st || undefined, priority: typeof rec.priority === "string" ? rec.priority : undefined, bucket: "today" });
-        } else if (dl >= mondayIso && dl <= sundayIso) {
-          weekCommitments.push({ path, title, deadline: dl, status: st || undefined, priority: typeof rec.priority === "string" ? rec.priority : undefined, bucket: "this_week" });
-        }
-      }
-    }
-  }
-
-  weekCommitments.sort((a, b) => {
-    const order = { overdue: 0, today: 1, this_week: 2 } as const;
-    if (order[a.bucket] !== order[b.bucket]) return order[a.bucket] - order[b.bucket];
-    return a.deadline.localeCompare(b.deadline);
-  });
-
-  // Weekly review 배너: 일요일이거나 지난주 회고가 vault 에 없으면 표시
-  const priorWeek = isoWeek(ymd(new Date(now.getTime() - 7 * 86400000)));
-  const priorWeekPath = `010_Daily/Weekly/${priorWeek}.md`;
-  const hasPriorWeekReview = Boolean(index.notes?.[priorWeekPath]);
-  const isSunday = now.getDay() === 0;
-  const showWeeklyReviewBanner = !hasPriorWeekReview && (isSunday || new Date(sundayIso).getTime() < now.getTime());
-
-  // Sort + slice link notes
-  linkNotesRaw.sort((a, b) => (b.created || "").localeCompare(a.created || ""));
-  const recentLinks = linkNotesRaw.slice(0, 5).map((l) => ({
-    ...l.rec,
-    path: l.path,
-    title: (l.path.split("/").pop() || l.path).replace(/\.md$/, ""),
-  }));
-
-  // 진행 중 프로젝트 top 3 (listNotes는 별도 인덱스 함수, 1패스 안에서 처리 못함)
-  const { notes: activeProjects } = listNotes(index, {
-    folder: "020_Projects/",
-    excludeStatus: [...KB_HUB_HIDDEN_STATUSES],
-    sort: "created_desc",
-    limit: 3,
-  });
-
-  // 추천 (growing top 3)
-  const recommended = agg.recent_growing.slice(0, 3);
-
-  // 최근 노트 5 (published/archived 제외)
-  const { notes: recentNotes } = listNotes(index, {
-    excludeStatus: [...KB_HUB_HIDDEN_STATUSES],
-    sort: "created_desc",
-    limit: 5,
-  });
-
-  return (
-    <div className="space-y-6">
-      {/* Today-at-a-glance — compact strip. Renders ABOVE the KPI
-          grid so the first data the eye meets is "what am I doing
-          right now?" rather than weekly totals. */}
-      <div className="dashboard-snap-section animate-fade-up" style={{ animationDelay: "60ms" }}>
-        <TodayStrip />
-      </div>
-
-      {/* KPI Bento — 4 cards with hover lift. Each card fades up on
-          mount with a 60ms stagger so the row reads as one sweep. */}
-      <div className="dashboard-snap-section grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="hover-lift animate-fade-up" style={{ animationDelay: "0ms" }}><StatKpiCard label="Notes (7d)" value={notesThisWeek} icon={<FileText className="h-8 w-8" />} accentColor="border-l-chart-1" href="/notes" /></div>
-        <div className="hover-lift animate-fade-up" style={{ animationDelay: "60ms" }}><StatKpiCard label="Published" value={publishedThisWeek} icon={<Send className="h-8 w-8" />} accentColor="border-l-chart-2" href="/blog" /></div>
-        <div className="hover-lift animate-fade-up" style={{ animationDelay: "120ms" }}><StatKpiCard label="Inbox" value={inboxThisWeek} icon={<Inbox className="h-8 w-8" />} accentColor="border-l-chart-3" href="/notes" /></div>
-        <div className="hover-lift animate-fade-up" style={{ animationDelay: "180ms" }}><StatKpiCard label="Total Notes" value={totalNotes} icon={<Layers className="h-8 w-8" />} accentColor="border-l-chart-4" href="/notes" /></div>
-      </div>
-
-      {/* Time this week — category roll-up with coloured bars. Sits
-          between KPIs and the month calendar so the first thing the
-          eye hits below the top stats is "where did my week go". */}
-      <div className="dashboard-snap-section animate-fade-up" style={{ animationDelay: "220ms" }}>
-        <TimeThisWeekCard />
-      </div>
-
-      {/* Calendar hero — full-width, keeps internal month grid */}
-      <div className="dashboard-snap-section grid grid-cols-12 gap-4 animate-fade-up" style={{ animationDelay: "260ms" }}>
-        <DashboardCalendar
-          monthLabel={now.toLocaleDateString("ko-KR", { year: "numeric", month: "long" })}
-          grid={grid.map((c) => (c ? { iso: c.iso, day: c.date.getDate() } : null))}
-          todayIso={todayIso}
-          monthStart={monthStart}
-          events={events}
-          weekCommitments={weekCommitments}
-          showWeeklyReviewBanner={showWeeklyReviewBanner}
-        />
-      </div>
-
-      {/* Quick Capture — Inbox 신규 노트 즉시 저장 (Server Action + useOptimistic) */}
-      <div className="dashboard-snap-section animate-fade-up" style={{ animationDelay: "340ms" }}>
-        <QuickCapture />
-      </div>
-
-      {/* Bento row 1 — asymmetric: featured projects (7/12) + compact recommendation (5/12) */}
-      <div className="dashboard-snap-section grid grid-cols-12 gap-4 reveal-up">
-        {/* Active projects — Server Component → Client Component(useOptimistic+ServerAction) */}
-        <ActiveProjectsCard
-          projects={activeProjects.map((p) => ({
-            path: p.path,
-            title: p.title,
-            status: typeof p.status === "string" ? p.status : undefined,
-            priority: typeof p.priority === "string" ? p.priority : undefined,
-            created: typeof p.created === "string" ? p.created : undefined,
-          }))}
-        />
-
-        {/* Recommended — compact sidebar style */}
-        <Card className="col-span-12 lg:col-span-5 hover-lift">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm flex items-center gap-2">
-              <span className="inline-block size-1.5 rounded-full bg-state-growing animate-pulse" />
-              읽을 콘텐츠
-            </CardTitle>
-            <CardDescription className="text-xs">growing 상태</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {recommended.length === 0 ? (
-              <p className="text-xs text-muted-foreground">growing 노트 없음</p>
-            ) : (
-              <ul className="space-y-2.5">
-                {recommended.map((n) => (
-                  <li key={n.path} className="space-y-0.5">
-                    <Link
-                      href={vaultPathToHref(n.path)}
-                      className="text-sm font-medium hover:text-primary truncate block transition-colors"
-                    >
-                      {n.title}
-                    </Link>
-                    <p className="text-[10px] text-muted-foreground/70 truncate font-mono">{n.path}</p>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Bento row 2 — asymmetric flipped: recent notes (5/12) + links timeline (7/12) */}
-      <div className="dashboard-snap-section grid grid-cols-12 gap-4 reveal-up">
-        {/* Recent notes — compact dense list */}
-        <Card className="col-span-12 lg:col-span-5 hover-lift">
-          <CardHeader className="pb-2">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-sm">최근 노트</CardTitle>
-              <Link href="/notes" className="text-xs text-muted-foreground hover:text-primary transition-colors">전체 →</Link>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <ul className="space-y-1.5 text-sm">
-              {recentNotes.map((n) => (
-                <li key={n.path} className="flex items-center justify-between gap-2 py-1 px-2 -mx-2 rounded transition-colors hover:bg-muted/50">
-                  <Link
-                    href={vaultPathToHref(n.path)}
-                    className="truncate hover:text-primary transition-colors"
-                  >
-                    {n.title}
-                  </Link>
-                  <span className="text-xs text-muted-foreground tabular-nums shrink-0">
-                    {n.created || ""}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </CardContent>
-        </Card>
-
-        {/* Recent links — wider timeline with external arrow */}
-        <Card className="col-span-12 lg:col-span-7 hover-lift">
-          <CardHeader className="pb-2">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-sm">최근 링크</CardTitle>
-              <Link href="/links" className="text-xs text-muted-foreground hover:text-primary transition-colors">전체 →</Link>
-            </div>
-          </CardHeader>
-          <CardContent>
-            {recentLinks.length === 0 ? (
-              <p className="text-xs text-muted-foreground">source_url 노트 없음</p>
-            ) : (
-              <ul className="space-y-1.5 text-sm">
-                {recentLinks.map((n) => (
-                  <li key={n.path} className="flex items-center justify-between gap-2 py-1 px-2 -mx-2 rounded transition-colors hover:bg-muted/50">
-                    <a
-                      href={typeof n.source_url === "string" ? n.source_url : "#"}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="truncate hover:text-primary transition-colors inline-flex items-center gap-1.5"
-                    >
-                      <span className="truncate">{n.title}</span>
-                      <span aria-hidden className="text-muted-foreground/50 shrink-0">↗</span>
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-
-      <p className="text-xs text-muted-foreground text-right font-mono">
-        Index: {agg.last_commit_hash} ·{" "}
-        {agg.last_full_scan ? new Date(agg.last_full_scan).toLocaleString() : ""}
-      </p>
-    </div>
-  );
-}
-
-function DashboardSkeleton() {
-  return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {[0,1,2,3].map((i) => <div key={i} className="h-24 rounded-lg skeleton-shimmer" />)}
-      </div>
-      <div className="grid grid-cols-12 gap-4">
-        <div className="col-span-12 h-80 rounded-lg skeleton-shimmer" />
-        <div className="col-span-12 lg:col-span-6 h-48 rounded-lg skeleton-shimmer" />
-        <div className="col-span-12 lg:col-span-6 h-48 rounded-lg skeleton-shimmer" />
-        <div className="col-span-12 lg:col-span-6 h-48 rounded-lg skeleton-shimmer" />
-        <div className="col-span-12 lg:col-span-6 h-48 rounded-lg skeleton-shimmer" />
-      </div>
-    </div>
-  );
-}
-
+/**
+ * Dashboard — the personal management hub.
+ *
+ * Rebuilt from a bento-card dashboard into a morning-briefing hub.
+ * The idea is that every external management tool the studio used to
+ * run in spreadsheets or separate apps (time tracking, finance,
+ * reading queue, habits, …) lives here as a single card. Each card is
+ * a signal + click-through into the tool's dedicated page.
+ *
+ * Layout is editorial to match the public surface vocabulary:
+ *   kicker + font-display h1 greeting
+ *   hairline-t section dividers
+ *   clamp padding
+ *   tool cards in a 4-col / 2-col / 1-col responsive grid
+ *
+ * Tier structure (expert-informed):
+ *   Tier 1 (daily)   Time · Deadlines · Knowledge · Finance
+ *   Tier 2 (weekly)  Projects · Weekly · Reading · Habits
+ *   System           RT heartbeat · vault sync · Vercel
+ *
+ * Empty tool cards (Finance / Reading / Habits) render as disabled
+ * "soon" stubs so the grid shape stays legible and the roadmap is
+ * visible at a glance — no accidental navigation into empty routes.
+ */
 function getGreeting(): string {
   const h = new Date().getHours();
   if (h < 6) return "Good night";
@@ -364,7 +51,7 @@ function getGreeting(): string {
   return "Good evening";
 }
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
   const now = new Date();
   const dateStr = now.toLocaleDateString("ko-KR", {
     year: "numeric",
@@ -373,33 +60,139 @@ export default function DashboardPage() {
     weekday: "short",
   });
 
-  // Strategy D — scroll-snap proximity, not a SlideDeck.
-  // Workflow pages (live forms, interactive calendar, scrollable
-  // lists) can't tolerate wheel lockdown, so we give this surface a
-  // subtle section-snap rhythm via CSS `scroll-snap-type: y proximity`
-  // (see globals.css `html:has(.dashboard-snap-root)`). Each widget
-  // group gets `.dashboard-snap-section`, and the browser snaps near
-  // section boundaries without blocking free scroll or input.
+  let vaultStats: { totalNotes: number; lastCommit?: string; lastScan?: string } | null = null;
+  try {
+    const index = await getCachedVaultIndex();
+    const agg = aggregate(index);
+    vaultStats = {
+      totalNotes: Object.keys(index.notes || {}).length,
+      lastCommit: agg.last_commit_hash ?? undefined,
+      lastScan: agg.last_full_scan ?? undefined,
+    };
+  } catch {
+    vaultStats = null;
+  }
+
   return (
-    <div className="dashboard-snap-root mx-auto max-w-6xl space-y-6 px-4 py-6 sm:px-6">
-      <div className="dashboard-snap-section space-y-1">
+    <div className="mx-auto max-w-[1400px] space-y-10 px-4 py-8 sm:space-y-14 sm:px-6 sm:py-10">
+      {/* ─── Hero greeting ────────────────────────────────────────── */}
+      <section className="space-y-2">
+        <p className="font-technical text-[10.5px] uppercase tracking-[0.18em] text-muted-foreground animate-fade-up">
+          Hub · 00
+        </p>
         <h1
-          className="text-2xl sm:text-3xl font-bold tracking-tight animate-fade-up"
-          style={{ animationDelay: "0ms" }}
+          className="font-display italic leading-[1.05] tracking-[-0.025em] animate-fade-up"
+          style={{ fontSize: "clamp(2rem, 5vw, 3.25rem)", animationDelay: "60ms" }}
         >
-          {getGreeting()}{" "}
-          <span className="font-display italic text-primary">Minhan</span>
+          {getGreeting()}, <span className="text-primary">Minhan</span>.
         </h1>
         <p
-          className="text-sm text-muted-foreground animate-fade-up"
+          className="font-technical text-[12px] uppercase tracking-[0.18em] text-muted-foreground tabular-nums animate-fade-up"
           style={{ animationDelay: "120ms" }}
         >
-          {dateStr} — 종합 대시보드
+          {dateStr}
         </p>
-      </div>
-      <Suspense fallback={<DashboardSkeleton />}>
-        <DashboardContent />
-      </Suspense>
+      </section>
+
+      {/* ─── Now strip ────────────────────────────────────────────── */}
+      <section className="hairline-t pt-6 sm:pt-8 animate-fade-up" style={{ animationDelay: "180ms" }}>
+        <p className="kicker mb-3">Now · 01</p>
+        <Suspense
+          fallback={
+            <div className="h-12 rounded-md border border-dashed border-border bg-card/30" />
+          }
+        >
+          <TodayStrip />
+        </Suspense>
+      </section>
+
+      {/* ─── Tier 1 Hub (daily) ───────────────────────────────────── */}
+      <section className="hairline-t pt-6 sm:pt-8">
+        <header className="mb-5 flex items-baseline justify-between">
+          <p className="kicker">Tier 1 · 매일</p>
+          <p className="font-technical text-[10.5px] uppercase tracking-[0.14em] text-muted-foreground">
+            time · deadlines · knowledge · finance
+          </p>
+        </header>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <Suspense fallback={<ToolSkeleton />}>
+            <TimeHubCard />
+          </Suspense>
+          <Suspense fallback={<ToolSkeleton />}>
+            <DeadlinesHubCard />
+          </Suspense>
+          <Suspense fallback={<ToolSkeleton />}>
+            <KnowledgeHubCard />
+          </Suspense>
+          <FinanceHubCard />
+        </div>
+      </section>
+
+      {/* ─── Tier 2 Hub (weekly) ─────────────────────────────────── */}
+      <section className="hairline-t pt-6 sm:pt-8">
+        <header className="mb-5 flex items-baseline justify-between">
+          <p className="kicker">Tier 2 · 주 단위</p>
+          <p className="font-technical text-[10.5px] uppercase tracking-[0.14em] text-muted-foreground">
+            projects · weekly · reading · habits
+          </p>
+        </header>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <Suspense fallback={<ToolSkeleton />}>
+            <ProjectsHubCard />
+          </Suspense>
+          <Suspense fallback={<ToolSkeleton />}>
+            <WeeklyHubCard />
+          </Suspense>
+          <ReadingHubCard />
+          <HabitsHubCard />
+        </div>
+      </section>
+
+      {/* ─── System row ──────────────────────────────────────────── */}
+      <section className="hairline-t pt-6 sm:pt-8">
+        <header className="mb-4 flex items-baseline justify-between">
+          <p className="kicker">System · 09</p>
+          <Link
+            href="/admin"
+            className="font-technical text-[10.5px] uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-foreground"
+          >
+            Full admin →
+          </Link>
+        </header>
+        <div className="grid gap-3 rounded-md border border-[var(--hairline)] bg-card/40 p-4 font-technical text-[11.5px] uppercase tracking-[0.14em] text-muted-foreground sm:grid-cols-3 sm:gap-6">
+          <span className="flex items-baseline gap-2">
+            <span className="opacity-70">Vault</span>
+            <span className="text-foreground tabular-nums">
+              {vaultStats?.totalNotes ?? "—"} notes
+            </span>
+          </span>
+          <span className="flex items-baseline gap-2">
+            <span className="opacity-70">Last scan</span>
+            <span className="text-foreground tabular-nums">
+              {vaultStats?.lastScan
+                ? new Date(vaultStats.lastScan).toLocaleString("ko-KR", {
+                    month: "2-digit",
+                    day: "2-digit",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })
+                : "—"}
+            </span>
+          </span>
+          <span className="flex items-baseline gap-2">
+            <span className="opacity-70">Index</span>
+            <span className="font-mono text-foreground tabular-nums text-[10.5px]">
+              {vaultStats?.lastCommit?.slice(0, 7) ?? "—"}
+            </span>
+          </span>
+        </div>
+      </section>
     </div>
+  );
+}
+
+function ToolSkeleton() {
+  return (
+    <div className="skeleton-shimmer h-[172px] rounded-md border border-[var(--hairline)] bg-card/40" />
   );
 }
