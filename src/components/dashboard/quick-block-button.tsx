@@ -112,7 +112,13 @@ export function QuickBlockButton({ categories }: Props) {
     <>
       <button
         type="button"
-        onClick={() => setOpen(true)}
+        onClick={(e) => {
+          // Parent <Link href="/calendar"> wraps this button (ToolCard).
+          // Block navigation so the modal opens in place.
+          e.preventDefault();
+          e.stopPropagation();
+          setOpen(true);
+        }}
         className="font-technical inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/10 px-3 py-1.5 text-[11px] uppercase tracking-[0.14em] text-foreground transition-colors hover:border-primary hover:bg-primary/20"
       >
         <Play className="h-3 w-3 fill-current" aria-hidden />

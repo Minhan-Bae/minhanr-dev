@@ -89,7 +89,7 @@ export async function TimeHubCard() {
         ]}
       >
         {cats.length > 0 && (
-          <div className="-mt-1 flex justify-end" onClick={(e) => e.preventDefault()}>
+          <div className="-mt-1 flex justify-end">
             <QuickBlockButton categories={cats} />
           </div>
         )}
