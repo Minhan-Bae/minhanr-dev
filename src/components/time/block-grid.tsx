@@ -94,10 +94,15 @@ export function BlockGrid({ weekStartIso, categories, entries }: BlockGridProps)
 
   // Active drag selection — { dayIdx, startSlot, endSlot }. endSlot is
   // exclusive-like (we render inclusive highlight from min..max).
-  const [drag, setDrag] = useState<
-    | { dayIdx: number; startSlot: number; currentSlot: number }
-    | null
-  >(null);
+  //
+  // dragRef mirrors the state so pointermove→pointerup can read the
+  // latest currentSlot synchronously. Without the ref, the pointerup
+  // handler was closing over a stale `drag` from the render when the
+  // useEffect attached its listeners — every drag committed with
+  // span=1 because currentSlot was still startSlot in that closure.
+  type DragState = { dayIdx: number; startSlot: number; currentSlot: number };
+  const [drag, setDrag] = useState<DragState | null>(null);
+  const dragRef = useRef<DragState | null>(null);
 
   const catById = useMemo(
     () => new Map(categories.map((c) => [c.id, c] as const)),
@@ -248,38 +253,52 @@ export function BlockGrid({ weekStartIso, categories, entries }: BlockGridProps)
   ) {
     ev.preventDefault();
     (ev.currentTarget as Element).setPointerCapture?.(ev.pointerId);
-    setDrag({ dayIdx, startSlot: slotIdx, currentSlot: slotIdx });
+    const initial: DragState = { dayIdx, startSlot: slotIdx, currentSlot: slotIdx };
+    dragRef.current = initial;
+    setDrag(initial);
   }
 
   useEffect(() => {
     if (!drag) return;
     function onMove(ev: PointerEvent) {
+      const current = dragRef.current;
+      if (!current) return;
       const c = cellFromEvent(ev);
       if (!c) return;
-      if (c.dayIdx !== drag!.dayIdx) return; // stay in-column
+      if (c.dayIdx !== current.dayIdx) return; // stay in-column
       // Don't drag over already-occupied cells — clamp to the first
       // blocked row by walking out from start.
-      const direction = c.slotIdx >= drag!.startSlot ? 1 : -1;
-      let farthest = drag!.startSlot;
+      const direction = c.slotIdx >= current.startSlot ? 1 : -1;
+      let farthest = current.startSlot;
       for (
-        let s = drag!.startSlot;
+        let s = current.startSlot;
         direction > 0 ? s <= c.slotIdx : s >= c.slotIdx;
         s += direction
       ) {
-        if (s !== drag!.startSlot && grid[drag!.dayIdx][s] !== null) break;
+        if (s !== current.startSlot && grid[current.dayIdx][s] !== null) break;
         farthest = s;
       }
-      setDrag({ ...drag!, currentSlot: farthest });
+      const next: DragState = { ...current, currentSlot: farthest };
+      dragRef.current = next;
+      setDrag(next);
     }
     function onUp() {
-      if (!drag) return;
-      const lo = Math.min(drag.startSlot, drag.currentSlot);
-      const hi = Math.max(drag.startSlot, drag.currentSlot);
+      const finalDrag = dragRef.current;
+      if (!finalDrag) return;
+      const lo = Math.min(finalDrag.startSlot, finalDrag.currentSlot);
+      const hi = Math.max(finalDrag.startSlot, finalDrag.currentSlot);
       const span = hi - lo + 1;
-      setSelected({ kind: "empty", dayIdx: drag.dayIdx, slotIdx: lo, span });
+      setSelected({
+        kind: "empty",
+        dayIdx: finalDrag.dayIdx,
+        slotIdx: lo,
+        span,
+      });
+      dragRef.current = null;
       setDrag(null);
     }
     function onCancel() {
+      dragRef.current = null;
       setDrag(null);
     }
     window.addEventListener("pointermove", onMove);
