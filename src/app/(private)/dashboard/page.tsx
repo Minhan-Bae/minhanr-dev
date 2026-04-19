@@ -13,6 +13,7 @@ import { VaultUnreachablePrivate } from "@/components/vault-unreachable";
 import { ActiveProjectsCard } from "@/components/dashboard/active-projects-card";
 import { QuickCapture } from "@/components/dashboard/quick-capture";
 import { TimeThisWeekCard } from "@/components/dashboard/time-this-week-card";
+import { TodayStrip } from "@/components/dashboard/today-strip";
 import { FileText, Send, Inbox, Layers } from "lucide-react";
 import { aggregate, getCachedVaultIndex, KB_HUB_HIDDEN_STATUSES, listNotes } from "@/lib/vault-index";
 import { vaultPathToHref } from "@/lib/vault-note";
@@ -184,6 +185,13 @@ async function DashboardContent() {
 
   return (
     <div className="space-y-6">
+      {/* Today-at-a-glance — compact strip. Renders ABOVE the KPI
+          grid so the first data the eye meets is "what am I doing
+          right now?" rather than weekly totals. */}
+      <div className="dashboard-snap-section animate-fade-up" style={{ animationDelay: "60ms" }}>
+        <TodayStrip />
+      </div>
+
       {/* KPI Bento — 4 cards with hover lift. Each card fades up on
           mount with a 60ms stagger so the row reads as one sweep. */}
       <div className="dashboard-snap-section grid grid-cols-2 lg:grid-cols-4 gap-4">
