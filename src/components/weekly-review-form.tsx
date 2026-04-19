@@ -5,10 +5,8 @@ import { useFormStatus } from "react-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { apiFetch } from "@/lib/api-fetch";
-import {
-  saveWeeklyReviewAction,
-  initialWeeklyReviewState,
-} from "@/lib/actions/review";
+import { saveWeeklyReviewAction } from "@/lib/actions/review";
+import { initialWeeklyReviewState } from "@/lib/actions/review-types";
 
 interface WeeklyReviewResponse {
   exists: boolean;

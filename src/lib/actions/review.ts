@@ -12,24 +12,12 @@ import { requireUser } from "@/lib/api-auth";
 import { getFileContent, commitToGitHub } from "@/lib/github";
 import { todayKstDate, isoWeek } from "@/lib/time";
 import { VAULT_PATHS } from "@/lib/vault-paths";
+// Types / initial state live in a sibling non-"use server" module —
+// this directive forbids any non-async-function export.
+import type { WeeklyReviewState } from "./review-types";
 
 // 2026-04-18 Level 1 청소: 010_Daily/Weekly/ 폴더 → 010_Daily/012_Weekly_Review/ 통합.
 const WEEKLY_DIR = VAULT_PATHS.weeklyReview;
-
-export interface WeeklyReviewState {
-  ok: boolean;
-  message: string;
-  week?: string;
-  path?: string;
-  /** 마지막 시도 timestamp — useActionState가 같은 ok 결과 연속 시 React가
-   *  re-render를 trigger하도록 변화 보장 */
-  ts?: number;
-}
-
-export const initialWeeklyReviewState: WeeklyReviewState = {
-  ok: false,
-  message: "",
-};
 
 export async function saveWeeklyReviewAction(
   _prev: WeeklyReviewState,

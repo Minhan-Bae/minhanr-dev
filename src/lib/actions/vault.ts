@@ -17,8 +17,13 @@ import { updateFrontmatterField } from "@/lib/vault-write";
 import { commitToGitHub } from "@/lib/github";
 import { nowInKST } from "@/lib/time";
 import { VAULT_PATHS } from "@/lib/vault-paths";
-
-export type VaultAction = "pause" | "complete" | "archive";
+// Types / consts live in a sibling non-"use server" module because this
+// directive forbids any non-async-function export. See vault-types.ts.
+import type {
+  VaultAction,
+  VaultActionResult,
+  QuickCaptureState,
+} from "./vault-types";
 
 const ALLOWED: ReadonlySet<VaultAction> = new Set(["pause", "complete", "archive"]);
 
@@ -55,13 +60,6 @@ function buildFields(action: VaultAction): Record<string, string> {
 function buildMessage(action: VaultAction, path: string): string {
   const basename = (path.split("/").pop() || path).replace(/\.md$/, "");
   return `chore: dashboard ${action} — ${basename}`;
-}
-
-export interface VaultActionResult {
-  ok: boolean;
-  path: string;
-  action: VaultAction;
-  error?: string;
 }
 
 /**
@@ -117,19 +115,8 @@ export async function transitionNoteAction(
 
 // ─────────────────────────────────────────────────────────────────────
 // Quick Capture — 000_Inbox 신규 노트 생성 (useActionState 호환)
+// Types / initial state 는 vault-types.ts.
 // ─────────────────────────────────────────────────────────────────────
-
-export interface QuickCaptureState {
-  ok: boolean;
-  message: string;
-  path?: string;
-  ts?: number;
-}
-
-export const initialQuickCaptureState: QuickCaptureState = {
-  ok: false,
-  message: "",
-};
 
 export async function createInboxNoteAction(
   _prev: QuickCaptureState,

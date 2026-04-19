@@ -24,10 +24,8 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Inbox } from "lucide-react";
-import {
-  createInboxNoteAction,
-  initialQuickCaptureState,
-} from "@/lib/actions/vault";
+import { createInboxNoteAction } from "@/lib/actions/vault";
+import { initialQuickCaptureState } from "@/lib/actions/vault-types";
 
 export function QuickCapture() {
   const [state, formAction] = useActionState(createInboxNoteAction, initialQuickCaptureState);
