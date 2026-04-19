@@ -31,7 +31,11 @@ import {
  *   - 본 파일의 두 액션은 SoT가 Supabase로 이동한 뒤 deprecate.
  */
 
-export interface NoteEditResult {
+// Next.js 16 "use server" 파일은 async function 만 export 가능.
+// Non-function export 가 있으면 "A 'use server' file can only export
+// async functions" 런타임 에러가 발생하므로 interface 는 file-scope
+// 내부 선언으로만 둔다 (외부 import 없음).
+interface NoteEditResult {
   ok: boolean;
   error?: string;
   path?: string;
