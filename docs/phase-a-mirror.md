@@ -75,6 +75,20 @@ hook이 돌지 않아도 studio 편집은 자동 미러.
 Phase B 진입 시 vault는 read-only → studio가 SoT. `vault-sync.mjs`는
 역방향 `supabase-to-vault-export.mjs`로 대체되고 1일 1회 cron으로 실행.
 
+## Vercel revalidation 자동화 (Sprint 4)
+
+vault-sync 완료 후 minhanr-dev의 ISR 캐시를 즉시 무효화하려면
+`.env.local` + Vercel env에 다음 값 설정:
+
+```
+REVALIDATE_URL=https://minhanr.dev/api/revalidate
+REVALIDATE_SECRET=<random 32+ char string>
+```
+
+스크립트가 두 값 모두 읽으면 sync 마지막 단계에 POST로 호출 →
+`/`, `/notes`, `/search`, `/graph`, `/dashboard`, `/blog`가 동시에
+재검증된다. 값이 없으면 조용히 skip (UX 영향 없음).
+
 ## 트러블슈팅
 
 | 증상 | 원인 | 조치 |

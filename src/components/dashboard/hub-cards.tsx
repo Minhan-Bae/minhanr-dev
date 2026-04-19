@@ -8,6 +8,8 @@ import {
   startOfWeekSundayKST,
 } from "@/lib/time/week";
 import { getCachedVaultIndex, listNotes, aggregate, KB_HUB_HIDDEN_STATUSES } from "@/lib/vault-index";
+import { getVaultStats, listNotesFromSupabase } from "@/lib/notes-supabase";
+import { createSupabaseAdmin } from "@/lib/supabase-admin";
 import { isoWeek } from "@/lib/time";
 
 /**
@@ -109,19 +111,25 @@ export async function TimeHubCard() {
 
 export async function DeadlinesHubCard() {
   try {
-    const index = await getCachedVaultIndex();
     const now = new Date();
     const todayIso = kstYmd(now);
     const in7 = kstYmd(new Date(now.getTime() + 7 * 86400000));
 
+    const sb = createSupabaseAdmin();
+    const { data } = await sb
+      .from("vault_notes")
+      .select("deadline,workflow,publish,lifecycle_state")
+      .not("deadline", "is", null)
+      .neq("lifecycle_state", "archived");
+
     let overdue = 0;
     let today = 0;
     let thisWeek = 0;
-    for (const [, rec] of Object.entries(index.notes || {})) {
-      const dl = typeof rec.deadline === "string" ? rec.deadline : "";
+    for (const r of data ?? []) {
+      const dl = typeof r.deadline === "string" ? r.deadline : "";
       if (!/^\d{4}-\d{2}-\d{2}/.test(dl)) continue;
-      const status = typeof rec.status === "string" ? rec.status : "";
-      if (["published", "archived", "completed", "done"].includes(status)) continue;
+      if (r.publish === "published") continue;
+      if (r.workflow === "completed" || r.workflow === "paused") continue;
       if (dl < todayIso) overdue++;
       else if (dl === todayIso) today++;
       else if (dl <= in7) thisWeek++;
@@ -160,32 +168,19 @@ export async function DeadlinesHubCard() {
 
 export async function KnowledgeHubCard() {
   try {
-    const index = await getCachedVaultIndex();
-    const agg = aggregate(index);
-    const total = Object.keys(index.notes || {}).length;
-
-    // 7-day new
-    const sevenAgo = kstYmd(new Date(Date.now() - 7 * 86400000));
-    let new7d = 0;
-    let published = 0;
-    for (const [, rec] of Object.entries(index.notes || {})) {
-      const created = typeof rec.created === "string" ? rec.created : "";
-      if (created >= sevenAgo) new7d++;
-      if (rec.status === "published") published++;
-    }
-
+    const stats = await getVaultStats();
     return (
       <ToolCard
         kicker="Knowledge · 03"
         title="Vault"
-        description="Obsidian PARA — 3-tier knowledge base"
+        description="Supabase FTS · 3-tier knowledge base"
         href="/notes"
         icon={FileText}
-        primary={{ value: String(total), label: "Notes" }}
+        primary={{ value: String(stats.total), label: "Notes" }}
         secondary={[
-          { label: "7d new", value: String(new7d) },
-          { label: "Published", value: String(published) },
-          { label: "Growing", value: String(agg.recent_growing.length) },
+          { label: "Growing", value: String(stats.growing), tint: "primary" as const },
+          { label: "Mature", value: String(stats.mature) },
+          { label: "Published", value: String(stats.published) },
         ]}
       />
     );
@@ -194,7 +189,7 @@ export async function KnowledgeHubCard() {
       <ToolCard
         kicker="Knowledge · 03"
         title="Vault"
-        description="vault 연결 안 됨"
+        description="Supabase 연결 안 됨"
         href="/notes"
         icon={FileText}
         disabled
@@ -219,27 +214,24 @@ export function FinanceHubCard() {
 
 export async function ProjectsHubCard() {
   try {
-    const index = await getCachedVaultIndex();
-    const { notes: activeProjects } = listNotes(index, {
+    const { notes: active, total } = await listNotesFromSupabase({
       folder: "020_Projects/",
-      excludeStatus: [...KB_HUB_HIDDEN_STATUSES],
-      sort: "created_desc",
-      limit: 50,
+      lifecycleState: "active",
+      excludePublish: ["published"],
+      sort: "updated_desc",
+      limit: 100,
     });
-    const activeCount = activeProjects.length;
-    const masters = activeProjects.filter((p) => /_Master\.md$/.test(p.path)).length;
+    const masters = active.filter((p) => /_Master\.md$/.test(p.path)).length;
 
     return (
       <ToolCard
         kicker="Projects · 05"
         title="Active projects"
-        description="020_Projects · status ≠ archived/published"
+        description="020_Projects · lifecycle active"
         href="/notes?folder=020_Projects"
         icon={FolderOpen}
-        primary={{ value: String(activeCount), label: "Active" }}
-        secondary={[
-          { label: "Masters", value: String(masters) },
-        ]}
+        primary={{ value: String(total), label: "Active" }}
+        secondary={[{ label: "Masters", value: String(masters) }]}
       />
     );
   } catch {
@@ -257,14 +249,19 @@ export async function ProjectsHubCard() {
 
 export async function WeeklyHubCard() {
   try {
-    const index = await getCachedVaultIndex();
     const now = new Date();
     const thisIso = isoWeek(kstYmd(now));
     const lastIso = isoWeek(kstYmd(new Date(now.getTime() - 7 * 86400000)));
     const thisPath = `010_Daily/Weekly/${thisIso}.md`;
     const lastPath = `010_Daily/Weekly/${lastIso}.md`;
-    const hasThis = Boolean(index.notes?.[thisPath]);
-    const hasLast = Boolean(index.notes?.[lastPath]);
+    const sb = createSupabaseAdmin();
+    const { data } = await sb
+      .from("vault_notes")
+      .select("path")
+      .in("path", [thisPath, lastPath]);
+    const found = new Set((data ?? []).map((r) => r.path));
+    const hasThis = found.has(thisPath);
+    const hasLast = found.has(lastPath);
 
     const primary = hasThis ? "✓ This week" : hasLast ? "Due now" : "Pending";
 

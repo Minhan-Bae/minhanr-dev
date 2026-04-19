@@ -361,6 +361,30 @@ async function main() {
     console.log(`parse errors            : ${errors.length}`);
     for (const e of errors.slice(0, 5)) console.log(`  ${e.path}: ${e.error}`);
   }
+
+  // 6. Vercel revalidate — REVALIDATE_URL + REVALIDATE_SECRET env 설정된 경우만
+  const revalidateUrl = process.env.REVALIDATE_URL;
+  const revalidateSecret = process.env.REVALIDATE_SECRET;
+  if (revalidateUrl && revalidateSecret) {
+    console.log("▸ triggering Vercel revalidate…");
+    try {
+      const res = await fetch(revalidateUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-revalidate-secret": revalidateSecret,
+        },
+        body: JSON.stringify({}),
+      });
+      if (res.ok) {
+        console.log(`  revalidate ${res.status} OK`);
+      } else {
+        console.error(`  revalidate ${res.status}: ${await res.text()}`);
+      }
+    } catch (e) {
+      console.error(`  revalidate fetch failed: ${e?.message || e}`);
+    }
+  }
 }
 
 main().catch((e) => {

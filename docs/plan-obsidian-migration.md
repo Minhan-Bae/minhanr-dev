@@ -294,6 +294,19 @@ INPUT: 데스크탑·음성·논문·모바일
                     └─ minhanr-dev-notes  (비공개 노트 첨부)
 ```
 
+### 9.x 구현 현황 (2026-04-19 기준)
+
+- ✅ Sprint 1 — Supabase schema · 1729 notes bulk import · vault-sync · write-through
+- ✅ Sprint 2 — CodeMirror 6 에디터 · wikilink 자동완성 · auto-save · R2 paste/drop
+- ✅ Sprint 3 — /notes · /notes/[...path] · /search · /graph 전부 Supabase로 swap
+- ✅ Sprint 4 (부분) — Dashboard 4개 카드 Supabase · /api/revalidate 엔드포인트 · sync→revalidate 연동
+- ⏳ Sprint 4 (잔여) — PWA (실제 모바일 편집 필요 시점에 추가) · Phase B/C 전환(사용자 결정)
+
+Phase 상태:
+- 현재 **Phase A (혼용)**: Obsidian이 여전히 authoritative. studio 편집은 write-through로 vault+Supabase 동시 업데이트. 외부 Obsidian 편집은 `npm run vault:sync`로 미러.
+- Phase B 진입 조건: 사용자가 Obsidian 편집을 중단하고 studio만 사용할 때.
+- Phase C 진입 조건: vault read-only 전환 + Supabase→vault export cron 설치.
+
 ### 9.4 스냅샷 비교
 
 | 항목 | 현재 | Phase A | Phase C |
