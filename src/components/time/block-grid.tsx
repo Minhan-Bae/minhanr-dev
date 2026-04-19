@@ -246,28 +246,37 @@ export function BlockGrid({ weekStartIso, categories, entries }: BlockGridProps)
     return { dayIdx, slotIdx };
   }
 
+  // Grid 데이터를 ref로 미러 — onMove closure 안에서 최신 `grid` 참조용.
+  // (grid prop이 렌더 간 재생성될 때 onMove가 stale entry map을 보지 않도록)
+  const gridDataRef = useRef(grid);
+  gridDataRef.current = grid;
+
   function onEmptyPointerDown(
     ev: React.PointerEvent,
     dayIdx: number,
     slotIdx: number
   ) {
+    // preventDefault는 text selection / focus 이동 억제. pointer capture는
+    // 쓰지 않는다 — window listener만으로 충분하고, 과거에 캡처 + effect
+    // 비동기 조합 때문에 초기 move 이벤트가 drop되어 span=1로 commit되던
+    // 버그가 있었다. onPointerDown 안에서 직접 window listener를 붙이면
+    // React 렌더 타이밍과 무관하게 첫 move부터 확실히 받는다.
     ev.preventDefault();
-    (ev.currentTarget as Element).setPointerCapture?.(ev.pointerId);
-    const initial: DragState = { dayIdx, startSlot: slotIdx, currentSlot: slotIdx };
+    const initial: DragState = {
+      dayIdx,
+      startSlot: slotIdx,
+      currentSlot: slotIdx,
+    };
     dragRef.current = initial;
     setDrag(initial);
-  }
 
-  useEffect(() => {
-    if (!drag) return;
-    function onMove(ev: PointerEvent) {
+    const onMove = (e: PointerEvent) => {
       const current = dragRef.current;
       if (!current) return;
-      const c = cellFromEvent(ev);
+      const c = cellFromEvent(e);
       if (!c) return;
       if (c.dayIdx !== current.dayIdx) return; // stay in-column
-      // Don't drag over already-occupied cells — clamp to the first
-      // blocked row by walking out from start.
+      // 기존 엔트리로 드래그가 들어가면 그 직전까지로 clamp.
       const direction = c.slotIdx >= current.startSlot ? 1 : -1;
       let farthest = current.startSlot;
       for (
@@ -275,14 +284,28 @@ export function BlockGrid({ weekStartIso, categories, entries }: BlockGridProps)
         direction > 0 ? s <= c.slotIdx : s >= c.slotIdx;
         s += direction
       ) {
-        if (s !== current.startSlot && grid[current.dayIdx][s] !== null) break;
+        if (
+          s !== current.startSlot &&
+          gridDataRef.current[current.dayIdx][s] !== null
+        ) {
+          break;
+        }
         farthest = s;
       }
+      if (farthest === current.currentSlot) return; // no-op, 리렌더 생략
       const next: DragState = { ...current, currentSlot: farthest };
       dragRef.current = next;
       setDrag(next);
-    }
-    function onUp() {
+    };
+
+    const cleanup = () => {
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+      window.removeEventListener("pointercancel", onCancel);
+    };
+
+    const onUp = () => {
+      cleanup();
       const finalDrag = dragRef.current;
       if (!finalDrag) return;
       const lo = Math.min(finalDrag.startSlot, finalDrag.currentSlot);
@@ -296,21 +319,18 @@ export function BlockGrid({ weekStartIso, categories, entries }: BlockGridProps)
       });
       dragRef.current = null;
       setDrag(null);
-    }
-    function onCancel() {
+    };
+
+    const onCancel = () => {
+      cleanup();
       dragRef.current = null;
       setDrag(null);
-    }
+    };
+
     window.addEventListener("pointermove", onMove);
     window.addEventListener("pointerup", onUp);
     window.addEventListener("pointercancel", onCancel);
-    return () => {
-      window.removeEventListener("pointermove", onMove);
-      window.removeEventListener("pointerup", onUp);
-      window.removeEventListener("pointercancel", onCancel);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [drag]);
+  }
 
   function isInDrag(dayIdx: number, slotIdx: number) {
     if (!drag || drag.dayIdx !== dayIdx) return false;
