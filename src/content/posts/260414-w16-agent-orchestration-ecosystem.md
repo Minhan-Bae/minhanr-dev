@@ -20,6 +20,7 @@ date: '2026-04-14'
 author: MinHanr
 ---
 
+
 # W16 Agent Orchestration Ecosystem
 
 > Skill/Capability를 일급 객체로 보고, 그 위에 hierarchical MAS와 vendor-neutral CLI를 얹는 흐름이 W15~W16에 동시 다발로 출현. PathFinder의 plan→execute 분리, TrinityX의 RT 슬롯 토폴로지 설계의 직접 레퍼런스.
@@ -44,7 +45,6 @@ author: MinHanr
 - **AgentSkillOS** (arXiv 2603.02176) — Capability Tree(계층적 노드 재귀) + DAG 파이프라인. 스킬을 **에코시스템 스케일**로 조직·확장·벤치마킹.
 - **QualixarOS** (arXiv 2604.06392) — 첫 application-level Agent OS. 10 LLM 프로바이더 × 8 프레임워크 × 7 트랜스포트 통합. 12가지 멀티에이전트 토폴로지 실행 시맨틱 정의 + Forge LLM 팀 컴파일러.
 
-**TrinityX 적용**: 현재 RT-1/2/3 슬롯이 임시 토폴로지로 묶여 있는데, QualixarOS의 12 토폴로지 중 RT 패턴 두세 개를 표준화해 슬롯 매니페스트로 노출하면 추가 슬롯 도입이 단순화됨.
 
 ## B. Hierarchical Multi-Agent Systems (3건)
 
@@ -80,9 +80,3 @@ author: MinHanr
 3. **Hierarchical MAS의 검증 사례 등장**: OrgAgent의 이론을 MAMS가 HPC에서 실제 운용. 더 이상 "계층 MAS는 실험"이 아님.
 4. **CLI 코딩 에이전트 시장은 컨피그 게임**: 핵심 차별은 (a) 어떤 모델 라우팅, (b) 어떤 거버넌스 레이어, (c) 어떤 워크플로우 UX. 런타임 자체는 MCP + WASM/tmux로 평탄화.
 
-## 후속 액션
-
-- [ ] **TrinityX 슬롯 → QualixarOS 토폴로지 매핑** (RT-1: planner-executor / RT-2: pipeline / RT-3: scheduler)
-- [ ] **PathFinder plan 단계에 OAC Approval 패턴 도입** 검토 (사용자 Telegram 1-click 승인 = HDP signed delegation으로 결합)
-- [ ] **OMX/OpenSWE 코드 분석**으로 minhanr-dev publisher 워크플로우 단순화 가능성 평가
-- [ ] **Llama Stack 어댑터** 추가로 oikbas-worker가 OpenAI/Anthropic 외 fallback 확보

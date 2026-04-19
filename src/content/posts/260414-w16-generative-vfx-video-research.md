@@ -22,6 +22,7 @@ date: '2026-04-14'
 author: MinHanr
 ---
 
+
 # W16 Generative VFX & Video Research
 
 > 비디오 생성/합성 9건. 단순 T2V를 넘어서 **(1) 합성(compositing)이 일급 객체화**, **(2) 물리 시뮬을 diffusion이 흡수**, **(3) 장기 영상의 품질 붕괴 해결**이라는 세 축이 W16에 동시 출현.
@@ -69,9 +70,3 @@ author: MinHanr
 3. **Long-horizon 문제는 architectural reform이 아닌 self-distillation**으로 풀림. Self-Forcing++의 50× 확장은 모델 변경 없이 가능. → 기존 기반 모델들도 즉시 수혜.
 4. **In-context Animation** (FramePrompt)의 등장은 prompt engineering이 비디오 도메인에서도 일급 패턴이 됨을 의미.
 
-## 후속 액션
-
-- [ ] **Project-V conditioning 매트릭스 갱신**: GSDiT(카메라) + PhysCtrl(재료) + ImplicitFluid(유체) 3축 표준
-- [ ] **CharacterShift v2 설계 노트에 GenCompositor + OverPP layer 분리 패턴 인용**
-- [ ] **ILM × OverPP 공저자 협력을 산업 트렌드 시그널로 RT-3 모닝브리핑에 등록**
-- [ ] **Self-Forcing++ 50× 효과**를 ColorDepthExpansion 장기 시퀀스 실험에 적용 가능성 검토

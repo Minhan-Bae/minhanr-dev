@@ -16,6 +16,7 @@ categories:
   - Systems
 ---
 
+
 # Agent Protocol Ecosystem: 수렴 분석
 
 > 52건 growing 노트 클러스터 통합. TrinityX 아키텍처 + OIKBAS 에이전틱 시스템 직결.
@@ -70,22 +71,6 @@ categories:
 - 2025 "Context Engineering" → 2026 "Harness Engineering"
 - 에이전트를 제약, 피드백 루프, 복구 메커니즘으로 설계
 - **OIKBAS는 이미 Harness Engineering 구현체**: CLAUDE.md + rules + commands + skills + vault_index.json
-
-## TrinityX 아키텍처 매핑
-
-| TrinityX 계층 | 현재 | 프로토콜 업그레이드 |
-|---------------|------|---------------------|
-| RT-1/2/3 간 조율 | 독립 실행 | A2A Agent Cards로 동적 라우팅 |
-| 도구 연결 (HF, Houdini) | MCP v1 | MCP v2 SDK + OAuth 2.1 |
-| 사용자 인터페이스 | Telegram bot | AG-UI + MCP Apps |
-| 에러 복구 | LLM 기반 | SERF 결정론적 택소노미 |
-| 자기 개선 | 없음 | EvoSkill 패턴 + `.learnings/` |
-
-## 액션 아이템
-
-1. **MCP v2 마이그레이션 준비**: SDK V2 릴리즈 시 Houdini MCP + HuggingFace MCP 업그레이드. OAuth 2.1 인증 적용으로 프로덕션 보안 확보.
-2. **A2A Agent Cards 설계**: RT-1(수집), RT-2(수렴), RT-3(확산) 각각의 능력을 Agent Card로 선언. 점진적으로 독립 실행 → A2A 기반 동적 조율로 전환.
-3. **SERF 에러 택소노미 즉시 적용**: Houdini MCP 에러 복구([[260402_Project3D_Houdini_MCP_Convergence]])와 볼트 자동화 태스크에 SERF 패턴 도입. LLM 기반 에러 해석을 결정론적 복구로 대체.
 
 ## 소스
 

@@ -19,6 +19,7 @@ date: '2026-04-14'
 author: MinHanr
 ---
 
+
 # W16 3DGS & Reconstruction Research
 
 > 5건 모두 **3DGS 기반**이지만 해결하려는 문제는 다르다. (1) 에지 GPU에서의 실시간성, (2) 시공간+시점 통합, (3) 희소 입력에서의 생성형 보강. PathFinder의 NVS / ColorDepthExpansion의 광원 시뮬과 직접 결합.
@@ -73,9 +74,3 @@ author: MinHanr
 3. **7DGS의 통합 표현**은 4DGS·deformable GS·SH 계수를 모두 묶음. 코드 개방 시 community 빠르게 채택할 가능성.
 4. **PathFinder + ColorDepthExpansion 2026 R&D 라인이 본 5건과 정확히 정렬**됨. 각 R&D 마스터에 본 합본을 reference로 추가.
 
-## 후속 액션
-
-- [ ] **PathFinder_Master.md**에 FlowR + CloseUpShot 2단 보강 파이프라인 인용
-- [ ] **ColorDepthExpansion_Master.md**에 Splats Under Pressure protocol을 edge profile 평가 섹션 추가
-- [ ] **NIPA H100×8 신청안**의 "다단계 deployment" 섹션에 본 합본 링크
-- [ ] **7DGS 코드 공개 모니터링** (논문 업로드 후 reference impl 등록 시 PathFinder POC 검토)
