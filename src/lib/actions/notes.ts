@@ -234,6 +234,26 @@ export async function upsertNoteSupabaseOnlyAction(
  * 현재는 Supabase만. Phase C에서 vault export cron이 Supabase 삭제를
  * 감지해 vault 파일 제거.
  */
+/**
+ * listNotePathsAction — wikilink autocomplete용 경량 경로 리스트.
+ * path + title만 반환 (body 제외). 한 번에 전량 fetch 후 클라이언트에서
+ * Fuse.js로 fuzzy 매칭. 1700 노트 기준 payload ≈ 150KB — 허용 범위.
+ */
+export async function listNotePathsAction(): Promise<
+  Array<{ path: string; title: string }>
+> {
+  const auth = await ensureAuthed();
+  if (!auth.ok) return [];
+  const sb = createSupabaseAdmin();
+  const { data, error } = await sb
+    .from("vault_notes")
+    .select("path,title")
+    .order("last_edited_at", { ascending: false })
+    .limit(2500);
+  if (error || !data) return [];
+  return data.map((r) => ({ path: r.path, title: r.title ?? r.path }));
+}
+
 export async function deleteNoteSupabaseAction(
   path: string
 ): Promise<NoteEditResult> {
