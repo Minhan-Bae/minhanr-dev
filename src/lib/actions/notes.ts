@@ -2,32 +2,44 @@
 
 import { revalidatePath } from "next/cache";
 import { createSupabaseServer } from "@/lib/supabase-server";
+import { createSupabaseAdmin } from "@/lib/supabase-admin";
 import { commitToGitHub, getFileContent } from "@/lib/github";
+import {
+  parseNote,
+  buildVaultNoteRow,
+  extractTags,
+} from "@/lib/notes-frontmatter";
 
 /**
  * Note authoring server actions — write path for the studio editor.
  *
- * The studio writes full-file content straight into the companion
- * vault repo via GitHub's Contents API, preserving frontmatter and body
- * in a single commit. No client-side parsing — the editor hands us the
- * entire markdown blob and we treat it as opaque bytes.
+ * 2단계 쓰기 모델 (Phase A, 2026-04-19):
+ *   1. GitHub Contents API로 vault에 커밋 (source of truth 유지).
+ *   2. 성공 시 Supabase `vault_notes` 테이블에 write-through.
+ *      GHA publish-to-blog.yml의 mirror 동기화를 기다리지 않고 즉시
+ *      반영해서 `/notes` · `/search` · `/graph` 화면이 편집 직후부터
+ *      일관성을 갖도록 한다.
  *
- * Authorisation: a Supabase session is required for every call. The
- * `/dashboard` middleware already enforces this at the request level,
- * but we re-check here so a server action fired from a stale client
- * still can't sneak past.
+ * 실패 모드:
+ *   • vault 커밋 실패 → Supabase 쓰지 않음 (원자성 우선).
+ *   • vault 커밋 성공 + Supabase 실패 → 로그만 남기고 성공 반환.
+ *     GHA가 5-10분 내 백필하므로 최종 일관성은 보장됨.
+ *     사용자 피드백 루프를 끊지 않기 위해 studio는 정상 응답.
+ *
+ * Phase B/C 이행 시:
+ *   - upsertNoteToSupabaseOnly() 추가 예정 (vault skip).
+ *   - 본 파일의 두 액션은 SoT가 Supabase로 이동한 뒤 deprecate.
  */
 
 export interface NoteEditResult {
   ok: boolean;
   error?: string;
   path?: string;
+  supabaseSynced?: boolean;
 }
 
 /**
- * Whitelist of vault paths the editor may touch. Matches folders
- * `000_*`, `010_*`, … followed by at least one more segment and a
- * `.md` file. Keeps us out of `.github/`, `docs/`, etc. by construction.
+ * Whitelist of vault paths the editor may touch.
  */
 const SAFE_VAULT_PATH = /^\d{3}_[^/]+\/[^\s][^/]*(\/[^\s][^/]*)*\.md$/;
 
@@ -41,9 +53,58 @@ async function ensureAuthed(): Promise<{ ok: true } | { ok: false; error: string
 }
 
 /**
- * Commit a full-file update. `content` is the new raw markdown (frontmatter
- * + body). The caller is trusted to have produced well-formed YAML — we
- * don't re-parse it here.
+ * Supabase write-through — vault 커밋 성공 후 즉시 호출.
+ * 실패는 console.error만 하고 throw하지 않음 (vault가 SoT이므로 최종 일관성 OK).
+ */
+async function writeThroughToSupabase(
+  path: string,
+  content: string,
+  editSource: "studio" | "vault" = "studio"
+): Promise<boolean> {
+  try {
+    const parsed = parseNote(path, content);
+    const row = buildVaultNoteRow(parsed, { editSource });
+    const tags = extractTags(parsed.frontmatter);
+
+    const sb = createSupabaseAdmin();
+
+    // Upsert by path — path는 unique.
+    const { data: upserted, error: upsertErr } = await sb
+      .from("vault_notes")
+      .upsert(row, { onConflict: "path" })
+      .select("id")
+      .single();
+
+    if (upsertErr) {
+      console.error("[notes.writeThrough] upsert failed", upsertErr);
+      return false;
+    }
+
+    // Tags 재동기화: 기존 삭제 → 신규 insert (소규모, 원자성 불필요)
+    const noteId = upserted.id;
+    const { error: delErr } = await sb.from("vault_tags").delete().eq("note_id", noteId);
+    if (delErr) {
+      console.error("[notes.writeThrough] tag delete failed", delErr);
+      return false;
+    }
+    if (tags.length > 0) {
+      const { error: insErr } = await sb
+        .from("vault_tags")
+        .insert(tags.map((t) => ({ note_id: noteId, tag: t })));
+      if (insErr) {
+        console.error("[notes.writeThrough] tag insert failed", insErr);
+        return false;
+      }
+    }
+    return true;
+  } catch (e) {
+    console.error("[notes.writeThrough] unexpected", e);
+    return false;
+  }
+}
+
+/**
+ * Commit a full-file update. vault 커밋 + Supabase 동기화.
  */
 export async function saveNoteContentAction(
   path: string,
@@ -57,8 +118,6 @@ export async function saveNoteContentAction(
       return { ok: false, error: "허용되지 않는 경로입니다." };
     }
 
-    // GitHub requires the current blob SHA for an update (to detect
-    // concurrent writes); null means "create".
     const existing = await getFileContent(path);
     const sha = existing?.sha;
 
@@ -72,14 +131,16 @@ export async function saveNoteContentAction(
     );
     if (!commit.ok) return { ok: false, error: commit.error };
 
+    const supabaseSynced = await writeThroughToSupabase(path, content, "studio");
+
     // Revalidate every route that might render this note.
     revalidatePath(`/notes/${path}`);
     revalidatePath("/notes");
     revalidatePath("/dashboard");
     revalidatePath("/graph");
-    revalidatePath("/"); // home graph pulls from posts, not vault, but
-                        // cheap enough to nuke
-    return { ok: true, path };
+    revalidatePath("/search");
+    revalidatePath("/");
+    return { ok: true, path, supabaseSynced };
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
     return { ok: false, error: msg };
@@ -87,8 +148,7 @@ export async function saveNoteContentAction(
 }
 
 /**
- * Create a new note file. `folder` must be a top-level digit-prefixed
- * vault folder (e.g. `000_Inbox`); `slug` is sanitised into a filename.
+ * Create a new note file. vault 커밋 + Supabase 동기화.
  */
 export async function createNoteAction(
   folder: string,
@@ -102,8 +162,6 @@ export async function createNoteAction(
     if (!/^\d{3}_[^/]+$/.test(folder)) {
       return { ok: false, error: "유효하지 않은 폴더입니다." };
     }
-    // Strict-but-Korean-friendly filename sanitiser: keep alphanumerics,
-    // hangul, hyphens, and underscores; everything else becomes an underscore.
     const cleaned = slug.replace(/[^0-9a-zA-Z가-힣_\-]/g, "_").replace(/_+/g, "_");
     if (!cleaned || cleaned === "_") {
       return { ok: false, error: "유효하지 않은 파일 이름입니다." };
@@ -126,9 +184,69 @@ export async function createNoteAction(
     );
     if (!commit.ok) return { ok: false, error: commit.error };
 
+    const supabaseSynced = await writeThroughToSupabase(path, content, "studio");
+
     revalidatePath("/notes");
     revalidatePath("/dashboard");
-    return { ok: true, path };
+    revalidatePath("/graph");
+    revalidatePath("/search");
+    return { ok: true, path, supabaseSynced };
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    return { ok: false, error: msg };
+  }
+}
+
+/**
+ * Supabase-only upsert — Phase B 이후 primary write path.
+ * vault에 커밋하지 않고 DB만 업데이트. export cron이 vault로 왕복.
+ *
+ * 현재는 내부 테스트용 — UI는 saveNoteContentAction 사용 유지.
+ */
+export async function upsertNoteSupabaseOnlyAction(
+  path: string,
+  content: string
+): Promise<NoteEditResult> {
+  try {
+    const auth = await ensureAuthed();
+    if (!auth.ok) return { ok: false, error: auth.error };
+    if (!SAFE_VAULT_PATH.test(path)) {
+      return { ok: false, error: "허용되지 않는 경로입니다." };
+    }
+    const supabaseSynced = await writeThroughToSupabase(path, content, "studio");
+    if (!supabaseSynced) {
+      return { ok: false, error: "Supabase 동기화 실패" };
+    }
+    revalidatePath(`/notes/${path}`);
+    revalidatePath("/notes");
+    revalidatePath("/search");
+    revalidatePath("/graph");
+    return { ok: true, path, supabaseSynced: true };
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    return { ok: false, error: msg };
+  }
+}
+
+/**
+ * Delete note — Supabase row + tags + backlinks 삭제 (cascade).
+ * vault 파일 삭제는 GitHub Contents API DELETE는 별도 함수 필요해
+ * 현재는 Supabase만. Phase C에서 vault export cron이 Supabase 삭제를
+ * 감지해 vault 파일 제거.
+ */
+export async function deleteNoteSupabaseAction(
+  path: string
+): Promise<NoteEditResult> {
+  try {
+    const auth = await ensureAuthed();
+    if (!auth.ok) return { ok: false, error: auth.error };
+    const sb = createSupabaseAdmin();
+    const { error } = await sb.from("vault_notes").delete().eq("path", path);
+    if (error) return { ok: false, error: error.message };
+    revalidatePath("/notes");
+    revalidatePath("/search");
+    revalidatePath("/graph");
+    return { ok: true, path, supabaseSynced: true };
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
     return { ok: false, error: msg };
