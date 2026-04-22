@@ -19,7 +19,7 @@ publish_ready: true
 cover:
   image: https://cdn-thumbnails.huggingface.co/social-thumbnails/papers/2604.02580/gradient.png
   alt: 260412-voxel-code-bench-3d-world-modeling
-date: '2026-04-12'
+date: '2026-04-22'
 ---
 
 
