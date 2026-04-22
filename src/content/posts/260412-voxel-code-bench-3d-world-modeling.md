@@ -10,7 +10,7 @@ code_url: https://github.com/facebookresearch/VoxelCodeBench
 license: CC-By-NC
 code_available: true
 status: published
-created: 2026-04-12
+created: 2026-04-22
 slug: 260412-voxel-code-bench-3d-world-modeling
 summary: Meta Facebook Research가 공개한 3D 월드 모델링 코드 생성 벤치마크. LLM이 텍스트 프롬프트에서 Python
   코드로 UE5 복셀 씬을 구현하는 능력을 220개 태스크로 평가한다.
