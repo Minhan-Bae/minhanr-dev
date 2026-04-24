@@ -1,6 +1,6 @@
 ---
 tags:
-- AI_Daily_Trend
+- Trend
 - domain/rendering
 - domain/3d
 - tech/gaussian-splatting
@@ -10,27 +10,21 @@ code_url: https://github.com/sparkjsdev/spark
 code_available: true
 model_available: false
 license: unknown
-status: published
 created: 2026-03-31
 slug: 260331-world-labs-spark2-renderer
 summary: Fei-Fei Li가 이끄는 World Labs가 Spark 2.0 Developer Preview를 공개했다
 author: MinHanr
 publish_ready: true
 cover:
-  image: https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260331-world-labs-spark2-renderer/cover.png
+  image: /images/posts/260331-world-labs-spark2-renderer/cover.png
   alt: 260331 World Labs Spark2 GS Renderer
-date: '2026-03-31'
-categories:
-  - VFX
+type: Trend
+lifecycle: published
+date: '2026-04-24'
+status: published
 ---
 
 # World Labs Spark 2.0 — 오픈소스 3DGS 웹 렌더러 메이저 업데이트
-
-![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260331-world-labs-spark2-renderer/fig-1.png)
-*Source: [sparkjs.dev](https://sparkjs.dev/2.0.0-preview/docs/new-features-2.0/)*
-
-![Figure 2](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260331-world-labs-spark2-renderer/fig-2.png)
-*Source: [GitHub · sparkjsdev/spark](https://github.com/sparkjsdev/spark)*
 
 ## 개요
 

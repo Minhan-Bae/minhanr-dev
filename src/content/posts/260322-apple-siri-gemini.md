@@ -1,12 +1,11 @@
 ---
 tags:
-- AI_Daily_Trend
+- Trend
 - domain/industry
 - domain/llm
 source_platform:
 - X
 - Blog
-status: published
 created: 2026-03-22
 source_url: ''
 slug: 260322-apple-siri-gemini
@@ -15,21 +14,16 @@ summary: '한줄 요약: Apple이 자체 AI 개발 노선을 수정하고 Google
 author: MinHanr
 publish_ready: true
 cover:
-  image: https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260322-apple-siri-gemini/cover.jpg
+  image: /images/posts/260322-apple-siri-gemini/cover.jpg
   alt: 260322 Apple Siri Gemini 파트너십
-date: '2026-03-22'
-categories:
-  - Industry
+type: Trend
+lifecycle: published
+date: '2026-04-24'
+status: published
 ---
 # Apple × Google — Siri에 Gemini 탑재, AI 전략 대전환
 
 > **한줄 요약**: Apple이 자체 AI 개발 노선을 수정하고 Google Gemini(1.2조 파라미터)를 Siri의 핵심 엔진으로 채택, 연간 약 10억 달러 규모의 다년 계약을 체결했다.
-
-![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260322-apple-siri-gemini/fig-1.jpg)
-*Source: [techcrunch.com](https://techcrunch.com/2026/01/12/googles-gemini-to-power-apples-ai-features-like-siri/)*
-
-![Figure 2](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260322-apple-siri-gemini/fig-2.jpg)
-*Source: [cnbc.com](https://www.cnbc.com/2026/01/12/apple-google-ai-siri-gemini.html)*
 
 ---
 

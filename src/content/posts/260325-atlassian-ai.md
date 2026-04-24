@@ -1,11 +1,10 @@
 ---
 tags:
-- AI_Daily_Trend
+- Trend
 - domain/industry
 source_platform:
 - Blog
 - X
-status: published
 created: 2026-03-25
 source_url: ''
 slug: 260325-atlassian-ai
@@ -14,18 +13,13 @@ summary: Atlassian이 전체 인력의 10%인 1,600명을 감원하고 CTO를 �
 author: MinHanr
 publish_ready: true
 cover:
-  image: https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260325-atlassian-ai/cover.jpg
+  image: /images/posts/260325-atlassian-ai/cover.jpg
   alt: 260325 Atlassian 1600명 감원 AI 올인 전략
-date: '2026-03-25'
-categories:
-  - Writing
+type: Trend
+lifecycle: published
+date: '2026-04-24'
+status: published
 ---
-![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260325-atlassian-ai/fig-1.jpg)
-*Source: [techcrunch.com](https://techcrunch.com/2026/03/12/atlassian-follows-blocks-footsteps-and-cuts-staff-in-the-name-of-ai/)*
-
-![Figure 2](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260325-atlassian-ai/fig-2.png)
-*Source: [atlassian.com](https://www.atlassian.com/blog/announcements/atlassian-team-update-march-2026)*
-
 ## 한줄 요약
 
 Atlassian이 전체 인력의 10%인 **1,600명을 감원**하고 CTO를 교체하며, AI와 엔터프라이즈 사업에 자원을 재배치하는 대규모 구조조정을 단행했다.

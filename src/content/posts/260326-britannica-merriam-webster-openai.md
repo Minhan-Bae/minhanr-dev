@@ -1,12 +1,11 @@
 ---
 tags:
-- AI_Daily_Trend
+- Trend
 - domain/industry
 source_platform:
 - X
 - Reddit
 - Blog
-status: published
 created: 2026-03-26
 source_url: ''
 slug: 260326-britannica-merriam-webster-openai
@@ -15,18 +14,13 @@ summary: Encyclopedia Britannica와 Merriam-Webster가 OpenAI를 상대로 ~10�
 author: MinHanr
 publish_ready: true
 cover:
-  image: https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260326-britannica-merriam-webster-openai/cover.jpg
+  image: /images/posts/260326-britannica-merriam-webster-openai/cover.jpg
   alt: 260326 Britannica Merriam Webster OpenAI 저작권소송
-date: '2026-03-26'
-categories:
-  - Industry
+type: Trend
+lifecycle: published
+date: '2026-04-24'
+status: published
 ---
-![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260326-britannica-merriam-webster-openai/fig-1.jpg)
-*Source: [techcrunch.com](https://techcrunch.com/2026/03/16/merriam-webster-openai-encyclopedia-brittanica-lawsuit/)*
-
-![Figure 2](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260326-britannica-merriam-webster-openai/fig-2.jpg)
-*Source: [fortune.com](https://fortune.com/2026/03/18/dictionaries-suing-openai-chatgpt-copyright-infringement/)*
-
 ## 한줄 요약
 
 Encyclopedia Britannica와 Merriam-Webster가 OpenAI를 상대로 **~10만 건 저작물 무단 사용**, RAG 기반 콘텐츠 복제, 할루시네이션 허위 귀속에 대한 저작권·상표법 소송을 제기했다.

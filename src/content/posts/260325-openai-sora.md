@@ -1,13 +1,12 @@
 ---
 tags:
-- AI_Daily_Trend
+- Trend
 - domain/creative-tools
-- domain/AI_Ethics
+- domain/governance
 - domain/video
 source_platform:
 - X
 - Reddit
-status: published
 created: 2026-03-25
 source_url: ''
 slug: 260325-openai-sora
@@ -16,18 +15,13 @@ summary: OpenAI가 딥페이크 논란과 사용자 이탈 속에 AI 비디오 �
 author: MinHanr
 publish_ready: true
 cover:
-  image: https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260325-openai-sora/cover.jpg
+  image: /images/posts/260325-openai-sora/cover.jpg
   alt: 260325 OpenAI Sora 앱 종료 딥페이크 논란
-date: '2026-03-25'
-categories:
-  - Industry
+type: Trend
+lifecycle: published
+date: '2026-04-24'
+status: published
 ---
-![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260325-openai-sora/fig-1.jpg)
-*Source: [techcrunch.com](https://techcrunch.com/2026/03/24/openais-sora-was-the-creepiest-app-on-your-phone-now-its-shutting-down/)*
-
-![Figure 2](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260325-openai-sora/fig-2.png)
-*Source: [variety.com](https://variety.com/2026/digital/news/openai-shutting-down-sora-video-disney-1236698277/)*
-
 ## 한줄 요약
 
 OpenAI가 딥페이크 논란과 사용자 이탈 속에 AI 비디오 생성 앱 **Sora**의 서비스 종료를 발표하며, 비디오 AI의 소비자 시장 진입 한계를 드러냈다.

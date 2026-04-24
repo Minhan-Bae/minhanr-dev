@@ -1,11 +1,10 @@
 ---
 tags:
-- AI_Daily_Trend
+- Trend
 - domain/industry
 source_platform:
 - Blog
 - X
-status: published
 created: 2026-03-22
 source_url: ''
 slug: 260322-anthropic-claude-marketplace
@@ -14,18 +13,16 @@ summary: '한줄 요약: Anthropic이 수수료 0%의 Claude Marketplace를 출�
 author: MinHanr
 publish_ready: true
 cover:
-  image: https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260322-anthropic-claude-marketplace/cover.png
+  image: /images/posts/260322-anthropic-claude-marketplace/cover.png
   alt: 260322 Anthropic Claude Marketplace 출시
-date: '2026-03-22'
-categories:
-  - Industry
+type: Trend
+lifecycle: published
+date: '2026-04-24'
+status: published
 ---
 # Anthropic Claude Marketplace — AI 엔터프라이즈 생태계의 새 모델
 
 > **한줄 요약**: Anthropic이 수수료 0%의 Claude Marketplace를 출시, 기업 고객이 기존 API 예산으로 서드파티 AI 앱을 구매할 수 있게 하여 SaaS 유통 구조에 도전장을 내밀었다.
-
-![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260322-anthropic-claude-marketplace/fig-1.png)
-*Source: [siliconangle.com](https://siliconangle.com/2026/03/06/anthropic-launches-claude-marketplace-third-party-cloud-services/)*
 
 ---
 

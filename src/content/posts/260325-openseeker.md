@@ -1,14 +1,13 @@
 ---
 tags:
-- AI_Daily_Trend
+- Trend
 - domain/agents
 - domain/open-source
-- AI_R&D_Paper
+- Research
 source_platform:
 - ArXiv
 - HuggingFace
 - GitHub
-status: published
 created: 2026-03-25
 source_url: ''
 slug: 260325-openseeker
@@ -17,18 +16,13 @@ summary: 순수 학술팀이 11,700개 학습 샘플만으로 프론티어 검�
 author: MinHanr
 publish_ready: true
 cover:
-  image: https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260325-openseeker/cover.png
+  image: /images/posts/260325-openseeker/cover.png
   alt: 260325 OpenSeeker 오픈소스 검색에이전트 민주화
-date: '2026-03-25'
-categories:
-  - Writing
+type: Trend
+lifecycle: published
+date: '2026-04-24'
+status: published
 ---
-![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260325-openseeker/fig-1.png)
-*Source: [arXiv 2603.15594 (Fig. 1)](https://arxiv.org/abs/2603.15594)*
-
-![Figure 2](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260325-openseeker/fig-2.png)
-*Source: [Hugging Face · papers/2603.15594](https://huggingface.co/papers/2603.15594)*
-
 ## 한줄 요약
 
 순수 학술팀이 11,700개 학습 샘플만으로 프론티어 검색 에이전트 성능을 달성한 최초의 완전 오픈소스 검색 에이전트 **OpenSeeker**가 공개되었다.

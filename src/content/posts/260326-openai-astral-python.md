@@ -1,13 +1,12 @@
 ---
 tags:
-- AI_Daily_Trend
+- Trend
 - domain/creative-tools
 - domain/industry
 source_platform:
 - Blog
 - X
 - Reddit
-status: published
 created: 2026-03-26
 source_url: ''
 slug: 260326-openai-astral-python
@@ -16,18 +15,13 @@ summary: OpenAI가 Python 생태계의 핵심 오픈소스 도구(uv, Ruff, ty)�
 author: MinHanr
 publish_ready: true
 cover:
-  image: https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260326-openai-astral-python/cover.jpg
+  image: /images/posts/260326-openai-astral-python/cover.jpg
   alt: 260326 OpenAI Astral 인수 Python 개발도구
-date: '2026-03-26'
-categories:
-  - Industry
+type: Trend
+lifecycle: published
+date: '2026-04-24'
+status: published
 ---
-![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260326-openai-astral-python/fig-1.jpg)
-*Source: [astral.sh](https://astral.sh/blog/openai)*
-
-![Figure 2](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260326-openai-astral-python/fig-2.jpg)
-*Source: [cnbc.com](https://www.cnbc.com/2026/03/19/openai-to-acquire-developer-tooling-startup-astral.html)*
-
 ## 한줄 요약
 
 OpenAI가 Python 생태계의 핵심 오픈소스 도구(uv, Ruff, ty)를 만든 **Astral**을 인수하며, 월간 수억 건 다운로드의 개발 인프라를 Codex 팀에 통합한다.

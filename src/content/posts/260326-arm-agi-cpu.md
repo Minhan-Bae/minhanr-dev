@@ -1,12 +1,11 @@
 ---
 tags:
-- AI_Daily_Trend
+- Trend
 - domain/infrastructure
 source_platform:
 - Blog
 - Reddit
 - X
-status: published
 created: 2026-03-26
 source_url: ''
 slug: 260326-arm-agi-cpu
@@ -15,18 +14,13 @@ summary: Arm이 35년 역사 최초로 자체 설계·제조 칩 AGI CPU를 출�
 author: MinHanr
 publish_ready: true
 cover:
-  image: https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260326-arm-agi-cpu/cover.jpg
+  image: /images/posts/260326-arm-agi-cpu/cover.jpg
   alt: 260326 Arm AGI CPU 최초 자체칩 AI추론
-date: '2026-03-26'
-categories:
-  - Writing
+type: Trend
+lifecycle: published
+date: '2026-04-24'
+status: published
 ---
-![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260326-arm-agi-cpu/fig-1.jpg)
-*Source: [newsroom.arm.com](https://newsroom.arm.com/blog/introducing-arm-agi-cpu)*
-
-![Figure 2](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260326-arm-agi-cpu/fig-2.jpg)
-*Source: [newsroom.arm.com](https://newsroom.arm.com/news/arm-agi-cpu-launch)*
-
 ## 한줄 요약
 
 Arm이 35년 역사 최초로 자체 설계·제조 칩 **AGI CPU**를 출시하며, 라이선스 전용 기업에서 실리콘 공급자로의 역사적 전환을 선언했다.

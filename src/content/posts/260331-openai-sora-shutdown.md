@@ -1,6 +1,6 @@
 ---
 tags:
-- AI_Daily_Trend
+- Trend
 - domain/video-generation
 - tech/T2V
 source_url: https://techcrunch.com/2026/03/29/why-openai-really-shut-down-sora/
@@ -8,27 +8,21 @@ code_url: ''
 code_available: false
 model_available: false
 license: unknown
-status: published
 created: 2026-03-31
 slug: 260331-openai-sora-shutdown
 summary: 2026년 3월 24일, OpenAI가 Sora 앱 및 API 서비스 종료를 공식 발표했다
 author: MinHanr
 publish_ready: true
 cover:
-  image: https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260331-openai-sora-shutdown/cover.jpg
+  image: /images/posts/260331-openai-sora-shutdown/cover.jpg
   alt: 260331 OpenAI Sora Shutdown
-date: '2026-03-31'
-categories:
-  - Industry
+type: Trend
+lifecycle: published
+date: '2026-04-24'
+status: published
 ---
 
 # OpenAI Sora 서비스 종료 — 영상생성 시장 전환점
-
-![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260331-openai-sora-shutdown/fig-1.jpg)
-*Source: [techcrunch.com](https://techcrunch.com/2026/03/29/why-openai-really-shut-down-sora/)*
-
-![Figure 2](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260331-openai-sora-shutdown/fig-2.png)
-*Source: [variety.com](https://variety.com/2026/digital/news/openai-shutting-down-sora-video-disney-1236698277/)*
 
 ## 개요
 

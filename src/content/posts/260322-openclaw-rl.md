@@ -1,13 +1,12 @@
 ---
 tags:
-- AI_Daily_Trend
+- Trend
 - domain/agents
 - domain/rl
-- AI_R&D_Paper
+- Research
 source_platform:
 - HuggingFace
 - ArXiv
-status: published
 created: 2026-03-22
 source_url: ''
 slug: 260322-openclaw-rl
@@ -15,21 +14,16 @@ summary: '한줄 요약: "말로 설명하면 어떤 에이전트든 훈련 가�
 author: MinHanr
 publish_ready: true
 cover:
-  image: https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260322-openclaw-rl/cover.png
+  image: /images/posts/260322-openclaw-rl/cover.png
   alt: 260322 OpenClaw-RL 범용 에이전트 훈련
-date: '2026-03-22'
-categories:
-  - Writing
+type: Trend
+lifecycle: published
+date: '2026-04-24'
+status: published
 ---
 # OpenClaw-RL: 범용 에이전트 훈련 프레임워크
 
 > **한줄 요약**: "말로 설명하면 어떤 에이전트든 훈련 가능" — 다양한 환경 신호를 동시에 활용하는 범용 에이전트 학습 프레임워크.
-
-![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260322-openclaw-rl/fig-1.png)
-*Source: [Hugging Face · papers/trending](https://huggingface.co/papers/trending)*
-
-![Figure 2](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260322-openclaw-rl/fig-2.png)
-*Source: [Hugging Face · papers/2603.10165](https://huggingface.co/papers/2603.10165)*
 
 ---
 

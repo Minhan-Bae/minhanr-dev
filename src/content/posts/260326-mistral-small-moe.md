@@ -1,6 +1,6 @@
 ---
 tags:
-- AI_Daily_Trend
+- Trend
 - domain/llm
 - domain/open-source
 source_platform:
@@ -8,7 +8,6 @@ source_platform:
 - Reddit
 - HuggingFace
 - X
-status: published
 created: 2026-03-26
 source_url: ''
 slug: 260326-mistral-small-moe
@@ -17,18 +16,13 @@ summary: Mistral AI가 128개 전문가 중 4개만 활성화하는 119B MoE 아
 author: MinHanr
 publish_ready: true
 cover:
-  image: https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260326-mistral-small-moe/cover.png
+  image: /images/posts/260326-mistral-small-moe/cover.png
   alt: 260326 Mistral Small 4 통합 MoE 오픈소스
-date: '2026-03-26'
-categories:
-  - Writing
+type: Trend
+lifecycle: published
+date: '2026-04-24'
+status: published
 ---
-![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260326-mistral-small-moe/fig-1.png)
-*Source: [mistral.ai](https://mistral.ai/news/mistral-small-4)*
-
-![Figure 2](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260326-mistral-small-moe/fig-2.png)
-*Source: [marktechpost.com](https://www.marktechpost.com/2026/03/16/mistral-ai-releases-mistral-small-4-a-119b-parameter-moe-model-that-unifies-instruct-reasoning-and-multimodal-workloads/)*
-
 ## 한줄 요약
 
 Mistral AI가 128개 전문가 중 4개만 활성화하는 **119B MoE 아키텍처**로, 기존 Magistral(추론)·Pixtral(멀티모달)·Devstral(코딩) 3개 모델을 **하나로 통합**한 Mistral Small 4를 Apache 2.0으로 공개했다.

@@ -2,14 +2,13 @@
 tags:
 - AI_Trend
 - domain/video
-- AI_Daily_Trend
+- Trend
 source_platform:
 - CNN
 - TechCrunch
 - Bloomberg
 - Variety
 source_url: https://www.cnn.com/2026/03/24/tech/openai-sora-video-app-shutting-down
-status: published
 promoted_date: 2026-03-28
 promotion_reason: relevance 4, breakthrough — Memesis 멀티API 아키텍처 실증 시그널 — 주간수렴 자동전환
 created: 2026-03-28
@@ -25,16 +24,14 @@ publish_ready: true
 cover:
   image: /api/og?title=260328-openai-sora-sora&category=Trends
   alt: 260328 OpenAI Sora 서비스종료 SORA
-date: '2026-03-28'
-categories:
-  - Industry
+type: Trend
+lifecycle: published
+date: '2026-04-24'
+status: published
 ---
 # OpenAI Sora 서비스 완전 종료 — 영상 생성 AI 시장 재편
 
 > OpenAI가 2026년 3월 25일 Sora 앱과 API를 완전 종료. 출시 6개월 만에 높은 컴퓨트 비용과 사용자 감소로 서비스 중단 결정.
-
-![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260328-openai-sora-sora/fig-1.jpg)
-*Source: [cnn.com](https://www.cnn.com/2026/03/24/tech/openai-sora-video-app-shutting-down)*
 
 ## 핵심 내용
 

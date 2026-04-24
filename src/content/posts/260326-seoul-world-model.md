@@ -1,14 +1,13 @@
 ---
 tags:
-- AI_Daily_Trend
+- Trend
 - domain/simulation
 - domain/video
-- AI_R&D_Paper
+- Research
 source_platform:
 - ArXiv
 - HuggingFace
 - GitHub
-status: published
 created: 2026-03-26
 source_url: ''
 slug: 260326-seoul-world-model
@@ -17,15 +16,13 @@ summary: NAVER AI Lab x KAIST 공동 연구팀이 서울 실제 스트리트뷰 
 author: MinHanr
 publish_ready: true
 cover:
-  image: https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260326-seoul-world-model/cover.png
+  image: /images/posts/260326-seoul-world-model/cover.png
   alt: 260326 Seoul World Model 도시규모 월드시뮬레이션
-date: '2026-03-26'
-categories:
-  - Writing
+type: Trend
+lifecycle: published
+date: '2026-04-24'
+status: published
 ---
-![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260326-seoul-world-model/fig-1.png)
-*Source: [arXiv 2603.15583 (Fig. 1)](https://arxiv.org/abs/2603.15583)*
-
 ## 한줄 요약
 
 NAVER AI Lab x KAIST 공동 연구팀이 서울 실제 스트리트뷰 데이터를 기반으로, 수 킬로미터 궤적에 걸친 시공간적으로 일관된 도시 비디오를 생성하는 **도시 규모 월드 모델(Seoul World Model)**을 발표했다. Busan-City-Bench에서 FID 28.43, FVD 301.76으로 기존 SOTA(HY-World1.5의 49.63/544.04) 대비 압도적 우위.

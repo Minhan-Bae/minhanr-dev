@@ -1,13 +1,12 @@
 ---
 tags:
-- AI_Daily_Trend
+- Trend
 - domain/llm
 - domain/optimization
 source_platform:
 - Blog
 - X
 - Reddit
-status: published
 created: 2026-03-24
 source_url: ''
 slug: 260324-google-gemini-3.1-flash-lite
@@ -16,18 +15,13 @@ summary: Google이 Gemini 3.1 Flash-Lite를 공개하며, 입력 백만 토큰�
 author: MinHanr
 publish_ready: true
 cover:
-  image: https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260324-google-gemini-3.1-flash-lite/cover.png
+  image: /images/posts/260324-google-gemini-3.1-flash-lite/cover.png
   alt: 260324 Google Gemini 3.1 Flash Lite 출시
-date: '2026-03-24'
-categories:
-  - Industry
+type: Trend
+lifecycle: published
+date: '2026-04-24'
+status: published
 ---
-![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260324-google-gemini-3.1-flash-lite/fig-1.png)
-*Source: [blog.google](https://blog.google/innovation-and-ai/models-and-research/gemini-models/gemini-3-1-flash-lite/)*
-
-![Figure 2](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260324-google-gemini-3.1-flash-lite/fig-2.png)
-*Source: [siliconangle.com](https://siliconangle.com/2026/03/03/google-launches-speedy-gemini-3-1-flash-lite-model-preview/)*
-
 ## 한줄 요약
 
 Google이 Gemini 3.1 Flash-Lite를 공개하며, 입력 백만 토큰당 $0.25의 초저가에 GPQA Diamond 86.9%, 출력 속도 382 tok/s를 달성해 고빈도 추론 태스크의 경제성 기준을 새로 세웠다.

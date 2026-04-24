@@ -1,6 +1,6 @@
 ---
 tags:
-- AI_Daily_Trend
+- Trend
 - domain/tools
 - tech/MCP
 - tech/procedural
@@ -11,7 +11,6 @@ code_url: https://github.com/capoomgit/houdini-mcp
 code_available: true
 model_available: false
 license: MIT
-status: published
 created: 2026-03-31
 slug: 260331-houdini-mcp-llm-procedural
 summary: HoudiniMCP는 Capoom이 개발한 오픈소스 MCP(Model Context Protocol) 서버로, Claude 등 LLM
@@ -19,20 +18,15 @@ summary: HoudiniMCP는 Capoom이 개발한 오픈소스 MCP(Model Context Protoc
 author: MinHanr
 publish_ready: true
 cover:
-  image: https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260331-houdini-mcp-llm-procedural/cover.jpg
+  image: /images/posts/260331-houdini-mcp-llm-procedural/cover.jpg
   alt: 260331 houdini mcp llm procedural
-date: '2026-03-31'
-categories:
-  - VFX
+type: Trend
+lifecycle: published
+date: '2026-04-24'
+status: published
 ---
 
 # HoudiniMCP: LLM이 Houdini를 직접 제어하는 MCP 서버
-
-![Figure 1](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260331-houdini-mcp-llm-procedural/fig-1.png)
-*Source: [GitHub · capoomgit/houdini-mcp](https://github.com/capoomgit/houdini-mcp)*
-
-![Figure 2](https://pub-bf98fbd7060e48f2890b4674e66d02b1.r2.dev/posts/260331-houdini-mcp-llm-procedural/fig-2.png)
-*Source: [glama.ai](https://glama.ai/mcp/servers/capoom/houdini-mcp)*
 
 ## 개요
 
