@@ -19,6 +19,9 @@ import {
   Calendar,
   CalendarCheck,
   Clock,
+  BookOpen,
+  Briefcase,
+  Lightbulb,
 } from "lucide-react";
 
 import {
@@ -63,9 +66,10 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { title: "Notes", href: "/notes", icon: FileText },
       { title: "New note", href: "/notes/new", icon: FilePlus },
-      // /papers and /projects were retired as private surfaces in the
-      // editorial redesign; the note browser + tags + graph cover their
-      // use cases now.
+      // vault_schema v2.0 (2026-04-24) — type/lifecycle 분리로 라우트 부활
+      { title: "Papers", href: "/knowledge/papers", icon: BookOpen },
+      { title: "Projects", href: "/knowledge/projects", icon: Briefcase },
+      { title: "Sketches", href: "/knowledge/sketches", icon: Lightbulb },
       { title: "Graph", href: "/graph", icon: Network },
       { title: "Tags", href: "/tags", icon: Tag },
       { title: "Links", href: "/links", icon: Link2 },

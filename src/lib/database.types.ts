@@ -1,8 +1,6 @@
 // Auto-generated from Supabase (project trinityx · imhbbiarjtvjftdotjgt).
-// Regenerate via the Supabase MCP `generate_typescript_types` whenever
-// schema changes, or run `supabase gen types typescript` if the CLI
-// is set up. Do not edit by hand — wire table types through this file
-// so the rest of the app gets compile-time safety on every query.
+// Regenerate via Supabase MCP `generate_typescript_types`.
+// 2026-04-24: vault_schema v2.0 — vault_notes에 lifecycle/status/doc_state 컬럼 추가.
 export type Json =
   | string
   | number
@@ -12,11 +10,79 @@ export type Json =
   | Json[]
 
 export type Database = {
-  __InternalSupabase: {
-    PostgrestVersion: "14.4"
-  }
+  __InternalSupabase: { PostgrestVersion: "14.4" }
   public: {
     Tables: {
+      vault_notes: {
+        Row: {
+          body_md: string
+          category: string | null
+          confidence: string | null
+          created: string | null
+          created_at: string
+          deadline: string | null
+          doc_state: string | null
+          edit_source: string
+          excerpt: string | null
+          frontmatter_raw: Json
+          id: number
+          last_edited_at: string
+          lifecycle: string | null
+          lifecycle_state: string
+          maturity: string | null
+          path: string
+          priority: string | null
+          publish: string | null
+          search: unknown
+          slug: string | null
+          source_type: string | null
+          status: string | null
+          summary: string | null
+          title: string | null
+          type: string | null
+          updated_at: string
+          vault_commit: string | null
+          workflow: string | null
+        }
+        Insert: Partial<Database["public"]["Tables"]["vault_notes"]["Row"]> & { path: string }
+        Update: Partial<Database["public"]["Tables"]["vault_notes"]["Row"]>
+        Relationships: []
+      }
+      vault_tags: {
+        Row: { note_id: number; tag: string }
+        Insert: { note_id: number; tag: string }
+        Update: { note_id?: number; tag?: string }
+        Relationships: [
+          {
+            foreignKeyName: "vault_tags_note_id_fkey"
+            columns: ["note_id"]
+            isOneToOne: false
+            referencedRelation: "vault_notes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vault_note_backlinks: {
+        Row: {
+          anchor: string
+          display: string | null
+          dst_path: string
+          src_path: string
+        }
+        Insert: {
+          anchor?: string
+          display?: string | null
+          dst_path: string
+          src_path: string
+        }
+        Update: {
+          anchor?: string
+          display?: string | null
+          dst_path?: string
+          src_path?: string
+        }
+        Relationships: []
+      }
       time_categories: {
         Row: {
           color_hex: string
@@ -84,38 +150,23 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "time_entries_category_id_fkey"
-            columns: ["category_id"]
-            isOneToOne: false
-            referencedRelation: "time_categories"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
+      // 기타 테이블은 PostgREST API로 직접 접근 (타입 추가 필요시 generate_typescript_types 재실행)
     }
-    Functions: {
-      seed_default_time_categories: {
-        Args: { p_user_id: string }
-        Returns: undefined
-      }
-    }
+    Views: { [_ in never]: never }
+    Functions: { [_ in never]: never }
+    Enums: { [_ in never]: never }
+    CompositeTypes: { [_ in never]: never }
   }
 }
 
-// ── Friendly aliases for import-from-app ─────────────────────────
-
-export type TimeCategory = Database["public"]["Tables"]["time_categories"]["Row"]
-export type TimeCategoryInsert = Database["public"]["Tables"]["time_categories"]["Insert"]
-export type TimeCategoryUpdate = Database["public"]["Tables"]["time_categories"]["Update"]
-
-export type TimeEntry = Database["public"]["Tables"]["time_entries"]["Row"]
-export type TimeEntryInsert = Database["public"]["Tables"]["time_entries"]["Insert"]
-export type TimeEntryUpdate = Database["public"]["Tables"]["time_entries"]["Update"]
-
-/** Intensity enum. `main` = solid colour block, `buffer` = soft/lighter. */
-export type TimeIntensity = "main" | "buffer"
-
-/** Per-cell grid unit — one timebox = 30 minutes. */
-export const SLOT_MINUTES = 30
+// 편의 type alias (호출처 단순화)
+export type VaultNoteRow = Database["public"]["Tables"]["vault_notes"]["Row"];
+export type VaultTagRow = Database["public"]["Tables"]["vault_tags"]["Row"];
+export type TimeCategory = Database["public"]["Tables"]["time_categories"]["Row"];
+export type TimeCategoryInsert = Database["public"]["Tables"]["time_categories"]["Insert"];
+export type TimeCategoryUpdate = Database["public"]["Tables"]["time_categories"]["Update"];
+export type TimeEntry = Database["public"]["Tables"]["time_entries"]["Row"];
+export type TimeEntryInsert = Database["public"]["Tables"]["time_entries"]["Insert"];
+export type TimeEntryUpdate = Database["public"]["Tables"]["time_entries"]["Update"];

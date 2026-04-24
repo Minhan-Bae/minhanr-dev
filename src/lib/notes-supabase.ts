@@ -21,11 +21,16 @@ export interface SupabaseVaultNote {
   created: string | null;
   deadline: string | null;
   body_md: string;
+  // vault_schema v2.0 (2026-04-24) — 신 4축
+  lifecycle: string | null;     // seed|growing|mature|published|evergreen|archived
+  status: string | null;        // 020_Projects: planning|active|paused|completed|archived
+  doc_state: string | null;     // Template: deployed|draft|retired
+  publish: string | null;
+  type: string | null;
+  // legacy (백업 보존)
   maturity: string | null;
   workflow: string | null;
-  publish: string | null;
   lifecycle_state: string;
-  type: string | null;
   category: string | null;
   priority: string | null;
   source_type: string | null;
@@ -41,9 +46,10 @@ export interface SupabaseVaultNote {
 
 /**
  * 기본 select 컬럼 — body_md 제외 (list 뷰에선 불필요, toast pull로 느려짐).
+ * vault_schema v2.0: lifecycle/status/doc_state 추가.
  */
 const LIST_COLUMNS =
-  "id,path,slug,title,summary,excerpt,created,deadline,maturity,workflow,publish,lifecycle_state,type,category,priority,source_type,confidence,frontmatter_raw,vault_commit,edit_source,last_edited_at,created_at,updated_at";
+  "id,path,slug,title,summary,excerpt,created,deadline,lifecycle,status,doc_state,maturity,workflow,publish,lifecycle_state,type,category,priority,source_type,confidence,frontmatter_raw,vault_commit,edit_source,last_edited_at,created_at,updated_at";
 
 const FULL_COLUMNS = LIST_COLUMNS + ",body_md";
 
@@ -51,6 +57,12 @@ export interface ListNotesSupabaseOptions {
   folder?: string;              // '020_Projects/' 접두어
   folders?: readonly string[];  // OR 합집합
   tag?: string;
+  // vault_schema v2.0 — 신 4축 필터 (우선)
+  lifecycle?: string;           // seed|growing|mature|published|evergreen|archived
+  status?: string;              // planning|active|paused|completed|archived
+  type?: string;                // Project|Daily|Research|Trend|Synthesis|...
+  excludeLifecycle?: readonly string[];
+  // legacy (백업 호환)
   lifecycleState?: string;      // 'active' | 'archived'
   maturity?: string;
   workflow?: string;
@@ -92,6 +104,13 @@ export async function listNotesFromSupabase(
     q = q.or(clauses);
   }
 
+  // vault_schema v2.0 — 신 4축 필터 (우선)
+  if (opts.lifecycle) q = q.eq("lifecycle", opts.lifecycle);
+  if (opts.status) q = q.eq("status", opts.status);
+  if (opts.type) q = q.eq("type", opts.type);
+  if (opts.excludeLifecycle?.length)
+    q = q.not("lifecycle", "in", `(${opts.excludeLifecycle.join(",")})`);
+  // legacy 필터
   if (opts.lifecycleState) q = q.eq("lifecycle_state", opts.lifecycleState);
   if (opts.maturity) q = q.eq("maturity", opts.maturity);
   if (opts.workflow) q = q.eq("workflow", opts.workflow);
