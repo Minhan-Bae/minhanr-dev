@@ -4,6 +4,7 @@ import { VaultUnreachablePrivate } from "@/components/vault-unreachable";
 import { VaultGraph, type GraphNode, type GraphEdge } from "@/components/vault-graph";
 import { deriveNoteTitle } from "@/lib/vault-note";
 import { isTier2Path } from "@/lib/vault-tiers";
+import { dominantCluster } from "@/lib/tag-clusters";
 
 export const metadata = {
   title: "Graph | minhanr.dev",
@@ -42,7 +43,7 @@ async function GraphContent() {
   }
 
   // 2) edges 수집 (tier-2 노트만)
-  type Rec = { related?: unknown; status?: unknown; tags?: unknown };
+  type Rec = { related?: unknown; status?: unknown; tags?: unknown; lifecycle?: unknown };
   const rawEdges: Array<{ from: string; to: string }> = [];
   const degree = new Map<string, number>();
   const bump = (p: string) => degree.set(p, (degree.get(p) ?? 0) + 1);
@@ -85,15 +86,21 @@ async function GraphContent() {
     .filter((e) => topPaths.has(e.from) && topPaths.has(e.to))
     .filter((e, i, arr) => arr.findIndex((x) => x.from === e.from && x.to === e.to) === i);
 
-  // 5) Node payload
+  // 5) Node payload — 태그 기반 클러스터 색 부여 (vault_schema v2.0)
   const nodes: GraphNode[] = [...topPaths].map((path) => {
     const rec = index.notes[path] as Rec;
+    const tags = Array.isArray(rec?.tags) ? (rec.tags as string[]) : [];
+    const cluster = dominantCluster(tags);
     return {
       path,
       title: deriveNoteTitle(path, rec as Record<string, unknown>),
       status: typeof rec?.status === "string" ? rec.status : undefined,
+      lifecycle: typeof rec?.lifecycle === "string" ? rec.lifecycle : undefined,
       degree: degree.get(path) ?? 0,
       folder: path.split("/")[0] ?? "other",
+      clusterId: cluster.id,
+      clusterColor: cluster.id === "other" ? undefined : cluster.color,
+      clusterLabel: cluster.label,
     };
   });
 

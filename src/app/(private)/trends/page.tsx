@@ -28,6 +28,16 @@ async function TrendsContent() {
   const stats = index._meta?.stats;
   const tagTop = stats?.by_tag_top || [];
   const researchCats = stats?.by_research_category || {};
+  // vault_schema v2.0 — 새 4축 사전 집계
+  const byLifecycle = stats?.by_lifecycle || {};
+  const byType = stats?.by_type || {};
+  const byPublish = stats?.by_publish || {};
+  // 라이프사이클 순서 보장
+  const LIFECYCLE_ORDER = ["seed", "growing", "mature", "published", "evergreen", "archived"] as const;
+  const lifecycleEntries = LIFECYCLE_ORDER.map((k) => [k, byLifecycle[k] ?? 0] as const).filter(
+    ([, v]) => v > 0
+  );
+  const typeEntries = Object.entries(byType).sort((a, b) => b[1] - a[1]).slice(0, 12);
 
   // 최근 7일 growing/seed 노트에서 도메인 태그 분포
   const now = new Date();
@@ -100,6 +110,74 @@ async function TrendsContent() {
             <CardDescription>수집 갭</CardDescription>
             <CardTitle className="text-3xl font-bold tabular-nums">{gaps.length}개 폴더</CardTitle>
           </CardHeader>
+        </Card>
+      </div>
+
+      {/* vault_schema v2.0 — 라이프사이클·타입 분포 */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Lifecycle (전체)</CardTitle>
+            <CardDescription>seed → growing → mature → published</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              {lifecycleEntries.map(([k, v]) => {
+                const colors: Record<string, string> = {
+                  seed: "bg-amber-400/70",
+                  growing: "bg-blue-400/70",
+                  mature: "bg-emerald-500/80",
+                  published: "bg-purple-500/80",
+                  evergreen: "bg-teal-500/70",
+                  archived: "bg-muted-foreground/40",
+                };
+                const max = Math.max(...lifecycleEntries.map(([, x]) => x));
+                return (
+                  <div key={k} className="flex items-center justify-between gap-2">
+                    <span className="text-sm capitalize">{k}</span>
+                    <div className="flex items-center gap-2 flex-1 ml-3">
+                      <div
+                        className={`h-2 rounded-full ${colors[k] ?? "bg-primary"}`}
+                        style={{ width: `${(v / max) * 100}%` }}
+                      />
+                      <span className="text-xs text-muted-foreground tabular-nums w-10 text-right">{v}</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Type 분포</CardTitle>
+            <CardDescription>노트 종류 (top 12)</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap gap-2">
+              {typeEntries.map(([t, c]) => (
+                <Badge key={t} variant="secondary" className="text-sm">
+                  {t}: {c}
+                </Badge>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Publish</CardTitle>
+            <CardDescription>블로그 파이프라인</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2 text-sm">
+              {Object.entries(byPublish).map(([k, v]) => (
+                <div key={k} className="flex justify-between">
+                  <span className="capitalize">{k}</span>
+                  <span className="tabular-nums text-muted-foreground">{v}</span>
+                </div>
+              ))}
+            </div>
+          </CardContent>
         </Card>
       </div>
 

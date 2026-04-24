@@ -28,10 +28,13 @@ async function StatisticsContent() {
     return <VaultUnreachablePrivate error={e} />;
   }
 
-  const matureCount = agg.by_status.mature || 0;
-  const activeProjects =
-    (agg.by_status.active || 0) +
-    (agg.by_status.growing || 0);
+  // vault_schema v2.0 — lifecycle 우선, status 폴백
+  const matureCount = agg.by_lifecycle.mature || agg.by_status.mature || 0;
+  const growingCount = agg.by_lifecycle.growing || 0;
+  const seedCount = agg.by_lifecycle.seed || 0;
+  const publishedCount = agg.by_lifecycle.published || 0;
+  const evergreenCount = agg.by_lifecycle.evergreen || 0;
+  const activeProjects = agg.by_status.active || 0;  // Project status 전용
   const maturePct =
     agg.total_notes > 0
       ? Math.round((matureCount / agg.total_notes) * 100)
@@ -71,6 +74,16 @@ async function StatisticsContent() {
     .sort(([, a], [, b]) => b - a)
     .map(([status, count]) => ({ status, count }));
 
+  // vault_schema v2.0 — lifecycle 도넛용 (정렬된 순서)
+  const LIFECYCLE_ORDER = ["seed", "growing", "mature", "published", "evergreen", "archived"] as const;
+  const lifecycleEntries = LIFECYCLE_ORDER
+    .map((k) => ({ status: k, count: agg.by_lifecycle[k] || 0 }))
+    .filter((e) => e.count > 0);
+  const typeEntries = Object.entries(agg.by_type)
+    .sort(([, a], [, b]) => b - a)
+    .slice(0, 8)
+    .map(([t, c]) => ({ status: t, count: c }));
+
   return (
     <>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -79,6 +92,25 @@ async function StatisticsContent() {
         <StatKpiCard label="Mature %" value={`${maturePct}%`} hint={`${matureCount} mature`} accentColor="border-l-chart-4" />
         <StatKpiCard label="Deadlines" value={deadlinesTotal} hint={`${agg.deadlines_summary.overdue} overdue`} accentColor="border-l-destructive" />
       </div>
+
+      {/* vault_schema v2.0 — 콘텐츠 라이프사이클 진척도 */}
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base">콘텐츠 라이프사이클 (vault_schema v2.0)</CardTitle>
+          <CardDescription className="text-xs">
+            seed → growing → mature → published 흐름. 검수 대기는 mature.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+            <StatKpiCard label="Seed" value={seedCount} accentColor="border-l-amber-400" />
+            <StatKpiCard label="Growing" value={growingCount} accentColor="border-l-blue-400" />
+            <StatKpiCard label="Mature" value={matureCount} accentColor="border-l-emerald-500" />
+            <StatKpiCard label="Published" value={publishedCount} accentColor="border-l-purple-500" />
+            <StatKpiCard label="Evergreen" value={evergreenCount} accentColor="border-l-teal-500" />
+          </div>
+        </CardContent>
+      </Card>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <Card>
@@ -113,11 +145,21 @@ async function StatisticsContent() {
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-base">상태 분포</CardTitle>
-            <CardDescription className="text-xs">상위 5개 status</CardDescription>
+            <CardTitle className="text-base">Lifecycle 분포</CardTitle>
+            <CardDescription className="text-xs">콘텐츠 라이프사이클 (vault_schema v2.0)</CardDescription>
           </CardHeader>
           <CardContent>
-            <StatusDonutChart data={statusEntries} />
+            <StatusDonutChart data={lifecycleEntries.length ? lifecycleEntries : statusEntries} />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base">Type 분포 (top 8)</CardTitle>
+            <CardDescription className="text-xs">노트 종류 (Project/Daily/Research/...)</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <StatusDonutChart data={typeEntries} />
           </CardContent>
         </Card>
 

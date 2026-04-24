@@ -4,7 +4,7 @@ import { VAULT_PATHS, bucketOf as bucketOfPath } from "./vault-paths";
 
 export interface VaultNoteRecord {
   title?: string;        // Layer 1: 인덱스 사전 추출
-  status?: string;
+  status?: string;       // 020_Projects 전용 워크플로 (planning|active|paused|completed|archived) + legacy
   created?: string;
   tags?: string[];
   summary?: string;      // Layer 1: 인덱스 사전 추출
@@ -19,7 +19,12 @@ export interface VaultNoteRecord {
   source_url?: string;
   agent?: string;
   dispatch?: string;
-  type?: string;
+  category?: string;
+  // vault_schema.json v2.0 (2026-04-24) — 4축 직교 분리
+  type?: string;         // PascalCase: Project|Daily|Weekly|Research|Trend|Synthesis|...
+  lifecycle?: string;    // seed|growing|mature|published|evergreen|archived
+  publish?: string;      // draft|ready|published — 블로그 파이프라인
+  doc_state?: string;    // deployed|draft|retired — Template/Prompt 전용
   // catch-all
   [k: string]: unknown;
 }
@@ -35,6 +40,11 @@ export interface VaultIndexStats {
   by_tag_top?: Array<{ tag: string; count: number }>;
   by_month_created?: Array<{ month: string; count: number }>;
   links_count?: number;
+  // vault_schema v2.0 (2026-04-24) — 새 축 사전 집계
+  by_lifecycle?: Record<string, number>;
+  by_type?: Record<string, number>;
+  by_publish?: Record<string, number>;
+  by_tag_namespace?: Record<string, number>;  // type/domain/tech/proj/other 카운트
 }
 
 export interface VaultIndexFile {
@@ -80,6 +90,11 @@ export interface VaultAggregates {
   };
   links_count: number;
   recent_growing: VaultNote[];
+  // vault_schema v2.0 — 새 4축 분포
+  by_lifecycle: Record<string, number>;
+  by_type: Record<string, number>;
+  by_publish: Record<string, number>;
+  by_tag_namespace: Record<string, number>;
 }
 
 const RESEARCH_PREFIX = `${VAULT_PATHS.techResearch}/`;
@@ -180,6 +195,18 @@ export function aggregate(index: VaultIndexFile): VaultAggregates {
     return aggregateLegacy(index);
   }
 
+  // by_lifecycle/by_type/by_publish/by_tag_namespace는 인덱서가 사전 집계하지
+  // 못한 경우 fallback으로 단일 패스 계산. schema 3+ 인덱스부터 사전 집계됨.
+  const newAxes =
+    stats.by_lifecycle && stats.by_type && stats.by_publish && stats.by_tag_namespace
+      ? {
+          by_lifecycle: stats.by_lifecycle,
+          by_type: stats.by_type,
+          by_publish: stats.by_publish,
+          by_tag_namespace: stats.by_tag_namespace,
+        }
+      : computeNewAxes(index);
+
   return {
     total_notes: meta.total_notes ?? Object.keys(index.notes || {}).length,
     last_full_scan: meta.last_full_scan ?? null,
@@ -193,7 +220,45 @@ export function aggregate(index: VaultIndexFile): VaultAggregates {
     deadlines_summary: computeDeadlinesSummary(index),
     links_count: stats.links_count ?? 0,
     recent_growing: pickRecentGrowing(index, 5),
+    ...newAxes,
   };
+}
+
+/**
+ * vault_schema v2.0 새 4축 단일 패스 집계.
+ * schema 3+ 인덱서가 사전 집계 시 호출되지 않음 (fallback only).
+ */
+function computeNewAxes(index: VaultIndexFile): {
+  by_lifecycle: Record<string, number>;
+  by_type: Record<string, number>;
+  by_publish: Record<string, number>;
+  by_tag_namespace: Record<string, number>;
+} {
+  const by_lifecycle: Record<string, number> = {};
+  const by_type: Record<string, number> = {};
+  const by_publish: Record<string, number> = {};
+  const by_tag_namespace: Record<string, number> = { type: 0, domain: 0, tech: 0, proj: 0, other: 0 };
+
+  for (const rec of Object.values(index.notes || {})) {
+    if (rec.lifecycle) by_lifecycle[rec.lifecycle] = (by_lifecycle[rec.lifecycle] || 0) + 1;
+    if (rec.type) by_type[rec.type] = (by_type[rec.type] || 0) + 1;
+    if (rec.publish) {
+      const p = String(rec.publish);
+      by_publish[p] = (by_publish[p] || 0) + 1;
+    }
+    if (Array.isArray(rec.tags)) {
+      for (const t of rec.tags) {
+        if (typeof t !== "string") continue;
+        if (t.startsWith("domain/")) by_tag_namespace.domain += 1;
+        else if (t.startsWith("tech/")) by_tag_namespace.tech += 1;
+        else if (t.startsWith("proj/")) by_tag_namespace.proj += 1;
+        else if (/^[A-Z]/.test(t)) by_tag_namespace.type += 1;
+        else by_tag_namespace.other += 1;
+      }
+    }
+  }
+
+  return { by_lifecycle, by_type, by_publish, by_tag_namespace };
 }
 
 /**
@@ -214,7 +279,8 @@ function computeDeadlinesSummary(index: VaultIndexFile): VaultAggregates["deadli
 function pickRecentGrowing(index: VaultIndexFile, n: number): VaultNote[] {
   const growing: VaultNote[] = [];
   for (const [path, rec] of Object.entries(index.notes || {})) {
-    if (rec.status === "growing") {
+    // v2.0: lifecycle 우선, legacy status 폴백
+    if (rec.lifecycle === "growing" || rec.status === "growing") {
       growing.push({ ...rec, path, title: deriveTitle(path) });
     }
   }
@@ -304,6 +370,8 @@ function aggregateLegacy(index: VaultIndexFile): VaultAggregates {
     .sort((a, b) => (b.created || "").localeCompare(a.created || ""))
     .slice(0, 5);
 
+  const newAxes = computeNewAxes(index);
+
   return {
     total_notes: meta.total_notes ?? Object.keys(notes).length,
     last_full_scan: meta.last_full_scan ?? null,
@@ -317,6 +385,7 @@ function aggregateLegacy(index: VaultIndexFile): VaultAggregates {
     deadlines_summary,
     links_count,
     recent_growing,
+    ...newAxes,
   };
 }
 
@@ -326,6 +395,12 @@ export interface ListNotesOptions {
   tag?: string;
   status?: string;
   excludeStatus?: string | string[]; // Knowledge Hub: published 자동 제외 등
+  // vault_schema v2.0 — 새 4축 필터 (옵션. 명시 시 AND 매칭)
+  type?: string;         // Project|Daily|Research|Trend|Synthesis|...
+  lifecycle?: string;    // seed|growing|mature|published|evergreen|archived
+  publish?: string;      // draft|ready|published
+  excludeLifecycle?: string | string[];  // 기본: ["archived"]
+  excludePublish?: string | string[];    // 기본: ["published"]
   q?: string;            // case-insensitive substring on title/path
   sort?: "created_desc" | "created_asc" | "title_asc";
   limit?: number;
@@ -349,6 +424,14 @@ export interface ListNotesResult {
 export const KB_HUB_HIDDEN_STATUSES = ["published", "archived"] as const;
 
 /**
+ * vault_schema v2.0 — Knowledge Hub가 기본으로 숨기는 lifecycle/publish.
+ * - lifecycle: archived (050_Archive 또는 zombie)
+ * - publish: published (블로그 발행 완료 — /blog 라우트 전용)
+ */
+export const KB_HUB_HIDDEN_LIFECYCLE = ["archived"] as const;
+export const KB_HUB_HIDDEN_PUBLISH = ["published"] as const;
+
+/**
  * 페이지 호출처에서 sp.status를 받아 excludeStatus를 계산하는 헬퍼.
  * 명시적 status 필터가 KB_HUB_HIDDEN_STATUSES에 속하면 그 status는 제외 목록에서 빠진다
  * (사용자가 의도적으로 archived/published를 보려는 경우).
@@ -359,10 +442,20 @@ export function kbHubExcludeStatus(explicitStatus?: string): string[] {
 }
 
 export function listNotes(index: VaultIndexFile, opts: ListNotesOptions = {}): ListNotesResult {
-  const { folder, folders, tag, status, excludeStatus, q, sort = "created_desc", limit = 50, offset = 0 } = opts;
+  const {
+    folder, folders, tag, status, excludeStatus,
+    type, lifecycle, publish, excludeLifecycle, excludePublish,
+    q, sort = "created_desc", limit = 50, offset = 0,
+  } = opts;
   const ql = q?.toLowerCase();
-  const excludeSet = excludeStatus
+  const excludeStatusSet = excludeStatus
     ? new Set(Array.isArray(excludeStatus) ? excludeStatus : [excludeStatus])
+    : null;
+  const excludeLifecycleSet = excludeLifecycle
+    ? new Set(Array.isArray(excludeLifecycle) ? excludeLifecycle : [excludeLifecycle])
+    : null;
+  const excludePublishSet = excludePublish
+    ? new Set(Array.isArray(excludePublish) ? excludePublish : [excludePublish])
     : null;
   // folder와 folders는 OR 합집합. 둘 다 비어 있으면 폴더 필터 없음.
   const folderPrefixes: string[] = [];
@@ -373,7 +466,13 @@ export function listNotes(index: VaultIndexFile, opts: ListNotesOptions = {}): L
   for (const [path, rec] of Object.entries(index.notes || {})) {
     if (folderFilterActive && !folderPrefixes.some((p) => path.startsWith(p))) continue;
     if (status && (rec.status || "no_status") !== status) continue;
-    if (excludeSet && excludeSet.has(rec.status || "no_status")) continue;
+    if (excludeStatusSet && excludeStatusSet.has(rec.status || "no_status")) continue;
+    // 새 4축 필터
+    if (type && rec.type !== type) continue;
+    if (lifecycle && rec.lifecycle !== lifecycle) continue;
+    if (publish && String(rec.publish ?? "") !== publish) continue;
+    if (excludeLifecycleSet && rec.lifecycle && excludeLifecycleSet.has(rec.lifecycle)) continue;
+    if (excludePublishSet && rec.publish && excludePublishSet.has(String(rec.publish))) continue;
     if (tag && !(Array.isArray(rec.tags) && rec.tags.includes(tag))) continue;
     // Layer 1: title은 frontmatter에서 우선, 없으면 파일명 fallback
     const title =

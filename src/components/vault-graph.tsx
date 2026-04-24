@@ -8,8 +8,12 @@ export interface GraphNode {
   path: string;
   title: string;
   status?: string;
+  lifecycle?: string;          // vault_schema v2.0
   degree: number;
   folder: string;
+  clusterId?: string;          // tag cluster id (vfx_pipeline, ai_systems, ...)
+  clusterColor?: string;       // hex color from cluster
+  clusterLabel?: string;
 }
 
 export interface GraphEdge {
@@ -33,10 +37,17 @@ const FOLDER_HUE: Record<string, number> = {
 const STATUS_OPACITY: Record<string, number> = {
   mature: 1,
   published: 1,
+  evergreen: 1,
   growing: 0.8,
   seed: 0.55,
   archived: 0.35,
 };
+
+function lifecycleOpacity(node: GraphNode): number {
+  // lifecycle 우선, status 폴백
+  const key = node.lifecycle ?? node.status ?? "";
+  return STATUS_OPACITY[key] ?? 0.7;
+}
 
 /**
  * Deterministic radial layout: 연결수 많은 노드일수록 안쪽, 적을수록 바깥쪽.
@@ -140,8 +151,9 @@ export function VaultGraph({ nodes, edges }: VaultGraphProps) {
               if (!p) return null;
               const hue = FOLDER_HUE[n.folder] ?? 210;
               const opacity = (hovered && !highlight.nodes.has(n.path) ? 0.15 : 1) *
-                (STATUS_OPACITY[n.status ?? ""] ?? 0.7);
-              const fill = `oklch(0.72 0.15 ${hue})`;
+                lifecycleOpacity(n);
+              // 클러스터 색이 있으면 사용, 없으면 폴더 hue
+              const fill = n.clusterColor ?? `oklch(0.72 0.15 ${hue})`;
               const isHovered = hovered === n.path;
               return (
                 <g
@@ -181,9 +193,11 @@ export function VaultGraph({ nodes, edges }: VaultGraphProps) {
             <div className="text-muted-foreground/80 text-[10px] font-mono truncate mt-0.5">
               {hoveredNode.path}
             </div>
-            <div className="flex items-center gap-2 mt-1 text-[10px] text-muted-foreground">
+            <div className="flex items-center gap-2 mt-1 text-[10px] text-muted-foreground flex-wrap">
               <span>{hoveredNode.folder}</span>
-              {hoveredNode.status && <span>· {hoveredNode.status}</span>}
+              {hoveredNode.lifecycle && <span>· {hoveredNode.lifecycle}</span>}
+              {!hoveredNode.lifecycle && hoveredNode.status && <span>· {hoveredNode.status}</span>}
+              {hoveredNode.clusterLabel && <span>· {hoveredNode.clusterLabel}</span>}
               <span>· {hoveredNode.degree} links</span>
             </div>
           </div>
@@ -191,17 +205,35 @@ export function VaultGraph({ nodes, edges }: VaultGraphProps) {
       </div>
 
       {/* Legend */}
-      <div className="flex items-center gap-4 flex-wrap text-xs text-muted-foreground">
-        <span className="font-medium text-foreground/80">Folders:</span>
-        {Object.entries(FOLDER_HUE).map(([folder, hue]) => (
-          <span key={folder} className="inline-flex items-center gap-1.5">
-            <span
-              className="inline-block size-2.5 rounded-full"
-              style={{ background: `oklch(0.72 0.15 ${hue})` }}
-            />
-            {folder}
-          </span>
-        ))}
+      <div className="space-y-2 text-xs text-muted-foreground">
+        <div className="flex items-center gap-4 flex-wrap">
+          <span className="font-medium text-foreground/80">Clusters:</span>
+          {[...new Set(nodes.map((n) => n.clusterId).filter(Boolean))].map((id) => {
+            const node = nodes.find((n) => n.clusterId === id);
+            if (!node?.clusterColor) return null;
+            return (
+              <span key={id} className="inline-flex items-center gap-1.5">
+                <span
+                  className="inline-block size-2.5 rounded-full"
+                  style={{ background: node.clusterColor }}
+                />
+                {node.clusterLabel ?? id}
+              </span>
+            );
+          })}
+        </div>
+        <div className="flex items-center gap-4 flex-wrap">
+          <span className="font-medium text-foreground/80">Folders (fallback):</span>
+          {Object.entries(FOLDER_HUE).map(([folder, hue]) => (
+            <span key={folder} className="inline-flex items-center gap-1.5">
+              <span
+                className="inline-block size-2.5 rounded-full"
+                style={{ background: `oklch(0.72 0.15 ${hue})` }}
+              />
+              {folder}
+            </span>
+          ))}
+        </div>
       </div>
     </div>
   );
