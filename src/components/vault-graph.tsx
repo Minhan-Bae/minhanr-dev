@@ -50,33 +50,80 @@ function lifecycleOpacity(node: GraphNode): number {
 }
 
 /**
- * Deterministic radial layout: 연결수 많은 노드일수록 안쪽, 적을수록 바깥쪽.
- * 각도는 정렬 후 균등 분배. SSR-safe (랜덤 X, hydration mismatch 없음).
+ * Cluster-aware radial layout (vault_schema v2.0).
+ *
+ * 1) 노드를 clusterId 기준으로 그룹화 → 각 클러스터에 원의 섹터(각도 범위) 할당
+ * 2) 섹터 크기는 클러스터 노드 수에 비례 (큰 클러스터 = 넓은 섹터)
+ * 3) 각 섹터 내부에서 degree 높은 노드는 중심 가까이, 낮은 노드는 바깥쪽
+ * 4) 같은 섹터 내 노드끼리 시각적으로 모여 보임 → 군집 식별 직관화
+ *
+ * SSR-safe (deterministic, 랜덤 X).
  */
 function layout(nodes: GraphNode[], width: number, height: number) {
   const cx = width / 2;
   const cy = height / 2;
-  const maxR = Math.min(width, height) / 2 - 32;
+  const maxR = Math.min(width, height) / 2 - 40;
+  const minR = 60;
 
-  // degree 기준 정렬
-  const sorted = [...nodes].sort((a, b) => b.degree - a.degree);
-  const maxDeg = sorted[0]?.degree || 1;
-  const minDeg = sorted[sorted.length - 1]?.degree || 1;
-  const range = Math.max(1, maxDeg - minDeg);
+  // 1. 클러스터별 그룹화. clusterId 없는 노드는 'other' 버킷.
+  const clusterMap = new Map<string, GraphNode[]>();
+  for (const n of nodes) {
+    const cid = n.clusterId || "other";
+    if (!clusterMap.has(cid)) clusterMap.set(cid, []);
+    clusterMap.get(cid)!.push(n);
+  }
+
+  // 2. 클러스터 ID 정렬 — 큰 것부터 (안정된 순서 위해 id 알파벳)
+  const clusterIds = [...clusterMap.keys()].sort((a, b) => {
+    const sizeDiff = clusterMap.get(b)!.length - clusterMap.get(a)!.length;
+    return sizeDiff !== 0 ? sizeDiff : a.localeCompare(b);
+  });
+
+  const totalNodes = nodes.length || 1;
+  const allDegrees = nodes.map((n) => n.degree);
+  const maxDeg = Math.max(1, ...allDegrees);
+  const minDeg = Math.min(...allDegrees, 0);
+  const degRange = Math.max(1, maxDeg - minDeg);
 
   const positions = new Map<string, { x: number; y: number; r: number }>();
-  sorted.forEach((n, i) => {
-    // 반지름: degree 높을수록 중심 → 시각적 위계
-    const t = 1 - (n.degree - minDeg) / range; // 0 (high-deg) ~ 1 (low-deg)
-    const r = 48 + t * (maxR - 48);
-    // 각도: 인덱스 기반 균등, 황금각으로 시각적 스캐터
-    const theta = (i * 2.399963229728653) % (Math.PI * 2); // golden angle
-    const x = cx + r * Math.cos(theta);
-    const y = cy + r * Math.sin(theta);
-    // 노드 반지름: degree에 비례 (min 3, max 10)
-    const nr = 3 + 7 * ((n.degree - minDeg) / range);
-    positions.set(n.path, { x, y, r: nr });
-  });
+
+  // 3. 각 클러스터에 섹터 할당 (start angle ~ end angle).
+  //    클러스터 사이에 작은 gap(GAP_RAD) 둠 → 군집 경계 가시화.
+  const GAP_RAD = 0.06; // ~3.4도
+  const totalGaps = clusterIds.length * GAP_RAD;
+  const usableArc = Math.PI * 2 - totalGaps;
+  let cursorAngle = -Math.PI / 2; // 12시 방향에서 시작
+
+  for (const cid of clusterIds) {
+    const clusterNodes = clusterMap.get(cid)!;
+    const sectorArc = usableArc * (clusterNodes.length / totalNodes);
+    const startAngle = cursorAngle;
+    const endAngle = startAngle + sectorArc;
+    cursorAngle = endAngle + GAP_RAD;
+
+    // 섹터 내부 노드: degree desc 정렬 → 중심부터 채움
+    const sorted = [...clusterNodes].sort((a, b) => b.degree - a.degree);
+
+    sorted.forEach((n, i) => {
+      // 섹터 내 각도: i 기반 균등 분배 (양 끝에 약간 padding)
+      const segPad = sectorArc * 0.04;
+      const segUsable = sectorArc - 2 * segPad;
+      const segDenom = Math.max(1, sorted.length - 1);
+      const theta = startAngle + segPad + (i / segDenom) * segUsable;
+
+      // 반지름: degree 높을수록 중심에 가까이
+      const t = 1 - (n.degree - minDeg) / degRange; // 0 = 중심, 1 = 바깥
+      // 클러스터 안에서도 약간의 jitter (순서 i 기반 deterministic)
+      const jitter = ((i % 3) - 1) * 8;
+      const r = minR + t * (maxR - minR) + jitter;
+
+      const x = cx + r * Math.cos(theta);
+      const y = cy + r * Math.sin(theta);
+
+      const nr = 3 + 7 * ((n.degree - minDeg) / degRange);
+      positions.set(n.path, { x, y, r: nr });
+    });
+  }
 
   return positions;
 }
