@@ -39,9 +39,9 @@ export default function TagsIndex() {
             className="mt-6 max-w-xl text-[15px] leading-[1.7] text-muted-foreground sm:text-base animate-fade-up"
             style={{ animationDelay: "280ms" }}
           >
-            The studio's writing has accumulated {tags.length} distinct tags
+            The studio&rsquo;s writing has accumulated {tags.length} distinct tags
             across {tags.reduce((s, t) => s + t.count, 0)} post–tag pairs. Each
-            label scales with how often it's been written about.
+            label scales with how often it&rsquo;s been written about.
           </p>
         </div>
       </section>
