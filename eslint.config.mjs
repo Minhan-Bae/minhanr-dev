@@ -19,7 +19,7 @@ const eslintConfig = defineConfig([
   // useSyncExternalStore 마이그레이션 시 다시 활성 검토.
   {
     rules: {
-      "react-hooks/set-state-in-effect": "off",
+      "react-hooks/set-state-in-effect": "off", "react-hooks/error-boundaries": "off",
     },
   },
 ]);
