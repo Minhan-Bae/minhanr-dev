@@ -15,15 +15,20 @@ function verifySignature(payload: string, signature: string | null): boolean {
   }
 }
 
+// 2026-04-26 simplification: layer 2 (alpha/beta/gamma)는 사람의 작업 모드라
+// agent_heartbeats가 추적할 대상이 아님. row 정리 + 매핑 제거.
+// 추적 대상: omega(layer 1 master) + RT slot 1/2/3 (layer 3) + worker
 const AGENT_PREFIXES: Record<string, string> = {
-  "alpha:": "alpha",
-  "beta:": "beta",
-  "gamma:": "gamma",
   "auto: collect-all": "rt_slot1",
   "auto: collect": "rt_slot1",
   "auto: converge": "rt_slot2",
   "auto: morning": "rt_slot3",
   "omega:": "omega",
+  // Cloudflare Worker(oikbas-worker)가 텔레그램 capture로 만드는 commit
+  "capture: telegram": "worker_capture",
+  "daily: telegram": "worker_capture",
+  "daily: create": "worker_capture",
+  "feedback: resolve": "worker_callback",
 };
 
 function identifyAgent(commitMsg: string): string | null {
