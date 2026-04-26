@@ -32,7 +32,6 @@ export function ThemeSwitcher() {
     // so reading documentElement post-mount is the only way to learn what
     // theme is actually live. The mounted gate below prevents the hydration
     // mismatch that would otherwise result.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setTheme(getThemeFromDOM());
     setMounted(true);
   }, []);

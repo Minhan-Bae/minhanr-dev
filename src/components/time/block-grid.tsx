@@ -182,7 +182,6 @@ export function BlockGrid({ weekStartIso, categories, entries }: BlockGridProps)
     return m;
   }, [rows]);
 
-  const totalRowsInGrid = rows.length;
 
   // ─── Helpers ─────────────────────────────────────────────────────
 

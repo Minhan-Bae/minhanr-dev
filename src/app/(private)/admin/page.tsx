@@ -74,7 +74,6 @@ export default function AdminDashboard() {
     // setState happens asynchronously inside each loader (after the await),
     // not synchronously in this effect body — same precedent as
     // weekly-calendar.tsx#fetchData. Suppress the rule.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadAgents();
     loadCommits();
     loadVault();

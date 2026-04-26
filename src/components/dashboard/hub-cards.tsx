@@ -7,7 +7,6 @@ import {
   DAY_MS,
   startOfWeekSundayKST,
 } from "@/lib/time/week";
-import { getCachedVaultIndex, listNotes, aggregate, KB_HUB_HIDDEN_STATUSES } from "@/lib/vault-index";
 import { getVaultStats, listNotesFromSupabase } from "@/lib/notes-supabase";
 import { createSupabaseAdmin } from "@/lib/supabase-admin";
 import { isoWeek } from "@/lib/time";

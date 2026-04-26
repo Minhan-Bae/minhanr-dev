@@ -9,7 +9,6 @@ import {
   type SupabaseVaultNote,
   type ListNotesSupabaseOptions,
 } from "@/lib/notes-supabase";
-import { vaultPathToHref } from "@/lib/vault-note";
 
 /**
  * /papers — type:Research 노트 검수 인터페이스.

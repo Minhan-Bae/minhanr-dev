@@ -86,7 +86,6 @@ export function WeeklyCalendar() {
   useEffect(() => {
     try {
       const saved = localStorage.getItem("oikbas-cal-categories");
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       if (saved) setCategories({ ...DEFAULT_CATEGORIES, ...JSON.parse(saved) });
     } catch { /* */ }
   }, []);
@@ -104,7 +103,6 @@ export function WeeklyCalendar() {
   // Initial fetch on mount + on baseDate change. setState happens
   // asynchronously inside fetchData (after the await), not synchronously
   // in this effect body — suppress the rule for the intentional pattern.
-  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { fetchData(true); }, [fetchData]);
   useEffect(() => {
     const id = setInterval(() => setNowMinute(nowKstMinutes()), 60000);
