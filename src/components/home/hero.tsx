@@ -2,13 +2,6 @@ import { BRAND_IDENTITY } from "@/lib/brand/tokens";
 import { TypewriterLoop } from "@/components/typewriter-loop";
 import { HeroSearch } from "@/components/home/hero-search";
 
-interface HeroProps {
-  // The Selected / Writing / Updated stats used to live on the hero's
-  // bottom rail but moved out to <HomeStats /> (fixed bottom-left in
-  // the home layout) so they stay put while the SlideDeck transforms.
-  // The hero no longer takes those as props.
-}
-
 /** Per-letter delay for the boomerang typewriter hero. */
 const TYPE_DELAY_MS = 170;
 /** Erase is snappier than typing so the word reads as being rewound. */
