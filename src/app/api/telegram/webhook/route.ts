@@ -103,10 +103,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ status: "ignored" });
   }
 
-  const cmdToken =
-    process.env.TELEGRAM_CMD_BOT_TOKEN ||
-    process.env.TELEGRAM_BOT_TOKEN ||
-    "";
+  // 2026-04-26 simplification: legacy TELEGRAM_BOT_TOKEN fallback 제거.
+  // CMD bot이 실 발신자이며, 단일 봇 미러 운영에서도 .env에서 alias로 동기화됨.
+  const cmdToken = process.env.TELEGRAM_CMD_BOT_TOKEN || "";
 
   const supabase = createSupabaseAdmin();
 
