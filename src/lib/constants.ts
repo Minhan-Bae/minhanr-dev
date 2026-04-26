@@ -31,9 +31,13 @@ export const MONTHLY_COST_USD = 220;
 /* ── Agents ── */
 export const AGENT_COUNT = AGENTS.length;
 
-/* ── Error Thresholds (ms) ── */
+/* ── Error Thresholds (ms since last heartbeat → stale) ──
+ * 2026-04-26: 6h/36h → 168h(1주)으로 일괄 조정.
+ * 이유: RT는 cron이 아닌 Claude Code 세션에서 운영됨.
+ * 운영 중단 시간은 false-positive가 아닌 의도적 상황이므로
+ * 임계값을 높여 rt-heartbeat-monitor.yml과 일치시킴. */
 export const ERROR_THRESHOLDS: Record<string, number> = {
-  rt_slot1: 6 * 60 * 60 * 1000,   // 6h
-  rt_slot2: 36 * 60 * 60 * 1000,  // 36h
-  rt_slot3: 36 * 60 * 60 * 1000,  // 36h
+  rt_slot1: 168 * 60 * 60 * 1000, // 168h (1주)
+  rt_slot2: 168 * 60 * 60 * 1000, // 168h
+  rt_slot3: 168 * 60 * 60 * 1000, // 168h
 };
