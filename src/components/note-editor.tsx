@@ -98,11 +98,13 @@ export function NoteEditor({ path, initialContent }: NoteEditorProps) {
   const [notes, setNotes] = useState<NotePathItem[]>([]);
 
   const contentRef = useRef(content);
-  contentRef.current = content;
-  const savedRef = useRef(initialContent);
+  useEffect(() => { contentRef.current = content; }, [content]);
+  const [savedContent, setSavedContent] = useState(initialContent);
+  const savedContentRef = useRef(initialContent);
+  useEffect(() => { savedContentRef.current = savedContent; }, [savedContent]);
   const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const dirty = content !== savedRef.current;
+  const dirty = content !== savedContent;
 
   // ── 노트 리스트 fetch (wikilink 대상) ──────────────────────────
   useEffect(() => {
@@ -191,6 +193,7 @@ export function NoteEditor({ path, initialContent }: NoteEditorProps) {
 
   // CodeMirror DOM event extensions
   const pasteDropExtension = useMemo<Extension>(() => {
+    // eslint-disable-next-line react-hooks/refs -- paste/drop are event-time only, not render-time
     return EditorView.domEventHandlers({
       paste: (event) => {
         const items = event.clipboardData?.items;
@@ -221,12 +224,12 @@ export function NoteEditor({ path, initialContent }: NoteEditorProps) {
   const save = useCallback(
     (explicit = false) => {
       const current = contentRef.current;
-      if (current === savedRef.current) return;
+      if (current === savedContentRef.current) return;
       setSaveState({ kind: "saving" });
       startTransition(async () => {
         const res = await saveNoteContentAction(path, current);
         if (res.ok) {
-          savedRef.current = current;
+          setSavedContent(current);
           setSaveState({ kind: "ok", at: Date.now() });
           if (explicit) {
             router.push(
