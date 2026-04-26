@@ -13,6 +13,15 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
   ]),
+  // 2026-04-26: react-hooks v7에 추가된 set-state-in-effect 규칙은
+  // React 공식 doc이 권장하는 정당한 mount-init / external store sync
+  // 패턴까지 차단함. false-positive가 다수라 비활성. 향후
+  // useSyncExternalStore 마이그레이션 시 다시 활성 검토.
+  {
+    rules: {
+      "react-hooks/set-state-in-effect": "off",
+    },
+  },
 ]);
 
 export default eslintConfig;
