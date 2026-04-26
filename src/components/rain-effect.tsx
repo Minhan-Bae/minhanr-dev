@@ -48,7 +48,7 @@ export function RainEffect() {
     let raindrops: Raindrops | null = null;
     let renderer: RainRenderer | null = null;
     let cancelled = false;
-    let currentTheme: SceneTheme = theme;
+    const currentTheme: SceneTheme = theme;
 
     const resize = () => {
       if (!canvas) return;
