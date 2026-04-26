@@ -36,7 +36,7 @@ async function SearchResults({ q }: { q: string }) {
   return (
     <div className="space-y-4">
       <p className="font-technical text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
-        {total.toLocaleString()}건 매칭 · "{q}"
+        {total.toLocaleString()}건 매칭 · &ldquo;{q}&rdquo;
       </p>
       {notes.length === 0 ? (
         <p className="text-sm text-muted-foreground">결과 없음</p>
