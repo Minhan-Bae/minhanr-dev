@@ -4,7 +4,7 @@ import { HeroSearch } from "@/components/home/hero-search";
 
 /** Per-letter delay for the boomerang typewriter hero. */
 const TYPE_DELAY_MS = 170;
-/** Erase is snappier than typing so the word reads as being rewound. */
+/** Erase is snappier than typing so the word rehads as being rewound. */
 const ERASE_DELAY_MS = 80;
 /** ms the fully-typed wordmark sits on-screen before erasing. */
 const HOLD_MS = 5000;
@@ -19,7 +19,7 @@ const PAUSE_MS = 900;
  * this component focuses on just the centerpiece type + a quiet
  * Selected / Writing counter rail at the bottom.
  */
-export function Hero(_props: HeroProps) {
+export function Hero() {
   const word = BRAND_IDENTITY.studio;
 
   return (
