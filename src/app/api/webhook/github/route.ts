@@ -24,6 +24,11 @@ const AGENT_PREFIXES: Record<string, string> = {
   "auto: converge": "rt_slot2",
   "auto: morning": "rt_slot3",
   "omega:": "omega",
+  // 2026-04-26: Cloudflare Worker(oikbas-worker)가 텔레그램 capture로 만드는 commit
+  "capture: telegram": "worker_capture",
+  "daily: telegram": "worker_capture",
+  "daily: create": "worker_capture",
+  "feedback: resolve": "worker_callback",
 };
 
 function identifyAgent(commitMsg: string): string | null {
